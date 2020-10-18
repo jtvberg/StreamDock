@@ -29,19 +29,6 @@ body {
   -webkit-app-region: drag;
 }
 
-.header-bar-max {
-  background-color: #161616be;
-  margin: auto;
-  width: 200px;
-  border-radius: 3px;
-}
-
-.ontop-button {
-  color: #bebebe2d;
-  grid-row: 1;
-  margin-top: 1px;
-}
-
 .ontop-button {
   grid-column: 3;
   justify-self: flex-end;

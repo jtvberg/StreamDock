@@ -1,3 +1,3 @@
 // Imports and variable declarations
-const { ipcRenderer } = require('electron')
-const $ = require('jquery')
+// const { ipcRenderer } = require('electron')
+// const $ = require('jquery')
