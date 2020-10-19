@@ -4,7 +4,7 @@ const { data } = require('jquery')
 // const updater = require('./updater')
 
 // Enable Electron-Reload (dev only)
-require('electron-reload')(__dirname)
+// require('electron-reload')(__dirname)
 
 // Main window
 let win = null
@@ -33,7 +33,7 @@ const createWindow = () => {
   // win.setAlwaysOnTop(true, 'floating')
 
   // Open DevTools (dev only)
-  win.webContents.openDevTools()
+  // win.webContents.openDevTools()
 
   win.on('resize', function () {
     wb = win.getBounds()
@@ -93,7 +93,7 @@ ipcMain.on('service-change', (e, data) => {
       view.webContents.loadURL('https://www.netflix.com')
       break
     case 'yt':
-      view.webContents.loadURL('https://tv.youtube.com')
+      view.webContents.loadURL('https://tv.youtube.com', {userAgent: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.80 Safari/537.36'})
       break
     case 'hl':
       view.webContents.loadURL('https://www.hulu.com')
