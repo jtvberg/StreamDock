@@ -58,30 +58,55 @@ body {
 
 .color-0 {
   color: #5dade2;
-  background-color: #5dade2;
+  background-color: #000000;
 }
 
 .color-1 {
-  color: #FAFBFA;
-  background-color: #E5001D;
+  color: #ffffff;
+  background-color: #db272e;
 }
 
 .color-2 {
-  color: #FAFBFA;
-  background-color: #20E788;
+  color: #ffffff;
+  background-color: #1ce783;
 }
 
 .color-3 {
-  color: #FAFBFA;
-  background-color: #00A9DF;
+  color: #ffffff;
+  background-color: #00aee4;
 }
 
 .color-4 {
-  color: #FF0012;
-  background-color: #FAFBFA;
+  color: #ff0000;
+  background-color: #ffffff;
 }
 
 .color-5 {
-  color: #FAFBFA;
-  background-color: #1A3676;
+  color: #ffffff;
+  background-color: #1a3676;
+}
+
+.color-6 {
+  color: #000000;
+  background-color: #ffaf00;
+}
+
+.color-7 {
+  color: #000000;
+  background-color: #ffffff;
+}
+
+.color-8 {
+  color: #0095f7;
+  background-color: #ffffff;
+}
+
+.color-9 {
+  color: #ffffff;
+  background-color: #7e5ee4;
+}
+
+.color-10 {
+  color: #ffffff;
+  background-color: #000000;
 }

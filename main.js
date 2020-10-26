@@ -1,6 +1,5 @@
 // Imports and variable declarations
 const { app, BrowserWindow, ipcMain, BrowserView, session } = require('electron')
-const { data } = require('jquery')
 // const updater = require('./updater')
 
 // Enable Electron-Reload (dev only)
@@ -20,6 +19,7 @@ const createWindow = () => {
     transparent: true,
     frame: false,
     hasShadow: false,
+    titleBarStyle: 'hidden',
     webPreferences: {
       plugins: true,
       nodeIntegration: true
@@ -28,9 +28,6 @@ const createWindow = () => {
 
   // HTML file to load into window
   win.loadFile('main.html')
-
-  // Set initial state of always on top
-  // win.setAlwaysOnTop(true, 'floating')
 
   // Open DevTools (dev only)
   // win.webContents.openDevTools()
@@ -41,13 +38,8 @@ const createWindow = () => {
   })
 
   view = new BrowserView()
-  win.setBrowserView(view)
+  win.addBrowserView(view)
   view.setBounds({ x: 0, y: 25, width: 800, height: 575 })
-  view.webContents.loadURL('https://www.netflix.com')
-  // view.webContents.loadURL('https://tv.youtube.com')
-  // view.webContents.loadURL('https://www.hulu.com')
-  // view.webContents.loadURL('https://www.amazon.com/gp/video/storefront/')
-  // view.webContents.loadURL('https://www.disneyplus.com/home')
 }
 
 app.commandLine.appendSwitch('no-verify-widevine-cdm')
@@ -89,11 +81,14 @@ app.on('window-all-closed', function () {
 // IPC channel to change streaming service
 ipcMain.on('service-change', (e, data) => {
   switch (data) {
-    case 'nf':
-      view.webContents.loadURL('https://www.netflix.com')
+    case 'tv':
+      view.webContents.loadURL('https://tv.youtube.com', {userAgent: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.80 Safari/537.36'})
       break
     case 'yt':
-      view.webContents.loadURL('https://tv.youtube.com', {userAgent: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.80 Safari/537.36'})
+      view.webContents.loadURL('https://www.youtube.com', {userAgent: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.80 Safari/537.36'})
+      break
+    case 'nf':
+      view.webContents.loadURL('https://www.netflix.com')
       break
     case 'hl':
       view.webContents.loadURL('https://www.hulu.com')
@@ -103,6 +98,21 @@ ipcMain.on('service-change', (e, data) => {
       break
     case 'dp':
       view.webContents.loadURL('https://www.disneyplus.com/home')
+      break
+    case 'ep':
+      view.webContents.loadURL('https://plus.espn.com')
+      break
+    case 'pc':
+      view.webContents.loadURL('https://www.peacocktv.com/watch/home')
+      break
+    case 'cb':
+      view.webContents.loadURL('https://cbs.com')
+      break
+    case 'hm':
+      view.webContents.loadURL('https://play.hbomax.com/')
+      break
+    case 'ab':
+      view.webContents.loadURL('https://abc.com/')
       break
   }
 })

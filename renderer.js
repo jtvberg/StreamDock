@@ -1,20 +1,23 @@
 // Imports and variable declarations
-const { ipcRenderer, ipcMain } = require('electron')
+const { ipcRenderer, BrowserView } = require('electron')
 const $ = require('jquery')
 let winMax = false
+
+// Open first service
+const serv = $('.service-button').first().data('val') || 'tv'
+ipcRenderer.send('service-change', serv)
+
+// Set ontop
+ipcRenderer.send('ontop-lock')
 
 // Window max/restore on header double click
 function maxRestoreWindow () {
   if (!winMax) {
     ipcRenderer.send('win-max')
-    $('body').css('background-color', '#00000000')
-    $('.header-bar').addClass('header-bar-max')
     winMax = true
   } else {
     ipcRenderer.send('win-restore')
     winMax = false
-    $('body').css('background-color', '#161616be')
-    $('.header-bar').removeClass('header-bar-max')
   }
 }
 
