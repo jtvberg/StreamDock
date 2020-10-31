@@ -19,5 +19,5 @@
 ## Widevine DRM
     Most services will NOT work when you play actual content if you just run the code
     You must build a package signed by Widevine for it to work properly
-    I used the Castlabs EVS for this: https://github.com/castlabs/electron-releases/wiki/VMP
-    
+    I used the Castlabs EVS for this: https://github.com/castlabs/electron-releases/wiki/EVS by adding a call in the build process to EVS via the electron-builder afterPack or afterSign hook
+    You must sign prior to code signing on Mac and after code signing on Windows
