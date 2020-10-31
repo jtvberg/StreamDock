@@ -3,7 +3,7 @@ const { app, BrowserWindow, ipcMain, BrowserView, session } = require('electron'
 // const updater = require('./updater')
 
 // Enable Electron-Reload (dev only)
-// require('electron-reload')(__dirname)
+require('electron-reload')(__dirname)
 
 // Main window
 let win = null
