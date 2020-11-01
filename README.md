@@ -1,6 +1,9 @@
 # Temporal
  Streaming service viewer because reasons
 
+#### Main View
+<img src="/res/screenshots/main.png" width="250"/>
+
 ## Using the code
     Clone repo
     Provided instructions assume you are using npm as your package manager
