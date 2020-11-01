@@ -2,7 +2,7 @@
  Streaming service viewer because reasons
 
 #### Main View
-<img src="/res/screenshots/main.png" width="250"/>
+<img src="/res/screenshots/main.png" width="400"/>
 
 ## Using the code
     Clone repo
