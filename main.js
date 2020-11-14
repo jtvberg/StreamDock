@@ -1,11 +1,17 @@
 // Imports and variable declarations
 const { app, BrowserWindow, ipcMain, BrowserView, session, Menu } = require('electron')
+// TODO: Setting: allow update to userAgent
 const userAgent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.80 Safari/537.36'
 // const updater = require('./updater')
 
 // Enable Electron-Reload (dev only)
 // require('electron-reload')(__dirname)
 
+// TODO: Add system tray icon
+// TODO: Right-click toggle minimize/restore and mute (if not pause)
+// TODO: Click for service menu
+
+// TODO: Remember screen location and size
 // Main window
 let win = null
 let view = null
@@ -93,9 +99,9 @@ app.on('window-all-closed', function () {
   // }
 })
 
-// IPC channel to change streaming service
-ipcMain.on('service-change', (e, data) => {
-  switch (data) {
+// TODO: Refactor to use settings
+function setService (serv) {
+  switch (serv) {
     case 'tv':
       view.webContents.loadURL('https://tv.youtube.com')
       break
@@ -130,6 +136,14 @@ ipcMain.on('service-change', (e, data) => {
       view.webContents.loadURL('https://abc.com/')
       break
   }
+}
+
+// TDOD: load service options from saved settings
+// TODO: load last service used
+// TODO: Setting: add option to load last service used
+// IPC channel to change streaming service
+ipcMain.on('service-change', (e, data) => {
+  setService(data)
 })
 
 // IPC channel for locking app on top
@@ -157,6 +171,7 @@ ipcMain.on('win-hide', () => {
   win.hide()
 })
 
+// TODO: Add services to menu
 // Menu
 const isMac = process.platform === 'darwin'
 const template = [
@@ -176,6 +191,56 @@ const template = [
     ]
   }] : []),
   // { role: 'viewMenu' }
+  // TODO: Refactor to use settings to generate
+  {
+    label: 'Services',
+    submenu: [
+      {
+        label: 'YouTube TV',
+        click () { setService('tv') }
+      },
+      {
+        label: 'YouTube',
+        click () { setService('yt') }
+      },
+      {
+        label: 'Netflix',
+        click () { setService('nf') }
+      },
+      {
+        label: 'Hulu',
+        click () { setService('hl') }
+      },
+      {
+        label: 'Amazon Video',
+        click () { setService('ap') }
+      },
+      {
+        label: 'Disney+',
+        click () { setService('dp') }
+      },
+      {
+        label: 'Peacock',
+        click () { setService('pc') }
+      },
+      {
+        label: 'ABC',
+        click () { setService('ab') }
+      },
+      {
+        label: 'CBS',
+        click () { setService('cb') }
+      },
+      {
+        label: 'HBO Max',
+        click () { setService('hm') }
+      },
+      {
+        label: 'ESPN+',
+        click () { setService('ep') }
+      },
+    ]
+  },
   {
     label: 'View',
     submenu: [
@@ -183,10 +248,7 @@ const template = [
       { role: 'forcereload' },
       { role: 'toggledevtools' },
       { type: 'separator' },
-      { role: 'resetzoom' },
-      { role: 'zoomin' },
-      { role: 'zoomout' },
-      { type: 'separator' },
+      // TODO: Toggle menu item if full screenable from settings
       // { role: 'togglefullscreen' }
     ]
   },
