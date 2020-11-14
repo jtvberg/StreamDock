@@ -1,5 +1,6 @@
 // Imports and variable declarations
-const { app, BrowserWindow, ipcMain, BrowserView, session } = require('electron')
+const { app, BrowserWindow, ipcMain, BrowserView, session, Menu } = require('electron')
+const userAgent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.80 Safari/537.36'
 // const updater = require('./updater')
 
 // Enable Electron-Reload (dev only)
@@ -19,6 +20,7 @@ const createWindow = () => {
     transparent: true,
     frame: false,
     hasShadow: false,
+    fullscreen: false,
     titleBarStyle: 'hidden',
     webPreferences: {
       plugins: true,
@@ -37,8 +39,19 @@ const createWindow = () => {
     view.setBounds({ x: 0, y: 25, width: wb.width, height: wb.height - 25 })
   })
 
+  // Turn on fullScreen to use this to allow html driven full screen to go to maximize instead
+  // win.on('enter-html-full-screen', function () {
+  //   if (win.isFullScreen()) {
+  //     setTimeout(function() {
+  //       win.setFullScreen(false)
+  //       win.maximize()
+  //     }, 800)
+  //   }
+  // })
+
   view = new BrowserView()
   win.addBrowserView(view)
+  view.userAgent = userAgent
   view.setBounds({ x: 0, y: 25, width: 800, height: 575 })
 }
 
@@ -73,19 +86,21 @@ app.on('widevine-error', (error) => {
   process.exit(1)
 })
 
-// CLose app if all windows are closed (not Mac)
+// CLose app if all windows are closed (can check for Mac)
 app.on('window-all-closed', function () {
-  if (process.platform !== 'darwin') app.quit()
+  // if (process.platform !== 'darwin') {
+    app.quit()
+  // }
 })
 
 // IPC channel to change streaming service
 ipcMain.on('service-change', (e, data) => {
   switch (data) {
     case 'tv':
-      view.webContents.loadURL('https://tv.youtube.com', {userAgent: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.80 Safari/537.36'})
+      view.webContents.loadURL('https://tv.youtube.com')
       break
     case 'yt':
-      view.webContents.loadURL('https://www.youtube.com', {userAgent: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.80 Safari/537.36'})
+      view.webContents.loadURL('https://www.youtube.com')
       break
     case 'nf':
       view.webContents.loadURL('https://www.netflix.com')
@@ -141,3 +156,69 @@ ipcMain.on('win-restore', () => {
 ipcMain.on('win-hide', () => {
   win.hide()
 })
+
+// Menu
+const isMac = process.platform === 'darwin'
+const template = [
+  // { role: 'appMenu' }
+  ...(isMac ? [{
+    label: app.name,
+    submenu: [
+      { role: 'about' },
+      { type: 'separator' },
+      { role: 'services' },
+      { type: 'separator' },
+      { role: 'hide' },
+      { role: 'hideothers' },
+      { role: 'unhide' },
+      { type: 'separator' },
+      { role: 'quit' }
+    ]
+  }] : []),
+  // { role: 'viewMenu' }
+  {
+    label: 'View',
+    submenu: [
+      { role: 'reload' },
+      { role: 'forcereload' },
+      { role: 'toggledevtools' },
+      { type: 'separator' },
+      { role: 'resetzoom' },
+      { role: 'zoomin' },
+      { role: 'zoomout' },
+      { type: 'separator' },
+      // { role: 'togglefullscreen' }
+    ]
+  },
+  // { role: 'windowMenu' }
+  {
+    label: 'Window',
+    submenu: [
+      { role: 'minimize' },
+      { role: 'zoom' },
+      ...(isMac ? [
+        { type: 'separator' },
+        { role: 'front' },
+        { type: 'separator' },
+        { role: 'window' }
+      ] : [
+        { role: 'close' }
+      ])
+    ]
+  },
+  {
+    role: 'help',
+    submenu: [
+      {
+        label: 'Learn More',
+        click: async () => {
+          const { shell } = require('electron')
+          await shell.openExternal('https://github.com/jtvberg/StreamDock')
+        }
+      }
+    ]
+  }
+]
+
+const menu = Menu.buildFromTemplate(template)
+Menu.setApplicationMenu(menu)
