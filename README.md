@@ -1,4 +1,4 @@
-# Temporal
+# StreamDock
  Streaming service viewer because reasons
 
 #### Main View
