@@ -5,14 +5,14 @@ const userAgent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/5
 // const updater = require('./updater')
 
 // Enable Electron-Reload (dev only)
-// require('electron-reload')(__dirname)
+require('electron-reload')(__dirname)
 
 // TODO: Add system tray icon
 // TODO: Right-click toggle minimize/restore and mute (if not pause)
 // TODO: Click for service menu
 
 // TODO: Remember screen location and size
-// Main window
+// Main window and view
 let win = null
 let view = null
 const createWindow = () => {
@@ -40,9 +40,16 @@ const createWindow = () => {
   // Open DevTools (dev only)
   // win.webContents.openDevTools()
 
+  const headerSize = 22
+
+  view = new BrowserView()
+  win.addBrowserView(view)
+  view.userAgent = userAgent
+  setViewBounds()
+
+  // Reset view on resize
   win.on('resize', function () {
-    wb = win.getBounds()
-    view.setBounds({ x: 0, y: 25, width: wb.width, height: wb.height - 25 })
+    setViewBounds()
   })
 
   // Turn on fullScreen to use this to allow html driven full screen to go to maximize instead
@@ -55,10 +62,20 @@ const createWindow = () => {
   //   }
   // })
 
-  view = new BrowserView()
-  win.addBrowserView(view)
-  view.userAgent = userAgent
-  view.setBounds({ x: 0, y: 25, width: 800, height: 575 })
+  // IPC channel for hiding view
+  ipcMain.on('view-hide', () => {
+    view.setBounds({ x: 0, y: 0, width: 0, height: 0 })
+  })
+
+  // IPC channel for showing view
+  ipcMain.on('view-show', () => {
+    setViewBounds()
+  })
+
+  function setViewBounds () {
+    wb = win.getBounds()
+    view.setBounds({ x: 0, y: headerSize, width: wb.width, height: wb.height - headerSize })
+  }
 }
 
 app.commandLine.appendSwitch('no-verify-widevine-cdm')
@@ -180,6 +197,13 @@ const template = [
     label: app.name,
     submenu: [
       { role: 'about' },
+      { type: 'separator' },
+      {
+        label: 'Preferences',
+        click () { 
+          win.webContents.send('load-settings')
+        }
+      },
       { type: 'separator' },
       { role: 'services' },
       { type: 'separator' },

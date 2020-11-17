@@ -1,5 +1,5 @@
 // Imports and variable declarations
-const { ipcRenderer, BrowserView } = require('electron')
+const { ipcRenderer, BrowserView, app } = require('electron')
 const $ = require('jquery')
 let winMax = false
 
@@ -34,6 +34,7 @@ function loadServices () {
   )
 }
 
+// TODO: Consider moving to main
 // Window max/restore on header double click
 function maxRestoreWindow () {
   if (!winMax) {
@@ -68,6 +69,22 @@ $('.service-button').on('click', function () {
   ipcRenderer.send('service-change', $(this).data('val'))
 })
 
+// Settings close restore View
+$('#settings-modal').on('hidden.bs.modal', () => {
+  ipcRenderer.send('view-show')
+})
+
 // TODO: Build list of services and persist
 // TODO: Setting: let users pick and add services
 // TODO: Setting: let users pick color combo of service buttons
+
+// Settings invoke
+ipcRenderer.on('load-settings', () => {
+  ipcRenderer.send('view-hide')
+  loadSettingsModal()
+  $('#settings-modal').modal('show')
+})
+
+function loadSettingsModal() {
+  $('#input-agent').val('Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.80 Safari/537.36')
+}

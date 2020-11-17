@@ -22,17 +22,19 @@
     "electron": "git+https://github.com/castlabs/electron-releases.git#v9.3.2-wvvmp",
     "electron-builder": "^22.9.1",
     "electron-reload": "^1.5.0",
-    "eslint": "^7.12.1",
+    "eslint": "^7.13.0",
     "eslint-config-standard": "^14.1.1",
     "eslint-plugin-import": "^2.22.1",
     "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-promise": "^4.2.1",
-    "eslint-plugin-standard": "^4.0.2"
+    "eslint-plugin-standard": "^4.1.0"
   },
   "dependencies": {
     "@fortawesome/fontawesome-free": "^5.15.1",
     "electron-updater": "^4.3.5",
-    "jquery": "^3.5.1"
+    "jquery": "^3.5.1",
+    "bootstrap": "^4.5.3",
+    "popper.js": "^1.16.1"
   },
   "build": {
     "afterPack": "./afterPack.js",
