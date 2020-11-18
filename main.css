@@ -53,6 +53,7 @@ body {
   grid-column: 3;
   justify-self: flex-end;
   margin-right: 4px;
+  margin-top: 1px;
   color: #ffffff44;
 }
 
@@ -134,6 +135,7 @@ body {
 
 .settings-group {
   font-size: 14px;
+  margin-top: 5px;
 }
 
 .helper-text {
@@ -146,6 +148,11 @@ body {
 
 .service-host {
   margin-top: 10px;
+  margin-left: -1.25rem;
+}
+
+.service-check {
+  margin-right: 5px;
 }
 
 .text-area-agent {

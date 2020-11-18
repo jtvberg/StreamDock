@@ -20,24 +20,25 @@ ipcRenderer.send('ontop-lock')
 // Iterate through stored services and create buttons/menu entries
 function loadServices () {
   serviceList.forEach(function (serv) {
-    console.log(serv)
-    $('.service-button-host').append(`<div class="service-button" data-val="${serv.id}" data-url="${serv.url}" title="${serv.title}" style="color:${serv.color}; background-color:${serv.bgColor};">${serv.glyph}</div>`)
+    if (serv.active) {
+      $('.service-button-host').append(`<div class="service-button" data-val="${serv.id}" data-url="${serv.url}" title="${serv.title}" style="color:${serv.color}; background-color:${serv.bgColor};">${serv.glyph}</div>`)
+    }
   })
 }
 
 function setDefaultServices () {
   serviceList = [
-    { id: 'tv', glyph:'T', title: 'YouTube TV', url: 'https://tv.youtube.com', color: '#ff0000', bgColor: '#ffffff' },
-    { id: 'yt', glyph:'Y', title: 'YouTube', url: 'https://www.youtube.com', color: '#ff0000', bgColor: '#ffffff' },
-    { id: 'nf', glyph:'N', title: 'Netflix', url: 'https://www.netflix.com', color: '#ffffff', bgColor: '#db272e' },
-    { id: 'hl', glyph:'H', title: 'Hulu', url: 'https://www.hulu.com', color: '#ffffff', bgColor: '#1ce783' },
-    { id: 'ap', glyph:'P', title: 'Amazon Prime TV', url: 'https://www.amazon.com/gp/video/storefront', color: '#ffffff', bgColor: '#00aee4' },
-    { id: 'dp', glyph:'D', title: 'Disney+', url: 'https://www.disneyplus.com/home', color: '#ffffff', bgColor: '#1a3676' },
-    { id: 'pc', glyph:'P', title: 'Peacock', url: 'https://www.peacocktv.com/watch/home', color: '#000000', bgColor: '#ffffff' },
-    { id: 'ab', glyph:'A', title: 'ABC', url: 'https://abc.com', color: '#ffffff', bgColor: '#000000' },
-    { id: 'cb', glyph:'C', title: 'CBS', url: 'https://cbs.com', color: '#0095f7', bgColor: '#ffffff' },
-    { id: 'hm', glyph:'H', title: 'HBO Max', url: 'https://play.hbomax.com', color: '#ffffff', bgColor: '#7e5ee4' },
-    { id: 'ep', glyph:'E', title: 'ESPN+', url: 'https://plus.espn.com', color: '#000000', bgColor: '#ffaf00' }
+    { id: 'tv', active: true, glyph:'T', title: 'YouTube TV', url: 'https://tv.youtube.com', color: '#ff0000', bgColor: '#ffffff' },
+    { id: 'yt', active: true, glyph:'Y', title: 'YouTube', url: 'https://www.youtube.com', color: '#ff0000', bgColor: '#ffffff' },
+    { id: 'nf', active: true, glyph:'N', title: 'Netflix', url: 'https://www.netflix.com', color: '#ffffff', bgColor: '#db272e' },
+    { id: 'hl', active: true, glyph:'H', title: 'Hulu', url: 'https://www.hulu.com', color: '#ffffff', bgColor: '#1ce783' },
+    { id: 'ap', active: true, glyph:'P', title: 'Amazon Prime TV', url: 'https://www.amazon.com/gp/video/storefront', color: '#ffffff', bgColor: '#00aee4' },
+    { id: 'dp', active: true, glyph:'D', title: 'Disney+', url: 'https://www.disneyplus.com/home', color: '#ffffff', bgColor: '#1a3676' },
+    { id: 'pc', active: true, glyph:'P', title: 'Peacock', url: 'https://www.peacocktv.com/watch/home', color: '#000000', bgColor: '#ffffff' },
+    { id: 'ab', active: true, glyph:'A', title: 'ABC', url: 'https://abc.com', color: '#ffffff', bgColor: '#000000' },
+    { id: 'cb', active: true, glyph:'C', title: 'CBS', url: 'https://cbs.com', color: '#0095f7', bgColor: '#ffffff' },
+    { id: 'hm', active: true, glyph:'H', title: 'HBO Max', url: 'https://play.hbomax.com', color: '#ffffff', bgColor: '#7e5ee4' },
+    { id: 'ep', active: false, glyph:'E', title: 'ESPN+', url: 'https://plus.espn.com', color: '#000000', bgColor: '#ffaf00' }
   ]
 }
 
@@ -95,11 +96,13 @@ ipcRenderer.on('load-settings', () => {
 function loadSettingsModal() {
   $('#collapse-general, #collapse-services').collapse('hide')
   $('#input-agent').val('Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.80 Safari/537.36')
+  $('#settings-services-available').empty()
   serviceList.forEach(function (serv) {
+    const checked = serv.active ? 'checked' : ''
     $('#settings-services-available').append(
       `<div class="service-host">
         <div class="form-check">
-          <input type="checkbox" class="service-check" id="check-${serv.id}" data-val="${serv.id}">
+          <input type="checkbox" class="service-check" id="check-${serv.id}" data-val="${serv.id}" ${checked}>
           <img class="service-${serv.id}" src="./res/serv_logos/small/${serv.id}.png" for="check-${serv.id}"></img>
         </div>
       </div>`)
