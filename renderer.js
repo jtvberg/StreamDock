@@ -1,13 +1,15 @@
 // Imports and variable declarations
 const { ipcRenderer, BrowserView, app } = require('electron')
 const $ = require('jquery')
+let serviceList = []
 let winMax = false
 
 // Invoke services load
+setDefaultServices()
 loadServices()
 
 // Open first service
-const serv = $('.service-button').first().data('val') || 'tv'
+const serv = $('.service-button').first().data('url')
 ipcRenderer.send('service-change', serv)
 
 // TODO: Setting: Optop on startup
@@ -15,23 +17,28 @@ ipcRenderer.send('service-change', serv)
 ipcRenderer.send('ontop-lock')
 
 // TODO: Get from local storaage
-// TODO: Abstract css
-// TODO: Derive val
 // Iterate through stored services and create buttons/menu entries
 function loadServices () {
-  $('.service-button-host').append(
-    `<div class="service-button color-4" data-val="tv" title="YouTube TV">T</div>
-    <div class="service-button color-4" data-val="yt" title="YouTube">Y</div>
-    <div class="service-button color-1" data-val="nf" title="Netflix">N</div>
-    <div class="service-button color-2" data-val="hl" title="Hulu">H</div>
-    <div class="service-button color-3" data-val="ap" title="Amazon Prime Video">A</div>
-    <div class="service-button color-5" data-val="dp" title="Disney+">D</div>
-    <div class="service-button color-7" data-val="pc" title="Peacock">P</div>
-    <div class="service-button color-10" data-val="ab" title="ABC">A</div>
-    <div class="service-button color-8" data-val="cb" title="CBS">C</div>
-    <div class="service-button color-9" data-val="hm" title="HBO Max">H</div>
-    <div class="service-button color-6" data-val="ep" title="ESPN+">E</div>`
-  )
+  serviceList.forEach(function (serv) {
+    console.log(serv)
+    $('.service-button-host').append(`<div class="service-button" data-val="${serv.id}" data-url="${serv.url}" title="${serv.title}" style="color:${serv.color}; background-color:${serv.bgColor};">${serv.glyph}</div>`)
+  })
+}
+
+function setDefaultServices () {
+  serviceList = [
+    { id: 'tv', glyph:'T', title: 'YouTube TV', url: 'https://tv.youtube.com', color: '#ff0000', bgColor: '#ffffff' },
+    { id: 'yt', glyph:'Y', title: 'YouTube', url: 'https://www.youtube.com', color: '#ff0000', bgColor: '#ffffff' },
+    { id: 'nf', glyph:'N', title: 'Netflix', url: 'https://www.netflix.com', color: '#ffffff', bgColor: '#db272e' },
+    { id: 'hl', glyph:'H', title: 'Hulu', url: 'https://www.hulu.com', color: '#ffffff', bgColor: '#1ce783' },
+    { id: 'ap', glyph:'P', title: 'Amazon Prime TV', url: 'https://www.amazon.com/gp/video/storefront', color: '#ffffff', bgColor: '#00aee4' },
+    { id: 'dp', glyph:'D', title: 'Disney+', url: 'https://www.disneyplus.com/home', color: '#ffffff', bgColor: '#1a3676' },
+    { id: 'pc', glyph:'P', title: 'Peacock', url: 'https://www.peacocktv.com/watch/home', color: '#000000', bgColor: '#ffffff' },
+    { id: 'ab', glyph:'A', title: 'ABC', url: 'https://abc.com', color: '#ffffff', bgColor: '#000000' },
+    { id: 'cb', glyph:'C', title: 'CBS', url: 'https://cbs.com', color: '#0095f7', bgColor: '#ffffff' },
+    { id: 'hm', glyph:'H', title: 'HBO Max', url: 'https://play.hbomax.com', color: '#ffffff', bgColor: '#7e5ee4' },
+    { id: 'ep', glyph:'E', title: 'ESPN+', url: 'https://plus.espn.com', color: '#000000', bgColor: '#ffaf00' }
+  ]
 }
 
 // TODO: Consider moving to main
@@ -66,7 +73,7 @@ $('.header-bar').on('dblclick', () => {
 // TODO: Setting: let user pick whether or not a new window is created
 // Service selector click handler
 $('.service-button').on('click', function () {
-  ipcRenderer.send('service-change', $(this).data('val'))
+  ipcRenderer.send('service-change', $(this).data('url'))
 })
 
 // Settings close restore View
@@ -86,5 +93,35 @@ ipcRenderer.on('load-settings', () => {
 })
 
 function loadSettingsModal() {
+  $('#collapse-general, #collapse-services').collapse('hide')
   $('#input-agent').val('Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.80 Safari/537.36')
+  serviceList.forEach(function (serv) {
+    $('#settings-services-available').append(
+      `<div class="service-host">
+        <div class="form-check">
+          <input type="checkbox" class="service-check" id="check-${serv.id}" data-val="${serv.id}">
+          <img class="service-${serv.id}" src="./res/serv_logos/small/${serv.id}.png" for="check-${serv.id}"></img>
+        </div>
+      </div>`)
+  })
 }
+
+function saveSettings () {
+  $('.service-check').each(function () {
+    if ($(this).is(':checked')) {
+      console.log($(this).data('val'))
+    }
+  })
+}
+
+function loadDefaultSettings () {
+
+}
+
+$('#settings-save-button').on('click', () => {
+  saveSettings()
+})
+
+$('#settings-default-button').on('click', () => {
+  loadDefaultSettings()
+})

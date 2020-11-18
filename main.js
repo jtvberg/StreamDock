@@ -64,12 +64,12 @@ const createWindow = () => {
 
   // IPC channel for hiding view
   ipcMain.on('view-hide', () => {
-    view.setBounds({ x: 0, y: 0, width: 0, height: 0 })
+    win.removeBrowserView(view)
   })
 
   // IPC channel for showing view
   ipcMain.on('view-show', () => {
-    setViewBounds()
+    win.addBrowserView(view)
   })
 
   function setViewBounds () {
@@ -116,51 +116,12 @@ app.on('window-all-closed', function () {
   // }
 })
 
-// TODO: Refactor to use settings
-function setService (serv) {
-  switch (serv) {
-    case 'tv':
-      view.webContents.loadURL('https://tv.youtube.com')
-      break
-    case 'yt':
-      view.webContents.loadURL('https://www.youtube.com')
-      break
-    case 'nf':
-      view.webContents.loadURL('https://www.netflix.com')
-      break
-    case 'hl':
-      view.webContents.loadURL('https://www.hulu.com')
-      break
-    case 'ap':
-      view.webContents.loadURL('https://www.amazon.com/gp/video/storefront/')
-      break
-    case 'dp':
-      view.webContents.loadURL('https://www.disneyplus.com/home')
-      break
-    case 'ep':
-      view.webContents.loadURL('https://plus.espn.com')
-      break
-    case 'pc':
-      view.webContents.loadURL('https://www.peacocktv.com/watch/home')
-      break
-    case 'cb':
-      view.webContents.loadURL('https://cbs.com')
-      break
-    case 'hm':
-      view.webContents.loadURL('https://play.hbomax.com/')
-      break
-    case 'ab':
-      view.webContents.loadURL('https://abc.com/')
-      break
-  }
-}
-
 // TDOD: load service options from saved settings
 // TODO: load last service used
 // TODO: Setting: add option to load last service used
 // IPC channel to change streaming service
-ipcMain.on('service-change', (e, data) => {
-  setService(data)
+ipcMain.on('service-change', (e, url) => {
+  view.webContents.loadURL(url)
 })
 
 // IPC channel for locking app on top
@@ -216,55 +177,55 @@ const template = [
   }] : []),
   // { role: 'viewMenu' }
   // TODO: Refactor to use settings to generate
-  {
-    label: 'Services',
-    submenu: [
-      {
-        label: 'YouTube TV',
-        click () { setService('tv') }
-      },
-      {
-        label: 'YouTube',
-        click () { setService('yt') }
-      },
-      {
-        label: 'Netflix',
-        click () { setService('nf') }
-      },
-      {
-        label: 'Hulu',
-        click () { setService('hl') }
-      },
-      {
-        label: 'Amazon Video',
-        click () { setService('ap') }
-      },
-      {
-        label: 'Disney+',
-        click () { setService('dp') }
-      },
-      {
-        label: 'Peacock',
-        click () { setService('pc') }
-      },
-      {
-        label: 'ABC',
-        click () { setService('ab') }
-      },
-      {
-        label: 'CBS',
-        click () { setService('cb') }
-      },
-      {
-        label: 'HBO Max',
-        click () { setService('hm') }
-      },
-      {
-        label: 'ESPN+',
-        click () { setService('ep') }
-      },
-    ]
-  },
+  // {
+  //   label: 'Services',
+  //   submenu: [
+  //     {
+  //       label: 'YouTube TV',
+  //       click () { setService('tv') }
+  //     },
+  //     {
+  //       label: 'YouTube',
+  //       click () { setService('yt') }
+  //     },
+  //     {
+  //       label: 'Netflix',
+  //       click () { setService('nf') }
+  //     },
+  //     {
+  //       label: 'Hulu',
+  //       click () { setService('hl') }
+  //     },
+  //     {
+  //       label: 'Amazon Video',
+  //       click () { setService('ap') }
+  //     },
+  //     {
+  //       label: 'Disney+',
+  //       click () { setService('dp') }
+  //     },
+  //     {
+  //       label: 'Peacock',
+  //       click () { setService('pc') }
+  //     },
+  //     {
+  //       label: 'ABC',
+  //       click () { setService('ab') }
+  //     },
+  //     {
+  //       label: 'CBS',
+  //       click () { setService('cb') }
+  //     },
+  //     {
+  //       label: 'HBO Max',
+  //       click () { setService('hm') }
+  //     },
+  //     {
+  //       label: 'ESPN+',
+  //       click () { setService('ep') }
+  //     },
+  //   ]
+  // },
   {
     label: 'View',
     submenu: [
