@@ -19,7 +19,7 @@
   "author": "jtvberg",
   "license": "CC0-1.0",
   "devDependencies": {
-    "electron": "git+https://github.com/castlabs/electron-releases.git#v9.3.2-wvvmp",
+    "electron": "git+https://github.com/castlabs/electron-releases.git#v9.3.4-wvvmp",
     "electron-builder": "^22.9.1",
     "electron-reload": "^1.5.0",
     "eslint": "^7.13.0",
@@ -37,11 +37,17 @@
     "popper.js": "^1.16.1"
   },
   "build": {
-    "afterPack": "./afterPack.js",
     "appId": "com.jtvberg.streamdock",
     "copyright": "Copyright jtvberg",
     "mac": {
+      "afterPack": "./vmpSign.js",
       "category": "public.app-category.productivity"
+    },
+    "win": {
+      "certificateFile": "private/jtvberg.p12",
+      "certificatePassword": "",
+      "verifyUpdateCodeSignature": false,
+      "afterSign": "./vmpSign.js"
     },
     "publish": {
       "provider": "github"
