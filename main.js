@@ -153,7 +153,18 @@ ipcMain.on('win-hide', () => {
 // TODO: Add services to menu
 // Menu
 const template = [
-  ...(!isMac ? [{
+  // ...(!isMac ? [{
+  //   label: app.name,
+  //   submenu: [
+  //     { role: 'about' },
+  //     { type: 'separator' },
+  //     {
+  //       label: 'Preferences',
+  //       click () { win.webContents.send('load-settings') }
+  //     },
+  //   ]
+  //   }] : [
+  {
     label: app.name,
     submenu: [
       { role: 'about' },
@@ -161,9 +172,7 @@ const template = [
       {
         label: 'Preferences',
         click () { win.webContents.send('load-settings') }
-      },
-    ]
-    }] : [
+      }, ...(isMac ? [
       { type: 'separator' },
       { role: 'services' },
       { type: 'separator' },
@@ -172,7 +181,9 @@ const template = [
       { role: 'unhide' },
       { type: 'separator' },
       { role: 'quit' }
-    ]),
+      ] : [])
+    ]
+  },
   // TODO: Refactor to use settings to generate
   {
     label: 'Services',
@@ -223,7 +234,6 @@ const template = [
       { role: 'togglefullscreen' }
     ]
   },
-  // { role: 'windowMenu' }
   {
     label: 'Window',
     submenu: [
