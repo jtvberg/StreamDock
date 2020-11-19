@@ -3,14 +3,14 @@ const { ipcRenderer, BrowserView, app } = require('electron')
 const $ = require('jquery')
 let serviceList = []
 let winMax = false
+let isMac = false
 
 // Invoke services load
 setDefaultServices()
 loadServices()
 
 // Open first service
-const serv = $('.service-button').first().data('url')
-ipcRenderer.send('service-change', serv)
+ipcRenderer.send('service-change', serviceList[0].url)
 
 // TODO: Setting: Optop on startup
 // Set ontop
@@ -19,17 +19,20 @@ ipcRenderer.send('ontop-lock')
 // TODO: Get from local storaage
 // Iterate through stored services and create buttons/menu entries
 function loadServices () {
-  serviceList.forEach(function (serv) {
-    if (serv.active) {
-      $('.service-button-host').append(`<div class="service-button" data-val="${serv.id}" data-url="${serv.url}" title="${serv.title}" style="color:${serv.color}; background-color:${serv.bgColor};">${serv.glyph}</div>`)
-    }
-  })
+  if (isMac) {
+    $('.ontop-button').show()
+    serviceList.forEach(function (serv) {
+      if (serv.active) {
+        $('.service-button-host').append(`<div class="service-button" data-val="${serv.id}" data-url="${serv.url}" title="${serv.title}" style="color:${serv.color}; background-color:${serv.bgColor};">${serv.glyph}</div>`)
+      }
+    })
+  }
 }
 
 function setDefaultServices () {
   serviceList = [
-    { id: 'tv', active: true, glyph:'T', title: 'YouTube TV', url: 'https://tv.youtube.com', color: '#ff0000', bgColor: '#ffffff' },
     { id: 'yt', active: true, glyph:'Y', title: 'YouTube', url: 'https://www.youtube.com', color: '#ff0000', bgColor: '#ffffff' },
+    { id: 'tv', active: true, glyph:'T', title: 'YouTube TV', url: 'https://tv.youtube.com', color: '#ff0000', bgColor: '#ffffff' },
     { id: 'nf', active: true, glyph:'N', title: 'Netflix', url: 'https://www.netflix.com', color: '#ffffff', bgColor: '#db272e' },
     { id: 'hl', active: true, glyph:'H', title: 'Hulu', url: 'https://www.hulu.com', color: '#ffffff', bgColor: '#1ce783' },
     { id: 'ap', active: true, glyph:'P', title: 'Amazon Prime TV', url: 'https://www.amazon.com/gp/video/storefront', color: '#ffffff', bgColor: '#00aee4' },

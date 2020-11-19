@@ -49,7 +49,7 @@ const createWindow = () => {
   setViewBounds()
 
   // Reset view on resize
-  win.on('resize', function () {
+  win.on('resize', () => {
     setViewBounds()
   })
 
@@ -153,17 +153,6 @@ ipcMain.on('win-hide', () => {
 // TODO: Add services to menu
 // Menu
 const template = [
-  // ...(!isMac ? [{
-  //   label: app.name,
-  //   submenu: [
-  //     { role: 'about' },
-  //     { type: 'separator' },
-  //     {
-  //       label: 'Preferences',
-  //       click () { win.webContents.send('load-settings') }
-  //     },
-  //   ]
-  //   }] : [
   {
     label: app.name,
     submenu: [
@@ -172,7 +161,8 @@ const template = [
       {
         label: 'Preferences',
         click () { win.webContents.send('load-settings') }
-      }, ...(isMac ? [
+      },
+      ...(isMac ? [
       { type: 'separator' },
       { role: 'services' },
       { type: 'separator' },
@@ -189,10 +179,10 @@ const template = [
     label: 'Services',
     submenu: [
       {
-        label: 'YouTube TV'
+        label: 'YouTube'
       },
       {
-        label: 'YouTube'
+        label: 'YouTube TV'
       },
       {
         label: 'Netflix'

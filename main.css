@@ -55,6 +55,7 @@ body {
   margin-right: 4px;
   margin-top: 1px;
   color: #ffffff44;
+  display: none;
 }
 
 .ontop-button:hover {
