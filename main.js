@@ -2,6 +2,7 @@
 const { app, BrowserWindow, ipcMain, BrowserView, session, Menu } = require('electron')
 // TODO: Setting: allow update to userAgent
 const userAgent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.80 Safari/537.36'
+const isMac = process.platform === 'darwin'
 // const updater = require('./updater')
 
 // Enable Electron-Reload (dev only)
@@ -23,11 +24,11 @@ const createWindow = () => {
   win = new BrowserWindow({
     width: 800,
     height: 600,
-    transparent: true,
-    frame: false,
+    transparent: isMac ? true : false,
     hasShadow: false,
+    frame: isMac ? false : true,
+    titleBarStyle: isMac ? 'hidden' : 'default',
     fullscreen: false,
-    titleBarStyle: 'hidden',
     webPreferences: {
       plugins: true,
       nodeIntegration: true
@@ -40,7 +41,7 @@ const createWindow = () => {
   // Open DevTools (dev only)
   // win.webContents.openDevTools()
 
-  const headerSize = 22
+  const headerSize = isMac ? 22 : 0
 
   view = new BrowserView()
   win.addBrowserView(view)
@@ -111,7 +112,7 @@ app.on('widevine-error', (error) => {
 
 // CLose app if all windows are closed (can check for Mac)
 app.on('window-all-closed', function () {
-  // if (process.platform !== 'darwin') {
+  // if (!isMac) {
     app.quit()
   // }
 })
@@ -151,20 +152,18 @@ ipcMain.on('win-hide', () => {
 
 // TODO: Add services to menu
 // Menu
-const isMac = process.platform === 'darwin'
 const template = [
-  // { role: 'appMenu' }
-  ...(isMac ? [{
+  ...(!isMac ? [{
     label: app.name,
     submenu: [
       { role: 'about' },
       { type: 'separator' },
       {
         label: 'Preferences',
-        click () { 
-          win.webContents.send('load-settings')
-        }
+        click () { win.webContents.send('load-settings') }
       },
+    ]
+    }] : [
       { type: 'separator' },
       { role: 'services' },
       { type: 'separator' },
@@ -173,59 +172,46 @@ const template = [
       { role: 'unhide' },
       { type: 'separator' },
       { role: 'quit' }
-    ]
-  }] : []),
-  // { role: 'viewMenu' }
+    ]),
   // TODO: Refactor to use settings to generate
-  // {
-  //   label: 'Services',
-  //   submenu: [
-  //     {
-  //       label: 'YouTube TV',
-  //       click () { setService('tv') }
-  //     },
-  //     {
-  //       label: 'YouTube',
-  //       click () { setService('yt') }
-  //     },
-  //     {
-  //       label: 'Netflix',
-  //       click () { setService('nf') }
-  //     },
-  //     {
-  //       label: 'Hulu',
-  //       click () { setService('hl') }
-  //     },
-  //     {
-  //       label: 'Amazon Video',
-  //       click () { setService('ap') }
-  //     },
-  //     {
-  //       label: 'Disney+',
-  //       click () { setService('dp') }
-  //     },
-  //     {
-  //       label: 'Peacock',
-  //       click () { setService('pc') }
-  //     },
-  //     {
-  //       label: 'ABC',
-  //       click () { setService('ab') }
-  //     },
-  //     {
-  //       label: 'CBS',
-  //       click () { setService('cb') }
-  //     },
-  //     {
-  //       label: 'HBO Max',
-  //       click () { setService('hm') }
-  //     },
-  //     {
-  //       label: 'ESPN+',
-  //       click () { setService('ep') }
-  //     },
-  //   ]
-  // },
+  {
+    label: 'Services',
+    submenu: [
+      {
+        label: 'YouTube TV'
+      },
+      {
+        label: 'YouTube'
+      },
+      {
+        label: 'Netflix'
+      },
+      {
+        label: 'Hulu'
+      },
+      {
+        label: 'Amazon Video'
+      },
+      {
+        label: 'Disney+'
+      },
+      {
+        label: 'Peacock'
+      },
+      {
+        label: 'ABC'
+      },
+      {
+        label: 'CBS'
+      },
+      {
+        label: 'HBO Max'
+      },
+      {
+        label: 'ESPN+'
+      }
+    ]
+  },
   {
     label: 'View',
     submenu: [
@@ -234,7 +220,7 @@ const template = [
       { role: 'toggledevtools' },
       { type: 'separator' },
       // TODO: Toggle menu item if full screenable from settings
-      // { role: 'togglefullscreen' }
+      { role: 'togglefullscreen' }
     ]
   },
   // { role: 'windowMenu' }
@@ -243,6 +229,10 @@ const template = [
     submenu: [
       { role: 'minimize' },
       { role: 'zoom' },
+      { 
+        label: 'Lock On Top',
+        click () { win.isAlwaysOnTop() ? win.setAlwaysOnTop(false) : win.setAlwaysOnTop(true, 'floating') }
+      },
       ...(isMac ? [
         { type: 'separator' },
         { role: 'front' },
