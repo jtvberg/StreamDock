@@ -7,8 +7,9 @@
     "start": "electron .",
     "debug": "electron --inspect=7171 .",
     "break": "electron --inspect-brk=7171 .",
-    "build": "electron-builder -mw",
-    "release": "electron-builder -mw -p onTagOrDraft"
+    "buildMac": "electron-builder -m",
+    "buildWin": "electron-builder -w",
+    "releaseMac": "electron-builder -m -p onTagOrDraft"
   },
   "repository": "https://github.com/jtvberg/StreamDock",
   "homepage": "https://github.com/jtvberg/StreamDock",
@@ -39,15 +40,14 @@
   "build": {
     "appId": "com.jtvberg.streamdock",
     "copyright": "Copyright jtvberg",
+    "afterSign": "./vmpSign.js",
     "mac": {
-      "afterPack": "./vmpSign.js",
       "category": "public.app-category.productivity"
     },
     "win": {
       "certificateFile": "private/jtvberg.p12",
       "certificatePassword": "",
-      "verifyUpdateCodeSignature": false,
-      "afterSign": "./vmpSign.js"
+      "verifyUpdateCodeSignature": false
     },
     "publish": {
       "provider": "github"
