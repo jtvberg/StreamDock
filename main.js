@@ -6,7 +6,7 @@ const isMac = process.platform === 'darwin'
 // const updater = require('./updater')
 
 // Enable Electron-Reload (dev only)
-require('electron-reload')(__dirname)
+// require('electron-reload')(__dirname)
 
 // TODO: Add system tray icon
 // TODO: Right-click toggle minimize/restore and mute (if not pause)
@@ -39,7 +39,7 @@ const createWindow = () => {
   win.loadFile('main.html')
 
   // Open DevTools (dev only)
-  win.webContents.openDevTools()
+  // win.webContents.openDevTools()
 
   const headerSize = isMac ? 22 : 0
 
