@@ -1,14 +1,14 @@
 {
   "name": "StreamDock",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "description": "Streaming service viewer",
   "main": "main.js",
   "scripts": {
     "start": "electron .",
     "debug": "electron --inspect=7171 .",
     "break": "electron --inspect-brk=7171 .",
-    "build": "electron-builder -m",
-    "release": "electron-builder -m -p onTagOrDraft"
+    "build": "electron-builder -mw",
+    "release": "electron-builder -mw -p onTagOrDraft"
   },
   "repository": "https://github.com/jtvberg/StreamDock",
   "homepage": "https://github.com/jtvberg/StreamDock",
