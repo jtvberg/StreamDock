@@ -1,5 +1,5 @@
 // Imports and variable declarations
-const { app, BrowserWindow, ipcMain, BrowserView, session, Menu } = require('electron')
+const { app, BrowserWindow, ipcMain, BrowserView, session, Menu, MenuItem } = require('electron')
 // TODO: Setting: allow update to userAgent
 const userAgent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.80 Safari/537.36'
 const isMac = process.platform === 'darwin'
@@ -39,7 +39,7 @@ const createWindow = () => {
   win.loadFile('main.html')
 
   // Open DevTools (dev only)
-  // win.webContents.openDevTools()
+  win.webContents.openDevTools()
 
   const headerSize = isMac ? 22 : 0
 
@@ -150,6 +150,11 @@ ipcMain.on('win-hide', () => {
   win.hide()
 })
 
+// IPC channel for maximizing window
+ipcMain.on('add-stream', (e, serv) => {
+  addStreams(serv)
+})
+
 // TODO: Add services to menu
 // Menu
 const template = [
@@ -158,10 +163,10 @@ const template = [
     submenu: [
       { role: 'about' },
       { type: 'separator' },
-      {
-        label: 'Preferences',
-        click () { win.webContents.send('load-settings') }
-      },
+      // {
+      //   label: 'Preferences',
+      //   click () { win.webContents.send('load-settings') }
+      // },
       ...(isMac ? [
       { type: 'separator' },
       { role: 'services' },
@@ -176,42 +181,8 @@ const template = [
   },
   // TODO: Refactor to use settings to generate
   {
-    label: 'Services',
-    submenu: [
-      {
-        label: 'YouTube'
-      },
-      {
-        label: 'YouTube TV'
-      },
-      {
-        label: 'Netflix'
-      },
-      {
-        label: 'Hulu'
-      },
-      {
-        label: 'Amazon Video'
-      },
-      {
-        label: 'Disney+'
-      },
-      {
-        label: 'Peacock'
-      },
-      {
-        label: 'ABC'
-      },
-      {
-        label: 'CBS'
-      },
-      {
-        label: 'HBO Max'
-      },
-      {
-        label: 'ESPN+'
-      }
-    ]
+    label: 'Streams',
+    submenu: []
   },
   {
     label: 'View',
@@ -258,4 +229,14 @@ const template = [
 ]
 
 const menu = Menu.buildFromTemplate(template)
-Menu.setApplicationMenu(menu)
+const streamMenu = menu.items[1]
+function addStreams (serv) {
+  let menuItem = new MenuItem({ 
+    label: serv.title,
+    click () {
+      view.webContents.loadURL(serv.url)
+    }
+  })
+  streamMenu.submenu.append(menuItem)
+  Menu.setApplicationMenu(menu)
+}

@@ -1,9 +1,9 @@
 // Imports and variable declarations
-const { ipcRenderer, BrowserView, app } = require('electron')
+const { ipcRenderer, Menu, MenuItem } = require('electron')
 const $ = require('jquery')
 let serviceList = []
 let winMax = false
-let isMac = false
+let isMac = process.platform === 'darwin'
 
 // Invoke services load
 setDefaultServices()
@@ -15,18 +15,18 @@ ipcRenderer.send('service-change', serviceList[0].url)
 // TODO: Setting: Optop on startup
 // Set ontop
 ipcRenderer.send('ontop-lock')
-
+if (isMac) { $('.ontop-button').show() }
 // TODO: Get from local storaage
 // Iterate through stored services and create buttons/menu entries
 function loadServices () {
-  if (isMac) {
-    $('.ontop-button').show()
-    serviceList.forEach(function (serv) {
-      if (serv.active) {
+  serviceList.forEach(function (serv) {
+    if (serv.active) {
+      if (isMac) {
         $('.service-button-host').append(`<div class="service-button" data-val="${serv.id}" data-url="${serv.url}" title="${serv.title}" style="color:${serv.color}; background-color:${serv.bgColor};">${serv.glyph}</div>`)
       }
-    })
-  }
+      ipcRenderer.send('add-stream', serv)
+    }
+  })
 }
 
 function setDefaultServices () {
