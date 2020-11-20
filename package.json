@@ -40,7 +40,7 @@
   "build": {
     "appId": "com.jtvberg.streamdock",
     "copyright": "Copyright jtvberg",
-    "afterSign": "./vmpSign.js",
+    "afterPack": "./vmpSign.js",
     "mac": {
       "category": "public.app-category.productivity"
     },
