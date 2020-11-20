@@ -1,7 +1,8 @@
 // Imports and variable declarations
-const { app, BrowserWindow, ipcMain, BrowserView, session, Menu } = require('electron')
+const { app, BrowserWindow, ipcMain, BrowserView, session, Menu, MenuItem } = require('electron')
 // TODO: Setting: allow update to userAgent
 const userAgent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.80 Safari/537.36'
+const isMac = process.platform === 'darwin'
 // const updater = require('./updater')
 
 // Enable Electron-Reload (dev only)
@@ -12,7 +13,7 @@ const userAgent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/5
 // TODO: Click for service menu
 
 // TODO: Remember screen location and size
-// Main window
+// Main window and view
 let win = null
 let view = null
 const createWindow = () => {
@@ -23,11 +24,11 @@ const createWindow = () => {
   win = new BrowserWindow({
     width: 800,
     height: 600,
-    transparent: true,
-    frame: false,
+    transparent: isMac ? true : false,
     hasShadow: false,
+    frame: isMac ? false : true,
+    titleBarStyle: isMac ? 'hidden' : 'default',
     fullscreen: false,
-    titleBarStyle: 'hidden',
     webPreferences: {
       plugins: true,
       nodeIntegration: true
@@ -40,9 +41,16 @@ const createWindow = () => {
   // Open DevTools (dev only)
   // win.webContents.openDevTools()
 
-  win.on('resize', function () {
-    wb = win.getBounds()
-    view.setBounds({ x: 0, y: 25, width: wb.width, height: wb.height - 25 })
+  const headerSize = isMac ? 22 : 0
+
+  view = new BrowserView()
+  win.addBrowserView(view)
+  view.userAgent = userAgent
+  setViewBounds()
+
+  // Reset view on resize
+  win.on('resize', () => {
+    setViewBounds()
   })
 
   // Turn on fullScreen to use this to allow html driven full screen to go to maximize instead
@@ -55,10 +63,20 @@ const createWindow = () => {
   //   }
   // })
 
-  view = new BrowserView()
-  win.addBrowserView(view)
-  view.userAgent = userAgent
-  view.setBounds({ x: 0, y: 25, width: 800, height: 575 })
+  // IPC channel for hiding view
+  ipcMain.on('view-hide', () => {
+    win.removeBrowserView(view)
+  })
+
+  // IPC channel for showing view
+  ipcMain.on('view-show', () => {
+    win.addBrowserView(view)
+  })
+
+  function setViewBounds () {
+    wb = win.getBounds()
+    view.setBounds({ x: 0, y: headerSize, width: wb.width, height: wb.height - headerSize })
+  }
 }
 
 app.commandLine.appendSwitch('no-verify-widevine-cdm')
@@ -94,56 +112,17 @@ app.on('widevine-error', (error) => {
 
 // CLose app if all windows are closed (can check for Mac)
 app.on('window-all-closed', function () {
-  // if (process.platform !== 'darwin') {
+  // if (!isMac) {
     app.quit()
   // }
 })
-
-// TODO: Refactor to use settings
-function setService (serv) {
-  switch (serv) {
-    case 'tv':
-      view.webContents.loadURL('https://tv.youtube.com')
-      break
-    case 'yt':
-      view.webContents.loadURL('https://www.youtube.com')
-      break
-    case 'nf':
-      view.webContents.loadURL('https://www.netflix.com')
-      break
-    case 'hl':
-      view.webContents.loadURL('https://www.hulu.com')
-      break
-    case 'ap':
-      view.webContents.loadURL('https://www.amazon.com/gp/video/storefront/')
-      break
-    case 'dp':
-      view.webContents.loadURL('https://www.disneyplus.com/home')
-      break
-    case 'ep':
-      view.webContents.loadURL('https://plus.espn.com')
-      break
-    case 'pc':
-      view.webContents.loadURL('https://www.peacocktv.com/watch/home')
-      break
-    case 'cb':
-      view.webContents.loadURL('https://cbs.com')
-      break
-    case 'hm':
-      view.webContents.loadURL('https://play.hbomax.com/')
-      break
-    case 'ab':
-      view.webContents.loadURL('https://abc.com/')
-      break
-  }
-}
 
 // TDOD: load service options from saved settings
 // TODO: load last service used
 // TODO: Setting: add option to load last service used
 // IPC channel to change streaming service
-ipcMain.on('service-change', (e, data) => {
-  setService(data)
+ipcMain.on('service-change', (e, url) => {
+  view.webContents.loadURL(url)
 })
 
 // IPC channel for locking app on top
@@ -171,15 +150,24 @@ ipcMain.on('win-hide', () => {
   win.hide()
 })
 
+// IPC channel for maximizing window
+ipcMain.on('add-stream', (e, serv) => {
+  addStreams(serv)
+})
+
 // TODO: Add services to menu
 // Menu
-const isMac = process.platform === 'darwin'
 const template = [
-  // { role: 'appMenu' }
-  ...(isMac ? [{
+  {
     label: app.name,
     submenu: [
       { role: 'about' },
+      { type: 'separator' },
+      // {
+      //   label: 'Preferences',
+      //   click () { win.webContents.send('load-settings') }
+      // },
+      ...(isMac ? [
       { type: 'separator' },
       { role: 'services' },
       { type: 'separator' },
@@ -188,58 +176,13 @@ const template = [
       { role: 'unhide' },
       { type: 'separator' },
       { role: 'quit' }
+      ] : [])
     ]
-  }] : []),
-  // { role: 'viewMenu' }
+  },
   // TODO: Refactor to use settings to generate
   {
-    label: 'Services',
-    submenu: [
-      {
-        label: 'YouTube TV',
-        click () { setService('tv') }
-      },
-      {
-        label: 'YouTube',
-        click () { setService('yt') }
-      },
-      {
-        label: 'Netflix',
-        click () { setService('nf') }
-      },
-      {
-        label: 'Hulu',
-        click () { setService('hl') }
-      },
-      {
-        label: 'Amazon Video',
-        click () { setService('ap') }
-      },
-      {
-        label: 'Disney+',
-        click () { setService('dp') }
-      },
-      {
-        label: 'Peacock',
-        click () { setService('pc') }
-      },
-      {
-        label: 'ABC',
-        click () { setService('ab') }
-      },
-      {
-        label: 'CBS',
-        click () { setService('cb') }
-      },
-      {
-        label: 'HBO Max',
-        click () { setService('hm') }
-      },
-      {
-        label: 'ESPN+',
-        click () { setService('ep') }
-      },
-    ]
+    label: 'Streams',
+    submenu: []
   },
   {
     label: 'View',
@@ -249,15 +192,18 @@ const template = [
       { role: 'toggledevtools' },
       { type: 'separator' },
       // TODO: Toggle menu item if full screenable from settings
-      // { role: 'togglefullscreen' }
+      { role: 'togglefullscreen' }
     ]
   },
-  // { role: 'windowMenu' }
   {
     label: 'Window',
     submenu: [
       { role: 'minimize' },
       { role: 'zoom' },
+      { 
+        label: 'Lock On Top',
+        click () { win.isAlwaysOnTop() ? win.setAlwaysOnTop(false) : win.setAlwaysOnTop(true, 'floating') }
+      },
       ...(isMac ? [
         { type: 'separator' },
         { role: 'front' },
@@ -283,4 +229,14 @@ const template = [
 ]
 
 const menu = Menu.buildFromTemplate(template)
-Menu.setApplicationMenu(menu)
+const streamMenu = menu.items[1]
+function addStreams (serv) {
+  let menuItem = new MenuItem({ 
+    label: serv.title,
+    click () {
+      view.webContents.loadURL(serv.url)
+    }
+  })
+  streamMenu.submenu.append(menuItem)
+  Menu.setApplicationMenu(menu)
+}

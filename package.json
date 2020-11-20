@@ -1,14 +1,15 @@
 {
   "name": "StreamDock",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "description": "Streaming service viewer",
   "main": "main.js",
   "scripts": {
     "start": "electron .",
     "debug": "electron --inspect=7171 .",
     "break": "electron --inspect-brk=7171 .",
-    "build": "electron-builder -m",
-    "release": "electron-builder -m -p onTagOrDraft"
+    "buildMac": "electron-builder -m",
+    "buildWin": "electron-builder -w",
+    "releaseMac": "electron-builder -m -p onTagOrDraft"
   },
   "repository": "https://github.com/jtvberg/StreamDock",
   "homepage": "https://github.com/jtvberg/StreamDock",
@@ -22,24 +23,31 @@
     "electron": "git+https://github.com/castlabs/electron-releases.git#v9.3.2-wvvmp",
     "electron-builder": "^22.9.1",
     "electron-reload": "^1.5.0",
-    "eslint": "^7.12.1",
+    "eslint": "^7.13.0",
     "eslint-config-standard": "^14.1.1",
     "eslint-plugin-import": "^2.22.1",
     "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-promise": "^4.2.1",
-    "eslint-plugin-standard": "^4.0.2"
+    "eslint-plugin-standard": "^4.1.0"
   },
   "dependencies": {
     "@fortawesome/fontawesome-free": "^5.15.1",
     "electron-updater": "^4.3.5",
-    "jquery": "^3.5.1"
+    "jquery": "^3.5.1",
+    "bootstrap": "^4.5.3",
+    "popper.js": "^1.16.1"
   },
   "build": {
-    "afterPack": "./afterPack.js",
     "appId": "com.jtvberg.streamdock",
     "copyright": "Copyright jtvberg",
+    "afterPack": "./afterPack.js",
     "mac": {
       "category": "public.app-category.productivity"
+    },
+    "win": {
+      "certificateFile": "private/jtvberg.p12",
+      "certificatePassword": "",
+      "verifyUpdateCodeSignature": false
     },
     "publish": {
       "provider": "github"
