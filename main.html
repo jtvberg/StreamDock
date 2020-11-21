@@ -38,37 +38,44 @@
                     <div class="panel-body">
                       <div id="collapse-general" class="collapse settings-group" data-parent="#panel-general">
                         <div class="form-check">
-                          <input type="checkbox" class="form-check-input" id="check-ontop">
+                          <input type="checkbox" class="form-check-input settings-check" id="ontop-check">
                           <label class="form-check-label" for="check-ontop">Ontop on Start Up</label>
                           <div class="helper-text">
                             <small class="text-muted">Check to set window on top on start up</small>
                           </div>
                         </div>
                         <div class="form-check">
-                          <input type="checkbox" class="form-check-input" id="check-last">
-                          <label class="form-check-label" for="check-last">Remember Last Used Service</label>
+                          <input type="checkbox" class="form-check-input settings-check" id="last-check">
+                          <label class="form-check-label" for="last-check">Remember Last Used Service</label>
                           <div class="helper-text">
                             <small class="text-muted">Check to load the last service used from previous session</small>
                           </div>
                         </div>
                         <div class="form-check">
-                          <input type="checkbox" class="form-check-input" id="check-window">
-                          <label class="form-check-label" for="check-window">Remember Window Size and Location</label>
+                          <input type="checkbox" class="form-check-input settings-check" id="window-check">
+                          <label class="form-check-label" for="window-check">Remember Window Size and Location</label>
                           <div class="helper-text">
                             <small class="text-muted">Check to maintain last window size and location from previous session</small>
                           </div>
                         </div>
                         <div class="form-check">
-                          <input type="checkbox" class="form-check-input" id="check-fullscreen">
-                          <label class="form-check-label" for="check-fullscreen">Full Screen Behavior</label>
+                          <input type="checkbox" class="form-check-input settings-check" id="fullscreen-check">
+                          <label class="form-check-label" for="fullscreen-check">Full Screen Behavior</label>
                           <div class="helper-text">
                             <small class="text-muted">Check to allow full-screen control from within service</small>
                           </div>
                         </div>
+                        <div class="form-check">
+                          <input type="checkbox" class="form-check-input settings-check" id="quick-check">
+                          <label class="form-check-label" for="quick-check">Hide Quick Access Buttons</label>
+                          <div class="helper-text">
+                            <small class="text-muted">Check to hide quick access buttons (Mac only)</small>
+                          </div>
+                        </div>
                         <div class="form-group row" style="margin-left: 0px; margin-top: 5px">
-                          <label for="input-agent" style="margin-top: 5px;">User Agent:</label>
+                          <label for="agent-input" style="margin-top: 5px;">User Agent:</label>
                           <div class="col-sm-10" style="padding-left: 5px;">
-                            <textarea rows="3" class="form-control form-control-sm text-area-agent" id="input-agent"></textarea>
+                            <textarea rows="3" class="form-control form-control-sm agent-text-area" id="agent-input"></textarea>
                             <div>
                               <small class="text-muted">Update the User Agent string</small>
                             </div>

@@ -19,6 +19,7 @@ if (isMac) { $('.ontop-button').show() }
 // TODO: Get from local storaage
 // Iterate through stored services and create buttons/menu entries
 function loadServices () {
+  ipcRenderer.send('reset-menu')
   serviceList.forEach(function (serv) {
     if (serv.active) {
       if (isMac) {
@@ -98,7 +99,7 @@ ipcRenderer.on('load-settings', () => {
 
 function loadSettingsModal() {
   $('#collapse-general, #collapse-services').collapse('hide')
-  $('#input-agent').val('Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.80 Safari/537.36')
+  $('#agent-input').val('Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.80 Safari/537.36')
   $('#settings-services-available').empty()
   serviceList.forEach(function (serv) {
     const checked = serv.active ? 'checked' : ''
@@ -121,7 +122,9 @@ function saveSettings () {
 }
 
 function loadDefaultSettings () {
-
+  $('.settings-check').prop('checked', false )
+  $('.service-check').prop('checked', true )
+  $('#agent-input').val('Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.80 Safari/537.36')
 }
 
 $('#settings-save-button').on('click', () => {

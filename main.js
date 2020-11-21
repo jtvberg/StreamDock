@@ -6,7 +6,7 @@ const isMac = process.platform === 'darwin'
 // const updater = require('./updater')
 
 // Enable Electron-Reload (dev only)
-// require('electron-reload')(__dirname)
+require('electron-reload')(__dirname)
 
 // TODO: Add system tray icon
 // TODO: Right-click toggle minimize/restore and mute (if not pause)
@@ -150,9 +150,14 @@ ipcMain.on('win-hide', () => {
   win.hide()
 })
 
-// IPC channel for maximizing window
+// IPC channel for emptying stream menu items
+ipcMain.on('reset-menu', () => {
+  resetStreamMenu()
+})
+
+// IPC channel for adding stream service to menu
 ipcMain.on('add-stream', (e, serv) => {
-  addStreams(serv)
+  addStream(serv)
 })
 
 // TODO: Add services to menu
@@ -163,10 +168,10 @@ const template = [
     submenu: [
       { role: 'about' },
       { type: 'separator' },
-      // {
-      //   label: 'Preferences',
-      //   click () { win.webContents.send('load-settings') }
-      // },
+      {
+        label: 'Preferences',
+        click () { win.webContents.send('load-settings') }
+      },
       ...(isMac ? [
       { type: 'separator' },
       { role: 'services' },
@@ -228,15 +233,22 @@ const template = [
   }
 ]
 
-const menu = Menu.buildFromTemplate(template)
-const streamMenu = menu.items[1]
-function addStreams (serv) {
+let menu = Menu.buildFromTemplate(template)
+
+function addStream (serv) {
+  const streamMenu = Menu.getApplicationMenu().items[1]
   let menuItem = new MenuItem({ 
     label: serv.title,
+    id: serv.id,
     click () {
       view.webContents.loadURL(serv.url)
     }
   })
   streamMenu.submenu.append(menuItem)
+  Menu.setApplicationMenu(menu)
+}
+
+function resetStreamMenu () {
+  menu = Menu.buildFromTemplate(template)
   Menu.setApplicationMenu(menu)
 }
