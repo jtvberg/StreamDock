@@ -33,7 +33,7 @@ function applySettings () {
   }
 
   // Open last used service or first one in list
-  if (settings.openLast) { 
+  if (settings.openLast) {
     ipcRenderer.send('service-change', { id: settings.lastStream, url: streamList.find(item => item.id === settings.lastStream).url })
   } else {
     ipcRenderer.send('service-change', { id: streamList[0].id, url: streamList[0].url })
@@ -125,7 +125,8 @@ $('.header-bar').on('dblclick', () => {
 
 // Service selector click handler
 $('.service-button').on('click', function () {
-  ipcRenderer.send('service-change', { id: $(this).data('id'), url: $(this).data('url') })
+  ipcRenderer.send('service-change', { id: $(this).data('val'), url: $(this).data('url') })
+  settings.lastStream = $(this).data('val')
 })
 
 // Settings close restore View
@@ -140,7 +141,6 @@ ipcRenderer.on('load-settings', () => {
 
 // Settings save invoke from main
 ipcRenderer.on('save-settings', (e, data) => {
-  settings.lastStream = data.lastStream
   settings.windowSizeLocation = data.windowSizeLocation
   localStorage.setItem('settings', JSON.stringify(settings))
 })

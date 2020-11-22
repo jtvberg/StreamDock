@@ -7,7 +7,6 @@ const { app, BrowserWindow, ipcMain, BrowserView, session, Menu, MenuItem } = re
 const userAgent = ''
 const isMac = process.platform === 'darwin'
 // const updater = require('./updater')
-let = currentService = ''
 let = allowQuit = false
 
 // Enable Electron-Reload (dev only)
@@ -122,7 +121,6 @@ app.on('before-quit', (e) => {
     e.preventDefault()
     wb = win.getBounds()
     let data = {
-      lastStream: currentService,
       windowSizeLocation: { x: wb.x, y: wb.y, height: wb.height, width: wb.width  }
     }
     win.webContents.send('save-settings', data)
@@ -148,7 +146,6 @@ ipcMain.on('agent-change', (e, data) => {
 
 // IPC channel to change streaming service
 ipcMain.on('service-change', (e, data) => {
-  currentService = data.id
   view.webContents.loadURL(data.url)
 })
 
