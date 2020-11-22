@@ -1,18 +1,18 @@
-// Imports and variable declarations
-const { app, BrowserWindow, ipcMain, BrowserView, session, Menu, MenuItem } = require('electron')
-// TODO: Setting: allow update to userAgent
-const userAgent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.80 Safari/537.36'
-const isMac = process.platform === 'darwin'
-// const updater = require('./updater')
-
-// Enable Electron-Reload (dev only)
-require('electron-reload')(__dirname)
-
 // TODO: Add system tray icon
 // TODO: Right-click toggle minimize/restore and mute (if not pause)
 // TODO: Click for service menu
+// Imports and variable declarations
+const { app, BrowserWindow, ipcMain, BrowserView, session, Menu, MenuItem } = require('electron')
+// TODO: Setting: allow update to userAgent
+const userAgent = ''
+const isMac = process.platform === 'darwin'
+// const updater = require('./updater')
+let = currentService = ''
+let = allowQuit = false
 
-// TODO: Remember screen location and size
+// Enable Electron-Reload (dev only)
+// require('electron-reload')(__dirname)
+
 // Main window and view
 let win = null
 let view = null
@@ -28,7 +28,7 @@ const createWindow = () => {
     hasShadow: false,
     frame: isMac ? false : true,
     titleBarStyle: isMac ? 'hidden' : 'default',
-    fullscreen: false,
+    fullscreenable: false,
     webPreferences: {
       plugins: true,
       nodeIntegration: true
@@ -45,7 +45,6 @@ const createWindow = () => {
 
   view = new BrowserView()
   win.addBrowserView(view)
-  view.userAgent = userAgent
   setViewBounds()
 
   // Reset view on resize
@@ -73,17 +72,17 @@ const createWindow = () => {
     win.addBrowserView(view)
   })
 
+  // Adjust view bounds to window
   function setViewBounds () {
     wb = win.getBounds()
     view.setBounds({ x: 0, y: headerSize, width: wb.width, height: wb.height - headerSize })
   }
 }
 
+// Widvine DRM
 app.commandLine.appendSwitch('no-verify-widevine-cdm')
-
 let isOffline = false
 let widevineDir = app.getPath('userData')
-
 app.on('ready', () => {
   app.verifyWidevineCdm({
     session: session.defaultSession,
@@ -111,18 +110,46 @@ app.on('widevine-error', (error) => {
 })
 
 // CLose app if all windows are closed (can check for Mac)
-app.on('window-all-closed', function () {
+app.on('window-all-closed', () => {
   // if (!isMac) {
     app.quit()
   // }
 })
 
-// TDOD: load service options from saved settings
-// TODO: load last service used
-// TODO: Setting: add option to load last service used
+// When closing set window size and location
+app.on('before-quit', (e) => {
+  if (!allowQuit) {
+    e.preventDefault()
+    wb = win.getBounds()
+    let data = {
+      lastStream: currentService,
+      windowSizeLocation: { x: wb.x, y: wb.y, height: wb.height, width: wb.width  }
+    }
+    win.webContents.send('save-settings', data)
+    allowQuit = true
+    app.quit()
+  }
+})
+
+// IPC channel to update window size and location from settings
+ipcMain.on('set-window', (e, data) => {
+  win.setBounds({ x:data.x, y:data.y, height:data.height, width:data.width })
+})
+
+// IPC channel to set fullscreen allow from HTML
+ipcMain.on('allow-fullscreen', (e, data) => {
+  win.fullScreenable = data
+})
+
+// IPC channel to change user agent
+ipcMain.on('agent-change', (e, data) => {
+  view.userAgent = data
+})
+
 // IPC channel to change streaming service
-ipcMain.on('service-change', (e, url) => {
-  view.webContents.loadURL(url)
+ipcMain.on('service-change', (e, data) => {
+  currentService = data.id
+  view.webContents.loadURL(data.url)
 })
 
 // IPC channel for locking app on top
@@ -145,7 +172,7 @@ ipcMain.on('win-restore', () => {
   win.unmaximize()
 })
 
-// IPC channel for maximizing window
+// IPC channel for hiding window
 ipcMain.on('win-hide', () => {
   win.hide()
 })
@@ -160,7 +187,6 @@ ipcMain.on('add-stream', (e, serv) => {
   addStream(serv)
 })
 
-// TODO: Add services to menu
 // Menu
 const template = [
   {
@@ -184,7 +210,6 @@ const template = [
       ] : [])
     ]
   },
-  // TODO: Refactor to use settings to generate
   {
     label: 'Streams',
     submenu: []
@@ -195,9 +220,9 @@ const template = [
       { role: 'reload' },
       { role: 'forcereload' },
       { role: 'toggledevtools' },
-      { type: 'separator' },
+      { type: 'separator' }
       // TODO: Toggle menu item if full screenable from settings
-      { role: 'togglefullscreen' }
+      // { role: 'togglefullscreen' }
     ]
   },
   {
