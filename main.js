@@ -5,6 +5,7 @@
 const { app, BrowserWindow, ipcMain, BrowserView, session, Menu, MenuItem } = require('electron')
 const isMac = process.platform === 'darwin'
 // const updater = require('./updater')
+let wb = { x: 0, y: 0, height: 0, width: 0 }
 let allowQuit = false
 
 // Enable Electron-Reload (dev only)
@@ -49,6 +50,11 @@ const createWindow = () => {
     setViewBounds()
   })
 
+  // Capture window location on move
+  win.on('move', () => {
+    wb = win.getBounds()
+  })
+
   // Turn on fullScreen to use this to allow html driven full screen to go to maximize instead
   // win.on('enter-html-full-screen', function () {
   //   if (win.isFullScreen()) {
@@ -71,7 +77,7 @@ const createWindow = () => {
 
   // Adjust view bounds to window
   function setViewBounds () {
-    const wb = win.getBounds()
+    wb = win.getBounds()
     view.setBounds({ x: 0, y: headerSize, width: wb.width, height: wb.height - headerSize })
   }
 }
@@ -116,7 +122,6 @@ app.on('window-all-closed', () => {
 app.on('before-quit', (e) => {
   if (!allowQuit) {
     e.preventDefault()
-    const wb = win.getBounds()
     const data = {
       windowSizeLocation: { x: wb.x, y: wb.y, height: wb.height, width: wb.width }
     }
