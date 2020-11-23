@@ -3,11 +3,9 @@
 // TODO: Click for service menu
 // Imports and variable declarations
 const { app, BrowserWindow, ipcMain, BrowserView, session, Menu, MenuItem } = require('electron')
-// TODO: Setting: allow update to userAgent
-const userAgent = ''
 const isMac = process.platform === 'darwin'
 // const updater = require('./updater')
-let = allowQuit = false
+let allowQuit = false
 
 // Enable Electron-Reload (dev only)
 // require('electron-reload')(__dirname)
@@ -23,9 +21,9 @@ const createWindow = () => {
   win = new BrowserWindow({
     width: 800,
     height: 600,
-    transparent: isMac ? true : false,
+    transparent: !!isMac,
     hasShadow: false,
-    frame: isMac ? false : true,
+    frame: !isMac,
     titleBarStyle: isMac ? 'hidden' : 'default',
     fullscreenable: false,
     webPreferences: {
@@ -73,15 +71,16 @@ const createWindow = () => {
 
   // Adjust view bounds to window
   function setViewBounds () {
-    wb = win.getBounds()
+    const wb = win.getBounds()
     view.setBounds({ x: 0, y: headerSize, width: wb.width, height: wb.height - headerSize })
   }
 }
 
 // Widvine DRM
 app.commandLine.appendSwitch('no-verify-widevine-cdm')
-let isOffline = false
-let widevineDir = app.getPath('userData')
+const isOffline = false
+const widevineDir = app.getPath('userData')
+
 app.on('ready', () => {
   app.verifyWidevineCdm({
     session: session.defaultSession,
@@ -91,7 +90,7 @@ app.on('ready', () => {
 })
 
 app.on('widevine-ready', (version, lastVersion) => {
-  if (null !== lastVersion) {
+  if (lastVersion !== null) {
     console.log('Widevine ' + version + ', upgraded from ' + lastVersion + ', is ready to be used!')
   } else {
     console.log('Widevine ' + version + ' is ready to be used!')
@@ -110,18 +109,16 @@ app.on('widevine-error', (error) => {
 
 // CLose app if all windows are closed (can check for Mac)
 app.on('window-all-closed', () => {
-  // if (!isMac) {
-    app.quit()
-  // }
+  app.quit()
 })
 
 // When closing set window size and location
 app.on('before-quit', (e) => {
   if (!allowQuit) {
     e.preventDefault()
-    wb = win.getBounds()
-    let data = {
-      windowSizeLocation: { x: wb.x, y: wb.y, height: wb.height, width: wb.width  }
+    const wb = win.getBounds()
+    const data = {
+      windowSizeLocation: { x: wb.x, y: wb.y, height: wb.height, width: wb.width }
     }
     win.webContents.send('save-settings', data)
     allowQuit = true
@@ -131,7 +128,7 @@ app.on('before-quit', (e) => {
 
 // IPC channel to update window size and location from settings
 ipcMain.on('set-window', (e, data) => {
-  win.setBounds({ x:data.x, y:data.y, height:data.height, width:data.width })
+  win.setBounds({ x: data.x, y: data.y, height: data.height, width: data.width })
 })
 
 // IPC channel to set fullscreen allow from HTML
@@ -150,12 +147,12 @@ ipcMain.on('service-change', (e, data) => {
 })
 
 // IPC channel for locking app on top
-ipcMain.on('ontop-lock', function () {
+ipcMain.on('ontop-lock', () => {
   win.setAlwaysOnTop(true, 'floating')
 })
 
 // IPC channel for unlocking app on top
-ipcMain.on('ontop-unlock', function () {
+ipcMain.on('ontop-unlock', () => {
   win.setAlwaysOnTop(false)
 })
 
@@ -196,15 +193,17 @@ const template = [
         click () { win.webContents.send('load-settings') }
       },
       ...(isMac ? [
-      { type: 'separator' },
-      { role: 'services' },
-      { type: 'separator' },
-      { role: 'hide' },
-      { role: 'hideothers' },
-      { role: 'unhide' },
-      { type: 'separator' },
-      { role: 'quit' }
-      ] : [])
+        { type: 'separator' },
+        { role: 'services' },
+        { type: 'separator' },
+        { role: 'hide' },
+        { role: 'hideothers' },
+        { role: 'unhide' },
+        { type: 'separator' },
+        { role: 'quit' }
+      ] : [
+        { type: 'separator' },
+        { role: 'quit' }])
     ]
   },
   {
@@ -227,7 +226,7 @@ const template = [
     submenu: [
       { role: 'minimize' },
       { role: 'zoom' },
-      { 
+      {
         label: 'Lock On Top',
         click () { win.isAlwaysOnTop() ? win.setAlwaysOnTop(false) : win.setAlwaysOnTop(true, 'floating') }
       },
@@ -259,7 +258,7 @@ let menu = Menu.buildFromTemplate(template)
 
 function addStream (serv) {
   const streamMenu = Menu.getApplicationMenu().items[1]
-  let menuItem = new MenuItem({ 
+  const menuItem = new MenuItem({
     label: serv.title,
     id: serv.id,
     click () {
