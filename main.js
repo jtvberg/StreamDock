@@ -5,7 +5,7 @@
 const { app, BrowserWindow, ipcMain, BrowserView, Tray, session, Menu, MenuItem } = require('electron')
 const path = require('path')
 const isMac = process.platform === 'darwin'
-// const updater = require('./updater')
+const updater = require('./updater')
 let wb = { x: 0, y: 0, height: 0, width: 0 }
 let allowQuit = false
 
@@ -20,7 +20,7 @@ let tray = null
 // Create window
 const createWindow = () => {
   // Check for updates after 3 seconds
-  // setTimeout(updater, 3000)
+  setTimeout(updater, 3000)
 
   // Create main window
   win = new BrowserWindow({
