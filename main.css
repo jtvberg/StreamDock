@@ -17,6 +17,12 @@ body {
   border-radius: 10px;
 }
 
+.logo {
+  position: absolute;
+  right: 10px;
+  bottom: 10px;
+}
+
 .header-bar {
   display: grid;
   grid-template-columns: 1fr auto 1fr;
@@ -32,16 +38,21 @@ body {
   margin-top: -2px;
 }
 
+.service-button-color {
+  border-radius: 3px;
+  margin: 3px;
+}
+
 .service-button {
   border-radius: 2px;
   font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
   padding: 1px;
-  margin: 3px;
   width: 16px;
   height: 16px;
   text-align: center;
   font-size: 14px;
   line-height: 1;
+  user-select: none;
 }
 
 .service-button:hover {
@@ -82,7 +93,7 @@ body {
   border-color: #000000;
   background-color: #000000;
   color: #ffffff;
-  max-height: calc(100vh - 57px);
+  max-height: calc(100vh - 80px);
 }
 
 .modal-footer {

@@ -9,7 +9,7 @@ let wb = { x: 0, y: 0, height: 0, width: 0 }
 let allowQuit = false
 
 // Enable Electron-Reload (dev only)
-// require('electron-reload')(__dirname)
+require('electron-reload')(__dirname)
 
 // Main window and view
 let win = null
@@ -20,8 +20,10 @@ const createWindow = () => {
 
   // Create main window
   win = new BrowserWindow({
-    width: 800,
     height: 600,
+    width: 800,
+    minHeight: 280,
+    minWidth: 580,
     transparent: !!isMac,
     hasShadow: false,
     frame: !isMac,
@@ -73,6 +75,7 @@ const createWindow = () => {
   // IPC channel for showing view
   ipcMain.on('view-show', () => {
     win.addBrowserView(view)
+    setViewBounds()
   })
 
   // Adjust view bounds to window

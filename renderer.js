@@ -66,7 +66,7 @@ function loadServices () {
   streamList.forEach(function (serv) {
     if (serv.active) {
       if (isMac && settings.quickMenu) {
-        $('.service-button-host').append(`<div class="service-button" data-val="${serv.id}" data-url="${serv.url}" title="${serv.title}" style="color:${serv.color}; background-color:${serv.bgColor};">${serv.glyph}</div>`)
+        $('.service-button-host').append(`<div class="service-button-color" style="color:${serv.color}; background-color:${serv.bgColor};"><div class="service-button" data-val="${serv.id}" data-url="${serv.url}" title="${serv.title}">${serv.glyph}</div></div>`)
       }
       ipcRenderer.send('add-stream', serv)
     }
@@ -177,6 +177,12 @@ function loadDefaultSettings () {
   $('#agent-input').val(defaultSettings.userAgent)
 }
 
+// Service selector click handler
+$(document).on('click', '.service-button', function () {
+  ipcRenderer.send('service-change', { id: $(this).data('val'), url: $(this).data('url') })
+  settings.lastStream = $(this).data('val')
+})
+
 // Toggle keep on top
 $('.ontop-button').on('click', function () {
   if ($(this).hasClass('ontop-locked')) {
@@ -191,12 +197,6 @@ $('.ontop-button').on('click', function () {
 // Header double-click handler
 $('.header-bar').on('dblclick', () => {
   maxRestoreWindow()
-})
-
-// Service selector click handler
-$('.service-button').on('click', function () {
-  ipcRenderer.send('service-change', { id: $(this).data('val'), url: $(this).data('url') })
-  settings.lastStream = $(this).data('val')
 })
 
 // Settings close restore View
