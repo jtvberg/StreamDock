@@ -173,3 +173,10 @@ body {
   border: #0095f7 solid 1px;
   overflow: hidden;
 }
+
+.settings-services-host {
+  display: flex;
+  flex-flow: column wrap;
+  flex-wrap: wrap;
+  height: 360px;
+}

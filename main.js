@@ -2,7 +2,8 @@
 // TODO: Right-click toggle minimize/restore and mute (if not pause)
 // TODO: Click for service menu
 // Imports and variable declarations
-const { app, BrowserWindow, ipcMain, BrowserView, session, Menu, MenuItem } = require('electron')
+const { app, BrowserWindow, ipcMain, BrowserView, Tray, session, Menu, MenuItem } = require('electron')
+const path = require('path')
 const isMac = process.platform === 'darwin'
 // const updater = require('./updater')
 let wb = { x: 0, y: 0, height: 0, width: 0 }
@@ -14,6 +15,9 @@ require('electron-reload')(__dirname)
 // Main window and view
 let win = null
 let view = null
+let tray = null
+
+// Create window
 const createWindow = () => {
   // Check for updates after 3 seconds
   // setTimeout(updater, 3000)
@@ -85,6 +89,18 @@ const createWindow = () => {
   }
 }
 
+// Create tray
+const createTray = () => {
+  tray = new Tray(path.join(__dirname, '/res/logo/icon.png'))
+  tray.setToolTip('StreamDock')
+  tray.on('click', () => {
+    win.isVisible() ? win.hide() : win.show()
+  })
+  tray.on('right-click', () => {
+    app.quit()
+  })
+}
+
 // Widvine DRM
 app.commandLine.appendSwitch('no-verify-widevine-cdm')
 const isOffline = false
@@ -105,6 +121,7 @@ app.on('widevine-ready', (version, lastVersion) => {
     console.log('Widevine ' + version + ' is ready to be used!')
   }
   createWindow()
+  createTray()
 })
 
 app.on('widevine-update-pending', (currentVersion, pendingVersion) => {
