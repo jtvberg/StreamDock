@@ -1,6 +1,6 @@
 {
   "name": "StreamDock",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "description": "Streaming service viewer",
   "main": "main.js",
   "scripts": {
@@ -9,7 +9,7 @@
     "break": "electron --inspect-brk=7171 .",
     "buildMac": "electron-builder -m",
     "buildWin": "electron-builder -w",
-    "releaseMac": "electron-builder -m -p onTagOrDraft"
+    "releaseMac": "electron-builder -m -p 'onTagOrDraft'"
   },
   "repository": "https://github.com/jtvberg/StreamDock",
   "homepage": "https://github.com/jtvberg/StreamDock",
@@ -40,9 +40,13 @@
   "build": {
     "appId": "com.jtvberg.streamdock",
     "copyright": "Copyright jtvberg",
+    "electronDownload": {
+      "mirror": "https://github.com/castlabs/electron-releases/releases/download/v"
+    },
     "afterPack": "./afterPack.js",
     "mac": {
-      "category": "public.app-category.productivity"
+      "category": "public.app-category.productivity",
+      "target": "pkg"
     },
     "win": {
       "certificateFile": "private/jtvberg.p12",
