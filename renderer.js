@@ -86,7 +86,7 @@ function getDefaultStreams () {
     { id: 'ab', active: true, glyph: 'A', title: 'ABC', url: 'https://abc.com', color: '#ffffff', bgColor: '#000000' },
     { id: 'cb', active: true, glyph: 'C', title: 'CBS', url: 'https://cbs.com', color: '#0095f7', bgColor: '#ffffff' },
     { id: 'hm', active: true, glyph: 'H', title: 'HBO Max', url: 'https://play.hbomax.com', color: '#ffffff', bgColor: '#7e5ee4' },
-    { id: 'ep', active: false, glyph: 'E', title: 'ESPN+', url: 'https://plus.espn.com', color: '#000000', bgColor: '#ffaf00' }
+    { id: 'ep', active: true, glyph: 'E', title: 'ESPN+', url: 'https://plus.espn.com', color: '#000000', bgColor: '#ffaf00' }
   ]
   return defaultStreams
 }
@@ -100,7 +100,7 @@ function getDefaultSettings () {
     fullScreen: false,
     quickMenu: true,
     userAgent: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.80 Safari/537.36',
-    lastStream: 'yt',
+    lastStream: getDefaultStreams()[0].id,
     windowSizeLocation: { x: 0, y: 0, height: 600, width: 800 }
   }
   return defaultSettings
