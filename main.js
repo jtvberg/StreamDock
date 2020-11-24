@@ -10,7 +10,7 @@ let wb = { x: 0, y: 0, height: 0, width: 0 }
 let allowQuit = false
 
 // Enable Electron-Reload (dev only)
-require('electron-reload')(__dirname)
+// require('electron-reload')(__dirname)
 
 // Main window and view
 let win = null
