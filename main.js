@@ -2,7 +2,7 @@
 // TODO: Right-click toggle minimize/restore and mute (if not pause)
 // TODO: Click for service menu
 // Imports and variable declarations
-const { app, BrowserWindow, ipcMain, BrowserView, Tray, session, Menu, MenuItem } = require('electron')
+const { app, BrowserWindow, ipcMain, BrowserView, Tray, session, Menu, MenuItem, webContents } = require('electron')
 const path = require('path')
 const isMac = process.platform === 'darwin'
 const updater = require('./updater')
@@ -46,10 +46,10 @@ const createWindow = () => {
   // win.webContents.openDevTools()
 
   const headerSize = isMac ? 22 : 0
+  const windowAdjust = isMac ? 0 : 57
 
   view = new BrowserView()
-  win.addBrowserView(view)
-  setViewBounds()
+  addView()
 
   // Reset view on resize
   win.on('resize', () => {
@@ -71,21 +71,39 @@ const createWindow = () => {
   //   }
   // })
 
+  // Kill view on dev tools open
+  win.webContents.on('devtools-opened', () => {
+    removeView()
+  })
+
+  // Restpre view on dev tools close
+  win.webContents.on('devtools-closed', () => {
+    addView()
+  })
+
   // IPC channel for hiding view
   ipcMain.on('view-hide', () => {
-    win.removeBrowserView(view)
+    removeView()
   })
 
   // IPC channel for showing view
   ipcMain.on('view-show', () => {
+    addView()
+  })
+
+  function removeView () {
+    win.removeBrowserView(view)
+  }
+
+  function addView () {
     win.addBrowserView(view)
     setViewBounds()
-  })
+  }
 
   // Adjust view bounds to window
   function setViewBounds () {
     wb = win.getBounds()
-    view.setBounds({ x: 0, y: headerSize, width: wb.width, height: wb.height - headerSize })
+    view.setBounds({ x: 0, y: headerSize, width: wb.width, height: wb.height - windowAdjust })
   }
 }
 
