@@ -107,7 +107,7 @@ const createTray = () => {
 
 // Remove view from window
 function removeView () {
-  if (win.getBrowserView) {
+  if (win.getBrowserView()) {
     win.removeBrowserView(view)
   }
 }
@@ -235,7 +235,7 @@ ipcMain.on('add-stream', (e, serv) => {
   addStream(serv)
 })
 
-// Menu
+// Menu template
 const template = [
   {
     label: app.name,
@@ -310,6 +310,7 @@ const template = [
 
 let menu = Menu.buildFromTemplate(template)
 
+// Menu add stream service to menu
 function addStream (serv) {
   const streamMenu = Menu.getApplicationMenu().items[1]
   const menuItem = new MenuItem({
@@ -323,6 +324,7 @@ function addStream (serv) {
   Menu.setApplicationMenu(menu)
 }
 
+// Menu rebuild and set
 function resetStreamMenu () {
   menu = Menu.buildFromTemplate(template)
   Menu.setApplicationMenu(menu)
