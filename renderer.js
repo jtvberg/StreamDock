@@ -77,7 +77,7 @@ function loadServices () {
 function getDefaultStreams () {
   const defaultStreams = [
     { id: 'yt', active: true, glyph: 'Y', title: 'YouTube', url: 'https://www.youtube.com', color: '#ff0000', bgColor: '#ffffff' },
-    { id: 'tv', active: true, glyph: 'T', title: 'YouTube TV', url: 'https://tv.youtube.com', color: '#ff0000', bgColor: '#ffffff' },
+    { id: 'tv', active: false, glyph: 'T', title: 'YouTube TV', url: 'https://tv.youtube.com', color: '#ff0000', bgColor: '#ffffff' },
     { id: 'nf', active: true, glyph: 'N', title: 'Netflix', url: 'https://www.netflix.com', color: '#ffffff', bgColor: '#db272e' },
     { id: 'hl', active: true, glyph: 'H', title: 'Hulu', url: 'https://www.hulu.com', color: '#ffffff', bgColor: '#1ce783' },
     { id: 'ap', active: true, glyph: 'P', title: 'Amazon Prime TV', url: 'https://www.amazon.com/gp/video/storefront', color: '#ffffff', bgColor: '#00aee4' },
@@ -99,7 +99,7 @@ function getDefaultSettings () {
     saveWindow: true,
     fullScreen: false,
     quickMenu: true,
-    userAgent: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.80 Safari/537.36',
+    userAgent: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.198 Safari/537.36',
     lastStream: getDefaultStreams()[0].id,
     windowSizeLocation: { x: 0, y: 0, height: 600, width: 800 }
   }
