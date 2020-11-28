@@ -1,11 +1,10 @@
-// TODO: Add system tray icon
-// TODO: Right-click toggle minimize/restore and mute (if not pause)
-// TODO: Click for service menu
 // Imports and variable declarations
-const { app, BrowserWindow, ipcMain, BrowserView, Tray, session, Menu, MenuItem, webContents } = require('electron')
+const { app, BrowserWindow, ipcMain, BrowserView, Tray, session, Menu, MenuItem } = require('electron')
 const path = require('path')
 const isMac = process.platform === 'darwin'
 const updater = require('./updater')
+const headerSize = isMac ? 22 : 0
+const windowAdjust = isMac ? 22 : 57
 let wb = { x: 0, y: 0, height: 0, width: 0 }
 let allowQuit = false
 
@@ -45,11 +44,13 @@ const createWindow = () => {
   // Open DevTools (dev only)
   // win.webContents.openDevTools()
 
-  const headerSize = isMac ? 22 : 0
-  const windowAdjust = isMac ? 0 : 57
-
+  // Create main browserView
   view = new BrowserView()
-  addView()
+
+  // Show browserView when loaded
+  view.webContents.on('did-finish-load', () => {
+    addView()
+  })
 
   // Reset view on resize
   win.on('resize', () => {
@@ -90,21 +91,6 @@ const createWindow = () => {
   ipcMain.on('view-show', () => {
     addView()
   })
-
-  function removeView () {
-    win.removeBrowserView(view)
-  }
-
-  function addView () {
-    win.addBrowserView(view)
-    setViewBounds()
-  }
-
-  // Adjust view bounds to window
-  function setViewBounds () {
-    wb = win.getBounds()
-    view.setBounds({ x: 0, y: headerSize, width: wb.width, height: wb.height - windowAdjust })
-  }
 }
 
 // Create tray
@@ -117,6 +103,31 @@ const createTray = () => {
   tray.on('right-click', () => {
     app.quit()
   })
+}
+
+// Remove view from window
+function removeView () {
+  if (win.getBrowserView) {
+    win.removeBrowserView(view)
+  }
+}
+
+// Add view to window
+function addView () {
+  win.addBrowserView(view)
+  setViewBounds()
+}
+
+// Adjust view bounds to window
+function setViewBounds () {
+  wb = win.getBounds()
+  view.setBounds({ x: 0, y: headerSize, width: wb.width, height: wb.height - windowAdjust })
+}
+
+// Change stream service
+function streamChange (url) {
+  removeView()
+  view.webContents.loadURL(url)
 }
 
 // Widvine DRM
@@ -186,7 +197,7 @@ ipcMain.on('agent-change', (e, data) => {
 
 // IPC channel to change streaming service
 ipcMain.on('service-change', (e, data) => {
-  view.webContents.loadURL(data.url)
+  streamChange(data.url)
 })
 
 // IPC channel for locking app on top
@@ -305,7 +316,7 @@ function addStream (serv) {
     label: serv.title,
     id: serv.id,
     click () {
-      view.webContents.loadURL(serv.url)
+      streamChange(serv.url)
     }
   })
   streamMenu.submenu.append(menuItem)
