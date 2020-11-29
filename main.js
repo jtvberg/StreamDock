@@ -1,5 +1,5 @@
 // Imports and variable declarations
-const { app, BrowserWindow, ipcMain, BrowserView, Tray, session, Menu, MenuItem } = require('electron')
+const { app, BrowserWindow, ipcMain, BrowserView, Tray, session, Menu, MenuItem, systemPreferences } = require('electron')
 const path = require('path')
 const isMac = process.platform === 'darwin'
 const updater = require('./updater')
@@ -7,6 +7,9 @@ const headerSize = isMac ? 22 : 0
 const windowAdjust = isMac ? 22 : 57
 let wb = { x: 0, y: 0, height: 0, width: 0 }
 let allowQuit = false
+
+systemPreferences.setUserDefault('NSDisabledDictationMenuItem', 'boolean', true)
+systemPreferences.setUserDefault('NSDisabledCharacterPaletteMenuItem', 'boolean', true)
 
 // Enable Electron-Reload (dev only)
 // require('electron-reload')(__dirname)
@@ -263,6 +266,26 @@ const template = [
   {
     label: 'Streams',
     submenu: []
+  },
+  {
+    label: 'Edit',
+    submenu: [
+      { role: 'undo' },
+      { role: 'redo' },
+      { type: 'separator' },
+      { role: 'cut' },
+      { role: 'copy' },
+      { role: 'paste' },
+      ...(isMac ? [
+        { role: 'pasteAndMatchStyle' },
+        { role: 'delete' },
+        { role: 'selectAll' },
+      ] : [
+        { role: 'delete' },
+        { type: 'separator' },
+        { role: 'selectAll' }
+      ])
+    ]
   },
   {
     label: 'View',
