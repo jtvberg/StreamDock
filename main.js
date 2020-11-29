@@ -8,8 +8,10 @@ const windowAdjust = isMac ? 22 : 57
 let wb = { x: 0, y: 0, height: 0, width: 0 }
 let allowQuit = false
 
-systemPreferences.setUserDefault('NSDisabledDictationMenuItem', 'boolean', true)
-systemPreferences.setUserDefault('NSDisabledCharacterPaletteMenuItem', 'boolean', true)
+if (isMac) {
+  systemPreferences.setUserDefault('NSDisabledDictationMenuItem', 'boolean', true)
+  systemPreferences.setUserDefault('NSDisabledCharacterPaletteMenuItem', 'boolean', true)
+}
 
 // Enable Electron-Reload (dev only)
 // require('electron-reload')(__dirname)
