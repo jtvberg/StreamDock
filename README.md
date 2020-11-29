@@ -30,8 +30,14 @@
    You must add a call in the build process to EVS via the electron-builder afterPack or afterSign hook. 
    You must sign prior to code signing on Mac and after code signing on Windows. 
 
-   NOTE: You have to sign up for an EVS account and you will need to install Python to use it.
+   NOTE: You have to sign up for an EVS account and you will need to have Python to use it.
 
 ## Building
-   The code builds for Mac currently but I have not tested the build process on Windows or Linux.
-   This UI has been tested on Windows in support of the 2 menu paradigms but that is all.
+   The code builds for Mac and Windows currently but I have not tested the build process on Linux.
+
+## Releases
+   The current release works on Mac and Windows. It should install without much hassle on both platforms.
+   No Linux version in the release.
+   At the moment, any servicing using Google auth is broken if you have to sign-in to use (so, YouTube works, YouTube TV will not.)
+   The user agent spoofing is no longer working so Google OAuth will need to be implemented.
+   Look for that in an upcoming release.
