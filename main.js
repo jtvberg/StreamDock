@@ -132,7 +132,7 @@ function setViewBounds () {
 // Change stream service
 function streamChange (url) {
   removeView()
-  view.webContents.loadURL(url)
+  view.webContents.loadURL(url, { userAgent: 'Chrome' })
 }
 
 // Widvine DRM
@@ -193,11 +193,6 @@ ipcMain.on('set-window', (e, data) => {
 // IPC channel to set fullscreen allow from HTML
 ipcMain.on('allow-fullscreen', (e, data) => {
   win.fullScreenable = data
-})
-
-// IPC channel to change user agent
-ipcMain.on('agent-change', (e, data) => {
-  view.userAgent = data
 })
 
 // IPC channel to change streaming service

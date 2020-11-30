@@ -59,7 +59,6 @@ function applySettings () {
 // Iterate through stored services and create buttons/menu entries
 function loadServices () {
   streamList = localStorage.getItem('streamList') ? JSON.parse(localStorage.getItem('streamList')) : getDefaultStreams()
-  ipcRenderer.send('agent-change', settings.userAgent)
   ipcRenderer.send('allow-fullscreen', settings.fullScreen)
   ipcRenderer.send('reset-menu')
   $('.service-button-host').empty()
@@ -77,7 +76,7 @@ function loadServices () {
 function getDefaultStreams () {
   const defaultStreams = [
     { id: 'yt', active: true, glyph: 'Y', title: 'YouTube', url: 'https://www.youtube.com', color: '#ff0000', bgColor: '#ffffff' },
-    { id: 'tv', active: false, glyph: 'T', title: 'YouTube TV', url: 'https://tv.youtube.com', color: '#ff0000', bgColor: '#ffffff' },
+    { id: 'tv', active: true, glyph: 'T', title: 'YouTube TV', url: 'https://tv.youtube.com', color: '#ff0000', bgColor: '#ffffff' },
     { id: 'nf', active: true, glyph: 'N', title: 'Netflix', url: 'https://www.netflix.com', color: '#ffffff', bgColor: '#db272e' },
     { id: 'hl', active: true, glyph: 'H', title: 'Hulu', url: 'https://www.hulu.com', color: '#ffffff', bgColor: '#1ce783' },
     { id: 'ap', active: true, glyph: 'P', title: 'Amazon Prime TV', url: 'https://www.amazon.com/gp/video/storefront', color: '#ffffff', bgColor: '#00aee4' },
@@ -99,7 +98,6 @@ function getDefaultSettings () {
     saveWindow: true,
     fullScreen: false,
     quickMenu: true,
-    userAgent: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.198 Safari/537.36',
     lastStream: getDefaultStreams()[0].id,
     windowSizeLocation: { x: 0, y: 0, height: 600, width: 800 }
   }
@@ -127,7 +125,6 @@ function loadSettingsModal () {
   $('#window-check').prop('checked', settings.saveWindow)
   $('#fullscreen-check').prop('checked', settings.fullScreen)
   $('#quick-check').prop('checked', settings.quickMenu)
-  $('#agent-input').val(settings.userAgent)
   $('#settings-services-available').empty()
   streamList.forEach(function (serv) {
     const checked = serv.active ? 'checked' : ''
@@ -150,7 +147,6 @@ function saveSettings () {
     saveWindow: $('#window-check').is(':checked'),
     fullScreen: $('#fullscreen-check').is(':checked'),
     quickMenu: $('#quick-check').is(':checked'),
-    userAgent: $('#agent-input').val(),
     lastStream: settings.lastStream,
     windowSizeLocation: settings.windowSizeLocation
   }
@@ -174,7 +170,6 @@ function loadDefaultSettings () {
   $('#fullscreen-check').prop('checked', defaultSettings.fullScreen)
   $('#quick-check').prop('checked', defaultSettings.quickMenu)
   $('.service-check').prop('checked', true)
-  $('#agent-input').val(defaultSettings.userAgent)
 }
 
 // Service selector click handler
