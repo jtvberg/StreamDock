@@ -51,10 +51,11 @@ const createWindow = () => {
 
   // Create main browserView
   view = new BrowserView()
-
+  view.userAgent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.80 Safari/537.36'
+  
   // Show browserView when loaded
   view.webContents.on('did-finish-load', () => {
-    addView()
+    setView()
   })
 
   // Reset view on resize
@@ -84,7 +85,7 @@ const createWindow = () => {
 
   // Restpre view on dev tools close
   win.webContents.on('devtools-closed', () => {
-    addView()
+    setView()
   })
 
   // IPC channel for hiding view
@@ -94,7 +95,7 @@ const createWindow = () => {
 
   // IPC channel for showing view
   ipcMain.on('view-show', () => {
-    addView()
+    setView()
   })
 }
 
@@ -118,8 +119,8 @@ function removeView () {
 }
 
 // Add view to window
-function addView () {
-  win.addBrowserView(view)
+function setView () {
+  win.setBrowserView(view)
   setViewBounds()
 }
 
@@ -132,7 +133,7 @@ function setViewBounds () {
 // Change stream service
 function streamChange (url) {
   removeView()
-  view.webContents.loadURL(url, { userAgent: 'Chrome' })
+  view.webContents.loadURL(url)
 }
 
 // Widvine DRM
