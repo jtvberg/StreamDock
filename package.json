@@ -20,7 +20,7 @@
   "author": "jtvberg",
   "license": "CC0-1.0",
   "devDependencies": {
-    "electron": "git+https://github.com/castlabs/electron-releases.git#v9.3.5-wvvmp",
+    "electron": "github:castlabs/electron-releases#v11.0.3-wvvmp",
     "electron-builder": "^22.9.1",
     "electron-notarize": "^1.0.0",
     "electron-reload": "^1.5.0",
@@ -31,9 +31,9 @@
   },
   "dependencies": {
     "@fortawesome/fontawesome-free": "^5.15.1",
+    "bootstrap": "^4.5.3",
     "electron-updater": "^4.3.5",
     "jquery": "^3.5.1",
-    "bootstrap": "^4.5.3",
     "popper.js": "^1.16.1"
   },
   "build": {

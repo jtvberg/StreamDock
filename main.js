@@ -39,23 +39,30 @@ const createWindow = () => {
     fullscreenable: false,
     webPreferences: {
       plugins: true,
-      nodeIntegration: true
+      nodeIntegration: true,
+      enableRemoteModule: false
     }
   })
 
   // HTML file to load into window
-  win.loadFile('main.html')
+  win.loadFile('main.html', { userAgent: 'Chrome' })
 
-  // Open DevTools (dev only)
+  // Open DevTools (window, dev only)
   // win.webContents.openDevTools()
 
   // Create main browserView
   view = new BrowserView()
-  view.userAgent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.80 Safari/537.36'
+  if (isMac) {
+    view.userAgent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.67 Safari/537.36'
+  } else {
+    view.userAgent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.163 Safari/537.36'
+  }
   
   // Show browserView when loaded
   view.webContents.on('did-finish-load', () => {
     setView()
+    // Open DevTools (view, dev only)
+    // view.webContents.openDevTools()
   })
 
   // Reset view on resize
