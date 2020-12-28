@@ -7,6 +7,8 @@ const headerSize = isMac ? 22 : 0
 const windowAdjust = isMac ? 22 : 57
 let wb = { x: 0, y: 0, height: 0, width: 0 }
 let allowQuit = false
+let isPlaying = false
+let restorePlay = false
 
 if (isMac) {
   systemPreferences.setUserDefault('NSDisabledDictationMenuItem', 'boolean', true)
@@ -65,6 +67,16 @@ const createWindow = () => {
     // view.webContents.openDevTools()
   })
 
+  // Capture playing
+  view.webContents.on('media-started-playing', () => {
+    isPlaying = true
+  })
+
+  // Capture paused
+  view.webContents.on('media-paused', () => {
+    isPlaying = false
+  })
+
   // Reset view on resize
   win.on('resize', () => {
     setViewBounds()
@@ -90,7 +102,7 @@ const createWindow = () => {
     removeView()
   })
 
-  // Restpre view on dev tools close
+  // Restore view on dev tools close
   win.webContents.on('devtools-closed', () => {
     setView()
   })
@@ -111,6 +123,16 @@ const createTray = () => {
   tray = new Tray(path.join(__dirname, '/res/logo/icon.png'))
   tray.setToolTip('StreamDock')
   tray.on('click', () => {
+    // TODO: Setting to auto-play when restored
+    if (restorePlay) {
+      if ((isPlaying && win.isVisible()) || (!isPlaying && !win.isVisible())) {
+        view.webContents.sendInputEvent({type: 'keyDown', keyCode: 'space'})
+      }
+    } else {
+      if (isPlaying && win.isVisible()) {
+        view.webContents.sendInputEvent({type: 'keyDown', keyCode: 'space'})
+      }
+    }
     win.isVisible() ? win.hide() : win.show()
   })
   tray.on('right-click', () => {
