@@ -55,7 +55,7 @@ function applySettings () {
     ipcRenderer.send('set-window', settings.windowSizeLocation)
   }
 
-  // Set window size and location
+  // Set restore auto-play
   ipcRenderer.send('restore-play', settings.restorePlay)
 }
 
