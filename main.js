@@ -250,6 +250,11 @@ ipcMain.on('win-restore', () => {
   win.unmaximize()
 })
 
+// IPC channel to set restore-play
+ipcMain.on('restore-play', (e, data) => {
+  restorePlay = data
+})
+
 // IPC channel for hiding window
 ipcMain.on('win-hide', () => {
   win.hide()

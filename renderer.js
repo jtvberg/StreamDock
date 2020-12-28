@@ -36,7 +36,7 @@ function applySettings () {
   // Show lock button if Mac
   if (isMac) { $('.ontop-button').show() }
 
-  // Set windo on top
+  // Set window on top
   if (settings.onTop) {
     ipcRenderer.send('ontop-lock')
   } else {
@@ -54,12 +54,16 @@ function applySettings () {
   if (settings.saveWindow) {
     ipcRenderer.send('set-window', settings.windowSizeLocation)
   }
+
+  // Set window size and location
+  ipcRenderer.send('restore-play', settings.restorePlay)
 }
 
 // Iterate through stored services and create buttons/menu entries
 function loadServices () {
   streamList = localStorage.getItem('streamList') ? JSON.parse(localStorage.getItem('streamList')) : getDefaultStreams()
   ipcRenderer.send('allow-fullscreen', settings.fullScreen)
+  ipcRenderer.send('restore-play', settings.restorePlay)
   ipcRenderer.send('reset-menu')
   $('.service-button-host').empty()
   streamList.forEach(function (serv) {
@@ -97,6 +101,7 @@ function getDefaultSettings () {
     openLast: true,
     saveWindow: true,
     fullScreen: false,
+    restorePlay: false,
     quickMenu: true,
     lastStream: getDefaultStreams()[0].id,
     windowSizeLocation: { x: 0, y: 0, height: 600, width: 800 }
@@ -124,6 +129,7 @@ function loadSettingsModal () {
   $('#last-check').prop('checked', settings.openLast)
   $('#window-check').prop('checked', settings.saveWindow)
   $('#fullscreen-check').prop('checked', settings.fullScreen)
+  $('#restore-play-check').prop('checked', settings.restorePlay)
   $('#quick-check').prop('checked', settings.quickMenu)
   $('#settings-services-available').empty()
   streamList.forEach(function (serv) {
@@ -146,6 +152,7 @@ function saveSettings () {
     openLast: $('#last-check').is(':checked'),
     saveWindow: $('#window-check').is(':checked'),
     fullScreen: $('#fullscreen-check').is(':checked'),
+    restorePlay: $('#restore-play-check').is(':checked'),
     quickMenu: $('#quick-check').is(':checked'),
     lastStream: settings.lastStream,
     windowSizeLocation: settings.windowSizeLocation
@@ -168,6 +175,7 @@ function loadDefaultSettings () {
   $('#last-check').prop('checked', defaultSettings.openLast)
   $('#window-check').prop('checked', defaultSettings.saveWindow)
   $('#fullscreen-check').prop('checked', defaultSettings.fullScreen)
+  $('#restore-play-check').prop('checked', defaultSettings.restorePlay)
   $('#quick-check').prop('checked', defaultSettings.quickMenu)
   $('.service-check').prop('checked', true)
 }
