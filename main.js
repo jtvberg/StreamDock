@@ -54,6 +54,8 @@ const createWindow = () => {
 
   // Create main browserView
   view = new BrowserView()
+
+  // Set user agent
   if (isMac) {
     view.userAgent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.67 Safari/537.36'
   } else {
@@ -123,17 +125,18 @@ const createTray = () => {
   tray = new Tray(path.join(__dirname, '/res/logo/icon.png'))
   tray.setToolTip('StreamDock')
   tray.on('click', () => {
-    // TODO: Setting to auto-play when restored
+    const isVisible = win.isVisible()
+    view.webContents.focus()
     if (restorePlay) {
-      if ((isPlaying && win.isVisible()) || (!isPlaying && !win.isVisible())) {
+      if ((isPlaying && isVisible) || (!isPlaying && !isVisible)) {
         view.webContents.sendInputEvent({type: 'keyDown', keyCode: 'space'})
       }
     } else {
-      if (isPlaying && win.isVisible()) {
+      if (isPlaying && isVisible) {
         view.webContents.sendInputEvent({type: 'keyDown', keyCode: 'space'})
       }
     }
-    win.isVisible() ? win.hide() : win.show()
+    isVisible ? win.hide() : win.show()
   })
   tray.on('right-click', () => {
     app.quit()

@@ -26,6 +26,11 @@ ipcRenderer.on('save-settings', (e, data) => {
   localStorage.setItem('settings', JSON.stringify(settings))
 })
 
+// Receive logs from other threads
+ipcRenderer.on('log', (e, data) => {
+  console.log(data)
+})
+
 // Load Settings
 function loadSettings () {
   settings = localStorage.getItem('settings') ? JSON.parse(localStorage.getItem('settings')) : getDefaultSettings()
@@ -90,6 +95,7 @@ function getDefaultStreams () {
     { id: 'cb', active: true, glyph: 'C', title: 'CBS', url: 'https://cbs.com', color: '#0095f7', bgColor: '#ffffff' },
     { id: 'hm', active: true, glyph: 'H', title: 'HBO Max', url: 'https://play.hbomax.com', color: '#ffffff', bgColor: '#7e5ee4' },
     { id: 'ep', active: true, glyph: 'E', title: 'ESPN+', url: 'https://plus.espn.com', color: '#000000', bgColor: '#ffaf00' }
+    // { id: 'ud', active: true, glyph: 'U', title: 'Udemy', url: 'https://udemy.com', color: '#eb5352', bgColor: '#ffffff' }
   ]
   return defaultStreams
 }
