@@ -9,10 +9,15 @@ let wb = { x: 0, y: 0, height: 0, width: 0 }
 let allowQuit = false
 let isPlaying = false
 let restorePlay = false
+let userAgent = ''
 
+// OS variables
 if (isMac) {
   systemPreferences.setUserDefault('NSDisabledDictationMenuItem', 'boolean', true)
   systemPreferences.setUserDefault('NSDisabledCharacterPaletteMenuItem', 'boolean', true)
+  userAgent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.88 Safari/537.36'
+} else {
+  userAgent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.163 Safari/537.36'
 }
 
 // Enable Electron-Reload (dev only)
@@ -54,13 +59,6 @@ const createWindow = () => {
 
   // Create main browserView
   view = new BrowserView()
-
-  // Set user agent
-  if (isMac) {
-    view.userAgent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.67 Safari/537.36'
-  } else {
-    view.userAgent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.163 Safari/537.36'
-  }
   
   // Show browserView when loaded
   view.webContents.on('did-finish-load', () => {
@@ -71,7 +69,11 @@ const createWindow = () => {
 
   // Capture playing
   view.webContents.on('media-started-playing', () => {
-    isPlaying = true
+    if (win.isVisible()) {
+      isPlaying = true
+    } else {
+      view.webContents.executeJavaScript(`document.getElementsByTagName('video')[0].pause()`)
+    }
   })
 
   // Capture paused
@@ -88,16 +90,6 @@ const createWindow = () => {
   win.on('move', () => {
     wb = win.getBounds()
   })
-
-  // Turn on fullScreen to use this to allow html driven full screen to go to maximize instead
-  // win.on('enter-html-full-screen', function () {
-  //   if (win.isFullScreen()) {
-  //     setTimeout(function() {
-  //       win.setFullScreen(false)
-  //       win.maximize()
-  //     }, 800)
-  //   }
-  // })
 
   // Kill view on dev tools open
   win.webContents.on('devtools-opened', () => {
@@ -127,15 +119,21 @@ const createTray = () => {
   tray.on('click', () => {
     const isVisible = win.isVisible()
     view.webContents.focus()
-    if (restorePlay) {
-      if ((isPlaying && isVisible) || (!isPlaying && !isVisible)) {
-        view.webContents.sendInputEvent({type: 'keyDown', keyCode: 'space'})
-      }
-    } else {
-      if (isPlaying && isVisible) {
-        view.webContents.sendInputEvent({type: 'keyDown', keyCode: 'space'})
-      }
+    if (isPlaying && isVisible) {
+      view.webContents.executeJavaScript(`document.getElementsByTagName('video')[0].pause()`)
     }
+    if (restorePlay && !isPlaying && !isVisible) {
+      view.webContents.executeJavaScript(`document.getElementsByTagName('video')[0].play()`)
+    }
+    // if (restorePlay) {
+    //   if ((isPlaying && isVisible) || (!isPlaying && !isVisible)) {
+    //     view.webContents.sendInputEvent({type: 'keyDown', keyCode: 'space'})
+    //   }
+    // } else {
+    //   if (isPlaying && isVisible) {
+    //     view.webContents.sendInputEvent({type: 'keyDown', keyCode: 'space'})
+    //   }
+    // }
     isVisible ? win.hide() : win.show()
   })
   tray.on('right-click', () => {
@@ -168,11 +166,12 @@ function streamChange (url) {
   view.webContents.loadURL(url)
 }
 
-// Widvine DRM
+// Widvine DRM setup
 app.commandLine.appendSwitch('no-verify-widevine-cdm')
 const isOffline = false
 const widevineDir = app.getPath('userData')
 
+// App ready
 app.on('ready', () => {
   app.verifyWidevineCdm({
     session: session.defaultSession,
@@ -181,20 +180,17 @@ app.on('ready', () => {
   })
 })
 
-app.on('widevine-ready', (version, lastVersion) => {
-  if (lastVersion !== null) {
-    console.log('Widevine ' + version + ', upgraded from ' + lastVersion + ', is ready to be used!')
-  } else {
-    console.log('Widevine ' + version + ' is ready to be used!')
-  }
+// Widvine DRM  ready
+app.on('widevine-ready', () => {
+  session.defaultSession.webRequest.onBeforeSendHeaders((details, callback) => {
+    details.requestHeaders['User-Agent'] = userAgent
+    callback({ cancel: false, requestHeaders: details.requestHeaders })
+  })
   createWindow()
   createTray()
 })
 
-app.on('widevine-update-pending', (currentVersion, pendingVersion) => {
-  console.log('Widevine ' + currentVersion + ' is ready to be upgraded to ' + pendingVersion + '!')
-})
-
+// Widvine DRM error handling
 app.on('widevine-error', (error) => {
   console.log('Widevine installation encountered an error: ' + error)
   process.exit(1)
