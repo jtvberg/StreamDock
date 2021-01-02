@@ -42,8 +42,8 @@
     "electronDownload": {
       "mirror": "https://github.com/castlabs/electron-releases/releases/download/v"
     },
-    "afterPack": "./afterPack.js",
-    "afterSign": "./afterSign.js",
+    "afterPack": "./build/afterPack.js",
+    "afterSign": "./build/afterSign.js",
     "mac": {
       "category": "public.app-category.productivity",
       "target": "dmg",
