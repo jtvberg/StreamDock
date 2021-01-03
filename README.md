@@ -33,17 +33,17 @@
    NOTE: You have to sign up for an EVS account and you will need to have Python to use it.
 
 ## Building
-   The code builds for Mac and Windows currently but I have not tested the build process on Linux.
+   The code builds for Mac and Windows currently, but I have not tested the build process on Linux.
 
 ## Releases
-   The current release works on Mac and Windows. It should install without much hassle on both platforms.
+   The current release works on Mac and there is an older one for Windows. It should install without much hassle on both platforms.
    No Linux version in the release.
-   At the moment, any servicing using Google auth is broken if you have to sign-in to use (so, YouTube works, YouTube TV will not.)
+   At the moment, any service using Google auth is broken if you have to sign-in to use (so, YouTube works, YouTube TV will not.)
    The user agent spoofing is no longer working so Google OAuth will need to be implemented.
    Look for that in an upcoming release.
 
 ## App Control
    Click on the quick-access buttons across the top to load streaming services as selected in the settings menu under preferences.
    Left-click on the tray icon will hide and pause the window/stream (if playing.)
-   If hidden already, another left-click will restore the windown but not resume play (unless restore auto-play is checked in the settings.)
+   If hidden already, another left-click will restore the window but not resume play (unless restore auto-play is checked in the settings.)
    Right-click on the tray icon will exit the app completely.
