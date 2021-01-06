@@ -23,6 +23,13 @@ body {
   bottom: 10px;
 }
 
+.loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: calc(100vh - 40px);
+}
+
 .header-bar {
   display: grid;
   grid-template-columns: 1fr auto 1fr;

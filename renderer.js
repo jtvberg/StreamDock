@@ -27,6 +27,16 @@ ipcRenderer.on('save-settings', (e, data) => {
   localStorage.setItem('settings', JSON.stringify(settings))
 })
 
+// Stream changed
+ipcRenderer.on('stream-changed', () => {
+  $('.loading').show()
+})
+
+// Stream loaded
+ipcRenderer.on('stream-loaded', () => {
+  $('.loading').hide()
+})
+
 // Receive logs from other threads
 ipcRenderer.on('log', (e, data) => {
   console.log(data)
@@ -203,6 +213,7 @@ function loadDefaultSettings () {
 
 // Service selector click handler
 $(document).on('click', '.service-button', function () {
+  $('.loading').show()
   ipcRenderer.send('service-change', { id: $(this).data('val'), url: $(this).data('url') })
   settings.lastStream = $(this).data('val')
 })

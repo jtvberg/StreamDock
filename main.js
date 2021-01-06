@@ -64,6 +64,7 @@ const createWindow = () => {
   // Show browserView when loaded
   view.webContents.on('did-finish-load', () => {
     setView()
+    win.webContents.send('stream-loaded')
     // Open DevTools (view, dev only)
     // view.webContents.openDevTools()
   })
@@ -165,6 +166,7 @@ function setViewBounds () {
 function streamChange (url) {
   removeView()
   view.webContents.loadURL(url)
+  win.webContents.send('stream-changed')
 }
 
 // Widvine DRM setup
