@@ -36,6 +36,12 @@ body {
   grid-column: 2;
   display: flex;
   margin-top: -2px;
+  opacity: 0;
+  transition: opacity .2s
+}
+
+.service-button-host:hover {
+  opacity: 1;
 }
 
 .service-button-color {
@@ -44,8 +50,8 @@ body {
 }
 
 .service-button {
-  border-radius: 2px;
-  font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+  border-radius: 3px;
+  font-family: 'Gill Sans', Calibri, sans-serif;
   padding: 1px;
   width: 16px;
   height: 16px;
@@ -53,6 +59,8 @@ body {
   font-size: 14px;
   line-height: 1;
   user-select: none;
+  transition: color .2s, background-color .2s;
+  cursor: pointer;
 }
 
 .service-button:hover {
@@ -65,8 +73,10 @@ body {
   justify-self: flex-end;
   margin-right: 4px;
   margin-top: 1px;
-  color: #ffffff44;
+  color: #ffffff00;
   display: none;
+  transition: color .2s;
+  cursor: pointer;
 }
 
 .ontop-button:hover {

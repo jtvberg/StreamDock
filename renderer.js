@@ -13,7 +13,8 @@ let winMax = false
 // Invoke services load and apply settings
 loadSettings()
 loadServices()
-applySettings()
+applyInitialSettings()
+openStream()
 
 // Settings modal invoke main
 ipcRenderer.on('load-settings', () => {
@@ -37,7 +38,7 @@ function loadSettings () {
 }
 
 // Apply loaded settings
-function applySettings () {
+function applyInitialSettings () {
   // Show lock button if Mac
   if (isMac) { $('.ontop-button').show() }
 
@@ -48,17 +49,22 @@ function applySettings () {
     $('.ontop-button').removeClass('ontop-locked').addClass('ontop-unlocked')
   }
 
-  // Open last used service or first one in list
-  if (settings.openLast) {
-    ipcRenderer.send('service-change', { id: settings.lastStream, url: streamList.find(item => item.id === settings.lastStream).url })
-  } else {
-    ipcRenderer.send('service-change', { id: streamList[0].id, url: streamList[0].url })
-  }
-
   // Set window size and location
   if (settings.saveWindow) {
     ipcRenderer.send('set-window', settings.windowSizeLocation)
   }
+
+  // Set full-screenable
+  ipcRenderer.send('allow-fullscreen', settings.fullScreen)
+
+  // Set restore auto-play
+  ipcRenderer.send('restore-play', settings.restorePlay)
+}
+
+// Apply loaded settings
+function applyUpdateSettings () {
+  // Set full-screenable
+  ipcRenderer.send('allow-fullscreen', settings.fullScreen)
 
   // Set restore auto-play
   ipcRenderer.send('restore-play', settings.restorePlay)
@@ -67,8 +73,6 @@ function applySettings () {
 // Iterate through stored services and create buttons/menu entries
 function loadServices () {
   streamList = localStorage.getItem('streamList') ? JSON.parse(localStorage.getItem('streamList')) : getDefaultStreams()
-  ipcRenderer.send('allow-fullscreen', settings.fullScreen)
-  ipcRenderer.send('restore-play', settings.restorePlay)
   ipcRenderer.send('reset-menu')
   $('.service-button-host').empty()
   streamList.forEach(function (serv) {
@@ -81,6 +85,15 @@ function loadServices () {
   })
 }
 
+// Open last used service or first one in list
+function openStream () {
+  if (settings.openLast) {
+    ipcRenderer.send('service-change', { id: settings.lastStream, url: streamList.find(item => item.id === settings.lastStream).url })
+  } else {
+    ipcRenderer.send('service-change', { id: streamList[0].id, url: streamList[0].url })
+  }
+}
+
 // Return default streams
 function getDefaultStreams () {
   const defaultStreams = [
@@ -90,6 +103,7 @@ function getDefaultStreams () {
     { id: 'hl', active: true, glyph: 'H', title: 'Hulu', url: 'https://www.hulu.com', color: '#ffffff', bgColor: '#1ce783' },
     { id: 'ap', active: true, glyph: 'P', title: 'Amazon Prime TV', url: 'https://www.amazon.com/gp/video/storefront', color: '#ffffff', bgColor: '#00aee4' },
     { id: 'dp', active: true, glyph: 'D', title: 'Disney+', url: 'https://www.disneyplus.com/home', color: '#ffffff', bgColor: '#1a3676' },
+    { id: 'at', active: true, glyph: 'T', title: 'Apple TV+', url: 'https://tv.apple.com/', color: '#ffffff', bgColor: '#000000' },
     { id: 'pc', active: true, glyph: 'P', title: 'Peacock', url: 'https://www.peacocktv.com/watch/home', color: '#000000', bgColor: '#ffffff' },
     { id: 'ab', active: true, glyph: 'A', title: 'ABC', url: 'https://abc.com', color: '#ffffff', bgColor: '#000000' },
     { id: 'cb', active: true, glyph: 'C', title: 'CBS', url: 'https://cbs.com', color: '#0095f7', bgColor: '#ffffff' },
@@ -172,6 +186,7 @@ function saveSettings () {
 
   $('#settings-modal').modal('hide')
   loadServices()
+  applyUpdateSettings()
 }
 
 // Load default settings into settings modal

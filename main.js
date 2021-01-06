@@ -21,7 +21,7 @@ if (isMac) {
 }
 
 // Enable Electron-Reload (dev only)
-// require('electron-reload')(__dirname)
+require('electron-reload')(__dirname)
 
 // Main window and view
 let win = null
@@ -44,6 +44,7 @@ const createWindow = () => {
     frame: !isMac,
     titleBarStyle: isMac ? 'hidden' : 'default',
     fullscreenable: false,
+    maximizable: false,
     webPreferences: {
       plugins: true,
       nodeIntegration: true,
@@ -222,6 +223,7 @@ ipcMain.on('set-window', (e, data) => {
 // IPC channel to set fullscreen allow from HTML
 ipcMain.on('allow-fullscreen', (e, data) => {
   win.fullScreenable = data
+  win.maximizable = data
 })
 
 // IPC channel to change streaming service
