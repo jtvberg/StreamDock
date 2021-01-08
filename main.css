@@ -44,7 +44,8 @@ body {
   display: flex;
   margin-top: -2px;
   opacity: 0;
-  transition: opacity .2s
+  transition: opacity .2s;
+  -webkit-app-region: no-drag;
 }
 
 .service-button-host:hover {
@@ -176,24 +177,23 @@ body {
 }
 
 .service-host {
-  margin-top: 10px;
   margin-left: -1.25rem;
+  margin-top: 15px;
 }
 
 .service-check {
   margin-right: 5px;
 }
 
-.agent-text-area {
+.text-url {
   color: #ffffff;
   background-color: #000000;
-  border: #0095f7 solid 1px;
-  overflow: hidden;
+  border: #696969 solid 1px;
+  margin-top: 10px;
 }
 
 .settings-services-host {
   display: flex;
-  flex-flow: column wrap;
+  flex-flow: column;
   flex-wrap: wrap;
-  height: 360px;
 }

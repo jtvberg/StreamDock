@@ -171,6 +171,9 @@ function loadSettingsModal () {
           <img class="service-${serv.id}" src="./res/serv_logos/small/${serv.id}.png" for="check-${serv.id}"></img>
         </div>
       </div>`)
+      // <div class="col-sm-10" style="padding-left: 5px;">
+      //   <input type="text" rows="3" class="form-control form-control-sm text-url" id="input-url" value="${serv.url}"/>
+      // </div>
   })
   $('#settings-modal').modal('show')
 }
