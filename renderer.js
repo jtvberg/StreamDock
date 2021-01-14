@@ -82,7 +82,17 @@ function applyUpdateSettings () {
 
 // Iterate through stored services and create buttons/menu entries
 function loadServices () {
-  streamList = localStorage.getItem('streamList') ? JSON.parse(localStorage.getItem('streamList')) : getDefaultStreams()
+  const defaultList = getDefaultStreams()
+  streamList = localStorage.getItem('streamList') ? JSON.parse(localStorage.getItem('streamList')) : defaultList
+  if (defaultList.length !== streamList.length) {
+    defaultList.forEach(item => {
+      let miss = true
+      streamList.forEach(serv => {
+        if (item.id === serv.id) { miss = false }
+      })
+      if (miss) { streamList.push(item) }
+    })
+  }
   ipcRenderer.send('reset-menu')
   $('.service-button-host').empty()
   streamList.forEach(function (serv) {
