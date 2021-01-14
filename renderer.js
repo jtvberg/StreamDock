@@ -84,6 +84,8 @@ function applyUpdateSettings () {
 function loadServices () {
   const defaultList = getDefaultStreams()
   streamList = localStorage.getItem('streamList') ? JSON.parse(localStorage.getItem('streamList')) : defaultList
+  
+  // Add new default streams to stream list
   if (defaultList.length !== streamList.length) {
     defaultList.forEach(item => {
       let miss = true
@@ -118,17 +120,17 @@ function openStream () {
 function getDefaultStreams () {
   const defaultStreams = [
     { id: 'yt', active: true, glyph: 'Y', title: 'YouTube', url: 'https://www.youtube.com', color: '#ff0000', bgColor: '#ffffff' },
-    { id: 'tv', active: true, glyph: 'T', title: 'YouTube TV', url: 'https://tv.youtube.com', color: '#ff0000', bgColor: '#ffffff' },
+    { id: 'tv', active: false, glyph: 'T', title: 'YouTube TV', url: 'https://tv.youtube.com', color: '#ff0000', bgColor: '#ffffff' },
     { id: 'nf', active: true, glyph: 'N', title: 'Netflix', url: 'https://www.netflix.com', color: '#ffffff', bgColor: '#db272e' },
     { id: 'hl', active: true, glyph: 'H', title: 'Hulu', url: 'https://www.hulu.com', color: '#ffffff', bgColor: '#1ce783' },
     { id: 'ap', active: true, glyph: 'P', title: 'Amazon Prime TV', url: 'https://www.amazon.com/gp/video/storefront', color: '#ffffff', bgColor: '#00aee4' },
-    { id: 'dp', active: true, glyph: 'D', title: 'Disney+', url: 'https://www.disneyplus.com/home', color: '#ffffff', bgColor: '#1a3676' },
-    { id: 'at', active: true, glyph: 'T', title: 'Apple TV+', url: 'https://tv.apple.com/', color: '#ffffff', bgColor: '#000000' },
-    { id: 'pc', active: true, glyph: 'P', title: 'Peacock', url: 'https://www.peacocktv.com/watch/home', color: '#000000', bgColor: '#ffffff' },
-    { id: 'ab', active: true, glyph: 'A', title: 'ABC', url: 'https://abc.com', color: '#ffffff', bgColor: '#000000' },
-    { id: 'cb', active: true, glyph: 'C', title: 'CBS', url: 'https://cbs.com', color: '#0095f7', bgColor: '#ffffff' },
-    { id: 'hm', active: true, glyph: 'H', title: 'HBO Max', url: 'https://play.hbomax.com', color: '#ffffff', bgColor: '#7e5ee4' },
-    { id: 'ep', active: true, glyph: 'E', title: 'ESPN+', url: 'https://plus.espn.com', color: '#000000', bgColor: '#ffaf00' }
+    { id: 'dp', active: false, glyph: 'D', title: 'Disney+', url: 'https://www.disneyplus.com/home', color: '#ffffff', bgColor: '#1a3676' },
+    { id: 'at', active: false, glyph: 'T', title: 'Apple TV+', url: 'https://tv.apple.com/', color: '#ffffff', bgColor: '#000000' },
+    { id: 'pc', active: false, glyph: 'P', title: 'Peacock', url: 'https://www.peacocktv.com/watch/home', color: '#000000', bgColor: '#ffffff' },
+    { id: 'ab', active: false, glyph: 'A', title: 'ABC', url: 'https://abc.com', color: '#ffffff', bgColor: '#000000' },
+    { id: 'cb', active: false, glyph: 'C', title: 'CBS', url: 'https://cbs.com', color: '#0095f7', bgColor: '#ffffff' },
+    { id: 'hm', active: false, glyph: 'H', title: 'HBO Max', url: 'https://play.hbomax.com', color: '#ffffff', bgColor: '#7e5ee4' },
+    { id: 'ep', active: false, glyph: 'E', title: 'ESPN+', url: 'https://plus.espn.com', color: '#000000', bgColor: '#ffaf00' }
     // { id: 'ud', active: true, glyph: 'U', title: 'Udemy', url: 'https://udemy.com', color: '#eb5352', bgColor: '#ffffff' }
   ]
   return defaultStreams
