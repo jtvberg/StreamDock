@@ -21,7 +21,7 @@ if (isMac) {
 }
 
 // Enable Electron-Reload (dev only)
-require('electron-reload')(__dirname)
+// require('electron-reload')(__dirname)
 
 // Main window and view
 let win = null
@@ -75,6 +75,7 @@ const createWindow = () => {
       isPlaying = true
     } else {
       view.webContents.executeJavaScript(`document.getElementsByTagName('video')[0].pause()`)
+      view.webContents.executeJavaScript(`document.querySelector('apple-tv-plus-player').shadowRoot.querySelector('amp-video-player-internal').shadowRoot.querySelector('amp-video-player').shadowRoot.querySelector('video').pause()`)
     }
   })
 
@@ -123,9 +124,11 @@ const createTray = () => {
     view.webContents.focus()
     if (isPlaying && isVisible) {
       view.webContents.executeJavaScript(`document.getElementsByTagName('video')[0].pause()`)
+      view.webContents.executeJavaScript(`document.querySelector('apple-tv-plus-player').shadowRoot.querySelector('amp-video-player-internal').shadowRoot.querySelector('amp-video-player').shadowRoot.querySelector('video').pause()`)
     }
     if (restorePlay && !isPlaying && !isVisible) {
       view.webContents.executeJavaScript(`document.getElementsByTagName('video')[0].play()`)
+      view.webContents.executeJavaScript(`document.querySelector('apple-tv-plus-player').shadowRoot.querySelector('amp-video-player-internal').shadowRoot.querySelector('amp-video-player').shadowRoot.querySelector('video').play()`)
     }
     // if (restorePlay) {
     //   if ((isPlaying && isVisible) || (!isPlaying && !isVisible)) {
