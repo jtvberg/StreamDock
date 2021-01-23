@@ -176,24 +176,99 @@ body {
   margin-bottom: 5px;
 }
 
-.service-host {
-  margin-left: -1.25rem;
-  margin-top: 15px;
-}
-
-.service-check {
-  margin-right: 5px;
-}
-
+.text-glyph,
 .text-url {
-  color: #ffffff;
+  color: #d6d6d6;
   background-color: #000000;
   border: #696969 solid 1px;
-  margin-top: 10px;
+}
+
+.text-glyph {
+  max-width: 29px;
+  margin-left: 3px;
 }
 
 .settings-services-host {
   display: flex;
   flex-flow: column;
   flex-wrap: wrap;
+}
+
+.service-host {
+  display: grid;
+  grid-template-columns: 10px 25px 1fr .8fr 10px;
+  grid-template-rows: 10px repeat(4, 30px) 12px;
+  align-items: center;
+  border: #00000000 solid 1px;
+  border-radius: 3px;
+}
+
+.service-host:hover {
+  background-color: #2e2e2ebe;
+  border: #696969 solid 1px;
+  border-radius: 3px;
+}
+
+.serv-url {
+  grid-column-start: 3;
+  grid-column-end: 5;
+  grid-row: 5;
+}
+
+.service-host>img {
+  grid-row-start: 2;
+  grid-row-end: 5;
+  grid-column: 3;
+  width: 90%;
+  height: 90%;
+  object-fit: contain;
+}
+
+.serv-check-host {
+  grid-row-start: 2;
+  grid-row-end: 6;
+  grid-column: 2;
+  padding: 0;
+  margin: 100%;
+  margin-left: 0px;
+  margin-right: 5px;
+  padding: 0;
+}
+
+.serv-glyph-pick {
+  grid-row: 2;
+  grid-column: 4;
+  color: #d6d6d6;
+}
+
+.serv-color-pick {
+  grid-row: 3;
+}
+
+.serv-bg-pick {
+  grid-row: 4;
+}
+
+.serv-color-pick,
+.serv-bg-pick {
+  grid-column: 4;
+  color: #d6d6d6;
+  margin-bottom: 5px;
+}
+
+.label-text {
+  color: #d6d6d6;
+  font-family: Calibri, sans-serif;
+  font-weight: 400;
+  align-self: center;
+  margin: 0;
+  margin-top: 1px;
+}
+
+input[type=color] {
+  border: none;
+  padding: 0;
+  width: 0px;
+  height: 0px;
+  visibility: hidden;
 }
