@@ -119,7 +119,7 @@ function openStream () {
 // Return default streams
 function getDefaultStreams () {
   const defaultStreams = [
-    { id: 'yt', active: true, glyph: 'Y', title: 'YouTube', url: 'https://www.youtubew.com', color: '#ff0000', bgColor: '#ffffff' },
+    { id: 'yt', active: true, glyph: 'Y', title: 'YouTube', url: 'https://www.youtube.com', color: '#ff0000', bgColor: '#ffffff' },
     { id: 'tv', active: true, glyph: 'T', title: 'YouTube TV', url: 'https://tv.youtube.com', color: '#ff0000', bgColor: '#ffffff' },
     { id: 'nf', active: true, glyph: 'N', title: 'Netflix', url: 'https://www.netflix.com', color: '#ffffff', bgColor: '#db272e' },
     { id: 'hl', active: true, glyph: 'H', title: 'Hulu', url: 'https://www.hulu.com', color: '#ffffff', bgColor: '#1ce783' },
@@ -142,7 +142,7 @@ function getDefaultSettings () {
     openLast: true,
     saveWindow: true,
     fullScreen: false,
-    restorePlay: false,
+    restorePlay: true,
     quickMenu: true,
     lastStream: getDefaultStreams()[0].id,
     windowSizeLocation: { x: 0, y: 0, height: 600, width: 800 }
@@ -178,9 +178,9 @@ function loadSettingsModal () {
     const defaultStream = defaultStreams.find(item => item.id === serv.id)
     const checked = serv.active ? 'checked' : ''
     $('#settings-services-available').append(
-      `<div class="service-host">
+      `<div class="service-host" data-id="${serv.id}">
         <div class="form-check serv-check-host">
-          <input type="checkbox" class="serv-check" id="check-${serv.id}" data-val="${serv.id}" ${checked}>
+          <input type="checkbox" class="serv-check" id="check-${serv.id}" data-id="${serv.id}" ${checked}>
         </div>
         <img src="./res/serv_logos/large/${serv.id}.png" for="check-${serv.id}"></img>
         <div class="input-group input-group-sm serv-url">
@@ -224,8 +224,13 @@ function saveSettings () {
   localStorage.setItem('settings', JSON.stringify(settings))
 
   $('.service-host').each(function () {
-    const check = $(this).find('.serv-check')
-    streamList.find(item => item.id === $(check).data('val')).active = $(check).is(':checked')
+    const id = $(this).data('id')
+    const result = streamList.find(item => item.id === id)
+    result.glyph = $(`#input-glyph-${id}`).val()
+    result.active = $(`#check-${id}`).is(':checked')
+    result.color = $(`#serv-color-${id}`).val()
+    result.bgColor = $(`#serv-bg-${id}`).val()
+    result.url = $(`#input-url-${id}`).val()
   })
   localStorage.setItem('streamList', JSON.stringify(streamList))
 
