@@ -1,3 +1,7 @@
+// TODO: HBO seizes on restore
+// TODO: ABC play does not work intermittently
+// TODO: Peacock won't login
+
 // Imports and variable declarations
 const { app, BrowserWindow, ipcMain, BrowserView, Tray, session, Menu, MenuItem, systemPreferences } = require('electron')
 const path = require('path')
@@ -10,6 +14,7 @@ let allowQuit = false
 let isPlaying = false
 let restorePlay = false
 let userAgent = ''
+let currentStream = ''
 
 // OS variables
 if (isMac) {
@@ -74,8 +79,7 @@ const createWindow = () => {
     if (win.isVisible()) {
       isPlaying = true
     } else {
-      view.webContents.executeJavaScript(`document.getElementsByTagName('video')[0].pause()`)
-      view.webContents.executeJavaScript(`document.querySelector('apple-tv-plus-player').shadowRoot.querySelector('amp-video-player-internal').shadowRoot.querySelector('amp-video-player').shadowRoot.querySelector('video').pause()`)
+      pause()
     }
   })
 
@@ -122,28 +126,41 @@ const createTray = () => {
   tray.on('click', () => {
     const isVisible = win.isVisible()
     view.webContents.focus()
-    if (isPlaying && isVisible) {
-      view.webContents.executeJavaScript(`document.getElementsByTagName('video')[0].pause()`)
-      view.webContents.executeJavaScript(`document.querySelector('apple-tv-plus-player').shadowRoot.querySelector('amp-video-player-internal').shadowRoot.querySelector('amp-video-player').shadowRoot.querySelector('video').pause()`)
+    if (isVisible) {
+      pause()
     }
-    if (restorePlay && !isPlaying && !isVisible) {
-      view.webContents.executeJavaScript(`document.getElementsByTagName('video')[0].play()`)
-      view.webContents.executeJavaScript(`document.querySelector('apple-tv-plus-player').shadowRoot.querySelector('amp-video-player-internal').shadowRoot.querySelector('amp-video-player').shadowRoot.querySelector('video').play()`)
+    if (restorePlay && !isVisible) {
+      play()
     }
-    // if (restorePlay) {
-    //   if ((isPlaying && isVisible) || (!isPlaying && !isVisible)) {
-    //     view.webContents.sendInputEvent({type: 'keyDown', keyCode: 'space'})
-    //   }
-    // } else {
-    //   if (isPlaying && isVisible) {
-    //     view.webContents.sendInputEvent({type: 'keyDown', keyCode: 'space'})
-    //   }
-    // }
     isVisible ? win.hide() : win.show()
   })
   tray.on('right-click', () => {
     app.quit()
   })
+}
+
+// Pause stream
+function pause () {
+  // Works for most services
+  view.webContents.executeJavaScript(`document.getElementsByTagName('video')[0].pause()`)
+  // Fricking Amazon...
+  view.webContents.executeJavaScript(`document.querySelectorAll('video').forEach(input => { input.pause() })`)
+  // Fricking Apple...
+  view.webContents.executeJavaScript(`document.querySelector('apple-tv-plus-player').shadowRoot.querySelector('amp-video-player-internal').shadowRoot.querySelector('amp-video-player').shadowRoot.querySelector('video').pause()`)
+}
+
+// Play stream
+function play () {
+  if (currentStream === 'ap') {
+    // Fricking Amazon...
+    view.webContents.executeJavaScript(`document.querySelectorAll('.rendererContainer>video').forEach(input => { input.play() })`)
+  } else if (currentStream === 'at') {
+    // Fricking Apple...
+    view.webContents.executeJavaScript(`document.querySelector('apple-tv-plus-player').shadowRoot.querySelector('amp-video-player-internal').shadowRoot.querySelector('amp-video-player').shadowRoot.querySelector('video').play()`)
+  } else {
+    // Works for most services
+    view.webContents.executeJavaScript(`document.getElementsByTagName('video')[0].play()`)
+  }
 }
 
 // Remove view from window
@@ -166,9 +183,11 @@ function setViewBounds () {
 }
 
 // Change stream service
-function streamChange (url) {
+function streamChange (stream) {
+  pause()
   removeView()
-  view.webContents.loadURL(url)
+  currentStream = stream.id
+  view.webContents.loadURL(stream.url)
   win.webContents.send('stream-changed')
 }
 
@@ -233,7 +252,7 @@ ipcMain.on('allow-fullscreen', (e, data) => {
 
 // IPC channel to change streaming service
 ipcMain.on('service-change', (e, data) => {
-  streamChange(data.url)
+  streamChange(data)
 })
 
 // IPC channel for locking app on top
@@ -378,7 +397,7 @@ function addStream (serv) {
     label: serv.title,
     id: serv.id,
     click () {
-      streamChange(serv.url)
+      streamChange(serv)
     }
   })
   streamMenu.submenu.append(menuItem)

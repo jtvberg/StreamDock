@@ -2,6 +2,7 @@
 // TODO: Setting: let user pick whether or not a new window is created
 // TODO: Setting: let users pick and add services
 // TODO: Setting: let users pick color combo of service buttons
+
 // Imports and variable declarations
 const { ipcRenderer } = require('electron')
 const $ = require('jquery')
