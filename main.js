@@ -1,6 +1,8 @@
 // TODO: HBO seizes on restore
 // TODO: ABC play does not work intermittently
 // TODO: Peacock won't login
+// TODO: Autoupdate not completing
+// TODO: About not on-top
 
 // Imports and variable declarations
 const { app, BrowserWindow, ipcMain, BrowserView, Tray, session, Menu, MenuItem, systemPreferences } = require('electron')

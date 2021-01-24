@@ -41,9 +41,15 @@
    At the moment, any service using Google auth is broken if you have to sign-in to use (so, YouTube works, YouTube TV will not.)
    The user agent spoofing is no longer working so Google OAuth will need to be implemented.
    Look for that in an upcoming release.
+   As a work-around: If you have YouTube TV you can sign into ABC with it and this will also sign you in to YouTube TV and YouTube.
+
+## Update (v.0.4.5)
+   You can now set your own glyphs for the quick-access buttons and update URLs.
+   Also added AppleTV+ support.
 
 ## App Control
    Click on the quick-access buttons across the top to load streaming services as selected in the settings menu under preferences.
    Left-click on the tray icon will hide and pause the window/stream (if playing.)
    If hidden already, another left-click will restore the window but not resume play (unless restore auto-play is checked in the settings.)
    Right-click on the tray icon will exit the app completely.
+   If you want to minimize the app but keep playing to maintain audio, do so from the dock.
