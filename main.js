@@ -132,7 +132,8 @@ const createTray = () => {
       pause()
     }
     if (restorePlay && !isVisible) {
-      play()
+      // HBO seizes on restore play
+      if (!currentStream === 'hm') { play() }
     }
     isVisible ? win.hide() : win.show()
   })
