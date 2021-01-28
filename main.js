@@ -1,4 +1,4 @@
-// TODO: HBO seizes on restore
+// TODO: HBO seizes on restore (remediated by not playing on restore for just 'hm')
 // TODO: ABC play does not work intermittently
 // TODO: Peacock won't login
 // TODO: Autoupdate not completing
@@ -37,9 +37,6 @@ let tray = null
 
 // Create window
 const createWindow = () => {
-  // Check for updates after 3 seconds
-  setTimeout(updater, 3000)
-
   // Create main window
   win = new BrowserWindow({
     height: 600,
@@ -131,9 +128,9 @@ const createTray = () => {
     if (isVisible) {
       pause()
     }
-    if (restorePlay && !isVisible) {
-      // HBO seizes on restore play
-      if (!currentStream === 'hm') { play() }
+    // HBO seizes on restore play
+    if (restorePlay && !isVisible && !currentStream === 'hm') {
+      play()
     }
     isVisible ? win.hide() : win.show()
   })
@@ -187,7 +184,7 @@ function setViewBounds () {
 
 // Change stream service
 function streamChange (stream) {
-  pause()
+  isPlaying ? pause() : null
   removeView()
   currentStream = stream.id
   view.webContents.loadURL(stream.url)
@@ -206,6 +203,8 @@ app.on('ready', () => {
     disableUpdate: isOffline,
     baseDir: widevineDir
   })
+  // Check for updates
+  updater
 })
 
 // Widvine DRM  ready
@@ -219,8 +218,8 @@ app.on('widevine-ready', () => {
 })
 
 // Widvine DRM error handling
-app.on('widevine-error', (error) => {
-  console.log('Widevine installation encountered an error: ' + error)
+app.on('widevine-error', (err) => {
+  win.webcontents.send('log', err)
   process.exit(1)
 })
 

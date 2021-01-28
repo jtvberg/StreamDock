@@ -1,7 +1,6 @@
 // TODO: Open services in new window
 // TODO: Setting: let user pick whether or not a new window is created
-// TODO: Setting: let users pick and add services
-// TODO: Setting: let users pick color combo of service buttons
+// TODO: Setting: add services
 
 // Imports and variable declarations
 const { ipcRenderer } = require('electron')
@@ -38,7 +37,7 @@ ipcRenderer.on('stream-loaded', () => {
   $('.loading').hide()
 })
 
-// Receive logs from other threads
+// Receive logs from other processes
 ipcRenderer.on('log', (e, data) => {
   console.log(data)
 })

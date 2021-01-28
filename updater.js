@@ -11,6 +11,9 @@ autoUpdater.autoDownload = false
 
 // Check for app updates
 module.exports = () => {
+  autoUpdater.on('error', (err) => {
+    sendStatusToWindow(err)
+  })
   // Check for updates
   autoUpdater.checkForUpdates()
   // Listen for update
