@@ -46,7 +46,6 @@
     "afterSign": "./build/afterSign.js",
     "mac": {
       "category": "public.app-category.productivity",
-      "target": "dmg",
       "entitlements": "./entitlements.plist"
     },
     "win": {

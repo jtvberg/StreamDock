@@ -204,7 +204,7 @@ app.on('ready', () => {
     baseDir: widevineDir
   })
   // Check for updates
-  updater
+  setTimeout(updater, 3000)
 })
 
 // Widvine DRM  ready
