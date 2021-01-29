@@ -1,7 +1,6 @@
-// TODO: HBO seizes on restore (remediated by not playing on restore for just 'hm')
+// TODO: HBO seizes on restore (might be on pause)
 // TODO: ABC play does not work intermittently
 // TODO: Peacock won't login
-// TODO: Autoupdate not completing
 // TODO: About not on-top
 
 // Imports and variable declarations
@@ -127,9 +126,7 @@ const createTray = () => {
     view.webContents.focus()
     if (isVisible) {
       pause()
-    }
-    // HBO seizes on restore play
-    if (restorePlay && !isVisible && !currentStream === 'hm') {
+    } else if (restorePlay) {
       play()
     }
     isVisible ? win.hide() : win.show()
@@ -151,15 +148,18 @@ function pause () {
 
 // Play stream
 function play () {
-  if (currentStream === 'ap') {
-    // Fricking Amazon...
-    view.webContents.executeJavaScript(`document.querySelectorAll('.rendererContainer>video').forEach(input => { input.play() })`)
-  } else if (currentStream === 'at') {
-    // Fricking Apple...
-    view.webContents.executeJavaScript(`document.querySelector('apple-tv-plus-player').shadowRoot.querySelector('amp-video-player-internal').shadowRoot.querySelector('amp-video-player').shadowRoot.querySelector('video').play()`)
-  } else {
-    // Works for most services
-    view.webContents.executeJavaScript(`document.getElementsByTagName('video')[0].play()`)
+  switch (currentStream) {
+    case 'ap':
+      view.webContents.executeJavaScript(`document.querySelectorAll('.rendererContainer>video').forEach(input => { input.play() })`)
+      break
+    case 'at':
+      view.webContents.executeJavaScript(`document.querySelector('apple-tv-plus-player').shadowRoot.querySelector('amp-video-player-internal').shadowRoot.querySelector('amp-video-player').shadowRoot.querySelector('video').play()`)
+      break
+    case 'hm':
+      break
+    default:
+      view.webContents.executeJavaScript(`document.getElementsByTagName('video')[0].play()`)
+      break
   }
 }
 
