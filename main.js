@@ -1,5 +1,3 @@
-// TODO: HBO seizes on restore (might be on pause)
-// TODO: ABC play does not work intermittently
 // TODO: Peacock won't login
 // TODO: About not on-top
 
@@ -138,27 +136,27 @@ const createTray = () => {
 
 // Pause stream
 function pause () {
-  // Works for most services
-  view.webContents.executeJavaScript(`document.getElementsByTagName('video')[0].pause()`)
-  // Fricking Amazon...
-  view.webContents.executeJavaScript(`document.querySelectorAll('video').forEach(input => { input.pause() })`)
-  // Fricking Apple...
-  view.webContents.executeJavaScript(`document.querySelector('apple-tv-plus-player').shadowRoot.querySelector('amp-video-player-internal').shadowRoot.querySelector('amp-video-player').shadowRoot.querySelector('video').pause()`)
+  switch (currentStream) {
+    case 'at':
+      view.webContents.executeJavaScript(`document.querySelector('apple-tv-plus-player').shadowRoot.querySelector('amp-video-player-internal').shadowRoot.querySelector('amp-video-player').shadowRoot.querySelector('video').pause()`)
+      break
+    default:
+      view.webContents.executeJavaScript(`document.querySelectorAll('video').forEach(input => { input.pause() })`)
+      break
+  }
 }
 
 // Play stream
 function play () {
   switch (currentStream) {
-    case 'ap':
-      view.webContents.executeJavaScript(`document.querySelectorAll('.rendererContainer>video').forEach(input => { input.play() })`)
-      break
     case 'at':
       view.webContents.executeJavaScript(`document.querySelector('apple-tv-plus-player').shadowRoot.querySelector('amp-video-player-internal').shadowRoot.querySelector('amp-video-player').shadowRoot.querySelector('video').play()`)
       break
-    case 'hm':
+    case 'ap':
+      view.webContents.executeJavaScript(`document.querySelectorAll('.rendererContainer>video').forEach(input => { input.play() })`)
       break
     default:
-      view.webContents.executeJavaScript(`document.getElementsByTagName('video')[0].play()`)
+      view.webContents.executeJavaScript(`document.querySelectorAll('video').forEach(input => { input.play() })`)
       break
   }
 }
