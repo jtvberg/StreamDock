@@ -52,6 +52,9 @@ function applyInitialSettings () {
   // Show lock button if Mac
   if (isMac) { $('.ontop-button').show() }
 
+  // Auto-hide navbar buttons
+  settings.hideNav ? $('.header-bar').children().addClass('nav-hide') : $('.header-bar').children().removeClass('nav-hide')
+
   // Set window on top
   if (settings.onTop) {
     ipcRenderer.send('ontop-lock')
@@ -73,6 +76,9 @@ function applyInitialSettings () {
 
 // Apply loaded settings
 function applyUpdateSettings () {
+  // Auto-hide navbar buttons
+  settings.hideNav ? $('.header-bar').children().addClass('nav-hide') : $('.header-bar').children().removeClass('nav-hide')
+
   // Set full-screenable
   ipcRenderer.send('allow-fullscreen', settings.fullScreen)
 
@@ -172,6 +178,7 @@ function loadSettingsModal () {
   $('#fullscreen-check').prop('checked', settings.fullScreen)
   $('#restore-play-check').prop('checked', settings.restorePlay)
   $('#quick-check').prop('checked', settings.quickMenu)
+  $('#nav-check').prop('checked', settings.hideNav)
   $('#settings-services-available').empty()
   defaultStreams = getDefaultStreams()
   streamList.forEach(function (serv, index) {
@@ -218,6 +225,7 @@ function saveSettings () {
     fullScreen: $('#fullscreen-check').is(':checked'),
     restorePlay: $('#restore-play-check').is(':checked'),
     quickMenu: $('#quick-check').is(':checked'),
+    hideNav: $('#nav-check').is(':checked'),
     lastStream: settings.lastStream,
     windowSizeLocation: settings.windowSizeLocation
   }

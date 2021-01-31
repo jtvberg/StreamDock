@@ -25,7 +25,7 @@ if (isMac) {
 }
 
 // Enable Electron-Reload (dev only)
-// require('electron-reload')(__dirname)
+require('electron-reload')(__dirname)
 
 // Main window and view
 let win = null
@@ -246,8 +246,10 @@ ipcMain.on('set-window', (e, data) => {
 
 // IPC channel to set fullscreen allow from HTML
 ipcMain.on('allow-fullscreen', (e, data) => {
+  win.setFullScreen(false)
   win.fullScreenable = data
   win.maximizable = data
+  menu.getMenuItemById('fullScreen').enabled = data
 })
 
 // IPC channel to change streaming service
@@ -287,7 +289,7 @@ ipcMain.on('win-hide', () => {
 
 // IPC channel for emptying stream menu items
 ipcMain.on('reset-menu', () => {
-  resetStreamMenu()
+  resetMenu()
 })
 
 // IPC channel for adding stream service to menu
@@ -347,12 +349,15 @@ const template = [
   {
     label: 'View',
     submenu: [
+      {
+        label: 'Toggle Full Screen',
+        id: 'fullScreen',
+        click () { win.setFullScreen(!win.fullScreen) }
+      },
       { role: 'reload' },
       { role: 'forcereload' },
-      { role: 'toggledevtools' },
-      { type: 'separator' }
-      // TODO: Toggle menu item if full screenable from settings
-      // { role: 'togglefullscreen' }
+      { type: 'separator' },
+      { role: 'toggledevtools' }
     ]
   },
   {
@@ -405,7 +410,7 @@ function addStream (serv) {
 }
 
 // Menu rebuild and set
-function resetStreamMenu () {
+function resetMenu () {
   menu = Menu.buildFromTemplate(template)
   Menu.setApplicationMenu(menu)
 }

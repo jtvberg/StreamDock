@@ -43,7 +43,6 @@ body {
   grid-column: 2;
   display: flex;
   margin-top: -2px;
-  opacity: 0;
   transition: opacity .2s;
   -webkit-app-region: no-drag;
 }
@@ -81,13 +80,17 @@ body {
   justify-self: flex-end;
   margin-right: 4px;
   margin-top: 1px;
-  color: #ffffff00;
-  display: none;
-  transition: color .2s;
+  color: #d6d6d63b;
+  transition: opacity .2s, color .2s;
   cursor: pointer;
 }
 
+.nav-hide {
+  opacity: 0;
+}
+
 .ontop-button:hover {
+  opacity: 1;
   color: #d6d6d6;
 }
 
@@ -112,6 +115,7 @@ body {
   background-color: #000000;
   color: #ffffff;
   max-height: calc(100vh - 80px);
+  user-select: none;
 }
 
 .modal-footer {
