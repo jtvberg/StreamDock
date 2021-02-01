@@ -19,13 +19,13 @@ let currentStream = ''
 if (isMac) {
   systemPreferences.setUserDefault('NSDisabledDictationMenuItem', 'boolean', true)
   systemPreferences.setUserDefault('NSDisabledCharacterPaletteMenuItem', 'boolean', true)
-  userAgent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.88 Safari/537.36'
+  userAgent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 11_1_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.96 Safari/537.36'
 } else {
   userAgent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.163 Safari/537.36'
 }
 
 // Enable Electron-Reload (dev only)
-require('electron-reload')(__dirname)
+// require('electron-reload')(__dirname)
 
 // Main window and view
 let win = null
@@ -45,6 +45,7 @@ const createWindow = () => {
     frame: !isMac,
     titleBarStyle: isMac ? 'hidden' : 'default',
     fullscreenable: false,
+    trafficLightPosition: { x: 7, y: 7 },
     maximizable: false,
     webPreferences: {
       plugins: true,
@@ -269,12 +270,7 @@ ipcMain.on('ontop-unlock', () => {
 
 // IPC channel for maximizing window
 ipcMain.on('win-max', () => {
-  win.maximize()
-})
-
-// IPC channel for restoring window
-ipcMain.on('win-restore', () => {
-  win.unmaximize()
+  win.isMaximized() ? win.unmaximize() : win.maximize()
 })
 
 // IPC channel to set restore-play

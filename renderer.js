@@ -8,7 +8,6 @@ const $ = require('jquery')
 const isMac = process.platform === 'darwin'
 let streamList = []
 let settings = []
-let winMax = false
 
 // Invoke services load and apply settings
 loadSettings()
@@ -52,9 +51,6 @@ function applyInitialSettings () {
   // Show lock button if Mac
   if (isMac) { $('.ontop-button').show() }
 
-  // Auto-hide navbar buttons
-  settings.hideNav ? $('.header-bar').children().addClass('nav-hide') : $('.header-bar').children().removeClass('nav-hide')
-
   // Set window on top
   if (settings.onTop) {
     ipcRenderer.send('ontop-lock')
@@ -67,11 +63,7 @@ function applyInitialSettings () {
     ipcRenderer.send('set-window', settings.windowSizeLocation)
   }
 
-  // Set full-screenable
-  ipcRenderer.send('allow-fullscreen', settings.fullScreen)
-
-  // Set restore auto-play
-  ipcRenderer.send('restore-play', settings.restorePlay)
+  applyUpdateSettings () 
 }
 
 // Apply loaded settings
@@ -156,16 +148,9 @@ function getDefaultSettings () {
   return defaultSettings
 }
 
-// TODO: Consider moving to main and checking for state instead of using a variable
 // Window max/restore on header double click
 function maxRestoreWindow () {
-  if (!winMax) {
-    ipcRenderer.send('win-max')
-    winMax = true
-  } else {
-    ipcRenderer.send('win-restore')
-    winMax = false
-  }
+  ipcRenderer.send('win-max')
 }
 
 // Load stored values into settings modal
