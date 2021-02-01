@@ -142,6 +142,7 @@ function getDefaultSettings () {
     fullScreen: false,
     restorePlay: true,
     quickMenu: true,
+    hideNav: true,
     lastStream: getDefaultStreams()[0].id,
     windowSizeLocation: { x: 0, y: 0, height: 600, width: 800 }
   }
