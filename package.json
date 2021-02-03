@@ -1,6 +1,6 @@
 {
   "name": "StreamDock",
-  "version": "0.4.8",
+  "version": "0.4.9",
   "description": "Streaming service viewer",
   "main": "main.js",
   "scripts": {
@@ -45,7 +45,7 @@
     "afterPack": "./build/afterPack.js",
     "afterSign": "./build/afterSign.js",
     "mac": {
-      "category": "public.app-category.productivity",
+      "category": "public.app-category.video",
       "entitlements": "./entitlements.plist"
     },
     "win": {

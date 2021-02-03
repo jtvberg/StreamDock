@@ -3,4 +3,3 @@ node_modules/
 dist/
 private/
 test*
-dev-app-update.yml
