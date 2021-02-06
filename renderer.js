@@ -297,6 +297,11 @@ $('.header-bar').on('dblclick', () => {
   maxRestoreWindow()
 })
 
+// Header right-click handler
+$('.header-bar').on('contextmenu', () => {
+  ipcRenderer.send('win-hide')
+})
+
 // Settings close restore View
 $('#settings-modal').on('hidden.bs.modal', () => {
   ipcRenderer.send('view-show')
