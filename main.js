@@ -280,6 +280,7 @@ ipcMain.on('restore-play', (e, data) => {
 
 // IPC channel for hiding window
 ipcMain.on('win-hide', () => {
+  pause()
   win.hide()
 })
 
