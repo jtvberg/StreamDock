@@ -15,7 +15,8 @@
   "homepage": "https://github.com/jtvberg/StreamDock",
   "keywords": [
     "Electron",
-    "Streaming service viewer"
+    "Streaming",
+    "Video"
   ],
   "author": "jtvberg",
   "license": "CC0-1.0",
