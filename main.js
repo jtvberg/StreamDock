@@ -190,6 +190,18 @@ function streamChange (stream) {
   win.webContents.send('stream-changed')
 }
 
+// Scale height to 16:9
+function scaleHeight () {
+  let wb = win.getBounds()
+  win.setBounds({ x: wb.x, y: wb.y, height: Math.round(((wb.width * 9) / 16) + windowAdjust), width: wb.width })
+}
+
+// Scale width to 16:9
+function scaleWidth () {
+  let wb = win.getBounds()
+  win.setBounds({ x: wb.x, y: wb.y, height: wb.height, width: Math.round((wb.height * 16) / 9) })
+}
+
 // Widvine DRM setup
 app.commandLine.appendSwitch('no-verify-widevine-cdm')
 const isOffline = false
@@ -350,6 +362,14 @@ const template = [
         label: 'Toggle Full Screen',
         id: 'fullScreen',
         click () { win.setFullScreen(!win.fullScreen) }
+      },
+      {
+        label: 'Scale Height to 16:9',
+        click () { scaleHeight() }
+      },
+      {
+        label: 'Scale Width to 16:9',
+        click () { scaleWidth() }
       },
       { role: 'reload' },
       { role: 'forcereload' },
