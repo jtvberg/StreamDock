@@ -17,7 +17,9 @@ exports.default = function (context) {
     })
   } else {
     // VMP sign via EVS
-    const { execSync } = require('child_process')
+    const {
+      execSync
+    } = require('child_process')
     console.log('VMP signing start')
     execSync('py -3 -m castlabs_evs.vmp sign-pkg ./dist/win-unpacked')
     console.log('VMP signing complete')

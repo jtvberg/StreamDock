@@ -5,9 +5,7 @@
         "node": true,
         "jquery": true
     },
-    "extends": [
-        "standard"
-    ],
+    "extends": "eslint:recommended",
     "globals": {
         "Atomics": "readonly",
         "SharedArrayBuffer": "readonly"
@@ -17,5 +15,18 @@
         "sourceType": "module"
     },
     "rules": {
+        "indent": [2, 2, {"SwitchCase": 1}],
+        "linebreak-style": [
+            "error",
+            "unix"
+        ],
+        "quotes": [
+            "error",
+            "single"
+        ],
+        "semi": [
+            "error",
+            "never"
+        ]
     }
 }

@@ -42,20 +42,22 @@ ipcRenderer.on('log', (e, data) => {
 })
 
 // Load Settings
-function loadSettings () {
+function loadSettings() {
   settings = localStorage.getItem('settings') ? JSON.parse(localStorage.getItem('settings')) : getDefaultSettings()
 }
 
 // Apply loaded settings
-function applyInitialSettings () {
+function applyInitialSettings() {
   // Show lock button if Mac
-  if (isMac) { $('.ontop-button').show() }
+  if (isMac) {
+    $('.ontop-btn').show()
+  }
 
   // Set window on top
   if (settings.onTop) {
     ipcRenderer.send('ontop-lock')
   } else {
-    $('.ontop-button').removeClass('ontop-locked').addClass('ontop-unlocked')
+    $('.ontop-btn').removeClass('ontop-locked').addClass('ontop-unlocked')
   }
 
   // Set window size and location
@@ -63,11 +65,11 @@ function applyInitialSettings () {
     ipcRenderer.send('set-window', settings.windowSizeLocation)
   }
 
-  applyUpdateSettings () 
+  applyUpdateSettings()
 }
 
 // Apply loaded settings
-function applyUpdateSettings () {
+function applyUpdateSettings() {
   // Auto-hide navbar buttons
   settings.hideNav ? $('.header-bar').children().addClass('nav-hide') : $('.header-bar').children().removeClass('nav-hide')
 
@@ -79,26 +81,30 @@ function applyUpdateSettings () {
 }
 
 // Iterate through stored services and create buttons/menu entries
-function loadServices () {
+function loadServices() {
   const defaultList = getDefaultStreams()
   streamList = localStorage.getItem('streamList') ? JSON.parse(localStorage.getItem('streamList')) : defaultList
-  
+
   // Add new default streams to stream list
   if (defaultList.length !== streamList.length) {
     defaultList.forEach(item => {
       let miss = true
       streamList.forEach(serv => {
-        if (item.id === serv.id) { miss = false }
+        if (item.id === serv.id) {
+          miss = false
+        }
       })
-      if (miss) { streamList.push(item) }
+      if (miss) {
+        streamList.push(item)
+      }
     })
   }
   ipcRenderer.send('reset-menu')
-  $('.service-button-host').empty()
+  $('.service-btn-host').empty()
   streamList.forEach(function (serv) {
     if (serv.active) {
       if (isMac && settings.quickMenu) {
-        $('.service-button-host').append(`<div class="service-button-color" style="color:${serv.color}; background-color:${serv.bgColor};"><div class="service-button" data-val="${serv.id}" data-url="${serv.url}" title="${serv.title}">${serv.glyph}</div></div>`)
+        $('.service-btn-host').append(`<div class="service-btn-color" style="color:${serv.color}; background-color:${serv.bgColor};"><div class="service-btn" data-val="${serv.id}" data-url="${serv.url}" title="${serv.title}">${serv.glyph}</div></div>`)
       }
       ipcRenderer.send('add-stream', serv)
     }
@@ -106,35 +112,136 @@ function loadServices () {
 }
 
 // Open last used service or first one in list
-function openStream () {
+function openStream() {
   if (settings.openLast) {
-    ipcRenderer.send('service-change', { id: settings.lastStream, url: streamList.find(item => item.id === settings.lastStream).url })
+    ipcRenderer.send('service-change', {
+      id: settings.lastStream,
+      url: streamList.find(item => item.id === settings.lastStream).url
+    })
   } else {
-    ipcRenderer.send('service-change', { id: streamList[0].id, url: streamList[0].url })
+    ipcRenderer.send('service-change', {
+      id: streamList[0].id,
+      url: streamList[0].url
+    })
   }
 }
 
 // Return default streams
-function getDefaultStreams () {
-  const defaultStreams = [
-    { id: 'yt', active: true, glyph: 'Y', title: 'YouTube', url: 'https://www.youtube.com', color: '#ff0000', bgColor: '#ffffff' },
-    { id: 'tv', active: true, glyph: 'T', title: 'YouTube TV', url: 'https://tv.youtube.com', color: '#ff0000', bgColor: '#ffffff' },
-    { id: 'nf', active: true, glyph: 'N', title: 'Netflix', url: 'https://www.netflix.com', color: '#ffffff', bgColor: '#db272e' },
-    { id: 'hl', active: true, glyph: 'H', title: 'Hulu', url: 'https://www.hulu.com', color: '#ffffff', bgColor: '#1ce783' },
-    { id: 'ap', active: true, glyph: 'P', title: 'Amazon Prime TV', url: 'https://www.amazon.com/gp/video/storefront', color: '#ffffff', bgColor: '#00aee4' },
-    { id: 'dp', active: true, glyph: 'D', title: 'Disney+', url: 'https://www.disneyplus.com/home', color: '#ffffff', bgColor: '#1a3676' },
-    { id: 'at', active: true, glyph: 'T', title: 'Apple TV+', url: 'https://tv.apple.com/', color: '#ffffff', bgColor: '#000000' },
-    { id: 'pc', active: false, glyph: 'P', title: 'Peacock', url: 'https://www.peacocktv.com/watch/home', color: '#000000', bgColor: '#ffffff' },
-    { id: 'ab', active: true, glyph: 'A', title: 'ABC', url: 'https://abc.com', color: '#ffffff', bgColor: '#000000' },
-    { id: 'cb', active: true, glyph: 'C', title: 'CBS', url: 'https://cbs.com', color: '#0095f7', bgColor: '#ffffff' },
-    { id: 'hm', active: true, glyph: 'H', title: 'HBO Max', url: 'https://play.hbomax.com', color: '#ffffff', bgColor: '#7e5ee4' },
-    { id: 'ep', active: true, glyph: 'E', title: 'ESPN+', url: 'https://plus.espn.com', color: '#000000', bgColor: '#ffaf00' }
+function getDefaultStreams() {
+  const defaultStreams = [{
+    id: 'yt',
+    active: true,
+    glyph: 'Y',
+    title: 'YouTube',
+    url: 'https://www.youtube.com',
+    color: '#ff0000',
+    bgColor: '#ffffff'
+  },
+  {
+    id: 'tv',
+    active: true,
+    glyph: 'T',
+    title: 'YouTube TV',
+    url: 'https://tv.youtube.com',
+    color: '#ff0000',
+    bgColor: '#ffffff'
+  },
+  {
+    id: 'nf',
+    active: true,
+    glyph: 'N',
+    title: 'Netflix',
+    url: 'https://www.netflix.com',
+    color: '#ffffff',
+    bgColor: '#db272e'
+  },
+  {
+    id: 'hl',
+    active: true,
+    glyph: 'H',
+    title: 'Hulu',
+    url: 'https://www.hulu.com',
+    color: '#ffffff',
+    bgColor: '#1ce783'
+  },
+  {
+    id: 'ap',
+    active: true,
+    glyph: 'P',
+    title: 'Amazon Prime TV',
+    url: 'https://www.amazon.com/gp/video/storefront',
+    color: '#ffffff',
+    bgColor: '#00aee4'
+  },
+  {
+    id: 'dp',
+    active: true,
+    glyph: 'D',
+    title: 'Disney+',
+    url: 'https://www.disneyplus.com/home',
+    color: '#ffffff',
+    bgColor: '#1a3676'
+  },
+  {
+    id: 'at',
+    active: true,
+    glyph: 'T',
+    title: 'Apple TV+',
+    url: 'https://tv.apple.com/',
+    color: '#ffffff',
+    bgColor: '#000000'
+  },
+  {
+    id: 'pc',
+    active: false,
+    glyph: 'P',
+    title: 'Peacock',
+    url: 'https://www.peacocktv.com/watch/home',
+    color: '#000000',
+    bgColor: '#ffffff'
+  },
+  {
+    id: 'ab',
+    active: true,
+    glyph: 'A',
+    title: 'ABC',
+    url: 'https://abc.com',
+    color: '#ffffff',
+    bgColor: '#000000'
+  },
+  {
+    id: 'cb',
+    active: true,
+    glyph: 'C',
+    title: 'CBS',
+    url: 'https://cbs.com',
+    color: '#0095f7',
+    bgColor: '#ffffff'
+  },
+  {
+    id: 'hm',
+    active: true,
+    glyph: 'H',
+    title: 'HBO Max',
+    url: 'https://play.hbomax.com',
+    color: '#ffffff',
+    bgColor: '#7e5ee4'
+  },
+  {
+    id: 'ep',
+    active: true,
+    glyph: 'E',
+    title: 'ESPN+',
+    url: 'https://plus.espn.com',
+    color: '#000000',
+    bgColor: '#ffaf00'
+  }
   ]
   return defaultStreams
 }
 
 // Return default settings
-function getDefaultSettings () {
+function getDefaultSettings() {
   const defaultSettings = {
     onTop: true,
     openLast: true,
@@ -144,18 +251,23 @@ function getDefaultSettings () {
     quickMenu: true,
     hideNav: true,
     lastStream: getDefaultStreams()[0].id,
-    windowSizeLocation: { x: 0, y: 0, height: 600, width: 800 }
+    windowSizeLocation: {
+      x: 0,
+      y: 0,
+      height: 600,
+      width: 800
+    }
   }
   return defaultSettings
 }
 
 // Window max/restore on header double click
-function maxRestoreWindow () {
+function maxRestoreWindow() {
   ipcRenderer.send('win-max')
 }
 
 // Load stored values into settings modal
-function loadSettingsModal () {
+function loadSettingsModal() {
   ipcRenderer.send('view-hide')
   $('#collapse-general, #collapse-services').collapse('hide')
   $('#ontop-check').prop('checked', settings.onTop)
@@ -166,8 +278,8 @@ function loadSettingsModal () {
   $('#quick-check').prop('checked', settings.quickMenu)
   $('#nav-check').prop('checked', settings.hideNav)
   $('#settings-services-available').empty()
-  defaultStreams = getDefaultStreams()
-  streamList.forEach(function (serv, index) {
+  const defaultStreams = getDefaultStreams()
+  streamList.forEach(function (serv) {
     const defaultStream = defaultStreams.find(item => item.id === serv.id)
     const checked = serv.active ? 'checked' : ''
     $('#settings-services-available').append(
@@ -203,7 +315,7 @@ function loadSettingsModal () {
 }
 
 // Save settings to local storage
-function saveSettings () {
+function saveSettings() {
   settings = {
     onTop: $('#ontop-check').is(':checked'),
     openLast: $('#last-check').is(':checked'),
@@ -234,7 +346,7 @@ function saveSettings () {
 }
 
 // Load default settings into settings modal
-function loadDefaultSettings () {
+function loadDefaultSettings() {
   const defaultSettings = getDefaultSettings()
   $('#ontop-check').prop('checked', defaultSettings.onTop)
   $('#last-check').prop('checked', defaultSettings.openLast)
@@ -245,7 +357,7 @@ function loadDefaultSettings () {
   $('.serv-check').prop('checked', true)
   $('.serv-color-input').each(function () {
     $(this).val($(this).data('default-color'))
-    $(this).parent().find('.serv-color-btn').css('color',$(this).val())
+    $(this).parent().find('.serv-color-btn').css('color', $(this).val())
   })
   $('.text-glyph').each(function () {
     $(this).val($(this).data('default-glyph'))
@@ -253,9 +365,12 @@ function loadDefaultSettings () {
 }
 
 // Service selector click handler
-$(document).on('click', '.service-button', function () {
+$(document).on('click', '.service-btn', function () {
   $('.loading').show()
-  ipcRenderer.send('service-change', { id: $(this).data('val'), url: $(this).data('url') })
+  ipcRenderer.send('service-change', {
+    id: $(this).data('val'),
+    url: $(this).data('url')
+  })
   settings.lastStream = $(this).data('val')
 })
 
@@ -266,7 +381,7 @@ $(document).on('click', '.serv-color-btn', function () {
 
 // Track color picker changes
 $(document).on('change', '.serv-color-input', function () {
-  $(this).parent().find('.serv-color-btn').css('color',$(this).val())
+  $(this).parent().find('.serv-color-btn').css('color', $(this).val())
 })
 
 // Reset to previous URL
@@ -281,8 +396,26 @@ $(document).on('click', '.url-default-btn', function () {
   $(urlText).val($(urlText).data('default-url'))
 })
 
+// Invert servivce btn colors on hover
+$(document).on('mouseenter', '.service-btn', function () {
+  const c = $(this).closest('.service-btn-color').css('color')
+  const b = $(this).closest('.service-btn-color').css('background-color')
+  $(this).css({
+    'color': b,
+    'background-color': c
+  })
+})
+
+// Restore service btn color
+$(document).on('mouseleave', '.service-btn', function () {
+  $(this).css({
+    'color': '',
+    'background-color': ''
+  })
+})
+
 // Toggle keep on top
-$('.ontop-button').on('click', function () {
+$('.ontop-btn').on('click', function () {
   if ($(this).hasClass('ontop-locked')) {
     $(this).removeClass('ontop-locked').addClass('ontop-unlocked')
     ipcRenderer.send('ontop-unlock')
@@ -308,11 +441,11 @@ $('#settings-modal').on('hidden.bs.modal', () => {
 })
 
 // Settings save button handler
-$('#settings-save-button').on('click', () => {
+$('#settings-save-btn').on('click', () => {
   saveSettings()
 })
 
 // Settings default button handler
-$('#settings-default-button').on('click', () => {
+$('#settings-default-btn').on('click', () => {
   loadDefaultSettings()
 })

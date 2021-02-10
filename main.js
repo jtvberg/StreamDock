@@ -8,7 +8,12 @@ const isMac = process.platform === 'darwin'
 const updater = require('./updater')
 const headerSize = isMac ? 22 : 0
 const windowAdjust = isMac ? 22 : 57
-let wb = { x: 0, y: 0, height: 0, width: 0 }
+let wb = {
+  x: 0,
+  y: 0,
+  height: 0,
+  width: 0
+}
 let allowQuit = false
 let isPlaying = false
 let restorePlay = false
@@ -45,7 +50,10 @@ const createWindow = () => {
     frame: !isMac,
     titleBarStyle: isMac ? 'hidden' : 'default',
     fullscreenable: false,
-    trafficLightPosition: { x: 7, y: 7 },
+    trafficLightPosition: {
+      x: 7,
+      y: 7
+    },
     maximizable: false,
     webPreferences: {
       plugins: true,
@@ -55,14 +63,16 @@ const createWindow = () => {
   })
 
   // HTML file to load into window
-  win.loadFile('main.html', { userAgent: 'Chrome' })
+  win.loadFile('main.html', {
+    userAgent: 'Chrome'
+  })
 
   // Open DevTools (window, dev only)
   // win.webContents.openDevTools()
 
   // Create main browserView
   view = new BrowserView()
-  
+
   // Show browserView when loaded
   view.webContents.on('did-finish-load', () => {
     setView()
@@ -136,53 +146,58 @@ const createTray = () => {
 }
 
 // Pause stream
-function pause () {
+function pause() {
   switch (currentStream) {
     case 'at':
-      view.webContents.executeJavaScript(`document.querySelector('apple-tv-plus-player').shadowRoot.querySelector('amp-video-player-internal').shadowRoot.querySelector('amp-video-player').shadowRoot.querySelector('video').pause()`)
+      view.webContents.executeJavaScript('document.querySelector(\'apple-tv-plus-player\').shadowRoot.querySelector(\'amp-video-player-internal\').shadowRoot.querySelector(\'amp-video-player\').shadowRoot.querySelector(\'video\').pause()')
       break
     default:
-      view.webContents.executeJavaScript(`document.querySelectorAll('video').forEach(input => { input.pause() })`)
+      view.webContents.executeJavaScript('document.querySelectorAll(\'video\').forEach(input => { input.pause() })')
       break
   }
 }
 
 // Play stream
-function play () {
+function play() {
   switch (currentStream) {
     case 'at':
-      view.webContents.executeJavaScript(`document.querySelector('apple-tv-plus-player').shadowRoot.querySelector('amp-video-player-internal').shadowRoot.querySelector('amp-video-player').shadowRoot.querySelector('video').play()`)
+      view.webContents.executeJavaScript('document.querySelector(\'apple-tv-plus-player\').shadowRoot.querySelector(\'amp-video-player-internal\').shadowRoot.querySelector(\'amp-video-player\').shadowRoot.querySelector(\'video\').play()')
       break
     case 'ap':
-      view.webContents.executeJavaScript(`document.querySelectorAll('.rendererContainer>video').forEach(input => { input.play() })`)
+      view.webContents.executeJavaScript('document.querySelectorAll(\'.rendererContainer>video\').forEach(input => { input.play() })')
       break
     default:
-      view.webContents.executeJavaScript(`document.querySelectorAll('video').forEach(input => { input.play() })`)
+      view.webContents.executeJavaScript('document.querySelectorAll(\'video\').forEach(input => { input.play() })')
       break
   }
 }
 
 // Remove view from window
-function removeView () {
+function removeView() {
   if (win.getBrowserView()) {
     win.removeBrowserView(view)
   }
 }
 
 // Add view to window
-function setView () {
+function setView() {
   win.setBrowserView(view)
   setViewBounds()
 }
 
 // Adjust view bounds to window
-function setViewBounds () {
+function setViewBounds() {
   wb = win.getBounds()
-  view.setBounds({ x: 0, y: headerSize, width: wb.width, height: wb.height - windowAdjust })
+  view.setBounds({
+    x: 0,
+    y: headerSize,
+    width: wb.width,
+    height: wb.height - windowAdjust
+  })
 }
 
 // Change stream service
-function streamChange (stream) {
+function streamChange(stream) {
   isPlaying ? pause() : null
   removeView()
   currentStream = stream.id
@@ -191,15 +206,25 @@ function streamChange (stream) {
 }
 
 // Scale height to 16:9
-function scaleHeight () {
+function scaleHeight() {
   let wb = win.getBounds()
-  win.setBounds({ x: wb.x, y: wb.y, height: Math.round(((wb.width * 9) / 16) + windowAdjust), width: wb.width })
+  win.setBounds({
+    x: wb.x,
+    y: wb.y,
+    height: Math.round(((wb.width * 9) / 16) + windowAdjust),
+    width: wb.width
+  })
 }
 
 // Scale width to 16:9
-function scaleWidth () {
+function scaleWidth() {
   let wb = win.getBounds()
-  win.setBounds({ x: wb.x, y: wb.y, height: wb.height, width: Math.round((wb.height * 16) / 9) })
+  win.setBounds({
+    x: wb.x,
+    y: wb.y,
+    height: wb.height,
+    width: Math.round((wb.height * 16) / 9)
+  })
 }
 
 // Widvine DRM setup
@@ -222,7 +247,10 @@ app.on('ready', () => {
 app.on('widevine-ready', () => {
   session.defaultSession.webRequest.onBeforeSendHeaders((details, callback) => {
     details.requestHeaders['User-Agent'] = userAgent
-    callback({ cancel: false, requestHeaders: details.requestHeaders })
+    callback({
+      cancel: false,
+      requestHeaders: details.requestHeaders
+    })
   })
   createWindow()
   createTray()
@@ -244,7 +272,12 @@ app.on('before-quit', (e) => {
   if (!allowQuit) {
     e.preventDefault()
     const data = {
-      windowSizeLocation: { x: wb.x, y: wb.y, height: wb.height, width: wb.width }
+      windowSizeLocation: {
+        x: wb.x,
+        y: wb.y,
+        height: wb.height,
+        width: wb.width
+      }
     }
     win.webContents.send('save-settings', data)
     allowQuit = true
@@ -254,7 +287,12 @@ app.on('before-quit', (e) => {
 
 // IPC channel to update window size and location from settings
 ipcMain.on('set-window', (e, data) => {
-  win.setBounds({ x: data.x, y: data.y, height: data.height, width: data.width })
+  win.setBounds({
+    x: data.x,
+    y: data.y,
+    height: data.height,
+    width: data.width
+  })
 })
 
 // IPC channel to set fullscreen allow from HTML
@@ -307,118 +345,186 @@ ipcMain.on('add-stream', (e, serv) => {
 })
 
 // Menu template
-const template = [
-  {
-    label: app.name,
-    submenu: [
-      { role: 'about' },
-      { type: 'separator' },
-      {
-        label: 'Preferences',
-        click () { win.webContents.send('load-settings') }
-      },
-      ...(isMac ? [
-        { type: 'separator' },
-        { role: 'services' },
-        { type: 'separator' },
-        { role: 'hide' },
-        { role: 'hideothers' },
-        { role: 'unhide' },
-        { type: 'separator' },
-        { role: 'quit' }
-      ] : [
-        { type: 'separator' },
-        { role: 'quit' }])
-    ]
+const template = [{
+  label: app.name,
+  submenu: [{
+    role: 'about'
   },
   {
-    label: 'Streams',
-    submenu: []
+    type: 'separator'
   },
   {
-    label: 'Edit',
-    submenu: [
-      { role: 'undo' },
-      { role: 'redo' },
-      { type: 'separator' },
-      { role: 'cut' },
-      { role: 'copy' },
-      { role: 'paste' },
-      ...(isMac ? [
-        { role: 'pasteAndMatchStyle' },
-        { role: 'delete' },
-        { role: 'selectAll' },
-      ] : [
-        { role: 'delete' },
-        { type: 'separator' },
-        { role: 'selectAll' }
-      ])
-    ]
+    label: 'Preferences',
+    click() {
+      win.webContents.send('load-settings')
+    }
+  },
+  ...(isMac ? [{
+    type: 'separator'
   },
   {
-    label: 'View',
-    submenu: [
-      {
-        label: 'Toggle Full Screen',
-        id: 'fullScreen',
-        click () { win.setFullScreen(!win.fullScreen) }
-      },
-      {
-        label: 'Scale Height to 16:9',
-        click () { scaleHeight() }
-      },
-      {
-        label: 'Scale Width to 16:9',
-        click () { scaleWidth() }
-      },
-      { role: 'reload' },
-      { role: 'forcereload' },
-      { type: 'separator' },
-      { role: 'toggledevtools' }
-    ]
+    role: 'services'
   },
   {
-    label: 'Window',
-    submenu: [
-      { role: 'minimize' },
-      { role: 'zoom' },
-      {
-        label: 'Lock On Top',
-        click () { win.isAlwaysOnTop() ? win.setAlwaysOnTop(false) : win.setAlwaysOnTop(true, 'floating') }
-      },
-      ...(isMac ? [
-        { type: 'separator' },
-        { role: 'front' },
-        { type: 'separator' },
-        { role: 'window' }
-      ] : [
-        { role: 'close' }
-      ])
-    ]
+    type: 'separator'
   },
   {
-    role: 'help',
-    submenu: [
-      {
-        label: 'Learn More',
-        click: async () => {
-          const { shell } = require('electron')
-          await shell.openExternal('https://github.com/jtvberg/StreamDock')
-        }
-      }
-    ]
+    role: 'hide'
+  },
+  {
+    role: 'hideothers'
+  },
+  {
+    role: 'unhide'
+  },
+  {
+    type: 'separator'
+  },
+  {
+    role: 'quit'
   }
+  ] : [{
+    type: 'separator'
+  },
+  {
+    role: 'quit'
+  }
+  ])
+  ]
+},
+{
+  label: 'Streams',
+  submenu: []
+},
+{
+  label: 'Edit',
+  submenu: [{
+    role: 'undo'
+  },
+  {
+    role: 'redo'
+  },
+  {
+    type: 'separator'
+  },
+  {
+    role: 'cut'
+  },
+  {
+    role: 'copy'
+  },
+  {
+    role: 'paste'
+  },
+  ...(isMac ? [{
+    role: 'pasteAndMatchStyle'
+  },
+  {
+    role: 'delete'
+  },
+  {
+    role: 'selectAll'
+  },
+  ] : [{
+    role: 'delete'
+  },
+  {
+    type: 'separator'
+  },
+  {
+    role: 'selectAll'
+  }
+  ])
+  ]
+},
+{
+  label: 'View',
+  submenu: [{
+    label: 'Toggle Full Screen',
+    id: 'fullScreen',
+    click() {
+      win.setFullScreen(!win.fullScreen)
+    }
+  },
+  {
+    label: 'Scale Height to 16:9',
+    click() {
+      scaleHeight()
+    }
+  },
+  {
+    label: 'Scale Width to 16:9',
+    click() {
+      scaleWidth()
+    }
+  },
+  {
+    role: 'reload'
+  },
+  {
+    role: 'forcereload'
+  }
+  ]
+},
+{
+  label: 'Window',
+  submenu: [{
+    role: 'minimize'
+  },
+  {
+    role: 'zoom'
+  },
+  {
+    label: 'Lock On Top',
+    click() {
+      win.isAlwaysOnTop() ? win.setAlwaysOnTop(false) : win.setAlwaysOnTop(true, 'floating')
+    }
+  },
+  ...(isMac ? [{
+    type: 'separator'
+  },
+  {
+    role: 'front'
+  },
+  {
+    type: 'separator'
+  },
+  {
+    role: 'window'
+  }
+  ] : [{
+    role: 'close'
+  }])
+  ]
+},
+{
+  role: 'help',
+  submenu: [{
+    label: 'Learn More',
+    click: async () => {
+      const { shell } = require('electron')
+      await shell.openExternal('https://github.com/jtvberg/StreamDock')
+    }
+  },
+  {
+    type: 'separator'
+  },
+  {
+    role: 'toggledevtools'
+  }
+  ]
+}
 ]
 
 let menu = Menu.buildFromTemplate(template)
 
 // Menu add stream service to menu
-function addStream (serv) {
+function addStream(serv) {
   const streamMenu = Menu.getApplicationMenu().items[1]
   const menuItem = new MenuItem({
     label: serv.title,
     id: serv.id,
-    click () {
+    click() {
       streamChange(serv)
     }
   })
@@ -427,7 +533,7 @@ function addStream (serv) {
 }
 
 // Menu rebuild and set
-function resetMenu () {
+function resetMenu() {
   menu = Menu.buildFromTemplate(template)
   Menu.setApplicationMenu(menu)
 }

@@ -1,6 +1,6 @@
 {
   "name": "StreamDock",
-  "version": "0.4.9",
+  "version": "0.4.10",
   "description": "Streaming service viewer",
   "main": "main.js",
   "scripts": {
