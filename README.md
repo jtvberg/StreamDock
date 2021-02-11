@@ -41,7 +41,9 @@
    At the moment, any service using Google auth is broken if you have to sign-in to use (so, YouTube works, YouTube TV will not.)\
    The user agent spoofing is no longer working so Google OAuth will need to be implemented.\
    Look for that in an upcoming release.\
-   As a work-around: If you have YouTube TV you can sign into ABC with it and this will also sign you in to YouTube TV and YouTube.
+   As a work-around: If you have YouTube TV you can sign into ABC with it and this will also sign you in to YouTube TV and YouTube.\
+   Peacock is set to off by default as the login is not working.\
+   The 'about' modal will be shown behind the main screen if set to on-top. This is a system modal so the work-around is to roll my own in the future.
 
 ## App Control
    Click on the quick-access buttons across the top to load streaming services as selected in the settings menu under preferences.\
