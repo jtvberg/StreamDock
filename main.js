@@ -2,7 +2,7 @@
 // TODO: About not on-top
 
 // Imports and variable declarations
-const { app, BrowserWindow, ipcMain, BrowserView, Tray, session, Menu, MenuItem, systemPreferences } = require('electron')
+const { app, BrowserWindow, ipcMain, BrowserView, Tray, session, Menu, MenuItem, systemPreferences, clipboard } = require('electron')
 const path = require('path')
 const isMac = process.platform === 'darwin'
 const updater = require('./updater')
@@ -223,8 +223,17 @@ function scaleWidth() {
     x: wb.x,
     y: wb.y,
     height: wb.height,
-    width: Math.round((wb.height * 16) / 9)
+    width: Math.round(((wb.height - windowAdjust) * 16) / 9)
   })
+}
+
+// Open copied link in new BrowserView
+function openLink(url) {
+  const stream = {
+    id: currentStream,
+    url: url
+  }
+  streamChange(stream)
 }
 
 // Widvine DRM setup
@@ -316,6 +325,21 @@ ipcMain.on('ontop-lock', () => {
 // IPC channel for unlocking app on top
 ipcMain.on('ontop-unlock', () => {
   win.setAlwaysOnTop(false)
+})
+
+// IPC channel for scaling horzizontally to 16:9
+ipcMain.on('scale-width', () => {
+  scaleWidth()
+})
+
+// IPC channel for scaling vertically to 16:9
+ipcMain.on('scale-height', () => {
+  scaleHeight()
+})
+
+// IPC channel for opening url from clip-board
+ipcMain.on('open-link', () => {
+  openLink(clipboard.readText())
 })
 
 // IPC channel for maximizing window
@@ -459,10 +483,22 @@ const template = [{
     }
   },
   {
+    type: 'separator'
+  },
+  {
     role: 'reload'
   },
   {
     role: 'forcereload'
+  },
+  {
+    type: 'separator'
+  },
+  {
+    label: 'Open Copied URL',
+    click() {
+      openLink(clipboard.readText())
+    }
   }
   ]
 },

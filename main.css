@@ -75,13 +75,24 @@ body {
   background-color: #000000;
 } */
 
-.ontop-btn {
+.control-btn-host {
   grid-column: 3;
+  display: flex;
   justify-self: flex-end;
   margin-right: 4px;
   margin-top: 1px;
+  transition: opacity .2s;
+  -webkit-app-region: no-drag;
+}
+
+.control-btn-host:hover {
+  opacity: 1;
+}
+
+.control-btn {
+  padding-left: 5px;
   color: #d6d6d63b;
-  transition: opacity .2s, color .2s;
+  transition: color .2s;
   cursor: pointer;
 }
 
@@ -89,8 +100,7 @@ body {
   opacity: 0;
 }
 
-.ontop-btn:hover {
-  opacity: 1;
+.control-btn:hover {
   color: #d6d6d6;
 }
 

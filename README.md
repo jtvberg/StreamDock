@@ -43,13 +43,13 @@
    Look for that in an upcoming release.\
    As a work-around: If you have YouTube TV you can sign into ABC with it and this will also sign you in to YouTube TV and YouTube.
 
-## Update (v.0.4.5)
-   You can now set your own glyphs for the quick-access buttons and update URLs.\
-   Also added AppleTV+ support.
-
 ## App Control
    Click on the quick-access buttons across the top to load streaming services as selected in the settings menu under preferences.\
-   Left-click on the tray icon will hide and pause the window/stream (if playing.)\
+   Left-click on the tray icon (or right-click on app header) will hide and pause the window/stream (if playing.)\
    If hidden already, another left-click will restore the window but not resume play (unless restore auto-play is checked in the settings.)\
    Right-click on the tray icon will exit the app completely.\
-   If you want to minimize the app but keep playing to maintain audio, do so from the dock.
+   If you want to minimize the app but keep playing to maintain audio, do so from the dock.\
+   There is an always on top toggle button in the top right corner.\
+   You can open a link from clipboard via the view menu.\
+   You can scale the video to 16:9 either vertically or horizontally also in the view menu.\
+   Various behaviors can be toggled in the settings under preferences including which streaming services are present and what colors and glyphs are used to represent them in the quick access bar.

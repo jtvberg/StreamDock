@@ -249,7 +249,7 @@ function getDefaultSettings() {
     fullScreen: false,
     restorePlay: true,
     quickMenu: true,
-    hideNav: true,
+    hideNav: false,
     lastStream: getDefaultStreams()[0].id,
     windowSizeLocation: {
       x: 0,
@@ -415,7 +415,7 @@ $(document).on('mouseleave', '.service-btn', function () {
 })
 
 // Toggle keep on top
-$('.ontop-btn').on('click', function () {
+$('#ontop-btn').on('click', function () {
   if ($(this).hasClass('ontop-locked')) {
     $(this).removeClass('ontop-locked').addClass('ontop-unlocked')
     ipcRenderer.send('ontop-unlock')
@@ -423,6 +423,21 @@ $('.ontop-btn').on('click', function () {
     $(this).removeClass('ontop-unlocked').addClass('ontop-locked')
     ipcRenderer.send('ontop-lock')
   }
+})
+
+// Open link from clipboard click handler
+$('#link-btn').on('click', function () {
+  ipcRenderer.send('open-link')
+})
+
+// Scale horizontal click handler
+$('#scaleh-btn').on('click', function () {
+  ipcRenderer.send('scale-width')
+})
+
+// Scale vertical click handler
+$('#scalev-btn').on('click', function () {
+  ipcRenderer.send('scale-height')
 })
 
 // Header double-click handler
