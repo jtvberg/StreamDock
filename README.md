@@ -52,6 +52,6 @@
    Right-click on the tray icon will exit the app completely.\
    If you want to minimize the app but keep playing to maintain audio, do so from the dock.\
    There is an always on top toggle button in the top right corner.\
-   You can open a link from clipboard via the view menu.\
-   You can scale the video to 16:9 either vertically or horizontally also in the view menu.\
+   You can open a link from clipboard via the view menu (or in the header).\
+   You can scale the video to 16:9 either vertically or horizontally also in the view menu (or in the header).\
    Various behaviors can be toggled in the settings under preferences including which streaming services are present and what colors and glyphs are used to represent them in the quick access bar.
