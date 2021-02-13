@@ -8,12 +8,7 @@ const isMac = process.platform === 'darwin'
 const updater = require('./updater')
 const headerSize = isMac ? 22 : 0
 const windowAdjust = isMac ? 22 : 57
-let wb = {
-  x: 0,
-  y: 0,
-  height: 0,
-  width: 0
-}
+let wb = { x: 0, y: 0, height: 0, width: 0 }
 let allowQuit = false
 let isPlaying = false
 let restorePlay = false
@@ -49,7 +44,6 @@ const createWindow = () => {
     hasShadow: false,
     frame: !isMac,
     titleBarStyle: isMac ? 'hidden' : 'default',
-    fullscreenable: false,
     trafficLightPosition: {
       x: 7,
       y: 7
@@ -72,6 +66,14 @@ const createWindow = () => {
 
   // Create main browserView
   view = new BrowserView()
+
+  view.webContents.on('enter-html-full-screen', () => {
+    console.log('enter-fullscreen')
+  })
+
+  view.webContents.on('leave-html-full-screen', () => {
+    console.log('leave-fullscreen')
+  })
 
   // Show browserView when loaded
   view.webContents.on('did-finish-load', () => {
@@ -149,10 +151,10 @@ const createTray = () => {
 function pause() {
   switch (currentStream) {
     case 'at':
-      view.webContents.executeJavaScript('document.querySelector(\'apple-tv-plus-player\').shadowRoot.querySelector(\'amp-video-player-internal\').shadowRoot.querySelector(\'amp-video-player\').shadowRoot.querySelector(\'video\').pause()')
+      view.webContents.executeJavaScript(`document.querySelector('apple-tv-plus-player').shadowRoot.querySelector('amp-video-player-internal').shadowRoot.querySelector('amp-video-player').shadowRoot.querySelector('video').pause()`)
       break
     default:
-      view.webContents.executeJavaScript('document.querySelectorAll(\'video\').forEach(input => { input.pause() })')
+      view.webContents.executeJavaScript(`document.querySelectorAll('video').forEach(input => { input.pause() })`)
       break
   }
 }
@@ -161,13 +163,13 @@ function pause() {
 function play() {
   switch (currentStream) {
     case 'at':
-      view.webContents.executeJavaScript('document.querySelector(\'apple-tv-plus-player\').shadowRoot.querySelector(\'amp-video-player-internal\').shadowRoot.querySelector(\'amp-video-player\').shadowRoot.querySelector(\'video\').play()')
+      view.webContents.executeJavaScript(`document.querySelector('apple-tv-plus-player').shadowRoot.querySelector('amp-video-player-internal').shadowRoot.querySelector('amp-video-player').shadowRoot.querySelector('video').play()`)
       break
     case 'ap':
-      view.webContents.executeJavaScript('document.querySelectorAll(\'.rendererContainer>video\').forEach(input => { input.play() })')
+      view.webContents.executeJavaScript(`document.querySelectorAll('.rendererContainer>video').forEach(input => { input.play() })`)
       break
     default:
-      view.webContents.executeJavaScript('document.querySelectorAll(\'video\').forEach(input => { input.play() })')
+      view.webContents.executeJavaScript(`document.querySelectorAll('video').forEach(input => { input.play() })`)
       break
   }
 }
