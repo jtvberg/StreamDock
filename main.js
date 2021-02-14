@@ -196,7 +196,6 @@ function setViewBounds() {
 // Change stream service
 function streamChange(stream) {
   isPlaying ? pause() : null
-  removeView()
   currentStream = stream.id
   view.webContents.loadURL(stream.url)
   win.webContents.send('stream-changed')
