@@ -125,7 +125,7 @@ const createWindow = () => {
 
 // Create tray
 const createTray = () => {
-  tray = new Tray(path.join(__dirname, '/res/logo/icon.png'))
+  tray = new Tray(path.join(__dirname, '/res/logo/iconTemplate@2x.png'))
   tray.setToolTip('StreamDock')
   tray.on('click', () => {
     const isVisible = win.isVisible()
