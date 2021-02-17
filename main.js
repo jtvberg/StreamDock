@@ -1,5 +1,4 @@
 // TODO: Peacock won't login
-// TODO: About not on-top
 
 // Imports and variable declarations
 const { app, BrowserWindow, ipcMain, BrowserView, Tray, session, Menu, MenuItem, systemPreferences, clipboard, nativeTheme, dialog } = require('electron')
