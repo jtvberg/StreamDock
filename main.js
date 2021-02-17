@@ -307,7 +307,6 @@ ipcMain.on('set-window', (e, data) => {
 ipcMain.on('allow-fullscreen', (e, data) => {
   win.setFullScreen(false)
   win.fullScreenable = data
-  win.maximizable = data
   menu.getMenuItemById('fullScreen').enabled = data
 })
 
