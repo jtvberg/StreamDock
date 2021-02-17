@@ -50,7 +50,6 @@ const createWindow = () => {
       x: 7,
       y: 7
     },
-    maximizable: false,
     webPreferences: {
       plugins: true,
       nodeIntegration: true,
