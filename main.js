@@ -20,7 +20,7 @@ if (isMac) {
   systemPreferences.setUserDefault('NSDisabledCharacterPaletteMenuItem', 'boolean', true)
   userAgent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 11_2_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.150 Safari/537.36'
 } else {
-  userAgent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.163 Safari/537.36'
+  userAgent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.182 Safari/537.36'
 }
 
 // Disable hardware acceleration (buggy)
@@ -307,7 +307,6 @@ ipcMain.on('set-window', (e, data) => {
 ipcMain.on('allow-fullscreen', (e, data) => {
   win.setFullScreen(false)
   win.fullScreenable = data
-  win.maximizable = data
   menu.getMenuItemById('fullScreen').enabled = data
 })
 
