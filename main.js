@@ -1,8 +1,9 @@
 // TODO: Peacock won't login
 // TODO: About not on-top
+// TODO: Light mode
 
 // Imports and variable declarations
-const { app, BrowserWindow, ipcMain, BrowserView, Tray, session, Menu, MenuItem, systemPreferences, clipboard } = require('electron')
+const { app, BrowserWindow, ipcMain, BrowserView, Tray, session, Menu, MenuItem, systemPreferences, clipboard, nativeTheme } = require('electron')
 const path = require('path')
 const isMac = process.platform === 'darwin'
 const updater = require('./updater')
@@ -120,6 +121,11 @@ const createWindow = () => {
   // IPC channel for showing view
   ipcMain.on('view-show', () => {
     setView()
+  })
+
+  // IPC channel for setting theme mode
+  ipcMain.on('set-theme', (e, data) => {
+    nativeTheme.themeSource = data
   })
 }
 

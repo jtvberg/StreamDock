@@ -43,7 +43,16 @@ ipcRenderer.on('log', (e, data) => {
 
 // Load Settings
 function loadSettings() {
-  settings = localStorage.getItem('settings') ? JSON.parse(localStorage.getItem('settings')) : getDefaultSettings()
+  const defaultList = getDefaultSettings()
+  settings = localStorage.getItem('settings') ? JSON.parse(localStorage.getItem('settings')) : defaultList
+  // Add new default settings to current settings
+  if (Object.keys(settings).length !== Object.keys(defaultList).length) {
+    for (var prop in defaultList) {
+      if (!Object.prototype.hasOwnProperty.call(settings, prop)) {
+        settings[prop] = defaultList[prop]
+      }
+    }
+  }
 }
 
 // Apply loaded settings
@@ -78,6 +87,9 @@ function applyUpdateSettings() {
 
   // Set restore auto-play
   ipcRenderer.send('restore-play', settings.restorePlay)
+
+  // Set the theme
+  ipcRenderer.send('set-theme', settings.themeMode ? settings.themeMode : 'system')
 }
 
 // Iterate through stored services and create buttons/menu entries
@@ -250,6 +262,7 @@ function getDefaultSettings() {
     restorePlay: true,
     quickMenu: true,
     hideNav: false,
+    themeMode: 'system',
     lastStream: getDefaultStreams()[0].id,
     windowSizeLocation: {
       x: 0,
@@ -277,6 +290,8 @@ function loadSettingsModal() {
   $('#restore-play-check').prop('checked', settings.restorePlay)
   $('#quick-check').prop('checked', settings.quickMenu)
   $('#nav-check').prop('checked', settings.hideNav)
+  $('input[name=radio-theme]').prop('checked', false).parent('.btn').removeClass('active')
+  $(`input[name=radio-theme][value=${settings.themeMode}]`).prop('checked', true).parent('.btn').addClass('active')
   $('#settings-services-available').empty()
   const defaultStreams = getDefaultStreams()
   streamList.forEach(function (serv) {
@@ -324,6 +339,7 @@ function saveSettings() {
     restorePlay: $('#restore-play-check').is(':checked'),
     quickMenu: $('#quick-check').is(':checked'),
     hideNav: $('#nav-check').is(':checked'),
+    themeMode: $('#choose-theme input:radio:checked').val(),
     lastStream: settings.lastStream,
     windowSizeLocation: settings.windowSizeLocation
   }
