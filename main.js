@@ -1,9 +1,8 @@
 // TODO: Peacock won't login
 // TODO: About not on-top
-// TODO: Light mode
 
 // Imports and variable declarations
-const { app, BrowserWindow, ipcMain, BrowserView, Tray, session, Menu, MenuItem, systemPreferences, clipboard, nativeTheme } = require('electron')
+const { app, BrowserWindow, ipcMain, BrowserView, Tray, session, Menu, MenuItem, systemPreferences, clipboard, nativeTheme, dialog } = require('electron')
 const path = require('path')
 const isMac = process.platform === 'darwin'
 const updater = require('./updater')
@@ -374,7 +373,15 @@ ipcMain.on('add-stream', (e, serv) => {
 const template = [{
   label: app.name,
   submenu: [{
-    role: 'about'
+    label: 'About',
+    click() {
+      dialog.showMessageBox({
+        title: `About ${app.name}`,
+        message: `StreamDock\nVersion ${app.getVersion()}`,
+        detail: 'Copyright \u00A9 jtvberg 2020-2021',
+        buttons: []
+      })
+    } 
   },
   {
     type: 'separator'
