@@ -109,21 +109,6 @@ const createWindow = () => {
   win.webContents.on('devtools-closed', () => {
     setView()
   })
-
-  // IPC channel for hiding view
-  ipcMain.on('view-hide', () => {
-    removeView()
-  })
-
-  // IPC channel for showing view
-  ipcMain.on('view-show', () => {
-    setView()
-  })
-
-  // IPC channel for setting theme mode
-  ipcMain.on('set-theme', (e, data) => {
-    nativeTheme.themeSource = data
-  })
 }
 
 // Create tray
@@ -364,6 +349,21 @@ ipcMain.on('reset-menu', () => {
 // IPC channel for adding stream service to menu
 ipcMain.on('add-stream', (e, serv) => {
   addStream(serv)
+})
+
+// IPC channel for hiding view
+ipcMain.on('view-hide', () => {
+  removeView()
+})
+
+// IPC channel for showing view
+ipcMain.on('view-show', () => {
+  setView()
+})
+
+// IPC channel for setting theme mode
+ipcMain.on('set-theme', (e, data) => {
+  nativeTheme.themeSource = data
 })
 
 // Menu template
