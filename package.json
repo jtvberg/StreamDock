@@ -52,7 +52,8 @@
     "win": {
       "certificateFile": "private/jtvberg.p12",
       "certificatePassword": "",
-      "verifyUpdateCodeSignature": false
+      "verifyUpdateCodeSignature": false,
+      "target": "zip"
     },
     "publish": {
       "provider": "github"
