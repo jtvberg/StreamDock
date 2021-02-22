@@ -1,6 +1,7 @@
 // TODO: Open services in new window
 // TODO: Setting: let user pick whether or not a new window is created
 // TODO: Setting: add services
+// TODO: Netflix facets
 
 // Imports and variable declarations
 const { ipcRenderer } = require('electron')
@@ -8,12 +9,13 @@ const $ = require('jquery')
 const isMac = process.platform === 'darwin'
 let streamList = []
 let settings = []
+let nfFacets = []
 
 // Invoke services load and apply settings
 loadSettings()
 loadServices()
 applyInitialSettings()
-openStream()
+openLastStream()
 
 // Settings modal invoke main
 ipcRenderer.on('load-settings', () => {
@@ -124,17 +126,11 @@ function loadServices() {
 }
 
 // Open last used service or first one in list
-function openStream() {
+function openLastStream() {
   if (settings.openLast) {
-    ipcRenderer.send('service-change', {
-      id: settings.lastStream,
-      url: streamList.find(item => item.id === settings.lastStream).url
-    })
+    openStream(settings.lastStream, streamList.find(item => item.id === settings.lastStream).url)
   } else {
-    ipcRenderer.send('service-change', {
-      id: streamList[0].id,
-      url: streamList[0].url
-    })
+    openStream(streamList[0].id, streamList[0].url)
   }
 }
 
@@ -380,14 +376,40 @@ function loadDefaultSettings() {
   })
 }
 
-// Service selector click handler
-$(document).on('click', '.service-btn', function () {
+// Load NF facets into UI
+function renderNfFacets() {
+  $.each(nfFacets, function(i, facet) {
+    if(facet.Category === 'Genre') {
+      $('.nf-facets').append(
+        `<div class="nf-facet" data-code="${facet.Code}">${facet.Genre}</div>`
+      )
+    }
+  })
+}
+
+// Sent IPC message to open stream
+function openStream(id, url) {
   $('.loading').show()
   ipcRenderer.send('service-change', {
-    id: $(this).data('val'),
-    url: $(this).data('url')
+    id: id,
+    url: url
   })
-  settings.lastStream = $(this).data('val')
+  settings.lastStream = id
+}
+
+// Load NF facets from file
+$.getJSON('nffacets.json', function(json) { 
+  nfFacets = json
+}).then(renderNfFacets)
+
+// NF facet click handler
+$(document).on('click', '.nf-facet', function () {
+  openStream('nf', `https://www.netflix.com/browse/genre/${$(this).data('code')}`)
+})
+
+// Service selector click handler
+$(document).on('click', '.service-btn', function () {
+  openStream($(this).data('val'), $(this).data('url'))
 })
 
 // Activate color picker

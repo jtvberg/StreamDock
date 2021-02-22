@@ -30,6 +30,26 @@ body {
   bottom: 10px;
 }
 
+.nf-facets {
+  display: flex;
+  flex-direction: column;
+  position: absolute;
+  left: 0px;
+  top: 22px;
+  height: 600px;
+  width: 200px;
+  color: white;
+}
+
+.nf-facet {
+  color: white;
+  cursor: pointer;
+}
+
+.nf-facet:hover {
+  color: blue;ƒ
+}
+
 .loading {
   display: flex;
   align-items: center;

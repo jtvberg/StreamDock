@@ -1,4 +1,5 @@
 // TODO: Peacock won't login
+// TODO: Touchbar support
 
 // Imports and variable declarations
 const { app, BrowserWindow, ipcMain, BrowserView, Tray, session, Menu, MenuItem, systemPreferences, clipboard, nativeTheme, dialog } = require('electron')
@@ -24,7 +25,7 @@ if (isMac) {
 }
 
 // Disable hardware acceleration (buggy)
-app.disableHardwareAcceleration()
+// app.disableHardwareAcceleration()
 
 // Enable Electron-Reload (dev only)
 // require('electron-reload')(__dirname)
@@ -88,6 +89,12 @@ const createWindow = () => {
   // Capture paused
   view.webContents.on('media-paused', () => {
     isPlaying = false
+  })
+
+  // Prevent new window open in current view
+  view.webContents.on('new-window', (e, url) => {
+    e.preventDefault()
+    view.webContents.loadURL(url)
   })
 
   // Reset view on resize
@@ -174,9 +181,9 @@ function setView() {
 function setViewBounds() {
   wb = win.getBounds()
   view.setBounds({
-    x: 0,
+    x: 200,
     y: headerSize,
-    width: wb.width,
+    width: wb.width - 200,
     height: wb.height - windowAdjust
   })
 }
@@ -184,6 +191,7 @@ function setViewBounds() {
 // Change stream service
 function streamChange(stream) {
   isPlaying ? pause() : null
+  view.setBounds({ x: 0, y: 0, width: 0, height: 0 })
   currentStream = stream.id
   view.webContents.loadURL(stream.url)
   win.webContents.send('stream-changed')
@@ -191,7 +199,6 @@ function streamChange(stream) {
 
 // Scale height to 16:9
 function scaleHeight() {
-  let wb = win.getBounds()
   win.setBounds({
     x: wb.x,
     y: wb.y,
@@ -202,7 +209,6 @@ function scaleHeight() {
 
 // Scale width to 16:9
 function scaleWidth() {
-  let wb = win.getBounds()
   win.setBounds({
     x: wb.x,
     y: wb.y,
