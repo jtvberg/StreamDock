@@ -7,13 +7,16 @@ const path = require('path')
 const isMac = process.platform === 'darwin'
 const updater = require('./updater')
 const headerSize = isMac ? 22 : 0
-const windowAdjust = isMac ? 22 : 57
+const winAdjustHeight = isMac ? 22 : 57
+const winAdjustWidth = 0
 let wb = { x: 0, y: 0, height: 0, width: 0 }
 let allowQuit = false
 let isPlaying = false
 let restorePlay = false
 let userAgent = ''
 let currentStream = ''
+
+const fs = require('fs')
 
 // OS variables
 if (isMac) {
@@ -28,7 +31,7 @@ if (isMac) {
 // app.disableHardwareAcceleration()
 
 // Enable Electron-Reload (dev only)
-// require('electron-reload')(__dirname)
+require('electron-reload')(__dirname)
 
 // Main window and view
 let win = null
@@ -107,6 +110,16 @@ const createWindow = () => {
     wb = win.getBounds()
   })
 
+  // when win ready set accent color and subscribe to changes if macOS
+  win.on('ready-to-show', () => {
+    getAccent()
+    if(isMac) {
+      systemPreferences.subscribeNotification('AppleColorPreferencesChangedNotification', () => {
+        getAccent()
+      })
+    }
+  })
+
   // Kill view on dev tools open
   win.webContents.on('devtools-opened', () => {
     removeView()
@@ -135,6 +148,11 @@ const createTray = () => {
   tray.on('right-click', () => {
     app.quit()
   })
+}
+
+// Get system accent color
+function getAccent() {
+  win.webContents.send('set-accent', `#${systemPreferences.getAccentColor()}`)
 }
 
 // Pause stream
@@ -181,10 +199,10 @@ function setView() {
 function setViewBounds() {
   wb = win.getBounds()
   view.setBounds({
-    x: 200,
+    x: winAdjustWidth,
     y: headerSize,
-    width: wb.width - 200,
-    height: wb.height - windowAdjust
+    width: wb.width - winAdjustWidth,
+    height: wb.height - winAdjustHeight
   })
 }
 
@@ -202,7 +220,7 @@ function scaleHeight() {
   win.setBounds({
     x: wb.x,
     y: wb.y,
-    height: Math.round(((wb.width * 9) / 16) + windowAdjust),
+    height: Math.round(((wb.width * 9) / 16) + winAdjustHeight),
     width: wb.width
   })
 }
@@ -213,7 +231,7 @@ function scaleWidth() {
     x: wb.x,
     y: wb.y,
     height: wb.height,
-    width: Math.round(((wb.height - windowAdjust) * 16) / 9)
+    width: Math.round(((wb.height - winAdjustHeight) * 16) / 9)
   })
 }
 
@@ -224,6 +242,16 @@ function openLink(url) {
     url: url
   }
   streamChange(stream)
+}
+
+// Take screenshot of current stream
+function captureStream() {
+  view.webContents.capturePage().then(image => {
+    fs.writeFileSync('temp.png', image.toPNG(), (err) => {
+      if (err) console.log(err)
+    })
+  })
+  win.webContents.send('image-resize')
 }
 
 // Widvine DRM setup
@@ -393,6 +421,12 @@ const template = [{
     label: 'Preferences',
     click() {
       win.webContents.send('load-settings')
+    }
+  },
+  {
+    label: 'Bookmark Stream',
+    click() {
+      captureStream()
     }
   },
   ...(isMac ? [{

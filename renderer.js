@@ -17,6 +17,12 @@ loadServices()
 applyInitialSettings()
 openLastStream()
 
+// Set system accent color css variable
+ipcRenderer.on('set-accent', (e, data) => {
+  let root = document.documentElement
+  root.style.setProperty('--color-system-accent', data)
+})
+
 // Settings modal invoke main
 ipcRenderer.on('load-settings', () => {
   loadSettingsModal()
@@ -378,11 +384,12 @@ function loadDefaultSettings() {
 
 // Load NF facets into UI
 function renderNfFacets() {
+  let img = new Image()
+  img.src = localStorage.getItem('image')
+  $('.nf-facet-host').append(img)
   $.each(nfFacets, function(i, facet) {
     if(facet.Category === 'Genre') {
-      $('.nf-facets').append(
-        `<div class="nf-facet" data-code="${facet.Code}">${facet.Genre}</div>`
-      )
+      $('.nf-facet-host').append(`<div class="nf-facet" data-code="${facet.Code}">${facet.Genre}</div>`)
     }
   })
 }
@@ -395,6 +402,40 @@ function openStream(id, url) {
     url: url
   })
   settings.lastStream = id
+}
+
+ipcRenderer.on('image-resize', () => {
+  compressImage()
+})
+
+function compressImage () {
+  const canvas = document.createElement('canvas')
+  const img = document.createElement('img')
+  img.src = 'temp.png'
+  img.onload = function () {
+    let width = img.width
+    let height = img.height
+    const maxHeight = 200
+    const maxWidth = 200
+
+    if (width > height) {
+      if (width > maxWidth) {
+        height = Math.round((height *= maxWidth / width))
+        width = maxWidth
+      }
+    } else {
+      if (height > maxHeight) {
+        width = Math.round((width *= maxHeight / height))
+        height = maxHeight
+      }
+    }
+    canvas.width = width
+    canvas.height = height
+
+    const ctx = canvas.getContext('2d')
+    ctx.drawImage(img, 0, 0, width, height)
+    localStorage.setItem('image', canvas.toDataURL('image/jpeg', 0.7))
+  }
 }
 
 // Load NF facets from file
