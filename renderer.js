@@ -301,8 +301,9 @@ function loadSettingsModal() {
     const checked = serv.active ? 'checked' : ''
     $('#settings-services-available').append(
       `<div class="service-host" data-id="${serv.id}">
-        <div class="form-check serv-check-host">
-          <input type="checkbox" class="serv-check" id="check-${serv.id}" data-id="${serv.id}" ${checked}>
+        <div class="custom-control custom-checkbox serv-check-host">
+          <input type="checkbox" class="custom-control-input serv-check" id="check-${serv.id}" data-id="${serv.id}" ${checked}>
+          <label class="custom-control-label serv-check-label" for="check-${serv.id}" style="width:0px"></label>
         </div>
         <img src="./res/serv_logos/large/${serv.id}.png" for="check-${serv.id}"></img>
         <div class="input-group input-group-sm serv-url">

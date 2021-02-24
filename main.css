@@ -1,16 +1,20 @@
 :root {
-  --color-fg: #000000;
-  --color-bg: #ffffff;
+  --color-fg: #ffffff;
+  --color-bg: #000000;
+  --color-bg-trans: #00000065;
   --color-trans: #00000000;
+  --color-neutral: #808080;
   --color-scroll: #ffffff44;
   --color-link: #1410ff;
-  --color-system-accent: red;
+  --color-hightlight: #0095f7;
+  --color-system-accent: blue;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
     --color-fg: #ffffff;
     --color-bg: #000000;
+    --color-bg-trans: #00000065;
   }
 }
 
@@ -18,26 +22,23 @@
   :root {
     --color-fg: #000000;
     --color-bg: #ffffff;
+    --color-bg-trans: #e7e7e79c;
   }
 }
 
 .custom-control-input:focus ~ .custom-control-label::before {
-  box-shadow: 0 0 0 1px #fff, 0 0 0 1px var(--color-system-accent);
-}
-.custom-control-input:active ~ .custom-control-label::before {
-  background-color: #fff;
+  box-shadow: 0 0 0 1px var(--color-bg), 0 0 0 1px var(--color-system-accent);
 }
 
 .custom-checkbox .custom-control-input:checked ~ .custom-control-label::before {
   background-color: var(--color-system-accent);
   border-color: var(--color-system-accent);
-  /* outline: var(--color-system-accent); */
 }
 
 body {
   overflow: hidden;
   color: var(--color-fg);
-  background: var(--color-bg);
+  background: var(--color-bg-trans);
 }
 
 ::-webkit-scrollbar {
@@ -72,7 +73,7 @@ body {
 }
 
 .nf-facet {
-  color: white;
+  color: var(--color-fg);
   cursor: pointer;
 }
 
@@ -127,11 +128,6 @@ body {
   cursor: pointer;
 }
 
-/* .service-btn:hover {
-  color: #5dade2;
-  background-color: #000000;
-} */
-
 .control-btn-host {
   grid-column: 3;
   display: flex;
@@ -148,7 +144,7 @@ body {
 
 .control-btn {
   padding-left: 5px;
-  color: #d6d6d63b;
+  color: var(--color-neutral);
   transition: color .2s;
   cursor: pointer;
 }
@@ -158,7 +154,7 @@ body {
 }
 
 .control-btn:hover {
-  color: #d6d6d6;
+  color: var(--color-fg);
 }
 
 .ontop-locked:before {
@@ -169,8 +165,12 @@ body {
   content: '\f3c1';
 }
 
+.modal-backdrop {
+  background-color: var(--color-bg-trans);
+}
+
 .modal-header {
-  border-bottom: 1px solid #000000;
+  border-bottom: none;
 }
 
 .modal-body {
@@ -178,9 +178,9 @@ body {
 }
 
 .modal-content {
-  border-color: inherit;
-  background-color: inherit;
-  color: inherit;
+  border-color: var(--color-bg-trans);
+  background-color: var(--color-bg-trans);
+  color: var(--color-fg);
   max-height: calc(100vh - 80px);
   user-select: none;
   border-radius: 10px;
@@ -192,7 +192,7 @@ body {
 
 .modal-close-btn:hover,
 .modal-close-btn {
-  color: inhereit;
+  color: var(--color-fg);
 }
 
 .modal-close-btn:active,
@@ -203,13 +203,12 @@ body {
 
 .collapsible {
   width: 100%;
-  /* background-color: #00000000; */
   border: none;
 }
 
 .panel {
   border-width: 1px;
-  /* border-color: #444444; */
+  border-color: var(--color-fg);
   padding: 2px;
 }
 
@@ -220,7 +219,7 @@ body {
 
 .panel-header>a:hover,
 .panel-header:hover {
-  color: #0095f7;
+  color: var(--color-hightlight);
 }
 
 .panel-header .fa {
@@ -232,7 +231,7 @@ body {
 }
 
 .panel-header>a {
-  /* color: #ffffff; */
+  color: var(--color-fg);
 }
 
 .settings-group {
@@ -255,14 +254,15 @@ body {
 
 .text-glyph,
 .text-url {
-  color: #d6d6d6;
-  background-color: #000000;
-  border: #696969 solid 1px;
+  color: var(--color-fg);
+  background: var(--color-bg);
+  border: var(--color-bg) solid 1px;
 }
 
 .text-glyph {
   max-width: 29px;
   margin-left: 3px;
+  border-radius: .25rem !important;
 }
 
 .settings-services-host {
@@ -277,14 +277,13 @@ body {
   grid-template-columns: 10px 25px 1fr .8fr 10px;
   grid-template-rows: 10px repeat(4, 30px) 12px;
   align-items: center;
-  border: #00000000 solid 1px;
+  border: none;
   border-radius: 5px;
 }
 
 .service-host:hover {
-  background-color: #4c356bbe;
-  border: #4c356bbe solid 1px;
-  /* border-radius: 5px; */
+  background-color: var(--color-bg-trans);
+  border-color: var(--color-bg-trans);
 }
 
 .serv-url {
@@ -313,10 +312,15 @@ body {
   padding: 0;
 }
 
+.serv-check-label::before,
+.serv-check-label::after {
+  left: 0px;
+}
+
 .serv-glyph-pick {
   grid-row: 2;
   grid-column: 4;
-  color: #d6d6d6;
+  color: var(--color-fg);
 }
 
 .serv-color-pick {
@@ -330,12 +334,12 @@ body {
 .serv-color-pick,
 .serv-bg-pick {
   grid-column: 4;
-  color: #d6d6d6;
+  color: var(--color-fg);
   margin-bottom: 5px;
 }
 
 .label-text {
-  color: #d6d6d6;
+  color: var(--color-fg);
   font-family: Calibri, sans-serif;
   font-weight: 400;
   align-self: center;
