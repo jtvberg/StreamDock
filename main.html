@@ -13,10 +13,11 @@
   <header class="header-bar">
     <div class="service-btn-host"></div>
     <div class="control-btn-host">
-      <div class="fas fa-link control-btn" id="link-btn"></div>
-      <div class="fas fa-arrows-alt-v control-btn" id="scalev-btn"></div>
-      <div class="fas fa-arrows-alt-h control-btn" id="scaleh-btn"></div>
-      <div class="fas ontop-locked control-btn" id="ontop-btn"></div>
+      <div class="fas fa-arrow-left control-btn" id="back-btn" title="Go Back"></div>      
+      <div class="fas fa-link control-btn" id="link-btn" title="Navigate to Link from Clipboard"></div>
+      <div class="fas fa-arrows-alt-v control-btn" id="scalev-btn" title="Scale Height to 16:9"></div>
+      <div class="fas fa-arrows-alt-h control-btn" id="scaleh-btn" title="Scale Width to 16:9"></div>
+      <div class="fas ontop-locked control-btn" id="ontop-btn" title="Toggle Window On Top"></div>
     </div>
   </header>
   <div class="loading">
@@ -52,7 +53,7 @@
                     <div id="collapse-general" class="collapse settings-group" data-parent="#panel-general">
                       <div class="custom-control custom-checkbox">
                         <input type="checkbox" class="custom-control-input settings-check" id="ontop-check">
-                        <label class="custom-control-label" for="ontop-check">Ontop on Start Up</label>
+                        <label class="custom-control-label" for="ontop-check">On top on Start Up</label>
                         <div class="helper-text">
                           <small class="text-muted">Check to set window on top on start up</small>
                         </div>
@@ -96,9 +97,9 @@
                       </div>
                       <div class="custom-control custom-checkbox">
                         <input type="checkbox" class="custom-control-input settings-check" id="nav-check">
-                        <label class="custom-control-label" for="nav-check">Auto-hide nav bar buttons</label>
+                        <label class="custom-control-label" for="nav-check">Auto-hide Nav Bar Buttons</label>
                         <div class="helper-text">
-                          <small class="text-muted">Check to auto-hide quick access and lock buttons (Mac only)</small>
+                          <small class="text-muted">Check to auto-hide quick access and control buttons (Mac only)</small>
                         </div>
                       </div>
                       <div class="form-group">

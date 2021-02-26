@@ -6,6 +6,7 @@ const { app, BrowserWindow, ipcMain, BrowserView, Tray, session, Menu, MenuItem,
 const path = require('path')
 const isMac = process.platform === 'darwin'
 const updater = require('./updater')
+const fs = require('fs')
 const headerSize = isMac ? 22 : 0
 const winAdjustHeight = isMac ? 22 : 57
 const winAdjustWidth = 0
@@ -15,8 +16,6 @@ let isPlaying = false
 let restorePlay = false
 let userAgent = ''
 let currentStream = ''
-
-const fs = require('fs')
 
 // OS variables
 if (isMac) {
@@ -31,7 +30,7 @@ if (isMac) {
 // app.disableHardwareAcceleration()
 
 // Enable Electron-Reload (dev only)
-require('electron-reload')(__dirname)
+// require('electron-reload')(__dirname)
 
 // Main window and view
 let win = null
@@ -74,10 +73,13 @@ const createWindow = () => {
 
   // Show browserView when loaded
   view.webContents.on('did-finish-load', () => {
-    setView()
-    win.webContents.send('stream-loaded')
     // Open DevTools (view, dev only)
     // view.webContents.openDevTools()
+    setView()
+    win.webContents.send('stream-loaded')
+    if (currentStream === 'yt') {
+      ytSkipAdds()
+    }
   })
 
   // Capture playing
@@ -237,11 +239,24 @@ function scaleWidth() {
 
 // Open copied link in new BrowserView
 function openLink(url) {
-  const stream = {
-    id: currentStream,
-    url: url
+  if (validateLink(url)) {
+    const stream = {
+      id: currentStream,
+      url: url
+    }
+    streamChange(stream)
   }
-  streamChange(stream)
+}
+
+// Check if url is valid
+function validateLink(url) {
+  try {
+    new URL(url)
+  } catch (e) {
+    console.error(e)
+    return false
+  }
+  return true
 }
 
 // Take screenshot of current stream
@@ -252,6 +267,32 @@ function captureStream() {
     })
   })
   win.webContents.send('image-resize')
+}
+
+// Navigate view backwards
+function navBack() {
+  if (view.webContents.canGoBack()) {
+    view.webContents.goBack()
+  }
+}
+
+// Navicate view forwards
+function navForward() {
+  if (view.webContents.canGoForward()) {
+    view.webContents.goForward()
+  }
+}
+
+// Skip/close YouTube ads
+function ytSkipAdds() {
+  view.webContents.executeJavaScript(`const obs = new MutationObserver(function(ml) {
+    for(const mut of ml) {
+      if (mut.type === 'childList' && mut.target.classList.contains('ytp-ad-text')) {
+        document.querySelector('.ytp-ad-skip-button').click()
+      }
+    }
+  }).observe(document.querySelector('ytd-app'), { childList: true, subtree: true})`)
+  // view.webContents.executeJavaScript(`if (document.querySelectorAll('.ytp-ad-overlay-close-button')) { document.querySelectorAll('.ytp-ad-overlay-close-button').click() }`)
 }
 
 // Widvine DRM setup
@@ -400,6 +441,16 @@ ipcMain.on('set-theme', (e, data) => {
   nativeTheme.themeSource = data
 })
 
+// IPC channel to navigate backwards
+ipcMain.on('nav-back', () => {
+  navBack()
+})
+
+// IPC channel to navigate forwards
+ipcMain.on('nav-forward', () => {
+  navForward()
+})
+
 // Menu template
 const template = [{
   label: app.name,
@@ -530,6 +581,18 @@ const template = [{
   },
   {
     type: 'separator'
+  },
+  {
+    label: 'Navigate Backward',
+    click() {
+      navBack()
+    }
+  },
+  {
+    label: 'Navigate Forward',
+    click() {
+      navForward()
+    }
   },
   {
     role: 'reload'

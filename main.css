@@ -132,7 +132,7 @@ body {
   grid-column: 3;
   display: flex;
   justify-self: flex-end;
-  margin-right: 4px;
+  margin-right: 6px;
   margin-top: 1px;
   transition: opacity .2s;
   -webkit-app-region: no-drag;
@@ -143,7 +143,7 @@ body {
 }
 
 .control-btn {
-  padding-left: 5px;
+  padding-left: 8px;
   color: var(--color-neutral);
   transition: color .2s;
   cursor: pointer;
@@ -278,7 +278,7 @@ body {
   grid-template-rows: 10px repeat(4, 30px) 12px;
   align-items: center;
   border: none;
-  border-radius: 5px;
+  border-radius: 8px;
 }
 
 .service-host:hover {

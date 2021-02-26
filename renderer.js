@@ -505,18 +505,23 @@ $('#ontop-btn').on('click', function () {
   }
 })
 
+// Back button click handler
+$('#back-btn').on('click', () => {
+  ipcRenderer.send('nav-back')
+})
+
 // Open link from clipboard click handler
-$('#link-btn').on('click', function () {
+$('#link-btn').on('click', () => {
   ipcRenderer.send('open-link')
 })
 
 // Scale horizontal click handler
-$('#scaleh-btn').on('click', function () {
+$('#scaleh-btn').on('click', () => {
   ipcRenderer.send('scale-width')
 })
 
 // Scale vertical click handler
-$('#scalev-btn').on('click', function () {
+$('#scalev-btn').on('click', () => {
   ipcRenderer.send('scale-height')
 })
 
