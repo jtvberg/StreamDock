@@ -9,7 +9,7 @@ const updater = require('./updater')
 const fs = require('fs')
 const headerSize = isMac ? 22 : 0
 const winAdjustHeight = isMac ? 22 : 57
-const winAdjustWidth = 0
+const winAdjustWidth = 200
 let wb = { x: 0, y: 0, height: 0, width: 0 }
 let allowQuit = false
 let isPlaying = false
@@ -26,11 +26,12 @@ if (isMac) {
   userAgent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.182 Safari/537.36'
 }
 
+// Dev code
 // Disable hardware acceleration (buggy)
 // app.disableHardwareAcceleration()
 
 // Enable Electron-Reload (dev only)
-// require('electron-reload')(__dirname)
+require('electron-reload')(__dirname)
 
 // Main window and view
 let win = null
