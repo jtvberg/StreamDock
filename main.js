@@ -287,12 +287,12 @@ function navForward() {
 function ytSkipAdds() {
   view.webContents.executeJavaScript(`const obs = new MutationObserver(function(ml) {
     for(const mut of ml) {
-      if (mut.type === 'childList' && mut.target.classList.contains('ytp-ad-text')) {
-        document.querySelector('.ytp-ad-skip-button').click()
+      if (mut.type === 'childList' && (mut.target.classList.contains('ytp-ad-text') || mut.target.classList.contains('ytp-ad-module'))) {
+        try { document.querySelector('.ytp-ad-skip-button').click() } catch(err) { console.log(err) }
+        try { document.querySelector('.ytp-ad-overlay-close-button').click() } catch(err) { console.log(err) }
       }
     }
   }).observe(document.querySelector('ytd-app'), { childList: true, subtree: true})`)
-  // view.webContents.executeJavaScript(`if (document.querySelectorAll('.ytp-ad-overlay-close-button')) { document.querySelectorAll('.ytp-ad-overlay-close-button').click() }`)
 }
 
 // Widvine DRM setup
