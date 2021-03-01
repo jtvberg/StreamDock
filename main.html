@@ -13,7 +13,8 @@
   <header class="header-bar">
     <div class="service-btn-host"></div>
     <div class="control-btn-host">
-      <div class="fas fa-arrow-left control-btn" id="back-btn" title="Go Back"></div>      
+      <div class="fas fa-arrow-left control-btn" id="back-btn" title="Go Back"></div>
+      <div class="fas fa-film control-btn" id="facets-btn" title="Show Genres"></div>
       <div class="fas fa-link control-btn" id="link-btn" title="Navigate to Link from Clipboard"></div>
       <div class="fas fa-arrows-alt-v control-btn" id="scalev-btn" title="Scale Height to 16:9"></div>
       <div class="fas fa-arrows-alt-h control-btn" id="scaleh-btn" title="Scale Width to 16:9"></div>
@@ -25,7 +26,7 @@
       <span class="sr-only">Loading...</span>
     </div>
   </div>
-  <div class="nf-facet-host">Netflix Facets</div>
+  <div class="nf-facet-host"><h3>Netflix Facets</h3></div>
   <div class="logo">
     <img src="./res/logo/sd_logo.png">
   </div>
@@ -60,9 +61,9 @@
                       </div>
                       <div class="custom-control custom-checkbox">
                         <input type="checkbox" class="custom-control-input settings-check" id="last-check">
-                        <label class="custom-control-label" for="last-check">Remember Last Used Service</label>
+                        <label class="custom-control-label" for="last-check">Remember Last Stream</label>
                         <div class="helper-text">
-                          <small class="text-muted">Check to load the last service used from previous session</small>
+                          <small class="text-muted">Check to load the last stream from previous session</small>
                         </div>
                       </div>
                       <div class="custom-control custom-checkbox">
@@ -100,6 +101,13 @@
                         <label class="custom-control-label" for="nav-check">Auto-hide Nav Bar Buttons</label>
                         <div class="helper-text">
                           <small class="text-muted">Check to auto-hide quick access and control buttons (Mac only)</small>
+                        </div>
+                      </div>
+                      <div class="custom-control custom-checkbox">
+                        <input type="checkbox" class="custom-control-input settings-check" id="skip-check">
+                        <label class="custom-control-label" for="skip-check">Skip or Dismiss Ads (YouTube)</label>
+                        <div class="helper-text">
+                          <small class="text-muted">Check to automatically skip or dismiss ads in YouTube</small>
                         </div>
                       </div>
                       <div class="form-group">

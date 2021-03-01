@@ -65,10 +65,12 @@ body {
   display: flex;
   flex-direction: column;
   position: absolute;
-  left: 0px;
+  right: 0px;
   top: 22px;
-  height: 600px;
-  width: 200px;
+  height: calc(100% - 60px);
+  width: 300px;
+  padding: 5px;
+  overflow-y: auto;
   color: var(--color-fg);
 }
 

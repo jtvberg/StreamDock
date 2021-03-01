@@ -1,5 +1,6 @@
 // TODO: Peacock won't login
 // TODO: Touchbar support
+// TODO: Scrollbar css
 
 // Imports and variable declarations
 const { app, BrowserWindow, ipcMain, BrowserView, Tray, session, Menu, MenuItem, systemPreferences, clipboard, nativeTheme, dialog } = require('electron')
@@ -9,11 +10,12 @@ const updater = require('./updater')
 const fs = require('fs')
 const headerSize = isMac ? 22 : 0
 const winAdjustHeight = isMac ? 22 : 57
-const winAdjustWidth = 200
+const winAdjustWidth = 300
 let wb = { x: 0, y: 0, height: 0, width: 0 }
 let allowQuit = false
 let isPlaying = false
 let restorePlay = false
+let showFacets = false
 let userAgent = ''
 let currentStream = ''
 
@@ -31,7 +33,7 @@ if (isMac) {
 // app.disableHardwareAcceleration()
 
 // Enable Electron-Reload (dev only)
-require('electron-reload')(__dirname)
+// require('electron-reload')(__dirname)
 
 // Main window and view
 let win = null
@@ -77,10 +79,12 @@ const createWindow = () => {
     // Open DevTools (view, dev only)
     // view.webContents.openDevTools()
     setView()
-    win.webContents.send('stream-loaded')
-    if (currentStream === 'yt') {
-      ytSkipAdds()
-    }
+    streamLoaded()
+  })
+
+  // Capture in-page navigation
+  view.webContents.on('did-navigate-in-page' , () => {
+    streamLoaded()
   })
 
   // Capture playing
@@ -130,7 +134,7 @@ const createWindow = () => {
 
   // Restore view on dev tools close
   win.webContents.on('devtools-closed', () => {
-    setView()
+    setViewBounds()
   })
 }
 
@@ -188,7 +192,8 @@ function play() {
 // Remove view from window
 function removeView() {
   if (win.getBrowserView()) {
-    win.removeBrowserView(view)
+    // win.removeBrowserView(view)
+    view.setBounds({ x: 0, y: 0, width: 0, height: 0 })
   }
 }
 
@@ -201,12 +206,14 @@ function setView() {
 // Adjust view bounds to window
 function setViewBounds() {
   wb = win.getBounds()
+  let waw = showFacets ? winAdjustWidth : 0
   view.setBounds({
-    x: winAdjustWidth,
+    x: 0,
     y: headerSize,
-    width: wb.width - winAdjustWidth,
+    width: wb.width - waw,
     height: wb.height - winAdjustHeight
   })
+  updateShowFacets()
 }
 
 // Change stream service
@@ -216,6 +223,23 @@ function streamChange(stream) {
   currentStream = stream.id
   view.webContents.loadURL(stream.url)
   win.webContents.send('stream-changed')
+  updateShowFacets()
+}
+
+// Stream loaded
+function streamLoaded() {
+  let data = { id: currentStream, url: view.webContents.getURL() }
+  win.webContents.send('stream-loaded', data)
+  updateShowFacets()
+  if (currentStream === 'yt') {
+    ytSkipAdds()
+  }
+}
+
+//
+function updateShowFacets() {
+  showFacets = showFacets && currentStream === 'nf'
+  win.webContents.send('show-facets', showFacets)
 }
 
 // Scale height to 16:9
@@ -242,7 +266,7 @@ function scaleWidth() {
 function openLink(url) {
   if (validateLink(url)) {
     const stream = {
-      id: currentStream,
+      id: 'ot',
       url: url
     }
     streamChange(stream)
@@ -267,13 +291,16 @@ function captureStream() {
       if (err) console.log(err)
     })
   })
-  win.webContents.send('image-resize')
+  win.webContents.send('save-bookmark', view.webContents.getURL())
 }
 
 // Navigate view backwards
 function navBack() {
   if (view.webContents.canGoBack()) {
     view.webContents.goBack()
+    currentStream = 'ot'
+    updateShowFacets()
+    setViewBounds()
   }
 }
 
@@ -281,6 +308,9 @@ function navBack() {
 function navForward() {
   if (view.webContents.canGoForward()) {
     view.webContents.goForward()
+    currentStream = 'ot'
+    updateShowFacets()
+    setViewBounds()
   }
 }
 
@@ -434,7 +464,7 @@ ipcMain.on('view-hide', () => {
 
 // IPC channel for showing view
 ipcMain.on('view-show', () => {
-  setView()
+  setViewBounds()
 })
 
 // IPC channel for setting theme mode
@@ -450,6 +480,12 @@ ipcMain.on('nav-back', () => {
 // IPC channel to navigate forwards
 ipcMain.on('nav-forward', () => {
   navForward()
+})
+
+// IPC channel to navigate forwards
+ipcMain.on('toggle-facets', () => {
+  showFacets = currentStream === 'nf' && view.getBounds().width === wb.width
+  setViewBounds()
 })
 
 // Menu template
