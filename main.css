@@ -4,7 +4,9 @@
   --color-bg-trans: #00000065;
   --color-trans: #00000000;
   --color-neutral: #808080;
-  --color-scroll: #ffffff44;
+  --color-neutral-light: #c7c7c7b2;
+  --color-scroll: #80808080;
+  --color-thumb: #808080;
   --color-link: #1410ff;
   --color-hightlight: #0095f7;
   --color-system-accent: blue;
@@ -14,7 +16,8 @@
   :root {
     --color-fg: #ffffff;
     --color-bg: #000000;
-    --color-bg-trans: #00000065;
+    --color-bg-trans: #00000081;
+    --color-neutral-light: #ffffff23;
   }
 }
 
@@ -23,6 +26,7 @@
     --color-fg: #000000;
     --color-bg: #ffffff;
     --color-bg-trans: #e7e7e79c;
+    --color-neutral-light: #c7c7c7b2;
   }
 }
 
@@ -46,12 +50,12 @@ body {
 }
 
 ::-webkit-scrollbar-track {
-  box-shadow: inset 0 0 6px var(--color-trans);
+  box-shadow: inset 0 0 6px var(--color-scroll);
   border-radius: 10px;
 }
 
 ::-webkit-scrollbar-thumb {
-  box-shadow: inset 0 0 6px var(-color-scroll);
+  box-shadow: inset 0 0 6px var(--color-thumb);
   border-radius: 10px;
 }
 
@@ -67,8 +71,8 @@ body {
   position: absolute;
   right: 0px;
   top: 22px;
-  height: calc(100% - 60px);
-  width: 300px;
+  height: calc(100% - 70px);
+  width: 240px;
   padding: 5px;
   overflow-y: auto;
   color: var(--color-fg);
@@ -284,8 +288,8 @@ body {
 }
 
 .service-host:hover {
-  background-color: var(--color-bg-trans);
-  border-color: var(--color-bg-trans);
+  background-color: var(--color-neutral-light);
+  border-color: var(--color-neutral-light);
 }
 
 .serv-url {

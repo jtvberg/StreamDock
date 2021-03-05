@@ -35,16 +35,23 @@ ipcRenderer.on('save-settings', (e, data) => {
 })
 
 // Stream changed
-ipcRenderer.on('stream-changed', () => {
+ipcRenderer.on('stream-changed', (e, data) => {
   $('.loading').show()
-  // $('.nf-facet-host').hide()
+  if (!data.url.includes('.netflix.com')) {
+    $('.nf-facet-host').hide()
+    $('#facets-btn').hide()
+  }
 })
 
 // Stream loaded
 ipcRenderer.on('stream-loaded', (e, data) => {
-  $('.loading').hide()
   settings.lastStream = { id: data.id, url: data.url }
-  data.id === 'nf' ? $('#facets-btn').show() : $('#facets-btn').hide()
+  if (settings.lastStream.url.includes('.netflix.com')) {
+    $('#facets-btn').show()
+  } else {
+    $('#facets-btn').hide()
+  }
+  $('.loading').hide()
 })
 
 // Save bookmark
@@ -94,6 +101,9 @@ function applyInitialSettings() {
   if (settings.saveWindow) {
     ipcRenderer.send('set-window', settings.windowSizeLocation)
   }
+
+  $('.nf-facet-host').hide()
+  $('#facets-btn').hide()
 
   applyUpdateSettings()
 }

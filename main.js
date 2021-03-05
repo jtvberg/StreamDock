@@ -10,7 +10,7 @@ const updater = require('./updater')
 const fs = require('fs')
 const headerSize = isMac ? 22 : 0
 const winAdjustHeight = isMac ? 22 : 57
-const winAdjustWidth = 300
+const winAdjustWidth = 240
 let wb = { x: 0, y: 0, height: 0, width: 0 }
 let allowQuit = false
 let isPlaying = false
@@ -18,6 +18,7 @@ let restorePlay = false
 let showFacets = false
 let userAgent = ''
 let currentStream = ''
+let lastStream = ''
 
 // OS variables
 if (isMac) {
@@ -69,7 +70,7 @@ const createWindow = () => {
   })
 
   // Open DevTools (window, dev only)
-  // win.webContents.openDevTools()
+  // win.webContents.openDevTools(detach)
 
   // Create main browserView
   view = new BrowserView()
@@ -77,14 +78,18 @@ const createWindow = () => {
   // Show browserView when loaded
   view.webContents.on('did-finish-load', () => {
     // Open DevTools (view, dev only)
-    // view.webContents.openDevTools()
+    // view.webContents.openDevTools(detach)
+    const stream = {
+      id: currentStream,
+      url: view.webContents.getURL()
+    }
     setView()
-    streamLoaded()
+    streamLoaded(stream)
   })
 
-  // Capture in-page navigation
-  view.webContents.on('did-navigate-in-page' , () => {
-    streamLoaded()
+  // Set current stream URL (most reliable event)
+  view.webContents.on('did-start-navigation', () => {
+    currentStream = setStreamId(view.webContents.getURL())
   })
 
   // Capture playing
@@ -192,7 +197,6 @@ function play() {
 // Remove view from window
 function removeView() {
   if (win.getBrowserView()) {
-    // win.removeBrowserView(view)
     view.setBounds({ x: 0, y: 0, width: 0, height: 0 })
   }
 }
@@ -205,6 +209,7 @@ function setView() {
 
 // Adjust view bounds to window
 function setViewBounds() {
+  updateShowFacets()
   wb = win.getBounds()
   let waw = showFacets ? winAdjustWidth : 0
   view.setBounds({
@@ -213,33 +218,87 @@ function setViewBounds() {
     width: wb.width - waw,
     height: wb.height - winAdjustHeight
   })
-  updateShowFacets()
 }
 
 // Change stream service
 function streamChange(stream) {
   isPlaying ? pause() : null
   view.setBounds({ x: 0, y: 0, width: 0, height: 0 })
+  lastStream = currentStream
   currentStream = stream.id
   view.webContents.loadURL(stream.url)
-  win.webContents.send('stream-changed')
-  updateShowFacets()
+  win.webContents.send('stream-changed', stream)
 }
 
 // Stream loaded
-function streamLoaded() {
-  let data = { id: currentStream, url: view.webContents.getURL() }
-  win.webContents.send('stream-loaded', data)
-  updateShowFacets()
-  if (currentStream === 'yt') {
-    ytSkipAdds()
-  }
+function streamLoaded(stream) {
+  win.webContents.send('stream-loaded', stream)
+  ytSkipAdds()
 }
 
-//
+// Toggle facets if Netflix
 function updateShowFacets() {
   showFacets = showFacets && currentStream === 'nf'
   win.webContents.send('show-facets', showFacets)
+}
+
+// Open copied link in new BrowserView
+function openLink(url) {
+  currentStream = 'ot'
+  if (validateLink(url)) {
+    const stream = {
+      id: setStreamId(url),
+      url: url
+    }
+    streamChange(stream)
+  }
+}
+
+// Navigate view backwards
+function navBack() {
+  if (view.webContents.canGoBack()) {
+    view.webContents.goBack()
+  }
+}
+
+// Navicate view forwards
+function navForward() {
+  if (view.webContents.canGoForward()) {
+    view.webContents.goForward()
+  }
+}
+
+// Set the stream ID if it needs to be derived
+function setStreamId(url) {
+  if (url.includes('.youtube.com') && !url.includes('tv.')) {
+    return 'yt'
+  }
+  if (url.includes('.netflix.com')) {
+    return 'nf'
+  }
+  return currentStream
+}
+
+// Back btn
+// Skip/close YouTube ads
+function ytSkipAdds() {
+  if (currentStream === 'yt' && lastStream !== 'yt') {
+    try {
+      view.webContents.executeJavaScript(`try { document.querySelector('.ytp-ad-skip-button').click() } catch(err) { console.log(err) }`)
+      view.webContents.executeJavaScript(`const obs = new MutationObserver(function(ml) {
+        for(const mut of ml) {
+          if (mut.type === 'childList' && mut.target.classList.contains('ytp-ad-text')) {
+            try { document.querySelector('.ytp-ad-skip-button').click() } catch(err) { console.log(err) }
+          }
+          if (mut.type === 'childList' && mut.target.classList.contains('ytp-ad-module')) {
+            try { document.querySelector('.ytp-ad-overlay-close-button').click() } catch(err) { console.log(err) }
+          }
+        }
+      }).observe(document.querySelector('ytd-app'), { childList: true, subtree: true})`)
+    } catch(err) {
+      console.log(err)
+    }
+  }
 }
 
 // Scale height to 16:9
@@ -262,17 +321,6 @@ function scaleWidth() {
   })
 }
 
-// Open copied link in new BrowserView
-function openLink(url) {
-  if (validateLink(url)) {
-    const stream = {
-      id: 'ot',
-      url: url
-    }
-    streamChange(stream)
-  }
-}
-
 // Check if url is valid
 function validateLink(url) {
   try {
@@ -292,38 +340,6 @@ function captureStream() {
     })
   })
   win.webContents.send('save-bookmark', view.webContents.getURL())
-}
-
-// Navigate view backwards
-function navBack() {
-  if (view.webContents.canGoBack()) {
-    view.webContents.goBack()
-    currentStream = 'ot'
-    updateShowFacets()
-    setViewBounds()
-  }
-}
-
-// Navicate view forwards
-function navForward() {
-  if (view.webContents.canGoForward()) {
-    view.webContents.goForward()
-    currentStream = 'ot'
-    updateShowFacets()
-    setViewBounds()
-  }
-}
-
-// Skip/close YouTube ads
-function ytSkipAdds() {
-  view.webContents.executeJavaScript(`const obs = new MutationObserver(function(ml) {
-    for(const mut of ml) {
-      if (mut.type === 'childList' && (mut.target.classList.contains('ytp-ad-text') || mut.target.classList.contains('ytp-ad-module'))) {
-        try { document.querySelector('.ytp-ad-skip-button').click() } catch(err) { console.log(err) }
-        try { document.querySelector('.ytp-ad-overlay-close-button').click() } catch(err) { console.log(err) }
-      }
-    }
-  }).observe(document.querySelector('ytd-app'), { childList: true, subtree: true})`)
 }
 
 // Widvine DRM setup
