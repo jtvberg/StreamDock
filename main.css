@@ -78,11 +78,56 @@ body {
   overflow-y: hidden;
 }
 
+.facet-filter-host {
+  position: relative;
+}
+
+.facet-filter {
+  height: 22px;
+  margin-bottom: 3px;
+  margin-top: -8px;
+  padding: 2px;
+  padding-right: 30px;
+  color: var(--color-fg);
+  background-color: var(--color-bg-trans);
+  border-color: var(--color-bg-trans);
+  border-radius: 3px;
+}
+
+.facet-filter:focus {
+  color: var(--color-fg);
+  background-color: var(--color-bg-trans);
+  border-color: var(--color-bg-trans);
+  box-shadow: 0 0 0 1px var(--color-bg-trans), 0 0 0 1px var(--color-system-accent);
+}
+
+.filter-all {
+  position: absolute;
+  cursor: pointer;
+  color: var(--color-neutral);
+  transition: color .2s;
+  right: 3px;
+  top: 6px;
+}
+
+.toggled {
+  color: var(--color-fg);
+}
+
+.filter-clear {
+  position: absolute;
+  cursor: pointer;
+  color: var(--color-neutral);
+  transition: color .2s;
+  right: 18px;
+  top: 3px;
+}
+
 .nf-facet-host {
   display: flex;
   flex-direction: column;
   overflow-y: auto;
-  height: calc(100% - 40px);
+  height: calc(100% - 60px);
 }
 
 .nf-facet {
@@ -169,6 +214,8 @@ body {
   opacity: 0;
 }
 
+.filter-clear:hover,
+.filter-all:hover,
 .control-btn:hover {
   color: var(--color-fg);
 }

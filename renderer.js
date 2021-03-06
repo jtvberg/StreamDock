@@ -416,11 +416,20 @@ function loadDefaultSettings() {
 
 // Load NF facets into UI
 function renderNfFacets() {
+  $('.nf-facet-host').empty()
+  const showAll = !$('.filter-all').hasClass('toggled')
   $.each(nfFacets, function(i, facet) {
     if(facet.Category === 'Genre') {
-      $('.nf-facet-host').append(`<div class="nf-facet" data-code="${facet.Code}">${facet.Genre}</div>`)
+      $('.nf-facet-host').append(`<div class="nf-facet" data-code="${facet.Code}" style="font-weight: 900">${facet.Genre}</div>`)
+    } else if (facet.Category !== 'A-Z') {
+      $('.nf-facet-host').append(`<div class="nf-facet" data-code="${facet.Code}">- ${facet.Genre}</div>`)
+    } else if (showAll) {
+      $('.nf-facet-host').append(`<div class="nf-facet" data-code="${facet.Code}">- ${facet.Genre}</div>`)
     }
   })
+  if (!showAll) {
+    $('.nf-facet-host').children().last().remove()
+  }
 }
 
 // Sent IPC message to open stream
@@ -482,7 +491,9 @@ $.getJSON('nffacets.json', function(json) {
 
 // NF facet click handler
 $(document).on('click', '.nf-facet', function () {
-  openStream('nf', `https://www.netflix.com/browse/genre/${$(this).data('code')}`)
+  if ($(this).data('code') > 0) {
+    openStream('nf', `https://www.netflix.com/browse/genre/${$(this).data('code')}`)
+  }
 })
 
 // Service selector click handler
@@ -528,6 +539,26 @@ $(document).on('mouseleave', '.service-btn', function () {
     'color': '',
     'background-color': ''
   })
+})
+
+// Clear facet filter
+$('.filter-clear').on('click', () => {
+  $('.facet-filter').val('')
+})
+
+// Toggle show all facets
+$('.filter-all').on('click', () => {
+  if ($('.filter-all').hasClass('toggled')) {
+    $('.filter-all').removeClass('toggled')
+  } else {
+    $('.filter-all').addClass('toggled')
+  }
+  renderNfFacets()
+})
+
+// Toggle show all facets
+$('.facet-filter').on('input', function () {
+  console.log($(this).val())
 })
 
 // Toggle keep on top

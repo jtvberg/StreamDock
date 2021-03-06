@@ -1,4 +1,5 @@
 [
+  { "Category": "Genre", "Genre": "Recently Added", "Code": "1592210" },
   { "Category": "Genre", "Genre": "Action & Adventure", "Code": "1365" },
   { "Category": "Action & Adventure", "Genre": "Asian Action Movies", "Code": "77232" },
   { "Category": "Action & Adventure", "Genre": "Classic Action & Adventure", "Code": "46576" },
@@ -243,6 +244,7 @@
   { "Category": "TV Shows", "Genre": "TV Sci-Fi & Fantasy", "Code": "1372" },
   { "Category": "TV Shows", "Genre": "Reality TV", "Code": "9833" },
   { "Category": "TV Shows", "Genre": "Teen TV Shows", "Code": "60951" },
+  { "Category": "Genre", "Genre": "A-Z Genres", "Code": "0" },
   { "Category": "A-Z", "Genre": "Action & Adventure based on a book from the 1960s", "Code": "4082" },
   { "Category": "A-Z", "Genre": "Action & Adventure based on a book from the 1970s", "Code": "2410" },
   { "Category": "A-Z", "Genre": "Action & Adventure based on a book from the 1980s", "Code": "704" },
