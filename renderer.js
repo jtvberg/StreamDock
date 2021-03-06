@@ -253,10 +253,10 @@ function getDefaultStreams() {
   {
     id: 'cb',
     active: true,
-    glyph: 'C',
-    title: 'CBS',
-    url: 'https://cbs.com',
-    color: '#0095f7',
+    glyph: 'P',
+    title: 'Paramount+',
+    url: 'https://www.paramountplus.com/',
+    color: '#0166a4',
     bgColor: '#ffffff'
   },
   {
