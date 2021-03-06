@@ -544,6 +544,7 @@ $(document).on('mouseleave', '.service-btn', function () {
 // Clear facet filter
 $('.filter-clear').on('click', () => {
   $('.facet-filter').val('')
+  renderNfFacets()
 })
 
 // Toggle show all facets
@@ -558,7 +559,16 @@ $('.filter-all').on('click', () => {
 
 // Toggle show all facets
 $('.facet-filter').on('input', function () {
-  console.log($(this).val())
+  const filter = ($(this).val()).toLowerCase()
+  $('.nf-facet-host').empty()
+  $.each(nfFacets, function(i, facet) {
+    if(facet.Genre.toLowerCase().includes(filter) || facet.Category.toLowerCase().includes(filter)) {
+      $('.nf-facet-host').append(`<div class="nf-facet" data-code="${facet.Code}">${facet.Genre}</div>`)
+    }
+  })
+  if (filter === '') {
+    renderNfFacets()
+  }
 })
 
 // Toggle keep on top
