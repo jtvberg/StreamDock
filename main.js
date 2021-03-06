@@ -33,7 +33,7 @@ if (isMac) {
 // app.disableHardwareAcceleration()
 
 // Enable Electron-Reload (dev only)
-// require('electron-reload')(__dirname)
+require('electron-reload')(__dirname)
 
 // Main window and view
 let win = null
@@ -69,7 +69,7 @@ const createWindow = () => {
   })
 
   // Open DevTools (window, dev only)
-  // win.webContents.openDevTools('detach')
+  win.webContents.openDevTools('detach')
 
   // Create main browserView
   view = new BrowserView()
@@ -246,8 +246,7 @@ function openLink(url) {
 // Navigate view backwards
 function navBack() {
   if (view.webContents.canGoBack()) {
-    currentStream = 'ot'
-    setViewBounds()
+    navChange()
     view.webContents.goBack()
   }
 }
@@ -255,10 +254,17 @@ function navBack() {
 // Navicate view forwards
 function navForward() {
   if (view.webContents.canGoForward()) {
-    currentStream = 'ot'
-    setViewBounds()
+    navChange()
     view.webContents.goForward()
   }
+}
+
+// Back/forward button stream change
+function navChange() {
+  currentStream = 'ot'
+  updateShowFacets()
+  view.setBounds({ x: 0, y: 0, width: 0, height: 0 })
+  win.webContents.send('stream-changed', null)
 }
 
 // Set the stream ID if it needs to be derived
@@ -274,7 +280,6 @@ function setStreamId(url) {
   return currentStream
 }
 
-// Back btn
 // Skip/close YouTube ads
 function ytSkipAdds() {
   if (currentStream === 'yt') {
@@ -346,7 +351,8 @@ function captureStream() {
       if (err) console.log(err)
     })
   })
-  win.webContents.send('save-bookmark', view.webContents.getURL())
+  const stream = { id: currentStream, url: view.webContents.getURL() }
+  win.webContents.send('save-bookmark', stream)
 }
 
 // Widvine DRM setup

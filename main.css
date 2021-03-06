@@ -1,6 +1,8 @@
 :root {
-  --color-fg: #ffffff;
-  --color-bg: #000000;
+  --color-white: #eeeeee;
+  --color-black: #111111;
+  --color-fg: var(--color-white);
+  --color-bg: var(--color-black);
   --color-bg-trans: #00000065;
   --color-trans: #00000000;
   --color-neutral: #808080;
@@ -14,8 +16,8 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --color-fg: #ffffff;
-    --color-bg: #000000;
+    --color-fg: var(--color-white);
+    --color-bg: var(--color-black);
     --color-bg-trans: #00000081;
     --color-neutral-light: #ffffff23;
   }
@@ -23,8 +25,8 @@
 
 @media (prefers-color-scheme: light) {
   :root {
-    --color-fg: #000000;
-    --color-bg: #ffffff;
+    --color-fg: var(--color-black);
+    --color-bg: var(--color-white);
     --color-bg-trans: #e7e7e79c;
     --color-neutral-light: #c7c7c7b2;
   }
@@ -65,26 +67,34 @@ body {
   bottom: 10px;
 }
 
-.nf-facet-host {
-  display: flex;
-  flex-direction: column;
+.facet-host {
   position: absolute;
   right: 0px;
   top: 22px;
   height: calc(100% - 70px);
   width: 240px;
   padding: 5px;
-  overflow-y: auto;
   color: var(--color-fg);
+  overflow-y: hidden;
+}
+
+.nf-facet-host {
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  height: calc(100% - 40px);
 }
 
 .nf-facet {
   color: var(--color-fg);
   cursor: pointer;
+  padding: 2px;
 }
 
 .nf-facet:hover {
-  color: var(--color-link)
+  color: var(--color-white);
+  border-radius: 3px;
+  background-color: var(--color-system-accent);
 }
 
 .loading {

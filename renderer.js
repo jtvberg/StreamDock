@@ -1,7 +1,6 @@
 // TODO: Open services in new window
 // TODO: Setting: let user pick whether or not a new window is created
 // TODO: Setting: add services
-// TODO: Netflix facets
 
 // Imports and variable declarations
 const { ipcRenderer } = require('electron')
@@ -37,15 +36,15 @@ ipcRenderer.on('save-settings', (e, data) => {
 // Stream changed
 ipcRenderer.on('stream-changed', (e, url) => {
   $('.loading').show()
-  if (!url.includes('.netflix.com')) {
-    $('.nf-facet-host').hide()
+  if (url && !url.includes('.netflix.com')) {
+    $('.facet-host').hide()
     $('#facets-btn').hide()
   }
 })
 
 // Stream loaded
-ipcRenderer.on('stream-loaded', (e, data) => {
-  settings.lastStream = data
+ipcRenderer.on('stream-loaded', (e, stream) => {
+  settings.lastStream = stream
   if (settings.lastStream.url.includes('.netflix.com')) {
     $('#facets-btn').show()
   } else {
@@ -60,13 +59,13 @@ ipcRenderer.on('stream-update', (e, url) => {
 })
 
 // Save bookmark
-ipcRenderer.on('save-bookmark', (e, url) => {
-  saveBookmark(url, 'temp.png')
+ipcRenderer.on('save-bookmark', (e, stream) => {
+  saveBookmark(stream, 'temp.png')
 })
 
 // Show Netflix facets
 ipcRenderer.on('show-facets', (e, bool) => {
-  bool ? $('.nf-facet-host').show() : $('.nf-facet-host').hide()
+  bool ? $('.facet-host').show() : $('.facet-host').hide()
 })
 
 // Receive logs from other processes
@@ -107,7 +106,7 @@ function applyInitialSettings() {
     ipcRenderer.send('set-window', settings.windowSizeLocation)
   }
 
-  $('.nf-facet-host').hide()
+  $('.facet-host').hide()
   $('#facets-btn').hide()
 
   applyUpdateSettings()
@@ -312,7 +311,7 @@ function maxRestoreWindow() {
 
 // Load stored values into settings modal
 function loadSettingsModal() {
-  $('.nf-facet-host').css({ 'opacity': '0' })
+  $('.facet-host').css({ 'opacity': '0' })
   ipcRenderer.send('view-hide')
   $('#collapse-general, #collapse-services').collapse('hide')
   $('#ontop-check').prop('checked', settings.onTop)
@@ -435,7 +434,7 @@ function openStream(id, url) {
 
 // TODO
 // Compress image and store off with url
-function saveBookmark(url, file) {
+function saveBookmark(stream, file) {
   const canvas = document.createElement('canvas')
   const img = document.createElement('img')
   img.src = file
@@ -462,8 +461,8 @@ function saveBookmark(url, file) {
     const ctx = canvas.getContext('2d')
     ctx.drawImage(img, 0, 0, width, height)
     let bookmark = { 
-      serv: 'ot',
-      url: url, 
+      serv: stream.id,
+      url: stream.url, 
       image: canvas.toDataURL('image/jpeg', 0.7),
       timestamp: Date.now()
     }
@@ -579,7 +578,7 @@ $('.header-bar').on('contextmenu', () => {
 
 // Settings close restore View
 $('#settings-modal').on('hidden.bs.modal', () => {
-  $('.nf-facet-host').css({ 'opacity': '1' })
+  $('.facet-host').css({ 'opacity': '1' })
   ipcRenderer.send('view-show')
 })
 
