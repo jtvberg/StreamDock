@@ -18,7 +18,6 @@ let restorePlay = false
 let showFacets = false
 let userAgent = ''
 let currentStream = ''
-let lastStream = ''
 
 // OS variables
 if (isMac) {
@@ -70,7 +69,7 @@ const createWindow = () => {
   })
 
   // Open DevTools (window, dev only)
-  // win.webContents.openDevTools(detach)
+  // win.webContents.openDevTools('detach')
 
   // Create main browserView
   view = new BrowserView()
@@ -78,7 +77,8 @@ const createWindow = () => {
   // Show browserView when loaded
   view.webContents.on('did-finish-load', () => {
     // Open DevTools (view, dev only)
-    // view.webContents.openDevTools(detach)
+    // view.webContents.openDevTools('detach')
+    currentStream = setStreamId(view.webContents.getURL())
     const stream = {
       id: currentStream,
       url: view.webContents.getURL()
@@ -89,7 +89,7 @@ const createWindow = () => {
 
   // Set current stream URL (most reliable event)
   view.webContents.on('did-start-navigation', () => {
-    currentStream = setStreamId(view.webContents.getURL())
+    win.webContents.send('stream-update', view.webContents.getURL())
   })
 
   // Capture playing
@@ -130,16 +130,6 @@ const createWindow = () => {
         getAccent()
       })
     }
-  })
-
-  // Kill view on dev tools open
-  win.webContents.on('devtools-opened', () => {
-    removeView()
-  })
-
-  // Restore view on dev tools close
-  win.webContents.on('devtools-closed', () => {
-    setViewBounds()
   })
 }
 
@@ -224,10 +214,9 @@ function setViewBounds() {
 function streamChange(stream) {
   isPlaying ? pause() : null
   view.setBounds({ x: 0, y: 0, width: 0, height: 0 })
-  lastStream = currentStream
   currentStream = stream.id
   view.webContents.loadURL(stream.url)
-  win.webContents.send('stream-changed', stream)
+  win.webContents.send('stream-changed', stream.url)
 }
 
 // Stream loaded
@@ -257,6 +246,8 @@ function openLink(url) {
 // Navigate view backwards
 function navBack() {
   if (view.webContents.canGoBack()) {
+    currentStream = 'ot'
+    setViewBounds()
     view.webContents.goBack()
   }
 }
@@ -264,17 +255,21 @@ function navBack() {
 // Navicate view forwards
 function navForward() {
   if (view.webContents.canGoForward()) {
+    currentStream = 'ot'
+    setViewBounds()
     view.webContents.goForward()
   }
 }
 
 // Set the stream ID if it needs to be derived
 function setStreamId(url) {
-  if (url.includes('.youtube.com') && !url.includes('tv.')) {
-    return 'yt'
-  }
-  if (url.includes('.netflix.com')) {
-    return 'nf'
+  if (currentStream === 'ot') {
+    if (url.includes('.youtube.com') && !url.includes('tv.')) {
+      return 'yt'
+    }
+    if (url.includes('.netflix.com')) {
+      return 'nf'
+    }
   }
   return currentStream
 }
@@ -282,16 +277,28 @@ function setStreamId(url) {
 // Back btn
 // Skip/close YouTube ads
 function ytSkipAdds() {
-  if (currentStream === 'yt' && lastStream !== 'yt') {
+  if (currentStream === 'yt') {
     try {
-      view.webContents.executeJavaScript(`try { document.querySelector('.ytp-ad-skip-button').click() } catch(err) { console.log(err) }`)
+      view.webContents.executeJavaScript(`try {
+        alert('add skip loaded')
+      } catch(err) { console.log(err) }`)
+      view.webContents.executeJavaScript(`try {
+        document.querySelector('.ytp-ad-skip-button').click()
+        alert('add skipped')
+      } catch(err) { console.log(err) }`)
       view.webContents.executeJavaScript(`const obs = new MutationObserver(function(ml) {
         for(const mut of ml) {
           if (mut.type === 'childList' && mut.target.classList.contains('ytp-ad-text')) {
-            try { document.querySelector('.ytp-ad-skip-button').click() } catch(err) { console.log(err) }
+            try {
+              document.querySelector('.ytp-ad-skip-button').click()
+              alert('add skipped')
+            } catch(err) { console.log(err) }
           }
           if (mut.type === 'childList' && mut.target.classList.contains('ytp-ad-module')) {
-            try { document.querySelector('.ytp-ad-overlay-close-button').click() } catch(err) { console.log(err) }
+            try {
+              document.querySelector('.ytp-ad-overlay-close-button').click()
+              alert('add closed')
+            } catch(err) { console.log(err) }
           }
         }
       }).observe(document.querySelector('ytd-app'), { childList: true, subtree: true})`)
@@ -708,7 +715,11 @@ const template = [{
     type: 'separator'
   },
   {
-    role: 'toggledevtools'
+    label: 'Open Devtools',
+    click() {
+      win.webContents.openDevTools('detach')
+      view.webContents.openDevTools('detach')
+    }
   }
   ]
 }

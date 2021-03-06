@@ -18,9 +18,9 @@ applyInitialSettings()
 openLastStream()
 
 // Set system accent color css variable
-ipcRenderer.on('set-accent', (e, data) => {
+ipcRenderer.on('set-accent', (e, color) => {
   let root = document.documentElement
-  root.style.setProperty('--color-system-accent', data)
+  root.style.setProperty('--color-system-accent', color)
 })
 
 // Settings modal invoke main
@@ -35,9 +35,9 @@ ipcRenderer.on('save-settings', (e, data) => {
 })
 
 // Stream changed
-ipcRenderer.on('stream-changed', (e, data) => {
+ipcRenderer.on('stream-changed', (e, url) => {
   $('.loading').show()
-  if (!data.url.includes('.netflix.com')) {
+  if (!url.includes('.netflix.com')) {
     $('.nf-facet-host').hide()
     $('#facets-btn').hide()
   }
@@ -45,13 +45,18 @@ ipcRenderer.on('stream-changed', (e, data) => {
 
 // Stream loaded
 ipcRenderer.on('stream-loaded', (e, data) => {
-  settings.lastStream = { id: data.id, url: data.url }
+  settings.lastStream = data
   if (settings.lastStream.url.includes('.netflix.com')) {
     $('#facets-btn').show()
   } else {
     $('#facets-btn').hide()
   }
   $('.loading').hide()
+})
+
+// Stream url updated
+ipcRenderer.on('stream-update', (e, url) => {
+  settings.lastStream = { id: settings.lastStream.id, url: url }
 })
 
 // Save bookmark
@@ -65,8 +70,8 @@ ipcRenderer.on('show-facets', (e, bool) => {
 })
 
 // Receive logs from other processes
-ipcRenderer.on('log', (e, data) => {
-  console.log(data)
+ipcRenderer.on('log', (e, info) => {
+  console.log(info)
 })
 
 // Load Settings
