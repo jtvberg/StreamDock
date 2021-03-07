@@ -16,6 +16,7 @@ let allowQuit = false
 let isPlaying = false
 let restorePlay = false
 let showFacets = false
+let skipAds = false
 let userAgent = ''
 let currentStream = ''
 
@@ -284,10 +285,10 @@ function setStreamId(url) {
 
 // Skip/close YouTube ads
 function ytSkipAdds() {
-  if (currentStream === 'yt') {
+  if (skipAds && currentStream === 'yt') {
     try {
-      view.webContents.executeJavaScript(`try {
-      } catch(err) { console.log(err) }`)
+      // view.webContents.executeJavaScript(`try {
+      // } catch(err) { console.log(err) }`)
       view.webContents.executeJavaScript(`try {
         document.querySelector('.ytp-ad-skip-button').click()
       } catch(err) { console.log(err) }`)
@@ -520,6 +521,12 @@ ipcMain.on('toggle-facets', () => {
   showFacets = currentStream === 'nf' && view.getBounds().width === wb.width
   setViewBounds()
 })
+
+// IPC channel to skip YouTube ads
+ipcMain.on('set-ytadskip', (e, bool) => {
+  skipAds = bool
+})
+
 
 // Menu template
 const template = [{

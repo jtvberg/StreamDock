@@ -125,6 +125,9 @@ function applyUpdateSettings() {
 
   // Set the theme
   ipcRenderer.send('set-theme', settings.themeMode ? settings.themeMode : 'system')
+
+  // Skip YouTube ad skip
+  ipcRenderer.send('set-ytadskip', settings.skipAds)
 }
 
 // Iterate through stored services and create buttons/menu entries
