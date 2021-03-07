@@ -420,7 +420,7 @@ function renderNfFacets() {
   const showAll = !$('.filter-all').hasClass('toggled')
   $.each(nfFacets, function(i, facet) {
     if(facet.Category === 'Genre') {
-      $('.nf-facet-host').append(`<div class="nf-facet" data-code="${facet.Code}" style="font-weight: 900">${facet.Genre}</div>`)
+      $('.nf-facet-host').append(`<div class="nf-facet" data-code="${facet.Code}" style="font-weight: 800">${facet.Genre}</div>`)
     } else if (facet.Category !== 'A-Z') {
       $('.nf-facet-host').append(`<div class="nf-facet" data-code="${facet.Code}">- ${facet.Genre}</div>`)
     } else if (showAll) {

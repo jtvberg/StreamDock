@@ -33,7 +33,7 @@ if (isMac) {
 // app.disableHardwareAcceleration()
 
 // Enable Electron-Reload (dev only)
-require('electron-reload')(__dirname)
+// require('electron-reload')(__dirname)
 
 // Main window and view
 let win = null
@@ -69,7 +69,7 @@ const createWindow = () => {
   })
 
   // Open DevTools (window, dev only)
-  win.webContents.openDevTools('detach')
+  // win.webContents.openDevTools('detach')
 
   // Create main browserView
   view = new BrowserView()
@@ -85,6 +85,7 @@ const createWindow = () => {
     }
     setView()
     streamLoaded(stream)
+    console.log('dfl')
   })
 
   // Set current stream URL (most reliable event)
@@ -265,6 +266,7 @@ function navChange() {
   updateShowFacets()
   view.setBounds({ x: 0, y: 0, width: 0, height: 0 })
   win.webContents.send('stream-changed', null)
+  setTimeout(setViewBounds, 1000)
 }
 
 // Set the stream ID if it needs to be derived
@@ -285,24 +287,20 @@ function ytSkipAdds() {
   if (currentStream === 'yt') {
     try {
       view.webContents.executeJavaScript(`try {
-        alert('add skip loaded')
       } catch(err) { console.log(err) }`)
       view.webContents.executeJavaScript(`try {
         document.querySelector('.ytp-ad-skip-button').click()
-        alert('add skipped')
       } catch(err) { console.log(err) }`)
       view.webContents.executeJavaScript(`const obs = new MutationObserver(function(ml) {
         for(const mut of ml) {
           if (mut.type === 'childList' && mut.target.classList.contains('ytp-ad-text')) {
             try {
               document.querySelector('.ytp-ad-skip-button').click()
-              alert('add skipped')
             } catch(err) { console.log(err) }
           }
           if (mut.type === 'childList' && mut.target.classList.contains('ytp-ad-module')) {
             try {
               document.querySelector('.ytp-ad-overlay-close-button').click()
-              alert('add closed')
             } catch(err) { console.log(err) }
           }
         }
@@ -313,23 +311,23 @@ function ytSkipAdds() {
   }
 }
 
-// Scale height to 16:9
-function scaleHeight() {
+// Scale height to supplied aspect ratio
+function scaleHeight(width, height) {
   win.setBounds({
     x: wb.x,
     y: wb.y,
-    height: Math.round(((wb.width * 9) / 16) + winAdjustHeight),
+    height: Math.round(((wb.width * height) / width) + winAdjustHeight),
     width: wb.width
   })
 }
 
-// Scale width to 16:9
-function scaleWidth() {
+// Scale width to supplied aspect ratio
+function scaleWidth(width, height) {
   win.setBounds({
     x: wb.x,
     y: wb.y,
     height: wb.height,
-    width: Math.round(((wb.height - winAdjustHeight) * 16) / 9)
+    width: Math.round(((wb.height - winAdjustHeight) * width) / height)
   })
 }
 
@@ -353,6 +351,12 @@ function captureStream() {
   })
   const stream = { id: currentStream, url: view.webContents.getURL() }
   win.webContents.send('save-bookmark', stream)
+}
+
+// Toggle bookmarks page
+function toggleBookmarks() {
+  // TODO
+
 }
 
 // Widvine DRM setup
@@ -447,12 +451,12 @@ ipcMain.on('ontop-unlock', () => {
 
 // IPC channel for scaling horzizontally to 16:9
 ipcMain.on('scale-width', () => {
-  scaleWidth()
+  scaleWidth(16, 9)
 })
 
 // IPC channel for scaling vertically to 16:9
 ipcMain.on('scale-height', () => {
-  scaleHeight()
+  scaleHeight(16, 9)
 })
 
 // IPC channel for opening url from clip-board
@@ -540,12 +544,6 @@ const template = [{
       win.webContents.send('load-settings')
     }
   },
-  {
-    label: 'Bookmark Stream',
-    click() {
-      captureStream()
-    }
-  },
   ...(isMac ? [{
     type: 'separator'
   },
@@ -627,6 +625,21 @@ const template = [{
 {
   label: 'View',
   submenu: [{
+    label: 'Toggle Bookmarks',
+    click() {
+      toggleBookmarks()
+    }
+  },
+  {
+    label: 'Bookmark Stream',
+    click() {
+      captureStream()
+    }
+  },
+  {
+    type: 'separator'
+  },
+  {
     label: 'Toggle Full Screen',
     id: 'fullScreen',
     click() {
@@ -636,13 +649,25 @@ const template = [{
   {
     label: 'Scale Height to 16:9',
     click() {
-      scaleHeight()
+      scaleHeight(16, 9)
     }
   },
   {
     label: 'Scale Width to 16:9',
     click() {
-      scaleWidth()
+      scaleWidth(16, 9)
+    }
+  },
+  {
+    label: 'Scale Height to 4:3',
+    click() {
+      scaleHeight(4, 3)
+    }
+  },
+  {
+    label: 'Scale Width to 4:3',
+    click() {
+      scaleWidth(4, 3)
     }
   },
   {
