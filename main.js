@@ -1,16 +1,21 @@
 // TODO: Peacock won't login
+// TODO: Touchbar support
+// TODO: Scrollbar css
 
 // Imports and variable declarations
 const { app, BrowserWindow, ipcMain, BrowserView, Tray, session, Menu, MenuItem, systemPreferences, clipboard, nativeTheme, dialog } = require('electron')
 const path = require('path')
 const isMac = process.platform === 'darwin'
 const updater = require('./updater')
+const fs = require('fs')
 const headerSize = isMac ? 22 : 0
-const windowAdjust = isMac ? 22 : 57
+const winAdjustHeight = isMac ? 22 : 57
+const winAdjustWidth = 240
 let wb = { x: 0, y: 0, height: 0, width: 0 }
 let allowQuit = false
 let isPlaying = false
 let restorePlay = false
+let showFacets = false
 let userAgent = ''
 let currentStream = ''
 
@@ -23,8 +28,9 @@ if (isMac) {
   userAgent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.182 Safari/537.36'
 }
 
+// Dev code
 // Disable hardware acceleration (buggy)
-app.disableHardwareAcceleration()
+// app.disableHardwareAcceleration()
 
 // Enable Electron-Reload (dev only)
 // require('electron-reload')(__dirname)
@@ -63,17 +69,28 @@ const createWindow = () => {
   })
 
   // Open DevTools (window, dev only)
-  // win.webContents.openDevTools()
+  // win.webContents.openDevTools('detach')
 
   // Create main browserView
   view = new BrowserView()
 
   // Show browserView when loaded
   view.webContents.on('did-finish-load', () => {
-    setView()
-    win.webContents.send('stream-loaded')
     // Open DevTools (view, dev only)
-    // view.webContents.openDevTools()
+    // view.webContents.openDevTools('detach')
+    currentStream = setStreamId(view.webContents.getURL())
+    const stream = {
+      id: currentStream,
+      url: view.webContents.getURL()
+    }
+    setView()
+    streamLoaded(stream)
+    console.log('dfl')
+  })
+
+  // Set current stream URL (most reliable event)
+  view.webContents.on('did-start-navigation', () => {
+    win.webContents.send('stream-update', view.webContents.getURL())
   })
 
   // Capture playing
@@ -90,6 +107,12 @@ const createWindow = () => {
     isPlaying = false
   })
 
+  // Prevent new window open in current view
+  view.webContents.on('new-window', (e, url) => {
+    e.preventDefault()
+    view.webContents.loadURL(url)
+  })
+
   // Reset view on resize
   win.on('resize', () => {
     setViewBounds()
@@ -100,14 +123,14 @@ const createWindow = () => {
     wb = win.getBounds()
   })
 
-  // Kill view on dev tools open
-  win.webContents.on('devtools-opened', () => {
-    removeView()
-  })
-
-  // Restore view on dev tools close
-  win.webContents.on('devtools-closed', () => {
-    setView()
+  // when win ready set accent color and subscribe to changes if macOS
+  win.on('ready-to-show', () => {
+    getAccent()
+    if(isMac) {
+      systemPreferences.subscribeNotification('AppleColorPreferencesChangedNotification', () => {
+        getAccent()
+      })
+    }
   })
 }
 
@@ -128,6 +151,11 @@ const createTray = () => {
   tray.on('right-click', () => {
     app.quit()
   })
+}
+
+// Get system accent color
+function getAccent() {
+  win.webContents.send('set-accent', `#${systemPreferences.getAccentColor()}`)
 }
 
 // Pause stream
@@ -160,7 +188,7 @@ function play() {
 // Remove view from window
 function removeView() {
   if (win.getBrowserView()) {
-    win.removeBrowserView(view)
+    view.setBounds({ x: 0, y: 0, width: 0, height: 0 })
   }
 }
 
@@ -172,52 +200,163 @@ function setView() {
 
 // Adjust view bounds to window
 function setViewBounds() {
+  updateShowFacets()
   wb = win.getBounds()
+  let waw = showFacets ? winAdjustWidth : 0
   view.setBounds({
     x: 0,
     y: headerSize,
-    width: wb.width,
-    height: wb.height - windowAdjust
+    width: wb.width - waw,
+    height: wb.height - winAdjustHeight
   })
 }
 
 // Change stream service
 function streamChange(stream) {
   isPlaying ? pause() : null
+  view.setBounds({ x: 0, y: 0, width: 0, height: 0 })
   currentStream = stream.id
   view.webContents.loadURL(stream.url)
-  win.webContents.send('stream-changed')
+  win.webContents.send('stream-changed', stream.url)
 }
 
-// Scale height to 16:9
-function scaleHeight() {
-  let wb = win.getBounds()
-  win.setBounds({
-    x: wb.x,
-    y: wb.y,
-    height: Math.round(((wb.width * 9) / 16) + windowAdjust),
-    width: wb.width
-  })
+// Stream loaded
+function streamLoaded(stream) {
+  win.webContents.send('stream-loaded', stream)
+  ytSkipAdds()
 }
 
-// Scale width to 16:9
-function scaleWidth() {
-  let wb = win.getBounds()
-  win.setBounds({
-    x: wb.x,
-    y: wb.y,
-    height: wb.height,
-    width: Math.round(((wb.height - windowAdjust) * 16) / 9)
-  })
+// Toggle facets if Netflix
+function updateShowFacets() {
+  showFacets = showFacets && currentStream === 'nf'
+  win.webContents.send('show-facets', showFacets)
 }
 
 // Open copied link in new BrowserView
 function openLink(url) {
-  const stream = {
-    id: currentStream,
-    url: url
+  currentStream = 'ot'
+  if (validateLink(url)) {
+    const stream = {
+      id: setStreamId(url),
+      url: url
+    }
+    streamChange(stream)
   }
-  streamChange(stream)
+}
+
+// Navigate view backwards
+function navBack() {
+  if (view.webContents.canGoBack()) {
+    navChange()
+    view.webContents.goBack()
+  }
+}
+
+// Navicate view forwards
+function navForward() {
+  if (view.webContents.canGoForward()) {
+    navChange()
+    view.webContents.goForward()
+  }
+}
+
+// Back/forward button stream change
+function navChange() {
+  currentStream = 'ot'
+  updateShowFacets()
+  view.setBounds({ x: 0, y: 0, width: 0, height: 0 })
+  win.webContents.send('stream-changed', null)
+  setTimeout(setViewBounds, 1000)
+}
+
+// Set the stream ID if it needs to be derived
+function setStreamId(url) {
+  if (currentStream === 'ot') {
+    if (url.includes('.youtube.com') && !url.includes('tv.')) {
+      return 'yt'
+    }
+    if (url.includes('.netflix.com')) {
+      return 'nf'
+    }
+  }
+  return currentStream
+}
+
+// Skip/close YouTube ads
+function ytSkipAdds() {
+  if (currentStream === 'yt') {
+    try {
+      view.webContents.executeJavaScript(`try {
+      } catch(err) { console.log(err) }`)
+      view.webContents.executeJavaScript(`try {
+        document.querySelector('.ytp-ad-skip-button').click()
+      } catch(err) { console.log(err) }`)
+      view.webContents.executeJavaScript(`const obs = new MutationObserver(function(ml) {
+        for(const mut of ml) {
+          if (mut.type === 'childList' && mut.target.classList.contains('ytp-ad-text')) {
+            try {
+              document.querySelector('.ytp-ad-skip-button').click()
+            } catch(err) { console.log(err) }
+          }
+          if (mut.type === 'childList' && mut.target.classList.contains('ytp-ad-module')) {
+            try {
+              document.querySelector('.ytp-ad-overlay-close-button').click()
+            } catch(err) { console.log(err) }
+          }
+        }
+      }).observe(document.querySelector('ytd-app'), { childList: true, subtree: true})`)
+    } catch(err) {
+      console.log(err)
+    }
+  }
+}
+
+// Scale height to supplied aspect ratio
+function scaleHeight(width, height) {
+  win.setBounds({
+    x: wb.x,
+    y: wb.y,
+    height: Math.round(((wb.width * height) / width) + winAdjustHeight),
+    width: wb.width
+  })
+}
+
+// Scale width to supplied aspect ratio
+function scaleWidth(width, height) {
+  win.setBounds({
+    x: wb.x,
+    y: wb.y,
+    height: wb.height,
+    width: Math.round(((wb.height - winAdjustHeight) * width) / height)
+  })
+}
+
+// Check if url is valid
+function validateLink(url) {
+  try {
+    new URL(url)
+  } catch (e) {
+    console.error(e)
+    return false
+  }
+  return true
+}
+
+// Take screenshot of current stream
+function captureStream() {
+  view.webContents.capturePage().then(image => {
+    fs.writeFileSync('temp.png', image.toPNG(), (err) => {
+      if (err) console.log(err)
+    })
+  })
+  const stream = { id: currentStream, url: view.webContents.getURL() }
+  win.webContents.send('save-bookmark', stream)
+}
+
+// Toggle bookmarks page
+function toggleBookmarks() {
+  // TODO
+
 }
 
 // Widvine DRM setup
@@ -312,12 +451,12 @@ ipcMain.on('ontop-unlock', () => {
 
 // IPC channel for scaling horzizontally to 16:9
 ipcMain.on('scale-width', () => {
-  scaleWidth()
+  scaleWidth(16, 9)
 })
 
 // IPC channel for scaling vertically to 16:9
 ipcMain.on('scale-height', () => {
-  scaleHeight()
+  scaleHeight(16, 9)
 })
 
 // IPC channel for opening url from clip-board
@@ -358,12 +497,28 @@ ipcMain.on('view-hide', () => {
 
 // IPC channel for showing view
 ipcMain.on('view-show', () => {
-  setView()
+  setViewBounds()
 })
 
 // IPC channel for setting theme mode
 ipcMain.on('set-theme', (e, data) => {
   nativeTheme.themeSource = data
+})
+
+// IPC channel to navigate backwards
+ipcMain.on('nav-back', () => {
+  navBack()
+})
+
+// IPC channel to navigate forwards
+ipcMain.on('nav-forward', () => {
+  navForward()
+})
+
+// IPC channel to navigate forwards
+ipcMain.on('toggle-facets', () => {
+  showFacets = currentStream === 'nf' && view.getBounds().width === wb.width
+  setViewBounds()
 })
 
 // Menu template
@@ -470,6 +625,21 @@ const template = [{
 {
   label: 'View',
   submenu: [{
+    label: 'Toggle Bookmarks',
+    click() {
+      toggleBookmarks()
+    }
+  },
+  {
+    label: 'Bookmark Stream',
+    click() {
+      captureStream()
+    }
+  },
+  {
+    type: 'separator'
+  },
+  {
     label: 'Toggle Full Screen',
     id: 'fullScreen',
     click() {
@@ -479,17 +649,41 @@ const template = [{
   {
     label: 'Scale Height to 16:9',
     click() {
-      scaleHeight()
+      scaleHeight(16, 9)
     }
   },
   {
     label: 'Scale Width to 16:9',
     click() {
-      scaleWidth()
+      scaleWidth(16, 9)
+    }
+  },
+  {
+    label: 'Scale Height to 4:3',
+    click() {
+      scaleHeight(4, 3)
+    }
+  },
+  {
+    label: 'Scale Width to 4:3',
+    click() {
+      scaleWidth(4, 3)
     }
   },
   {
     type: 'separator'
+  },
+  {
+    label: 'Navigate Backward',
+    click() {
+      navBack()
+    }
+  },
+  {
+    label: 'Navigate Forward',
+    click() {
+      navForward()
+    }
   },
   {
     role: 'reload'
@@ -552,7 +746,11 @@ const template = [{
     type: 'separator'
   },
   {
-    role: 'toggledevtools'
+    label: 'Open Devtools',
+    click() {
+      win.webContents.openDevTools('detach')
+      view.webContents.openDevTools('detach')
+    }
   }
   ]
 }

@@ -13,16 +13,26 @@
   <header class="header-bar">
     <div class="service-btn-host"></div>
     <div class="control-btn-host">
-      <div class="fas fa-link control-btn" id="link-btn"></div>
-      <div class="fas fa-arrows-alt-v control-btn" id="scalev-btn"></div>
-      <div class="fas fa-arrows-alt-h control-btn" id="scaleh-btn"></div>
-      <div class="fas ontop-locked control-btn" id="ontop-btn"></div>
+      <div class="fas fa-arrow-left control-btn" id="back-btn" title="Go Back"></div>
+      <div class="fas fa-film control-btn" id="facets-btn" title="Show Genres"></div>
+      <div class="fas fa-link control-btn" id="link-btn" title="Navigate to Link from Clipboard"></div>
+      <div class="fas fa-arrows-alt-v control-btn" id="scalev-btn" title="Scale Height to 16:9"></div>
+      <div class="fas fa-arrows-alt-h control-btn" id="scaleh-btn" title="Scale Width to 16:9"></div>
+      <div class="fas ontop-locked control-btn" id="ontop-btn" title="Toggle Window On Top"></div>
     </div>
   </header>
   <div class="loading">
     <div class="spinner-border text-primary" style="width: 5rem; height: 5rem;" role="status">
       <span class="sr-only">Loading...</span>
     </div>
+  </div>
+  <div class="facet-host"><h3>Genres</h3>
+    <div class="facet-filter-host">
+      <input class="form-control facet-filter" type="text" placeholder="Filter" aria-label="Search">
+      <div class="fas fa-times filter-clear" title="Clear Filter"></div>
+      <div class="fas fa-filter fa-xs filter-all toggled" title="Toggle Show All"></div>
+    </div>
+    <div class="nf-facet-host"></div>
   </div>
   <div class="logo">
     <img src="./res/logo/sd_logo.png">
@@ -49,55 +59,62 @@
                   </div>
                   <div class="panel-body">
                     <div id="collapse-general" class="collapse settings-group" data-parent="#panel-general">
-                      <div class="form-check">
-                        <input type="checkbox" class="form-check-input settings-check" id="ontop-check">
-                        <label class="form-check-label" for="ontop-check">Ontop on Start Up</label>
+                      <div class="custom-control custom-checkbox">
+                        <input type="checkbox" class="custom-control-input settings-check" id="ontop-check">
+                        <label class="custom-control-label" for="ontop-check">On top on Start Up</label>
                         <div class="helper-text">
                           <small class="text-muted">Check to set window on top on start up</small>
                         </div>
                       </div>
-                      <div class="form-check">
-                        <input type="checkbox" class="form-check-input settings-check" id="last-check">
-                        <label class="form-check-label" for="last-check">Remember Last Used Service</label>
+                      <div class="custom-control custom-checkbox">
+                        <input type="checkbox" class="custom-control-input settings-check" id="last-check">
+                        <label class="custom-control-label" for="last-check">Remember Last Stream</label>
                         <div class="helper-text">
-                          <small class="text-muted">Check to load the last service used from previous session</small>
+                          <small class="text-muted">Check to load the last stream from previous session</small>
                         </div>
                       </div>
-                      <div class="form-check">
-                        <input type="checkbox" class="form-check-input settings-check" id="window-check">
-                        <label class="form-check-label" for="window-check">Remember Window Size and Location</label>
+                      <div class="custom-control custom-checkbox">
+                        <input type="checkbox" class="custom-control-input settings-check" id="window-check">
+                        <label class="custom-control-label" for="window-check">Remember Window Size and Location</label>
                         <div class="helper-text">
                           <small class="text-muted">Check to maintain last window size and location from previous
                             session</small>
                         </div>
                       </div>
-                      <div class="form-check">
-                        <input type="checkbox" class="form-check-input settings-check" id="fullscreen-check">
-                        <label class="form-check-label" for="fullscreen-check">Full-Screen</label>
+                      <div class="custom-control custom-checkbox">
+                        <input type="checkbox" class="custom-control-input settings-check" id="fullscreen-check">
+                        <label class="custom-control-label" for="fullscreen-check">Full-Screen</label>
                         <div class="helper-text">
                           <small class="text-muted">Check to allow full-screen (this may allow invocation from within
                             the stream)</small>
                         </div>
                       </div>
-                      <div class="form-check">
-                        <input type="checkbox" class="form-check-input settings-check" id="restore-play-check">
-                        <label class="form-check-label" for="restore-play-check">Auto-play on Restore</label>
+                      <div class="custom-control custom-checkbox">
+                        <input type="checkbox" class="custom-control-input settings-check" id="restore-play-check">
+                        <label class="custom-control-label" for="restore-play-check">Auto-play on Restore</label>
                         <div class="helper-text">
                           <small class="text-muted">Check to enable auto-playback when restored from tray</small>
                         </div>
                       </div>
-                      <div class="form-check">
-                        <input type="checkbox" class="form-check-input settings-check" id="quick-check">
-                        <label class="form-check-label" for="quick-check">Show Quick Access Buttons</label>
+                      <div class="custom-control custom-checkbox">
+                        <input type="checkbox" class="custom-control-input settings-check" id="quick-check">
+                        <label class="custom-control-label" for="quick-check">Show Quick Access Buttons</label>
                         <div class="helper-text">
                           <small class="text-muted">Check to show quick access buttons (Mac only)</small>
                         </div>
                       </div>
-                      <div class="form-check">
-                        <input type="checkbox" class="form-check-input settings-check" id="nav-check">
-                        <label class="form-check-label" for="nav-check">Auto-hide nav bar buttons</label>
+                      <div class="custom-control custom-checkbox">
+                        <input type="checkbox" class="custom-control-input settings-check" id="nav-check">
+                        <label class="custom-control-label" for="nav-check">Auto-hide Nav Bar Buttons</label>
                         <div class="helper-text">
-                          <small class="text-muted">Check to auto-hide quick access and lock buttons (Mac only)</small>
+                          <small class="text-muted">Check to auto-hide quick access and control buttons (Mac only)</small>
+                        </div>
+                      </div>
+                      <div class="custom-control custom-checkbox">
+                        <input type="checkbox" class="custom-control-input settings-check" id="skip-check">
+                        <label class="custom-control-label" for="skip-check">Skip or Dismiss Ads (YouTube)</label>
+                        <div class="helper-text">
+                          <small class="text-muted">Check to automatically skip or dismiss ads in YouTube</small>
                         </div>
                       </div>
                       <div class="form-group">

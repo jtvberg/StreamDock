@@ -1,6 +1,6 @@
 {
   "name": "StreamDock",
-  "version": "0.4.12",
+  "version": "0.4.14",
   "description": "Streaming service viewer",
   "main": "main.js",
   "scripts": {
@@ -44,7 +44,6 @@
       "mirror": "https://github.com/castlabs/electron-releases/releases/download/v"
     },
     "afterPack": "./build/afterPack.js",
-    "afterSign": "./build/afterSign.js",
     "mac": {
       "category": "public.app-category.video",
       "entitlements": "./entitlements.plist"

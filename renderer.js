@@ -8,12 +8,19 @@ const $ = require('jquery')
 const isMac = process.platform === 'darwin'
 let streamList = []
 let settings = []
+let nfFacets = []
 
 // Invoke services load and apply settings
 loadSettings()
 loadServices()
 applyInitialSettings()
-openStream()
+openLastStream()
+
+// Set system accent color css variable
+ipcRenderer.on('set-accent', (e, color) => {
+  let root = document.documentElement
+  root.style.setProperty('--color-system-accent', color)
+})
 
 // Settings modal invoke main
 ipcRenderer.on('load-settings', () => {
@@ -27,18 +34,43 @@ ipcRenderer.on('save-settings', (e, data) => {
 })
 
 // Stream changed
-ipcRenderer.on('stream-changed', () => {
+ipcRenderer.on('stream-changed', (e, url) => {
   $('.loading').show()
+  if (url && !url.includes('.netflix.com')) {
+    $('.facet-host').hide()
+    $('#facets-btn').hide()
+  }
 })
 
 // Stream loaded
-ipcRenderer.on('stream-loaded', () => {
+ipcRenderer.on('stream-loaded', (e, stream) => {
+  settings.lastStream = stream
+  if (settings.lastStream.url.includes('.netflix.com')) {
+    $('#facets-btn').show()
+  } else {
+    $('#facets-btn').hide()
+  }
   $('.loading').hide()
 })
 
+// Stream url updated
+ipcRenderer.on('stream-update', (e, url) => {
+  settings.lastStream = { id: settings.lastStream.id, url: url }
+})
+
+// Save bookmark
+ipcRenderer.on('save-bookmark', (e, stream) => {
+  saveBookmark(stream, 'temp.png')
+})
+
+// Show Netflix facets
+ipcRenderer.on('show-facets', (e, bool) => {
+  bool ? $('.facet-host').show() : $('.facet-host').hide()
+})
+
 // Receive logs from other processes
-ipcRenderer.on('log', (e, data) => {
-  console.log(data)
+ipcRenderer.on('log', (e, info) => {
+  console.log(info)
 })
 
 // Load Settings
@@ -73,6 +105,9 @@ function applyInitialSettings() {
   if (settings.saveWindow) {
     ipcRenderer.send('set-window', settings.windowSizeLocation)
   }
+
+  $('.facet-host').hide()
+  $('#facets-btn').hide()
 
   applyUpdateSettings()
 }
@@ -123,18 +158,12 @@ function loadServices() {
   })
 }
 
-// Open last used service or first one in list
-function openStream() {
-  if (settings.openLast) {
-    ipcRenderer.send('service-change', {
-      id: settings.lastStream,
-      url: streamList.find(item => item.id === settings.lastStream).url
-    })
+// Open last stream or first service in list
+function openLastStream() {
+  if (settings.openLast && settings.lastStream.url) {
+    openStream(settings.lastStream.id, settings.lastStream.url)
   } else {
-    ipcRenderer.send('service-change', {
-      id: streamList[0].id,
-      url: streamList[0].url
-    })
+    openStream(streamList[0].id, streamList[0].url)
   }
 }
 
@@ -224,10 +253,10 @@ function getDefaultStreams() {
   {
     id: 'cb',
     active: true,
-    glyph: 'C',
-    title: 'CBS',
-    url: 'https://cbs.com',
-    color: '#0095f7',
+    glyph: 'P',
+    title: 'Paramount+',
+    url: 'https://www.paramountplus.com/',
+    color: '#0166a4',
     bgColor: '#ffffff'
   },
   {
@@ -263,7 +292,8 @@ function getDefaultSettings() {
     quickMenu: true,
     hideNav: false,
     themeMode: 'system',
-    lastStream: getDefaultStreams()[0].id,
+    lastStream: { id: getDefaultStreams()[0].id, url: getDefaultStreams()[0].url },
+    skipAds: true,
     windowSizeLocation: {
       x: 0,
       y: 0,
@@ -281,6 +311,7 @@ function maxRestoreWindow() {
 
 // Load stored values into settings modal
 function loadSettingsModal() {
+  $('.facet-host').css({ 'opacity': '0' })
   ipcRenderer.send('view-hide')
   $('#collapse-general, #collapse-services').collapse('hide')
   $('#ontop-check').prop('checked', settings.onTop)
@@ -290,6 +321,7 @@ function loadSettingsModal() {
   $('#restore-play-check').prop('checked', settings.restorePlay)
   $('#quick-check').prop('checked', settings.quickMenu)
   $('#nav-check').prop('checked', settings.hideNav)
+  $('#skip-check').prop('checked', settings.skipAds)
   $('input[name=radio-theme]').prop('checked', false).parent('.btn').removeClass('active')
   $(`input[name=radio-theme][value=${settings.themeMode}]`).prop('checked', true).parent('.btn').addClass('active')
   $('#settings-services-available').empty()
@@ -299,8 +331,9 @@ function loadSettingsModal() {
     const checked = serv.active ? 'checked' : ''
     $('#settings-services-available').append(
       `<div class="service-host" data-id="${serv.id}">
-        <div class="form-check serv-check-host">
-          <input type="checkbox" class="serv-check" id="check-${serv.id}" data-id="${serv.id}" ${checked}>
+        <div class="custom-control custom-checkbox serv-check-host">
+          <input type="checkbox" class="custom-control-input serv-check" id="check-${serv.id}" data-id="${serv.id}" ${checked}>
+          <label class="custom-control-label serv-check-label" for="check-${serv.id}" style="width:0px"></label>
         </div>
         <img src="./res/serv_logos/large/${serv.id}.png" for="check-${serv.id}"></img>
         <div class="input-group input-group-sm serv-url">
@@ -339,6 +372,7 @@ function saveSettings() {
     restorePlay: $('#restore-play-check').is(':checked'),
     quickMenu: $('#quick-check').is(':checked'),
     hideNav: $('#nav-check').is(':checked'),
+    skipAds: $('#skip-check').is(':checked'),
     themeMode: $('#choose-theme input:radio:checked').val(),
     lastStream: settings.lastStream,
     windowSizeLocation: settings.windowSizeLocation
@@ -380,14 +414,91 @@ function loadDefaultSettings() {
   })
 }
 
-// Service selector click handler
-$(document).on('click', '.service-btn', function () {
+// Load NF facets into UI
+function renderNfFacets() {
+  $('.nf-facet-host').empty()
+  const showAll = !$('.filter-all').hasClass('toggled')
+  $.each(nfFacets, function(i, facet) {
+    if(facet.Category === 'Genre') {
+      $('.nf-facet-host').append(`<div class="nf-facet" data-code="${facet.Code}" style="font-weight: 800">${facet.Genre}</div>`)
+    } else if (facet.Category !== 'A-Z') {
+      $('.nf-facet-host').append(`<div class="nf-facet" data-code="${facet.Code}">- ${facet.Genre}</div>`)
+    } else if (showAll) {
+      $('.nf-facet-host').append(`<div class="nf-facet" data-code="${facet.Code}">- ${facet.Genre}</div>`)
+    }
+  })
+  if (!showAll) {
+    $('.nf-facet-host').children().last().remove()
+  }
+}
+
+// Sent IPC message to open stream
+function openStream(id, url) {
   $('.loading').show()
   ipcRenderer.send('service-change', {
-    id: $(this).data('val'),
-    url: $(this).data('url')
+    id: id,
+    url: url
   })
-  settings.lastStream = $(this).data('val')
+}
+
+// TODO
+// Compress image and store off with url
+function saveBookmark(stream, file) {
+  const canvas = document.createElement('canvas')
+  const img = document.createElement('img')
+  img.src = file
+  img.onload = function () {
+    let width = img.width
+    let height = img.height
+    const maxHeight = 200
+    const maxWidth = 200
+
+    if (width > height) {
+      if (width > maxWidth) {
+        height = Math.round((height *= maxWidth / width))
+        width = maxWidth
+      }
+    } else {
+      if (height > maxHeight) {
+        width = Math.round((width *= maxHeight / height))
+        height = maxHeight
+      }
+    }
+    canvas.width = width
+    canvas.height = height
+
+    const ctx = canvas.getContext('2d')
+    ctx.drawImage(img, 0, 0, width, height)
+    let bookmark = { 
+      serv: stream.id,
+      url: stream.url, 
+      image: canvas.toDataURL('image/jpeg', 0.7),
+      timestamp: Date.now()
+    }
+    localStorage.setItem('bookmark', JSON.stringify(bookmark))
+  }
+}
+
+// Sent IPC message to open genre facets
+function toggleFacets() {
+  ipcRenderer.send('toggle-facets')
+}
+
+// Load NF facets from file
+$.getJSON('nffacets.json', function(json) { 
+  nfFacets = json
+}).then(renderNfFacets)
+
+// NF facet click handler
+$(document).on('click', '.nf-facet', function () {
+  if ($(this).data('code') > 0) {
+    openStream('nf', `https://www.netflix.com/browse/genre/${$(this).data('code')}`)
+  }
+})
+
+// Service selector click handler
+$(document).on('click', '.service-btn', function () {
+  openStream($(this).data('val'), $(this).data('url'))
 })
 
 // Activate color picker
@@ -430,6 +541,36 @@ $(document).on('mouseleave', '.service-btn', function () {
   })
 })
 
+// Clear facet filter
+$('.filter-clear').on('click', () => {
+  $('.facet-filter').val('')
+  renderNfFacets()
+})
+
+// Toggle show all facets
+$('.filter-all').on('click', () => {
+  if ($('.filter-all').hasClass('toggled')) {
+    $('.filter-all').removeClass('toggled')
+  } else {
+    $('.filter-all').addClass('toggled')
+  }
+  renderNfFacets()
+})
+
+// Toggle show all facets
+$('.facet-filter').on('input', function () {
+  const filter = ($(this).val()).toLowerCase()
+  $('.nf-facet-host').empty()
+  $.each(nfFacets, function(i, facet) {
+    if(facet.Genre.toLowerCase().includes(filter) || facet.Category.toLowerCase().includes(filter)) {
+      $('.nf-facet-host').append(`<div class="nf-facet" data-code="${facet.Code}">${facet.Genre}</div>`)
+    }
+  })
+  if (filter === '') {
+    renderNfFacets()
+  }
+})
+
 // Toggle keep on top
 $('#ontop-btn').on('click', function () {
   if ($(this).hasClass('ontop-locked')) {
@@ -441,18 +582,28 @@ $('#ontop-btn').on('click', function () {
   }
 })
 
+// Toggle genre facets
+$('#facets-btn').on('click', () => {
+  toggleFacets()
+})
+
+// Back button click handler
+$('#back-btn').on('click', () => {
+  ipcRenderer.send('nav-back')
+})
+
 // Open link from clipboard click handler
-$('#link-btn').on('click', function () {
+$('#link-btn').on('click', () => {
   ipcRenderer.send('open-link')
 })
 
 // Scale horizontal click handler
-$('#scaleh-btn').on('click', function () {
+$('#scaleh-btn').on('click', () => {
   ipcRenderer.send('scale-width')
 })
 
 // Scale vertical click handler
-$('#scalev-btn').on('click', function () {
+$('#scalev-btn').on('click', () => {
   ipcRenderer.send('scale-height')
 })
 
@@ -468,6 +619,7 @@ $('.header-bar').on('contextmenu', () => {
 
 // Settings close restore View
 $('#settings-modal').on('hidden.bs.modal', () => {
+  $('.facet-host').css({ 'opacity': '1' })
   ipcRenderer.send('view-show')
 })
 
