@@ -630,12 +630,12 @@ const template = [{
       toggleBookmarks()
     }
   },
-  {
-    label: 'Bookmark Stream',
-    click() {
-      captureStream()
-    }
-  },
+  // {
+  //   label: 'Bookmark Stream',
+  //   click() {
+  //     captureStream()
+  //   }
+  // },
   {
     type: 'separator'
   },
