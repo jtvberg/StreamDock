@@ -86,7 +86,6 @@ const createWindow = () => {
     }
     setView()
     streamLoaded(stream)
-    console.log('dfl')
   })
 
   // Set current stream URL (most reliable event)
@@ -263,6 +262,7 @@ function navForward() {
 
 // Back/forward button stream change
 function navChange() {
+  isPlaying ? pause() : null
   currentStream = 'ot'
   updateShowFacets()
   view.setBounds({ x: 0, y: 0, width: 0, height: 0 })
