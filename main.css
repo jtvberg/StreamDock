@@ -67,6 +67,19 @@ body {
   bottom: 10px;
 }
 
+.bookmark-host {
+  display: flex;
+  flex-wrap: wrap;
+  align-content: flex-start;
+  position: absolute;
+  width: 100%;
+  height: 100%;
+}
+
+.bookmark-tile {
+  margin: 10px;
+}
+
 .facet-host {
   position: absolute;
   right: 0px;

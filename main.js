@@ -356,8 +356,7 @@ function captureStream() {
 
 // Toggle bookmarks page
 function toggleBookmarks() {
-  // TODO
-
+  view.setBounds({ x: 0, y: 0, width: 0, height: 0 })
 }
 
 // Widvine DRM setup
@@ -637,12 +636,12 @@ const template = [{
       toggleBookmarks()
     }
   },
-  // {
-  //   label: 'Bookmark Stream',
-  //   click() {
-  //     captureStream()
-  //   }
-  // },
+  {
+    label: 'Bookmark Stream',
+    click() {
+      captureStream()
+    }
+  },
   {
     type: 'separator'
   },

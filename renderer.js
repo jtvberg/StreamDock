@@ -14,6 +14,7 @@ let nfFacets = []
 loadSettings()
 loadServices()
 applyInitialSettings()
+loadBookmarks()
 openLastStream()
 
 // Set system accent color css variable
@@ -444,6 +445,15 @@ function openStream(id, url) {
   })
 }
 
+// Load bookmarks
+function loadBookmarks() {
+  let bookmark = JSON.parse(localStorage.getItem('bookmark'))
+  $('.bookmark-host').append(`<div class="bookmark-tile"><img src="${bookmark.image}"></div>`)
+  $('.bookmark-host').append(`<div class="bookmark-tile"><img src="${bookmark.image}"></div>`)
+  $('.bookmark-host').append(`<div class="bookmark-tile"><img src="${bookmark.image}"></div>`)
+  $('.bookmark-host').append(`<div class="bookmark-tile"><img src="${bookmark.image}"></div>`)
+}
+
 // TODO
 // Compress image and store off with url
 function saveBookmark(stream, file) {
@@ -453,8 +463,8 @@ function saveBookmark(stream, file) {
   img.onload = function () {
     let width = img.width
     let height = img.height
-    const maxHeight = 200
-    const maxWidth = 200
+    const maxHeight = 400
+    const maxWidth = 400
 
     if (width > height) {
       if (width > maxWidth) {
@@ -475,7 +485,7 @@ function saveBookmark(stream, file) {
     let bookmark = { 
       serv: stream.id,
       url: stream.url, 
-      image: canvas.toDataURL('image/jpeg', 0.7),
+      image: canvas.toDataURL('image/jpeg', 1),
       timestamp: Date.now()
     }
     localStorage.setItem('bookmark', JSON.stringify(bookmark))
