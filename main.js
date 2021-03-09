@@ -34,7 +34,7 @@ if (isMac) {
 // app.disableHardwareAcceleration()
 
 // Enable Electron-Reload (dev only)
-require('electron-reload')(__dirname)
+// require('electron-reload')(__dirname)
 
 // Main window and view
 let win = null

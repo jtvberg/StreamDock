@@ -40,18 +40,20 @@
    No Linux version in the release.\
    At the moment, any service using Google auth is broken if you have to sign-in to use (so, YouTube works, YouTube TV will not.)\
    The user agent spoofing is no longer working so Google OAuth will need to be implemented.\
-   Look for that in an upcoming release.\
+   Look for that in a future release.\
    As a work-around: If you have YouTube TV you can sign into ABC with it and this will also sign you in to YouTube TV and YouTube.\
    Peacock is set to off by default as the login is not working.\
-   The 'about' modal will be shown behind the main screen if set to on-top. This is a system modal so the work-around is to roll my own in the future.
 
 ## App Control
-   Click on the quick-access buttons across the top to load streaming services as selected in the settings menu under preferences.\
+   Click on the quick-access buttons across the top (macOS only) to load streaming services as selected in the settings menu under preferences (or use the 'Streams' menu).\
    Left-click on the tray icon (or right-click on app header) will hide and pause the window/stream (if playing.)\
    If hidden already, another left-click will restore the window but not resume play (unless restore auto-play is checked in the settings.)\
    Right-click on the tray icon will exit the app completely.\
-   If you want to minimize the app but keep playing to maintain audio, do so from the dock.\
-   There is an always on top toggle button in the top right corner.\
-   You can open a link from clipboard via the view menu (or in the header).\
-   You can scale the video to 16:9 either vertically or horizontally also in the view menu (or in the header).\
-   Various behaviors can be toggled in the settings under preferences including which streaming services are present and what colors and glyphs are used to represent them in the quick access bar.
+   If you want to minimize the app but keep playing to maintain audio, do so from the dock/taskbar.\
+   There is an always on top toggle button in the top right corner (or in 'Window' menu).\
+   You can open a link from clipboard via the 'View' menu (or in the header).\
+   You can scale the video to 16:9 (or 4:3) either vertically or horizontally also in the view menu (or in the header for 16:9 only).\
+   Various behaviors can be toggled in the settings under preferences including which streaming services are present and what colors and glyphs are used to represent them in the quick access bar (macOS). This includes the ability to skip YouTube adds and dismiss ad overlays when possible (while not all ads are skipable, if turned on it will even skip adds before the skip button even appears.)\
+   You can bookmark streams via the bookmark button in the header or via the 'View' menu.\
+   Toggle bookmarks via the same menu over via the far left quick access button.\
+   You can also view the extended Netflix genres via 'Show Genres' button (only shows up when in Netflix on macOS) or alternatively in the 'View' menu.\
