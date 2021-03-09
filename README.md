@@ -42,7 +42,7 @@
    The user agent spoofing is no longer working so Google OAuth will need to be implemented.\
    Look for that in a future release.\
    As a work-around: If you have YouTube TV you can sign into ABC with it and this will also sign you in to YouTube TV and YouTube.\
-   Peacock is set to off by default as the login is not working.\
+   Peacock is set to off by default as the login is not working.
 
 ## App Control
    Click on the quick-access buttons across the top (macOS only) to load streaming services as selected in the settings menu under preferences (or use the 'Streams' menu).\
@@ -56,4 +56,4 @@
    Various behaviors can be toggled in the settings under preferences including which streaming services are present and what colors and glyphs are used to represent them in the quick access bar (macOS). This includes the ability to skip YouTube adds and dismiss ad overlays when possible (while not all ads are skipable, if turned on it will even skip adds before the skip button even appears.)\
    You can bookmark streams via the bookmark button in the header or via the 'View' menu.\
    Toggle bookmarks via the same menu over via the far left quick access button.\
-   You can also view the extended Netflix genres via 'Show Genres' button (only shows up when in Netflix on macOS) or alternatively in the 'View' menu.\
+   You can also view the extended Netflix genres via 'Show Genres' button (only shows up when in Netflix on macOS) or alternatively in the 'View' menu.

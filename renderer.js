@@ -47,6 +47,7 @@ ipcRenderer.on('stream-changed', (e, url) => {
 // Show bookmarks
 ipcRenderer.on('show-bookmarks', () => {
   $('.facet-host').hide()
+  $('.loading').hide()
   $('.bookmark-host').show()
 })
 

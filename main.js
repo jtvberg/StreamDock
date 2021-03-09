@@ -373,6 +373,7 @@ function toggleBookmarks() {
     win.webContents.send('hide-bookmarks')
     setViewBounds()
   } else {
+    isPlaying ? pause() : null
     showBookmarks = true
     win.webContents.send('show-bookmarks')
     view.setBounds({ x: 0, y: 0, width: 0, height: 0 })
