@@ -3,7 +3,7 @@
 // TODO: Setting: add services
 
 // Imports and variable declarations
-const { ipcRenderer } = require('electron')
+const { ipcRenderer, nativeImage, clipboard } = require('electron')
 const $ = require('jquery')
 const isMac = process.platform === 'darwin'
 let streamList = []
@@ -61,7 +61,7 @@ ipcRenderer.on('stream-update', (e, url) => {
 
 // Save bookmark
 ipcRenderer.on('save-bookmark', (e, stream) => {
-  saveBookmark(stream, 'temp.png')
+  saveBookmark(stream)
 })
 
 // Show Netflix facets
@@ -447,49 +447,34 @@ function openStream(id, url) {
 
 // Load bookmarks
 function loadBookmarks() {
-  let bookmark = JSON.parse(localStorage.getItem('bookmark'))
-  $('.bookmark-host').append(`<div class="bookmark-tile"><img src="${bookmark.image}"></div>`)
-  $('.bookmark-host').append(`<div class="bookmark-tile"><img src="${bookmark.image}"></div>`)
-  $('.bookmark-host').append(`<div class="bookmark-tile"><img src="${bookmark.image}"></div>`)
-  $('.bookmark-host').append(`<div class="bookmark-tile"><img src="${bookmark.image}"></div>`)
+  updateBookmarks(JSON.parse(localStorage.getItem('bookmark')))
 }
 
-// TODO
-// Compress image and store off with url
-function saveBookmark(stream, file) {
-  const canvas = document.createElement('canvas')
-  const img = document.createElement('img')
-  img.src = file
-  img.onload = function () {
-    let width = img.width
-    let height = img.height
-    const maxHeight = 400
-    const maxWidth = 400
-
-    if (width > height) {
-      if (width > maxWidth) {
-        height = Math.round((height *= maxWidth / width))
-        width = maxWidth
-      }
-    } else {
-      if (height > maxHeight) {
-        width = Math.round((width *= maxHeight / height))
-        height = maxHeight
-      }
-    }
-    canvas.width = width
-    canvas.height = height
-
-    const ctx = canvas.getContext('2d')
-    ctx.drawImage(img, 0, 0, width, height)
-    let bookmark = { 
-      serv: stream.id,
-      url: stream.url, 
-      image: canvas.toDataURL('image/jpeg', 1),
-      timestamp: Date.now()
-    }
-    localStorage.setItem('bookmark', JSON.stringify(bookmark))
+// Update bookmarks
+function updateBookmarks(bookmark) {
+  $('.bookmark-host').empty()
+  for (let i = 0; i < 5; i++) {
+    $('.bookmark-host').append(`<div class="bookmark-tile">
+    <img src="${bookmark.image}" style="width: 100%">
+    <div class="fas fa-circle fa-3x bookmark-play-btn-bg"></div>
+    <div class="fas fa-play fa-2x bookmark-play-btn"></div>
+    <div class="bookmark-title" title="${bookmark.url}">${bookmark.url}</div>
+    </div>`)
   }
+}
+
+// Resize image and store off with url
+function saveBookmark(stream) {
+  const img = nativeImage.createFromDataURL(clipboard.readImage().toDataURL())
+  const imgSize = img.getSize()
+  const bookmark = {
+    serv: stream.id,
+    url: stream.url,
+    image: img.resize({ width: 200, height: 200 * imgSize.height / imgSize.width }).toDataURL(),
+    timestamp: Date.now()
+  }
+  updateBookmarks(bookmark)
+  localStorage.setItem('bookmark', JSON.stringify(bookmark))
 }
 
 // Sent IPC message to open genre facets

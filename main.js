@@ -7,7 +7,6 @@ const { app, BrowserWindow, ipcMain, BrowserView, Tray, session, Menu, MenuItem,
 const path = require('path')
 const isMac = process.platform === 'darwin'
 const updater = require('./updater')
-const fs = require('fs')
 const headerSize = isMac ? 22 : 0
 const winAdjustHeight = isMac ? 22 : 57
 const winAdjustWidth = 240
@@ -34,7 +33,7 @@ if (isMac) {
 // app.disableHardwareAcceleration()
 
 // Enable Electron-Reload (dev only)
-// require('electron-reload')(__dirname)
+require('electron-reload')(__dirname)
 
 // Main window and view
 let win = null
@@ -346,10 +345,12 @@ function validateLink(url) {
 // Take screenshot of current stream
 function captureStream() {
   view.webContents.capturePage().then(image => {
-    fs.writeFileSync('temp.png', image.toPNG(), (err) => {
-      if (err) console.log(err)
-    })
+    clipboard.writeImage(image)
   })
+  setTimeout(sendBookmark, 1000)
+}
+
+function sendBookmark() {
   const stream = { id: currentStream, url: view.webContents.getURL() }
   win.webContents.send('save-bookmark', stream)
 }
