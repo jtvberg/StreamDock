@@ -91,7 +91,7 @@ body {
   right: 5px;
   opacity: 0;
   transition: opacity .2s;
-  color: red;
+  color: #c43410;
 }
 
 .bookmark-play-btn {
@@ -100,11 +100,11 @@ body {
   left: calc(50% - 20px);
   opacity: 0;
   transition: opacity .2s;
-  color: var(--color-white);
+  color: var(--color-black);
 }
 
 .bookmark-play-btn:hover {
-  color: var(--color-black);
+  color: var(--color-white);
 }
 
 .bookmark-play-btn-bg {

@@ -46,6 +46,7 @@ ipcRenderer.on('stream-changed', (e, url) => {
 
 // Show bookmarks
 ipcRenderer.on('show-bookmarks', () => {
+  $('.facet-host').hide()
   $('.bookmark-host').show()
 })
 
@@ -436,7 +437,7 @@ function renderNfFacets() {
   $('.nf-facet-host').empty()
   const showAll = !$('.filter-all').hasClass('toggled')
   $.each(nfFacets, function(i, facet) {
-    if(facet.Category === 'Genre') {
+    if (facet.Category === 'Genre') {
       $('.nf-facet-host').append(`<div class="nf-facet" data-code="${facet.Code}" style="font-weight: 800">${facet.Genre}</div>`)
     } else if (facet.Category !== 'A-Z') {
       $('.nf-facet-host').append(`<div class="nf-facet" data-code="${facet.Code}">- ${facet.Genre}</div>`)
@@ -451,7 +452,6 @@ function renderNfFacets() {
 
 // Sent IPC message to open stream
 function openStream(id, url) {
-  $('.loading').show()
   ipcRenderer.send('service-change', {
     id: id,
     url: url
@@ -469,11 +469,11 @@ function loadBookmarks() {
 
 // Update bookmarks
 function addBookmark(bookmark) {
-  $('.bookmark-host').append(`<div class="bookmark-tile">
+  $('.bookmark-host').append(`<div class="bookmark-tile" data-ts="${bookmark.timestamp}">
   <img src="${bookmark.image}" style="width: 100%">
   <div class="fas fa-times-circle fa-2x bookmark-delete-btn" data-ts="${bookmark.timestamp}"></div>
   <div class="fas fa-circle fa-3x bookmark-play-btn-bg"></div>
-  <div class="fas fa-play fa-2x bookmark-play-btn" data-val="${bookmark.id}" data-url="${bookmark.url}"></div>
+  <div class="fas fa-play fa-2x bookmark-play-btn" data-val="${bookmark.serv}" data-url="${bookmark.url}"></div>
   <div class="bookmark-title" title="${bookmark.url}">${bookmark.url}</div>
   </div>`)
 }
@@ -495,7 +495,17 @@ function saveBookmark(stream) {
 
 // Delete bookmark
 function deleteBookmark(ts) {
-  console.log(ts)
+  $.each(bookmarks, function(i){
+    if (this.timestamp === ts){
+      bookmarks.splice(i, 1)
+    }
+  })
+  $('.bookmark-tile').each(function () {
+    if ($(this).data('ts') === ts) {
+      $(this).remove()
+    }
+  })
+  localStorage.setItem('bookmarks', JSON.stringify(bookmarks))
 }
 
 // Sent IPC message to open genre facets
@@ -596,7 +606,7 @@ $('.facet-filter').on('input', function () {
   const filter = ($(this).val()).toLowerCase()
   $('.nf-facet-host').empty()
   $.each(nfFacets, function(i, facet) {
-    if(facet.Genre.toLowerCase().includes(filter) || facet.Category.toLowerCase().includes(filter)) {
+    if (facet.Genre.toLowerCase().includes(filter) || facet.Category.toLowerCase().includes(filter)) {
       $('.nf-facet-host').append(`<div class="nf-facet" data-code="${facet.Code}">${facet.Genre}</div>`)
     }
   })

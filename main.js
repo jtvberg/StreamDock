@@ -221,6 +221,7 @@ function streamChange(stream) {
   showBookmarks = false
   currentStream = stream.id
   view.webContents.loadURL(stream.url)
+  win.webContents.send('hide-bookmarks')
   win.webContents.send('stream-changed', stream.url)
 }
 
