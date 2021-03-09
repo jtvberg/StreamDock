@@ -9,6 +9,7 @@ const isMac = process.platform === 'darwin'
 let streamList = []
 let settings = []
 let nfFacets = []
+let bookmarks = []
 
 // Invoke services load and apply settings
 loadSettings()
@@ -41,6 +42,16 @@ ipcRenderer.on('stream-changed', (e, url) => {
     $('.facet-host').hide()
     $('#facets-btn').hide()
   }
+})
+
+// Show bookmarks
+ipcRenderer.on('show-bookmarks', () => {
+  $('.bookmark-host').show()
+})
+
+// Hide bookmarks
+ipcRenderer.on('hide-bookmarks', () => {
+  $('.bookmark-host').hide()
 })
 
 // Stream loaded
@@ -107,6 +118,7 @@ function applyInitialSettings() {
     ipcRenderer.send('set-window', settings.windowSizeLocation)
   }
 
+  $('.bookmark-host').hide()
   $('.facet-host').hide()
   $('#facets-btn').hide()
 
@@ -152,6 +164,7 @@ function loadServices() {
   }
   ipcRenderer.send('reset-menu')
   $('.service-btn-host').empty()
+  $('.service-btn-host').append('<div class="far fa-bookmark bookmarks-btn"></div>')
   streamList.forEach(function (serv) {
     if (serv.active) {
       if (isMac && settings.quickMenu) {
@@ -447,20 +460,22 @@ function openStream(id, url) {
 
 // Load bookmarks
 function loadBookmarks() {
-  updateBookmarks(JSON.parse(localStorage.getItem('bookmark')))
+  $('.bookmark-host').empty()
+  bookmarks = JSON.parse(localStorage.getItem('bookmarks')) || []
+  bookmarks.forEach(function (bm) {
+    addBookmark(bm)
+  })
 }
 
 // Update bookmarks
-function updateBookmarks(bookmark) {
-  $('.bookmark-host').empty()
-  for (let i = 0; i < 5; i++) {
-    $('.bookmark-host').append(`<div class="bookmark-tile">
-    <img src="${bookmark.image}" style="width: 100%">
-    <div class="fas fa-circle fa-3x bookmark-play-btn-bg"></div>
-    <div class="fas fa-play fa-2x bookmark-play-btn"></div>
-    <div class="bookmark-title" title="${bookmark.url}">${bookmark.url}</div>
-    </div>`)
-  }
+function addBookmark(bookmark) {
+  $('.bookmark-host').append(`<div class="bookmark-tile">
+  <img src="${bookmark.image}" style="width: 100%">
+  <div class="fas fa-times-circle fa-2x bookmark-delete-btn" data-ts="${bookmark.timestamp}"></div>
+  <div class="fas fa-circle fa-3x bookmark-play-btn-bg"></div>
+  <div class="fas fa-play fa-2x bookmark-play-btn" data-val="${bookmark.id}" data-url="${bookmark.url}"></div>
+  <div class="bookmark-title" title="${bookmark.url}">${bookmark.url}</div>
+  </div>`)
 }
 
 // Resize image and store off with url
@@ -473,8 +488,14 @@ function saveBookmark(stream) {
     image: img.resize({ width: 200, height: 200 * imgSize.height / imgSize.width }).toDataURL(),
     timestamp: Date.now()
   }
-  updateBookmarks(bookmark)
-  localStorage.setItem('bookmark', JSON.stringify(bookmark))
+  addBookmark(bookmark)
+  bookmarks.push(bookmark)
+  localStorage.setItem('bookmarks', JSON.stringify(bookmarks))
+}
+
+// Delete bookmark
+function deleteBookmark(ts) {
+  console.log(ts)
 }
 
 // Sent IPC message to open genre facets
@@ -486,6 +507,11 @@ function toggleFacets() {
 $.getJSON('nffacets.json', function(json) { 
   nfFacets = json
 }).then(renderNfFacets)
+
+// Bookmarks toggle click handler
+$(document).on('click', '.bookmarks-btn', () => {
+  ipcRenderer.send('toggle-bookmarks')
+})
 
 // NF facet click handler
 $(document).on('click', '.nf-facet', function () {
@@ -539,6 +565,16 @@ $(document).on('mouseleave', '.service-btn', function () {
   })
 })
 
+// Play bookmarked stream
+$(document).on('click', '.bookmark-play-btn', function () {
+  openStream($(this).data('val'), $(this).data('url'))
+})
+
+// Play bookmarked stream
+$(document).on('click', '.bookmark-delete-btn', function () {
+  deleteBookmark($(this).data('ts'))
+})
+
 // Clear facet filter
 $('.filter-clear').on('click', () => {
   $('.facet-filter').val('')
@@ -583,6 +619,11 @@ $('#ontop-btn').on('click', function () {
 // Toggle genre facets
 $('#facets-btn').on('click', () => {
   toggleFacets()
+})
+
+// Bookmark location
+$('#bookmark-btn').on('click', () => {
+  ipcRenderer.send('save-bookmark')
 })
 
 // Back button click handler

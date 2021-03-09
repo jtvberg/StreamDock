@@ -16,6 +16,7 @@ let isPlaying = false
 let restorePlay = false
 let showFacets = false
 let skipAds = false
+let showBookmarks = false
 let userAgent = ''
 let currentStream = ''
 
@@ -89,6 +90,7 @@ const createWindow = () => {
 
   // Set current stream URL (most reliable event)
   view.webContents.on('did-start-navigation', () => {
+    win.webContents.send('hide-bookmarks')
     win.webContents.send('stream-update', view.webContents.getURL())
   })
 
@@ -199,21 +201,24 @@ function setView() {
 
 // Adjust view bounds to window
 function setViewBounds() {
-  updateShowFacets()
-  wb = win.getBounds()
-  let waw = showFacets ? winAdjustWidth : 0
-  view.setBounds({
-    x: 0,
-    y: headerSize,
-    width: wb.width - waw,
-    height: wb.height - winAdjustHeight
-  })
+  if (!showBookmarks) {
+    updateShowFacets()
+    wb = win.getBounds()
+    let waw = showFacets ? winAdjustWidth : 0
+    view.setBounds({
+      x: 0,
+      y: headerSize,
+      width: wb.width - waw,
+      height: wb.height - winAdjustHeight
+    })
+  }
 }
 
 // Change stream service
 function streamChange(stream) {
   isPlaying ? pause() : null
   view.setBounds({ x: 0, y: 0, width: 0, height: 0 })
+  showBookmarks = false
   currentStream = stream.id
   view.webContents.loadURL(stream.url)
   win.webContents.send('stream-changed', stream.url)
@@ -245,7 +250,11 @@ function openLink(url) {
 
 // Navigate view backwards
 function navBack() {
-  if (view.webContents.canGoBack()) {
+  if (view.getBounds().width === 0) {
+    showBookmarks = false
+    win.webContents.send('hide-bookmarks')
+    setViewBounds()
+  } else if (view.webContents.canGoBack()) {
     navChange()
     view.webContents.goBack()
   }
@@ -350,6 +359,7 @@ function captureStream() {
   setTimeout(sendBookmark, 1000)
 }
 
+// Send bookmark to renderer
 function sendBookmark() {
   const stream = { id: currentStream, url: view.webContents.getURL() }
   win.webContents.send('save-bookmark', stream)
@@ -357,7 +367,15 @@ function sendBookmark() {
 
 // Toggle bookmarks page
 function toggleBookmarks() {
-  view.setBounds({ x: 0, y: 0, width: 0, height: 0 })
+  if (showBookmarks) {
+    showBookmarks = false
+    win.webContents.send('hide-bookmarks')
+    setViewBounds()
+  } else {
+    showBookmarks = true
+    win.webContents.send('show-bookmarks')
+    view.setBounds({ x: 0, y: 0, width: 0, height: 0 })
+  }
 }
 
 // Widvine DRM setup
@@ -522,11 +540,20 @@ ipcMain.on('toggle-facets', () => {
   setViewBounds()
 })
 
+// IPC channel to save bookmark
+ipcMain.on('save-bookmark', () => {
+  captureStream()
+})
+
+// IPC channel to toggle bookmarks
+ipcMain.on('toggle-bookmarks', () => {
+  toggleBookmarks()
+})
+
 // IPC channel to skip YouTube ads
 ipcMain.on('set-ytadskip', (e, bool) => {
   skipAds = bool
 })
-
 
 // Menu template
 const template = [{

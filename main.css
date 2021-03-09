@@ -85,6 +85,15 @@ body {
   font-size: .80em;
 }
 
+.bookmark-delete-btn {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  opacity: 0;
+  transition: opacity .2s;
+  color: red;
+}
+
 .bookmark-play-btn {
   position: absolute;
   top: calc(50% - 29px);
@@ -95,7 +104,7 @@ body {
 }
 
 .bookmark-play-btn:hover {
-  color: var(--color-hightlight);
+  color: var(--color-black);
 }
 
 .bookmark-play-btn-bg {
@@ -122,6 +131,7 @@ body {
   user-select: none;
 }
 
+.bookmark-tile:hover > .bookmark-delete-btn,
 .bookmark-tile:hover > .bookmark-title,
 .bookmark-tile:hover > .bookmark-play-btn,
 .bookmark-tile:hover > .bookmark-play-btn-bg {
@@ -264,6 +274,7 @@ body {
   opacity: 1;
 }
 
+.bookmarks-btn,
 .control-btn {
   padding-left: 8px;
   color: var(--color-neutral);
@@ -271,10 +282,17 @@ body {
   cursor: pointer;
 }
 
+.bookmarks-btn {
+  padding-left: 0px;
+  margin-top: 3px;
+  margin-right: 3px;
+}
+
 .nav-hide {
   opacity: 0;
 }
 
+.bookmarks-btn:hover,
 .filter-clear:hover,
 .filter-all:hover,
 .control-btn:hover {
