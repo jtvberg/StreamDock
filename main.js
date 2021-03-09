@@ -90,7 +90,6 @@ const createWindow = () => {
 
   // Set current stream URL (most reliable event)
   view.webContents.on('did-start-navigation', () => {
-    win.webContents.send('hide-bookmarks')
     win.webContents.send('stream-update', view.webContents.getURL())
   })
 
