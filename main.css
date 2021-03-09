@@ -274,7 +274,24 @@ body {
   opacity: 1;
 }
 
-.bookmarks-btn,
+.bookmarks-btn {
+  padding: 3px;
+  padding-left: 3.5px;
+  margin: 3px;
+  color: var(--color-fg);
+  background-color: var(--color-bg);
+  border-radius: 2.5px;
+  height: 16px;
+  width: 16px;
+  transition: color .2s;
+  cursor: pointer;
+}
+
+.bookmarks-btn:hover {
+  color: var(--color-bg);
+  background-color: var(--color-fg);
+}
+
 .control-btn {
   padding-left: 8px;
   color: var(--color-neutral);
@@ -282,17 +299,10 @@ body {
   cursor: pointer;
 }
 
-.bookmarks-btn {
-  padding-left: 0px;
-  margin-top: 3px;
-  margin-right: 3px;
-}
-
 .nav-hide {
   opacity: 0;
 }
 
-.bookmarks-btn:hover,
 .filter-clear:hover,
 .filter-all:hover,
 .control-btn:hover {

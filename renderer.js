@@ -166,7 +166,7 @@ function loadServices() {
   }
   ipcRenderer.send('reset-menu')
   $('.service-btn-host').empty()
-  $('.service-btn-host').append('<div class="far fa-bookmark bookmarks-btn"></div>')
+  $('.service-btn-host').append('<div class="far fa-bookmark fa-xs bookmarks-btn" title="Toggle Bookmarks"></div>')
   streamList.forEach(function (serv) {
     if (serv.active) {
       if (isMac && settings.quickMenu) {
