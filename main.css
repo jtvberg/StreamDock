@@ -10,6 +10,7 @@
   --color-scroll: #80808080;
   --color-thumb: #808080;
   --color-link: #1410ff;
+  --color-warning: #c43410;
   --color-hightlight: #0095f7;
   --color-system-accent: blue;
 }
@@ -91,13 +92,17 @@ body {
   right: 5px;
   opacity: 0;
   transition: opacity .2s;
-  color: #c43410;
+  color: var(--color-white);
+}
+
+.bookmark-delete-btn:hover {
+  color: var(--color-warning);
 }
 
 .bookmark-play-btn {
   position: absolute;
-  top: calc(50% - 29px);
-  left: calc(50% - 20px);
+  top: calc(50% - 13px);
+  left: calc(50% - 8px);
   opacity: 0;
   transition: opacity .2s;
   color: var(--color-black);
@@ -109,11 +114,23 @@ body {
 
 .bookmark-play-btn-bg {
   position: absolute;
-  top: calc(50% - 35px);
-  left: calc(50% - 30px);
+  top: calc(50% - 19px);
+  left: calc(50% - 19px);
   opacity: 0;
   transition: opacity .2s;
   color: var(--color-neutral);
+}
+
+.bookmark-url-btn {
+  position: absolute;
+  top: 5px;
+  left: 5px;
+  opacity: 0;
+  color: var(--color-white);
+}
+
+.bookmark-url-btn:hover {
+  color: var(--color-hightlight);
 }
 
 .bookmark-title {
@@ -131,11 +148,17 @@ body {
   user-select: none;
 }
 
+.bookmark-tile:hover > .bookmark-url-btn,
 .bookmark-tile:hover > .bookmark-delete-btn,
 .bookmark-tile:hover > .bookmark-title,
 .bookmark-tile:hover > .bookmark-play-btn,
 .bookmark-tile:hover > .bookmark-play-btn-bg {
   opacity: 1;
+}
+
+.bookmark-delete-btn:active,
+.bookmark-url-btn:active {
+  color: var(--color-neutral);
 }
 
 .facet-host {

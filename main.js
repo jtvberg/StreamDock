@@ -361,7 +361,7 @@ function captureStream() {
 
 // Send bookmark to renderer
 function sendBookmark() {
-  const stream = { id: currentStream, url: view.webContents.getURL() }
+  const stream = { id: currentStream, title: view.webContents.getTitle(), url: view.webContents.getURL() }
   win.webContents.send('save-bookmark', stream)
 }
 
@@ -613,10 +613,6 @@ const template = [{
   ]
 },
 {
-  label: 'Streams',
-  submenu: []
-},
-{
   label: 'Edit',
   submenu: [{
     role: 'undo'
@@ -656,6 +652,10 @@ const template = [{
   }
   ])
   ]
+},
+{
+  label: 'Streams',
+  submenu: []
 },
 {
   label: 'View',
