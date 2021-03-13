@@ -516,6 +516,22 @@ function toggleFacets() {
   ipcRenderer.send('toggle-facets')
 }
 
+// Filter facets
+function facetFilter(filter) {
+  const showAll = !$('.filter-all').hasClass('toggled')
+  $('.nf-facet-host').empty()
+  $.each(nfFacets, function(i, facet) {
+    if (showAll && facet.Code !== '0' && (facet.Genre.toLowerCase().includes(filter) || facet.Category.toLowerCase().includes(filter))) {
+      $('.nf-facet-host').append(`<div class="nf-facet" data-code="${facet.Code}">${facet.Genre}</div>`)
+    } else if (facet.Category !== 'A-Z' && facet.Code !== '0' && (facet.Genre.toLowerCase().includes(filter) || facet.Category.toLowerCase().includes(filter))) {
+      $('.nf-facet-host').append(`<div class="nf-facet" data-code="${facet.Code}">${facet.Genre}</div>`)
+    }
+  })
+  if (filter === '') {
+    renderNfFacets()
+  }
+}
+
 // Load NF facets from file
 $.getJSON('nffacets.json', function(json) { 
   nfFacets = json
@@ -606,21 +622,12 @@ $('.filter-all').on('click', () => {
   } else {
     $('.filter-all').addClass('toggled')
   }
-  renderNfFacets()
+  facetFilter($('.facet-filter').val().toLowerCase())
 })
 
 // Toggle show all facets
 $('.facet-filter').on('input', function () {
-  const filter = ($(this).val()).toLowerCase()
-  $('.nf-facet-host').empty()
-  $.each(nfFacets, function(i, facet) {
-    if (facet.Genre.toLowerCase().includes(filter) || facet.Category.toLowerCase().includes(filter)) {
-      $('.nf-facet-host').append(`<div class="nf-facet" data-code="${facet.Code}">${facet.Genre}</div>`)
-    }
-  })
-  if (filter === '') {
-    renderNfFacets()
-  }
+  facetFilter($(this).val().toLowerCase())
 })
 
 // Toggle keep on top
