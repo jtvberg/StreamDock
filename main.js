@@ -295,8 +295,6 @@ function setStreamId(url) {
 function ytSkipAdds() {
   if (skipAds && currentStream === 'yt') {
     try {
-      // view.webContents.executeJavaScript(`try {
-      // } catch(err) { console.log(err) }`)
       view.webContents.executeJavaScript(`try {
         document.querySelector('.ytp-ad-skip-button').click()
       } catch(err) { console.log(err) }`)
@@ -310,6 +308,12 @@ function ytSkipAdds() {
           if (mut.type === 'childList' && mut.target.classList.contains('ytp-ad-module')) {
             try {
               document.querySelector('.ytp-ad-overlay-close-button').click()
+            } catch(err) { console.log(err) }
+          }
+          if (mut.type === 'childList' && mut.target.classList.contains('ytd-mealbar-promo-renderer')) {
+            try {
+              document.querySelector('#dismiss-button"').click()
+              alert('promo skip')
             } catch(err) { console.log(err) }
           }
         }

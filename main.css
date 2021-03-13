@@ -332,6 +332,12 @@ body {
   color: var(--color-fg);
 }
 
+.filter-clear:active,
+.filter-all:active,
+.control-btn:active {
+  color: var(--color-system-accent);
+}
+
 .ontop-locked:before {
   content: '\f023';
 }

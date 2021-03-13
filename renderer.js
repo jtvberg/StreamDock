@@ -472,7 +472,7 @@ function loadBookmarks() {
 function addBookmark(bookmark) {
   $('.bookmark-host').append(`<div class="bookmark-tile" data-ts="${bookmark.timestamp}">
     <img src="${bookmark.image}" style="width: 100%">
-    <div class="fas fa-link bookmark-url-btn fa-2x" title="Copy URL"></div>
+    <div class="fas fa-link bookmark-url-btn fa-2x" data-url="${bookmark.url}" title="Copy URL"></div>
     <div class="fas fa-times-circle bookmark-delete-btn fa-2x" data-ts="${bookmark.timestamp}" title="Delete Bookmark"></div>
     <div class="fas fa-circle fa-3x bookmark-play-btn-bg"></div>
     <div class="fas fa-play fa-2x bookmark-play-btn" data-val="${bookmark.serv}" data-url="${bookmark.url}" title="Play Stream"></div>
@@ -586,6 +586,11 @@ $(document).on('click', '.bookmark-play-btn', function () {
 // Play bookmarked stream
 $(document).on('click', '.bookmark-delete-btn', function () {
   deleteBookmark($(this).data('ts'))
+})
+
+// Copy bookmark link to clipboard
+$(document).on('click', '.bookmark-url-btn', function () {
+  clipboard.writeText($(this).data('url'))
 })
 
 // Clear facet filter
