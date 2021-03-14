@@ -53,8 +53,8 @@ const createWindow = () => {
     transparent: !!isMac,
     hasShadow: false,
     frame: !isMac,
+    visualEffectState: 'active',
     titleBarStyle: isMac ? 'hidden' : 'default',
-    vibrancy: 'light',
     trafficLightPosition: {
       x: 7,
       y: 7
@@ -138,7 +138,7 @@ const createWindow = () => {
   // Set vibrancy to match theme on update
   nativeTheme.on('updated', () => {
     if (nativeTheme.shouldUseDarkColors) {
-      win.setVibrancy('ultra-dark')
+      win.setVibrancy('dark')
     } else {
       win.setVibrancy('light')
     }
