@@ -331,6 +331,7 @@ function maxRestoreWindow() {
 // Load stored values into settings modal
 function loadSettingsModal() {
   $('.facet-host').css({ 'opacity': '0' })
+  $('.bookmark-host').css({ 'opacity': '0' })
   ipcRenderer.send('view-hide')
   $('#collapse-general, #collapse-services').collapse('hide')
   $('#ontop-check').prop('checked', settings.onTop)
@@ -684,6 +685,7 @@ $('.header-bar').on('contextmenu', () => {
 // Settings close restore View
 $('#settings-modal').on('hidden.bs.modal', () => {
   $('.facet-host').css({ 'opacity': '1' })
+  $('.bookmark-host').css({ 'opacity': '1' })
   ipcRenderer.send('view-show')
 })
 

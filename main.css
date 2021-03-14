@@ -28,7 +28,7 @@
   :root {
     --color-fg: var(--color-black);
     --color-bg: var(--color-white);
-    --color-bg-trans: #e7e7e79c;
+    --color-bg-trans: #ddddddc0;
     --color-neutral-light: #c7c7c7b2;
   }
 }
@@ -44,8 +44,7 @@
 
 body {
   overflow: hidden;
-  color: var(--color-fg);
-  background: var(--color-bg-trans);
+  background-color: var(--color-bg-trans);
 }
 
 ::-webkit-scrollbar {

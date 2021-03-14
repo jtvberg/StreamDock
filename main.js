@@ -15,6 +15,7 @@ let allowQuit = false
 let isPlaying = false
 let restorePlay = false
 let showFacets = false
+let showPrefs = false
 let skipAds = false
 let showBookmarks = false
 let userAgent = ''
@@ -47,12 +48,13 @@ const createWindow = () => {
   win = new BrowserWindow({
     height: 600,
     width: 800,
-    minHeight: 280,
+    minHeight: 348,
     minWidth: 580,
     transparent: !!isMac,
     hasShadow: false,
     frame: !isMac,
     titleBarStyle: isMac ? 'hidden' : 'default',
+    vibrancy: 'light',
     trafficLightPosition: {
       x: 7,
       y: 7
@@ -123,13 +125,22 @@ const createWindow = () => {
     wb = win.getBounds()
   })
 
-  // when win ready set accent color and subscribe to changes if macOS
+  // When win ready set accent color and subscribe to changes if macOS
   win.on('ready-to-show', () => {
     getAccent()
     if(isMac) {
       systemPreferences.subscribeNotification('AppleColorPreferencesChangedNotification', () => {
         getAccent()
       })
+    }
+  })
+
+  // Set vibrancy to match theme on update
+  nativeTheme.on('updated', () => {
+    if (nativeTheme.shouldUseDarkColors) {
+      win.setVibrancy('ultra-dark')
+    } else {
+      win.setVibrancy('light')
     }
   })
 }
@@ -200,7 +211,7 @@ function setView() {
 
 // Adjust view bounds to window
 function setViewBounds() {
-  if (!showBookmarks) {
+  if (!showBookmarks && !showPrefs) {
     updateShowFacets()
     wb = win.getBounds()
     let waw = showFacets ? winAdjustWidth : 0
@@ -516,11 +527,13 @@ ipcMain.on('add-stream', (e, serv) => {
 
 // IPC channel for hiding view
 ipcMain.on('view-hide', () => {
+  showPrefs = true
   removeView()
 })
 
 // IPC channel for showing view
 ipcMain.on('view-show', () => {
+  showPrefs = false
   setViewBounds()
 })
 
@@ -799,7 +812,7 @@ let menu = Menu.buildFromTemplate(template)
 
 // Menu add stream service to menu
 function addStream(serv) {
-  const streamMenu = Menu.getApplicationMenu().items[1]
+  const streamMenu = Menu.getApplicationMenu().items[2]
   const menuItem = new MenuItem({
     label: serv.title,
     id: serv.id,
