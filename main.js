@@ -576,7 +576,7 @@ ipcMain.on('set-ytadskip', (e, bool) => {
   skipAds = bool
 })
 
-// Menu template
+// Build menu template
 const template = [{
   label: app.name,
   submenu: [{
@@ -811,6 +811,7 @@ const template = [{
 }
 ]
 
+// Set template
 let menu = Menu.buildFromTemplate(template)
 
 // Add stream service to menu & touchbar
@@ -841,7 +842,7 @@ function addStream(serv) {
   }
 }
 
-// Menu rebuild and set
+// Menu & touchbar rebuild and set
 function resetMenu() {
   menu = Menu.buildFromTemplate(template)
   Menu.setApplicationMenu(menu)

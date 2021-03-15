@@ -228,7 +228,7 @@ function getDefaultStreams() {
     id: 'ap',
     active: true,
     glyph: 'P',
-    title: 'Amazon Prime TV',
+    title: 'Prime Video',
     url: 'https://www.amazon.com/gp/video/storefront',
     color: '#ffffff',
     bgColor: '#00aee4'
