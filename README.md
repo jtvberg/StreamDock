@@ -46,6 +46,7 @@
 
 ## App Control
    Click on the quick-access buttons across the top (macOS only) to load streaming services as selected in the settings menu under preferences (or use the 'Streams' menu).\
+   A limited set of stream services will also be available in the Mac touch bar (beacuse why not)\
    Left-click on the tray icon (or right-click on app header) will hide and pause the window/stream (if playing.)\
    If hidden already, another left-click will restore the window but not resume play (unless restore auto-play is checked in the settings.)\
    Right-click on the tray icon will exit the app completely.\

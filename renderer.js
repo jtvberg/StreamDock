@@ -462,7 +462,7 @@ function openStream(id, url) {
 
 // Load bookmarks
 function loadBookmarks() {
-  $('.bookmark-host').empty()
+  $('.bookmark-stream-host').empty()
   bookmarks = JSON.parse(localStorage.getItem('bookmarks')) || []
   bookmarks.forEach(function (bm) {
     addBookmark(bm)
@@ -471,7 +471,7 @@ function loadBookmarks() {
 
 // Update bookmarks
 function addBookmark(bookmark) {
-  $('.bookmark-host').append(`<div class="bookmark-tile" data-ts="${bookmark.timestamp}">
+  $('.bookmark-stream-host').append(`<div class="bookmark-tile" data-ts="${bookmark.timestamp}">
     <img src="${bookmark.image}" style="width: 100%">
     <div class="fas fa-link bookmark-url-btn fa-2x" data-url="${bookmark.url}" title="Copy URL"></div>
     <div class="fas fa-times-circle bookmark-delete-btn fa-2x" data-ts="${bookmark.timestamp}" title="Delete Bookmark"></div>

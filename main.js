@@ -3,7 +3,8 @@
 // TODO: Scrollbar css
 
 // Imports and variable declarations
-const { app, BrowserWindow, ipcMain, BrowserView, Tray, session, Menu, MenuItem, systemPreferences, clipboard, nativeTheme, dialog } = require('electron')
+const { app, BrowserWindow, ipcMain, BrowserView, Tray, TouchBar, session, Menu, MenuItem, systemPreferences, clipboard, nativeTheme, dialog } = require('electron')
+const { TouchBarButton } = TouchBar
 const path = require('path')
 const isMac = process.platform === 'darwin'
 const updater = require('./updater')
@@ -20,6 +21,7 @@ let skipAds = false
 let showBookmarks = false
 let userAgent = ''
 let currentStream = ''
+let touchBarItems = []
 
 // OS variables
 if (isMac) {
@@ -35,12 +37,13 @@ if (isMac) {
 // app.disableHardwareAcceleration()
 
 // Enable Electron-Reload (dev only)
-// require('electron-reload')(__dirname)
+require('electron-reload')(__dirname)
 
 // Main window and view
 let win = null
 let view = null
 let tray = null
+let touchBar = null
 
 // Create window
 const createWindow = () => {
@@ -128,7 +131,7 @@ const createWindow = () => {
   // When win ready set accent color and subscribe to changes if macOS
   win.on('ready-to-show', () => {
     getAccent()
-    if(isMac) {
+    if (isMac) {
       systemPreferences.subscribeNotification('AppleColorPreferencesChangedNotification', () => {
         getAccent()
       })
@@ -810,7 +813,7 @@ const template = [{
 
 let menu = Menu.buildFromTemplate(template)
 
-// Menu add stream service to menu
+// Add stream service to menu & touchbar
 function addStream(serv) {
   const streamMenu = Menu.getApplicationMenu().items[2]
   const menuItem = new MenuItem({
@@ -822,10 +825,29 @@ function addStream(serv) {
   })
   streamMenu.submenu.append(menuItem)
   Menu.setApplicationMenu(menu)
+
+  if (isMac) {
+    touchBarItems.push(
+      new TouchBarButton({
+        label: serv.title,
+        backgroundColor: serv.bgColor,
+        click: () => {
+          streamChange(serv)
+        }
+      })
+    )
+    touchBar = new TouchBar({ items: touchBarItems })
+    win.setTouchBar(touchBar)
+  }
 }
 
 // Menu rebuild and set
 function resetMenu() {
   menu = Menu.buildFromTemplate(template)
   Menu.setApplicationMenu(menu)
+  if (isMac) {
+    touchBarItems = []
+    touchBar = new TouchBar({ items: touchBarItems })
+    win.setTouchBar(touchBar)
+  }
 }
