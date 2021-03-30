@@ -37,7 +37,7 @@ if (isMac) {
 // app.disableHardwareAcceleration()
 
 // Enable Electron-Reload (dev only)
-require('electron-reload')(__dirname)
+// require('electron-reload')(__dirname)
 
 // Main window and view
 let win = null
@@ -326,7 +326,7 @@ function ytSkipAdds() {
           }
           if (mut.type === 'childList' && mut.target.classList.contains('ytd-mealbar-promo-renderer')) {
             try {
-              document.querySelector('#dismiss-button"').click()
+              document.querySelectorAll('#dismiss-button').forEach(input => { input.click() })
               alert('promo skip')
             } catch(err) { console.log(err) }
           }
