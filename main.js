@@ -1,5 +1,4 @@
 // TODO: Peacock won't login
-// TODO: Touchbar support
 // TODO: Scrollbar css
 
 // Imports and variable declarations
@@ -241,7 +240,9 @@ function streamChange(stream) {
 // Stream loaded
 function streamLoaded(stream) {
   win.webContents.send('stream-loaded', stream)
-  ytSkipAdds()
+  ytSkipAds()
+  amzSkipPreview()
+  amzSkipRecap()
 }
 
 // Toggle facets if Netflix
@@ -305,14 +306,15 @@ function setStreamId(url) {
   return currentStream
 }
 
+// EXPERIMENTAL (3rd clause)
 // Skip/close YouTube ads
-function ytSkipAdds() {
+function ytSkipAds() {
   if (skipAds && currentStream === 'yt') {
     try {
       view.webContents.executeJavaScript(`try {
         document.querySelector('.ytp-ad-skip-button').click()
       } catch(err) { console.log(err) }`)
-      view.webContents.executeJavaScript(`const obs = new MutationObserver(function(ml) {
+      view.webContents.executeJavaScript(`const obsAds = new MutationObserver(function(ml) {
         for(const mut of ml) {
           if (mut.type === 'childList' && mut.target.classList.contains('ytp-ad-text')) {
             try {
@@ -327,11 +329,53 @@ function ytSkipAdds() {
           if (mut.type === 'childList' && mut.target.classList.contains('ytd-mealbar-promo-renderer')) {
             try {
               document.querySelectorAll('#dismiss-button').forEach(input => { input.click() })
-              alert('promo skip')
+              console.log('promo skip')
             } catch(err) { console.log(err) }
           }
         }
       }).observe(document.querySelector('ytd-app'), { childList: true, subtree: true})`)
+    } catch(err) {
+      console.log(err)
+    }
+  }
+}
+
+// EXPERIMENTAL
+// Skip/close Prime preivews
+function amzSkipPreview() {
+  if (skipAds && currentStream === 'ap') {
+    try {
+      view.webContents.executeJavaScript(`const obsPreview = new MutationObserver(function(ml) {
+        for(const mut of ml) {
+          if (mut.type === 'childList' && mut.target.classList.contains('fu4rd6c')) {
+            try {
+              document.querySelector('.fu4rd6c').click()
+              console.log('preview skip')
+            } catch(err) { console.log(err) }
+          }
+        }
+      }).observe(document.querySelector('.atvwebplayersdk-infobar-container'), { childList: true, subtree: true})`)
+    } catch(err) {
+      console.log(err)
+    }
+  }
+}
+
+// EXPERIMENTAL
+// Skip/close Prime episode recap
+function amzSkipRecap() {
+  if (skipAds && currentStream === 'ap') {
+    try {
+      view.webContents.executeJavaScript(`const obsRecap = new MutationObserver(function(ml) {
+        for(const mut of ml) {
+          if (mut.type === 'childList' && mut.target.classList.contains('atvwebplayersdk-skipelement-button')) {
+            try {
+              document.querySelector('.atvwebplayersdk-skipelement-button').click()
+              console.log('recap skip')
+            } catch(err) { console.log(err) }
+          }
+        }
+      }).observe(document.querySelector('.atvwebplayersdk-bottompanel-container'), { childList: true, subtree: true})`)
     } catch(err) {
       console.log(err)
     }
