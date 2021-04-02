@@ -347,14 +347,19 @@ function amzSkipPreview() {
     try {
       view.webContents.executeJavaScript(`const obsPreview = new MutationObserver(function(ml) {
         for(const mut of ml) {
-          if (mut.type === 'childList' && mut.target.classList.contains('fu4rd6c')) {
+          if (mut.type === 'childList') {
             try {
-              document.querySelector('.fu4rd6c').click()
-              console.log('preview skip')
+              if (mut.addedNodes && mut.addedNodes.length > 0) {
+                mut.addedNodes.forEach(element => {
+                  if (element.classList && element.classList.contains('fu4rd6c')) {
+                    document.querySelector('.fu4rd6c').click()
+                  }
+                })
+              }
             } catch(err) { console.log(err) }
           }
         }
-      }).observe(document.querySelector('.atvwebplayersdk-infobar-container'), { childList: true, subtree: true})`)
+      }).observe(document.querySelector('.webPlayerUIContainer'), { childList: true, subtree: true})`)
     } catch(err) {
       console.log(err)
     }
@@ -362,20 +367,25 @@ function amzSkipPreview() {
 }
 
 // EXPERIMENTAL
-// Skip/close Prime episode recap
+// Skip/close Prime episode recap & intros
 function amzSkipRecap() {
   if (skipAds && currentStream === 'ap') {
     try {
       view.webContents.executeJavaScript(`const obsRecap = new MutationObserver(function(ml) {
         for(const mut of ml) {
-          if (mut.type === 'childList' && mut.target.classList.contains('atvwebplayersdk-skipelement-button')) {
+          if (mut.type === 'childList') {
             try {
-              document.querySelector('.atvwebplayersdk-skipelement-button').click()
-              console.log('recap skip')
+              if (mut.addedNodes && mut.addedNodes.length > 0) {
+                mut.addedNodes.forEach(element => {
+                  if (element.classList && element.classList.contains('atvwebplayersdk-skipelement-button')) {
+                    document.querySelector('.atvwebplayersdk-skipelement-button').click()
+                  }
+                })
+              }
             } catch(err) { console.log(err) }
           }
         }
-      }).observe(document.querySelector('.atvwebplayersdk-bottompanel-container'), { childList: true, subtree: true})`)
+      }).observe(document.querySelector('.webPlayerUIContainer'), { childList: true, subtree: true})`)
     } catch(err) {
       console.log(err)
     }
