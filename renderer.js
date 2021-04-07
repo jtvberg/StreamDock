@@ -68,8 +68,8 @@ ipcRenderer.on('stream-loaded', (e, stream) => {
 })
 
 // Stream url updated
-ipcRenderer.on('stream-update', (e, url) => {
-  settings.lastStream = { id: settings.lastStream.id, url: url }
+ipcRenderer.on('stream-update', (e, stream) => {
+  settings.lastStream = stream
 })
 
 // Save bookmark

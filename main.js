@@ -83,18 +83,14 @@ const createWindow = () => {
   view.webContents.on('did-finish-load', () => {
     // Open DevTools (view, dev only)
     // view.webContents.openDevTools('detach')
-    currentStream = setStreamId(view.webContents.getURL())
-    const stream = {
-      id: currentStream,
-      url: view.webContents.getURL()
-    }
+    sendCurrentStream()
     setView()
-    streamLoaded(stream)
+    streamLoaded()
   })
 
   // Set current stream URL (most reliable event)
   view.webContents.on('did-start-navigation', () => {
-    win.webContents.send('stream-update', view.webContents.getURL())
+    sendCurrentStream()
   })
 
   // Capture playing
@@ -238,11 +234,10 @@ function streamChange(stream) {
 }
 
 // Stream loaded
-function streamLoaded(stream) {
-  win.webContents.send('stream-loaded', stream)
+function streamLoaded() {
   ytSkipAds()
-  amzSkipPreview()
-  amzSkipRecap()
+  setTimeout(amzSkipPreview, 3000)
+  setTimeout(amzSkipRecap, 3000)
 }
 
 // Toggle facets if Netflix
@@ -352,6 +347,7 @@ function amzSkipPreview() {
               if (mut.addedNodes && mut.addedNodes.length > 0) {
                 mut.addedNodes.forEach(element => {
                   if (element.classList && element.classList.contains('fu4rd6c')) {
+                    console.log('preview skip')
                     document.querySelector('.fu4rd6c').click()
                   }
                 })
@@ -378,6 +374,7 @@ function amzSkipRecap() {
               if (mut.addedNodes && mut.addedNodes.length > 0) {
                 mut.addedNodes.forEach(element => {
                   if (element.classList && element.classList.contains('atvwebplayersdk-skipelement-button')) {
+                    console.log('recap skip')
                     document.querySelector('.atvwebplayersdk-skipelement-button').click()
                   }
                 })
@@ -431,12 +428,6 @@ function captureStream() {
   setTimeout(sendBookmark, 1000)
 }
 
-// Send bookmark to renderer
-function sendBookmark() {
-  const stream = { id: currentStream, title: view.webContents.getTitle(), url: view.webContents.getURL() }
-  win.webContents.send('save-bookmark', stream)
-}
-
 // Toggle bookmarks page
 function toggleBookmarks() {
   if (showBookmarks) {
@@ -449,6 +440,44 @@ function toggleBookmarks() {
     win.webContents.send('show-bookmarks')
     view.setBounds({ x: 0, y: 0, width: 0, height: 0 })
   }
+}
+
+// Send bookmark to renderer
+async function sendBookmark() {
+  let currentUrl = await getCurrentUrl()
+  win.webContents.send('save-bookmark', { id: currentStream, title: view.webContents.getTitle(), url: currentUrl })
+}
+
+// Send current stream object
+async function sendCurrentStream() {
+  const currentUrl = await getCurrentUrl()
+  win.webContents.send('stream-loaded', { id: setStreamId(currentUrl), url: currentUrl })
+}
+
+// Get current URL
+async function getCurrentUrl() {
+  let url = view.webContents.getURL()
+  if (currentStream === 'ap') {
+    const result = await view.webContents.executeJavaScript(`try {
+      document.querySelectorAll('.tst-play-button')[0].getAttribute('href')
+    } catch(err) { console.log(err) }`)
+    url = result === undefined ? url : `https://www.amazon.com${result}`
+  }
+  return url
+}
+
+// Send settings
+async function saveSettings() {
+  await sendCurrentStream()
+  const data = {
+    windowSizeLocation: {
+      x: wb.x,
+      y: wb.y,
+      height: wb.height,
+      width: wb.width
+    }
+  }
+  win.webContents.send('save-settings', data)
 }
 
 // Widvine DRM setup
@@ -495,16 +524,8 @@ app.on('window-all-closed', () => {
 app.on('before-quit', (e) => {
   if (!allowQuit) {
     e.preventDefault()
-    const data = {
-      windowSizeLocation: {
-        x: wb.x,
-        y: wb.y,
-        height: wb.height,
-        width: wb.width
-      }
-    }
-    win.webContents.send('save-settings', data)
     allowQuit = true
+    saveSettings()
     app.quit()
   }
 })
