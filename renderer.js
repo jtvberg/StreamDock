@@ -610,6 +610,11 @@ $(document).on('click', '.bookmark-url-btn', function () {
   clipboard.writeText($(this).data('url'))
 })
 
+// Stop button dblclick from bubbling up to header
+$('.service-btn-host, .control-btn-host').on('dblclick', (e) => {
+  e.stopPropagation()
+})
+
 // Clear facet filter
 $('.filter-clear').on('click', () => {
   $('.facet-filter').val('')

@@ -123,6 +123,14 @@ const createWindow = () => {
     wb = win.getBounds()
   })
 
+  // Hide instead of close window unless quitting
+  win.on('close', (e) => {
+    if (!allowQuit) {
+      e.preventDefault()
+      win.hide()
+    }
+  })
+
   // When win ready set accent color and subscribe to changes if macOS
   win.on('ready-to-show', () => {
     getAccent()
@@ -466,6 +474,13 @@ async function getCurrentUrl() {
   return url
 }
 
+// Before close
+async function beforeClose() {
+  await saveSettings()
+  allowQuit = true
+  app.quit()
+}
+
 // Send settings
 async function saveSettings() {
   await sendCurrentStream()
@@ -524,9 +539,7 @@ app.on('window-all-closed', () => {
 app.on('before-quit', (e) => {
   if (!allowQuit) {
     e.preventDefault()
-    allowQuit = true
-    saveSettings()
-    app.quit()
+    beforeClose()
   }
 })
 
