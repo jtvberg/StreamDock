@@ -127,6 +127,7 @@ const createWindow = () => {
   win.on('close', (e) => {
     if (!allowQuit) {
       e.preventDefault()
+      pause()
       win.hide()
     }
   })
@@ -244,6 +245,7 @@ function streamChange(stream) {
 // Stream loaded
 function streamLoaded() {
   ytSkipAds()
+  amzGetUrl()
   setTimeout(amzSkipPreview, 3000)
   setTimeout(amzSkipRecap, 3000)
 }
@@ -348,22 +350,24 @@ function ytSkipAds() {
 function amzSkipPreview() {
   if (skipAds && currentStream === 'ap') {
     try {
-      view.webContents.executeJavaScript(`const obsPreview = new MutationObserver(function(ml) {
-        for(const mut of ml) {
-          if (mut.type === 'childList') {
-            try {
-              if (mut.addedNodes && mut.addedNodes.length > 0) {
-                mut.addedNodes.forEach(element => {
-                  if (element.classList && element.classList.contains('fu4rd6c')) {
-                    console.log('preview skip')
-                    document.querySelector('.fu4rd6c').click()
-                  }
-                })
-              }
-            } catch(err) { console.log(err) }
+      view.webContents.executeJavaScript(`
+        const obsPreview = new MutationObserver(function(ml) {
+          for(const mut of ml) {
+            if (mut.type === 'childList') {
+              try {
+                if (mut.addedNodes && mut.addedNodes.length > 0) {
+                  mut.addedNodes.forEach(element => {
+                    if (element.classList && element.classList.contains('fu4rd6c')) {
+                      console.log('preview skip')
+                      document.querySelector('.fu4rd6c').click()
+                    }
+                  })
+                }
+              } catch(err) { console.log(err) }
+            }
           }
-        }
-      }).observe(document.querySelector('.webPlayerUIContainer'), { childList: true, subtree: true})`)
+        }).observe(document.querySelector('.webPlayerUIContainer'), { childList: true, subtree: true})
+      `)
     } catch(err) {
       console.log(err)
     }
@@ -375,22 +379,41 @@ function amzSkipPreview() {
 function amzSkipRecap() {
   if (skipAds && currentStream === 'ap') {
     try {
-      view.webContents.executeJavaScript(`const obsRecap = new MutationObserver(function(ml) {
-        for(const mut of ml) {
-          if (mut.type === 'childList') {
-            try {
-              if (mut.addedNodes && mut.addedNodes.length > 0) {
-                mut.addedNodes.forEach(element => {
-                  if (element.classList && element.classList.contains('atvwebplayersdk-skipelement-button')) {
-                    console.log('recap skip')
-                    document.querySelector('.atvwebplayersdk-skipelement-button').click()
-                  }
-                })
-              }
-            } catch(err) { console.log(err) }
+      view.webContents.executeJavaScript(`
+        const obsRecap = new MutationObserver(function(ml) {
+          for(const mut of ml) {
+            if (mut.type === 'childList') {
+              try {
+                if (mut.addedNodes && mut.addedNodes.length > 0) {
+                  mut.addedNodes.forEach(element => {
+                    if (element.classList && element.classList.contains('atvwebplayersdk-skipelement-button')) {
+                      console.log('recap skip')
+                      document.querySelector('.atvwebplayersdk-skipelement-button').click()
+                    }
+                  })
+                }
+              } catch(err) { console.log(err) }
+            }
           }
-        }
-      }).observe(document.querySelector('.webPlayerUIContainer'), { childList: true, subtree: true})`)
+        }).observe(document.querySelector('.webPlayerUIContainer'), { childList: true, subtree: true})
+      `)
+    } catch(err) {
+      console.log('err')
+    }
+  }
+}
+
+// Get acutal URL for Amazon videos
+function amzGetUrl() {
+  if (currentStream === 'ap') {
+    try {
+      view.webContents.executeJavaScript(`
+        let sdAmzUrl = '${view.webContents.getURL()}'
+        try {
+            document.querySelectorAll('.tst-title-card').forEach(function(tile) { tile.dispatchEvent(new MouseEvent('mouseover', { 'bubbles': true })) })
+            document.querySelectorAll('.tst-play-button').forEach(function(btn) { btn.addEventListener('click', function() { sdAmzUrl = this.href }) })
+          } catch(err) { console.log(err) }
+      `)
     } catch(err) {
       console.log(err)
     }
@@ -466,11 +489,9 @@ async function sendCurrentStream() {
 async function getCurrentUrl() {
   let url = view.webContents.getURL()
   if (currentStream === 'ap') {
-    const result = await view.webContents.executeJavaScript(`try {
-      document.querySelectorAll('.tst-play-button')[0].getAttribute('href')
-    } catch(err) { console.log(err) }`)
-    url = result === undefined ? url : `https://www.amazon.com${result}`
+    url = await view.webContents.executeJavaScript('sdAmzUrl')
   }
+  console.log(url)
   return url
 }
 
@@ -508,7 +529,7 @@ app.on('ready', () => {
     baseDir: widevineDir
   })
   // Check for updates
-  setTimeout(updater, 3000)
+  // setTimeout(updater, 3000)
 })
 
 // Widvine DRM  ready
