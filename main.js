@@ -115,6 +115,7 @@ const createWindow = () => {
 
   // Reset view on resize
   win.on('resize', () => {
+    wb = win.getBounds()
     setViewBounds()
   })
 
@@ -190,16 +191,18 @@ function pause() {
 
 // Play stream
 function play() {
-  switch (currentStream) {
-    case 'at':
-      view.webContents.executeJavaScript(`document.querySelector('apple-tv-plus-player').shadowRoot.querySelector('amp-video-player-internal').shadowRoot.querySelector('amp-video-player').shadowRoot.querySelector('video').play()`)
-      break
-    case 'ap':
-      view.webContents.executeJavaScript(`document.querySelectorAll('.rendererContainer>video').forEach(input => { input.play() })`)
-      break
-    default:
-      view.webContents.executeJavaScript(`document.querySelectorAll('video').forEach(input => { input.play() })`)
-      break
+  if (!showBookmarks) {
+    switch (currentStream) {
+      case 'at':
+        view.webContents.executeJavaScript(`document.querySelector('apple-tv-plus-player').shadowRoot.querySelector('amp-video-player-internal').shadowRoot.querySelector('amp-video-player').shadowRoot.querySelector('video').play()`)
+        break
+      case 'ap':
+        view.webContents.executeJavaScript(`document.querySelectorAll('.rendererContainer>video').forEach(input => { input.play() })`)
+        break
+      default:
+        view.webContents.executeJavaScript(`document.querySelectorAll('video').forEach(input => { input.play() })`)
+        break
+    }
   }
 }
 
@@ -220,7 +223,6 @@ function setView() {
 function setViewBounds() {
   if (!showBookmarks && !showPrefs) {
     updateShowFacets()
-    wb = win.getBounds()
     let waw = showFacets ? winAdjustWidth : 0
     view.setBounds({
       x: 0,
@@ -529,7 +531,7 @@ app.on('ready', () => {
     baseDir: widevineDir
   })
   // Check for updates
-  // setTimeout(updater, 3000)
+  setTimeout(updater, 3000)
 })
 
 // Widvine DRM  ready
