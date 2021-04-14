@@ -36,7 +36,7 @@
    The code builds for Mac and Windows currently, but I have not tested the build process on Linux.
 
 ## Releases / Known Issues
-   The current release works on Mac and there is an older one for Windows. It should install without much hassle on both platforms.
+   The current release works on Mac (signed and notarized) and Windows (only self-signed). It should install without much hassle on both platforms.
    No Linux version in the release.\
    At the moment, any service using Google auth is broken if you have to sign-in to use (so, YouTube works, YouTube TV will not.)\
    The user agent spoofing is no longer working so Google OAuth will need to be implemented. 
@@ -60,4 +60,5 @@
    Various behaviors can be toggled in the settings under preferences including:\
    - Which streaming services are present and what colors and glyphs are used to represent them in the quick access bar (macOS)\
    - The ability to skip Prime previews and Prime episode recaps\
+   - Netflix recap skipping\
    - You can also skip YouTube ads and dismiss ad overlays when possible (while not all ads are skipable, if turned on it will even skip ads before the skip button even appears.)\

@@ -149,6 +149,9 @@ function applyUpdateSettings() {
 
   // Skip Prime recap skip
   ipcRenderer.send('set-amzrecapskip', settings.amzSkipRecap)
+
+  // Skip Netflix recap skip
+  ipcRenderer.send('set-nfrecapskip', settings.nfSkipRecap)
 }
 
 // Iterate through stored services and create buttons/menu entries
@@ -321,6 +324,7 @@ function getDefaultSettings() {
     ytSkipAds: true,
     amzSkipPreview: true,
     amzSkipRecap: false,
+    nfSkipRecap: false,
     windowSizeLocation: {
       x: 0,
       y: 0,
@@ -352,6 +356,7 @@ function loadSettingsModal() {
   $('#yt-skip-check').prop('checked', settings.ytSkipAds)
   $('#amz-preview-check').prop('checked', settings.amzSkipPreview)
   $('#amz-recap-check').prop('checked', settings.amzSkipRecap)
+  $('#nf-recap-check').prop('checked', settings.nfSkipRecap)
   $('input[name=radio-theme]').prop('checked', false).parent('.btn').removeClass('active')
   $(`input[name=radio-theme][value=${settings.themeMode}]`).prop('checked', true).parent('.btn').addClass('active')
   $('#settings-services-available').empty()
@@ -405,6 +410,7 @@ function saveSettings() {
     ytSkipAds: $('#yt-skip-check').is(':checked'),
     amzSkipPreview: $('#amz-preview-check').is(':checked'),
     amzSkipRecap: $('#amz-recap-check').is(':checked'),
+    nfSkipRecap: $('#nf-recap-check').is(':checked'),
     themeMode: $('#choose-theme input:radio:checked').val(),
     lastStream: settings.lastStream,
     windowSizeLocation: settings.windowSizeLocation

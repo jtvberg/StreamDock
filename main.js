@@ -19,6 +19,7 @@ let showPrefs = false
 let ytSkipAds = false
 let amzSkipPreview = false
 let amzSkipRecap = false
+let nfSkipRecap = false
 let showBookmarks = false
 let userAgent = ''
 let currentStream = ''
@@ -252,6 +253,7 @@ function streamLoaded() {
   amzGetUrl()
   setTimeout(amzPreviewSkip, 3000)
   setTimeout(amzRecapSkip, 3000)
+  nfRecapSkip()
 }
 
 // Toggle facets if Netflix
@@ -420,6 +422,35 @@ function amzGetUrl() {
       `)
     } catch(err) {
       console.log(err)
+    }
+  }
+}
+
+// EXPERIMENTAL
+// Skip/close Netlfix episode recap & intros
+function nfRecapSkip() {
+  if (nfSkipRecap && currentStream === 'nf') {
+    try {
+      view.webContents.executeJavaScript(`
+        const obsRecap = new MutationObserver(function(ml) {
+          for(const mut of ml) {
+            if (mut.type === 'childList') {
+              try {
+                if (mut.addedNodes && mut.addedNodes.length > 0) {
+                  mut.addedNodes.forEach(element => {
+                    if (element.classList && element.classList.contains('skip-credits')) {
+                      console.log('recap skip')
+                      document.querySelector('.skip-credits > a').click()
+                    }
+                  })
+                }
+              } catch(err) { console.log(err) }
+            }
+          }
+        }).observe(document.querySelector('#appMountPoint'), { childList: true, subtree: true})
+      `)
+    } catch(err) {
+      console.log('err')
     }
   }
 }
@@ -693,9 +724,14 @@ ipcMain.on('set-amzprevskip', (e, bool) => {
   amzSkipPreview = bool
 })
 
-// IPC channel to skip Orime recap
+// IPC channel to skip Prime recap
 ipcMain.on('set-amzrecapskip', (e, bool) => {
   amzSkipRecap = bool
+})
+
+// IPC channel to skip Netflix recap
+ipcMain.on('set-nfrecapskip', (e, bool) => {
+  nfSkipRecap = bool
 })
 
 // Build menu template
