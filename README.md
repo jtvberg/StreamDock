@@ -50,12 +50,12 @@
    Left-click on the tray icon (or right-click on app header) will hide and pause the window/stream (if playing.)\
    If hidden already, another left-click will restore the window but not resume play (unless restore auto-play is checked in the settings.)\
    Right-click on the tray icon will exit the app completely.\
-   If you want to minimize the app but keep playing to maintain audio, do so from the dock/taskbar.\
+   If you want to minimize the app but keep playing to maintain audio, do so by minimizing to the dock/taskbar.\
    There is an always on top toggle button in the top right corner (or in 'Window' menu).\
    You can open a link from clipboard via the 'View' menu (or in the header).\
    You can scale the video to 16:9 (or 4:3) either vertically or horizontally also in the view menu (or in the header for 16:9 only).\
    You can bookmark streams via the bookmark button in the header or via the 'View' menu.\
-   Toggle bookmarks via the same menu over via the far left quick access button.\
+   Toggle bookmarks via the far left quick access button.\
    You can also view the extended Netflix genres via 'Show Genres' button (only shows up when in Netflix on macOS) or alternatively in the 'View' menu.\
    Various behaviors can be toggled in the settings under preferences including:\
    - Which streaming services are present and what colors and glyphs are used to represent them in the quick access bar (macOS)\
