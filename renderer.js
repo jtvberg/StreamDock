@@ -142,7 +142,13 @@ function applyUpdateSettings() {
   ipcRenderer.send('set-theme', settings.themeMode ? settings.themeMode : 'system')
 
   // Skip YouTube ad skip
-  ipcRenderer.send('set-ytadskip', settings.skipAds)
+  ipcRenderer.send('set-ytadskip', settings.ytSkipAds)
+
+  // Skip Prime preview skip
+  ipcRenderer.send('set-amzprevskip', settings.amzSkipPreview)
+
+  // Skip Prime recap skip
+  ipcRenderer.send('set-amzrecapskip', settings.amzSkipRecap)
 }
 
 // Iterate through stored services and create buttons/menu entries
@@ -312,7 +318,9 @@ function getDefaultSettings() {
     hideNav: false,
     themeMode: 'system',
     lastStream: { id: getDefaultStreams()[0].id, url: getDefaultStreams()[0].url },
-    skipAds: true,
+    ytSkipAds: true,
+    amzSkipPreview: true,
+    amzSkipRecap: false,
     windowSizeLocation: {
       x: 0,
       y: 0,
@@ -341,7 +349,9 @@ function loadSettingsModal() {
   $('#restore-play-check').prop('checked', settings.restorePlay)
   $('#quick-check').prop('checked', settings.quickMenu)
   $('#nav-check').prop('checked', settings.hideNav)
-  $('#skip-check').prop('checked', settings.skipAds)
+  $('#yt-skip-check').prop('checked', settings.ytSkipAds)
+  $('#amz-preview-check').prop('checked', settings.amzSkipPreview)
+  $('#amz-recap-check').prop('checked', settings.amzSkipRecap)
   $('input[name=radio-theme]').prop('checked', false).parent('.btn').removeClass('active')
   $(`input[name=radio-theme][value=${settings.themeMode}]`).prop('checked', true).parent('.btn').addClass('active')
   $('#settings-services-available').empty()
@@ -392,7 +402,9 @@ function saveSettings() {
     restorePlay: $('#restore-play-check').is(':checked'),
     quickMenu: $('#quick-check').is(':checked'),
     hideNav: $('#nav-check').is(':checked'),
-    skipAds: $('#skip-check').is(':checked'),
+    ytSkipAds: $('#yt-skip-check').is(':checked'),
+    amzSkipPreview: $('#amz-preview-check').is(':checked'),
+    amzSkipRecap: $('#amz-recap-check').is(':checked'),
     themeMode: $('#choose-theme input:radio:checked').val(),
     lastStream: settings.lastStream,
     windowSizeLocation: settings.windowSizeLocation

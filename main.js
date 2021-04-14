@@ -16,7 +16,9 @@ let isPlaying = false
 let restorePlay = false
 let showFacets = false
 let showPrefs = false
-let skipAds = false
+let ytSkipAds = false
+let amzSkipPreview = false
+let amzSkipRecap = false
 let showBookmarks = false
 let userAgent = ''
 let currentStream = ''
@@ -246,10 +248,10 @@ function streamChange(stream) {
 
 // Stream loaded
 function streamLoaded() {
-  ytSkipAds()
+  ytAdsSkip()
   amzGetUrl()
-  setTimeout(amzSkipPreview, 3000)
-  setTimeout(amzSkipRecap, 3000)
+  setTimeout(amzPreviewSkip, 3000)
+  setTimeout(amzRecapSkip, 3000)
 }
 
 // Toggle facets if Netflix
@@ -315,8 +317,8 @@ function setStreamId(url) {
 
 // EXPERIMENTAL (3rd clause)
 // Skip/close YouTube ads
-function ytSkipAds() {
-  if (skipAds && currentStream === 'yt') {
+function ytAdsSkip() {
+  if (ytSkipAds && currentStream === 'yt') {
     try {
       view.webContents.executeJavaScript(`try {
         document.querySelector('.ytp-ad-skip-button').click()
@@ -349,8 +351,8 @@ function ytSkipAds() {
 
 // EXPERIMENTAL
 // Skip/close Prime preivews
-function amzSkipPreview() {
-  if (skipAds && currentStream === 'ap') {
+function amzPreviewSkip() {
+  if (amzSkipPreview && currentStream === 'ap') {
     try {
       view.webContents.executeJavaScript(`
         const obsPreview = new MutationObserver(function(ml) {
@@ -378,8 +380,8 @@ function amzSkipPreview() {
 
 // EXPERIMENTAL
 // Skip/close Prime episode recap & intros
-function amzSkipRecap() {
-  if (skipAds && currentStream === 'ap') {
+function amzRecapSkip() {
+  if (amzSkipRecap && currentStream === 'ap') {
     try {
       view.webContents.executeJavaScript(`
         const obsRecap = new MutationObserver(function(ml) {
@@ -493,7 +495,6 @@ async function getCurrentUrl() {
   if (currentStream === 'ap') {
     url = await view.webContents.executeJavaScript('sdAmzUrl')
   }
-  console.log(url)
   return url
 }
 
@@ -684,7 +685,17 @@ ipcMain.on('toggle-bookmarks', () => {
 
 // IPC channel to skip YouTube ads
 ipcMain.on('set-ytadskip', (e, bool) => {
-  skipAds = bool
+  ytSkipAds = bool
+})
+
+// IPC channel to skip Prime previews
+ipcMain.on('set-amzprevskip', (e, bool) => {
+  amzSkipPreview = bool
+})
+
+// IPC channel to skip Orime recap
+ipcMain.on('set-amzrecapskip', (e, bool) => {
+  amzSkipRecap = bool
 })
 
 // Build menu template
