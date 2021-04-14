@@ -35,11 +35,11 @@
 ## Building
    The code builds for Mac and Windows currently, but I have not tested the build process on Linux.
 
-## Releases
+## Releases / Known Issues
    The current release works on Mac and there is an older one for Windows. It should install without much hassle on both platforms.
    No Linux version in the release.\
    At the moment, any service using Google auth is broken if you have to sign-in to use (so, YouTube works, YouTube TV will not.)\
-   The user agent spoofing is no longer working so Google OAuth will need to be implemented.\
+   The user agent spoofing is no longer working so Google OAuth will need to be implemented. 
    Look for that in a future release.\
    As a work-around: If you have YouTube TV you can sign into ABC with it and this will also sign you in to YouTube TV and YouTube.\
    Peacock is set to off by default as the login is not working.
