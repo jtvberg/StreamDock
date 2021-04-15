@@ -9,7 +9,7 @@ const isMac = process.platform === 'darwin'
 const updater = require('./updater')
 const headerSize = isMac ? 22 : 0
 const winAdjustHeight = isMac ? 22 : 57
-const winAdjustWidth = 240
+const winAdjustWidth = isMac ? 240 : 256
 let wb = { x: 0, y: 0, height: 0, width: 0 }
 let allowQuit = false
 let isPlaying = false
@@ -127,9 +127,9 @@ const createWindow = () => {
     wb = win.getBounds()
   })
 
-  // Hide instead of close window unless quitting
+  // Hide instead of close window unless quitting (Mac)
   win.on('close', (e) => {
-    if (!allowQuit) {
+    if (!allowQuit && isMac) {
       e.preventDefault()
       pause()
       win.hide()
@@ -150,8 +150,14 @@ const createWindow = () => {
   nativeTheme.on('updated', () => {
     if (nativeTheme.shouldUseDarkColors) {
       win.setVibrancy('dark')
+      if (!isMac) {
+        tray.setImage(path.join(__dirname, '/res/logo/icon_win_tray_white.png'))
+      }
     } else {
       win.setVibrancy('light')
+      if (!isMac) {
+        tray.setImage(path.join(__dirname, '/res/logo/iconTemplate@2x.png'))
+      }
     }
   })
 }

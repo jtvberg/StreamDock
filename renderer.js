@@ -103,11 +103,6 @@ function loadSettings() {
 
 // Apply loaded settings
 function applyInitialSettings() {
-  // Show lock button if Mac
-  if (isMac) {
-    $('.ontop-btn').show()
-  }
-
   // Set window on top
   if (settings.onTop) {
     ipcRenderer.send('ontop-lock')
