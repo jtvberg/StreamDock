@@ -40,7 +40,6 @@ ipcRenderer.on('stream-changed', (e, url) => {
   $('.loading').show()
   if (url && !url.includes('.netflix.com')) {
     $('.facet-host').hide()
-    $('#facets-btn').hide()
   }
 })
 
