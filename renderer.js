@@ -103,6 +103,11 @@ function loadSettings() {
 
 // Apply loaded settings
 function applyInitialSettings() {
+  // Set background if win10
+  if (!isMac) {
+    $('body').css('background-color', 'var(--color-bg)')
+  }
+
   // Set window on top
   if (settings.onTop) {
     ipcRenderer.send('ontop-lock')
@@ -124,11 +129,6 @@ function applyInitialSettings() {
 
 // Apply loaded settings
 function applyUpdateSettings() {
-  // Set background if win10
-  if (!isMac) {
-    $('body').css('background-color: var(--color-bg);')
-  }
-
   // Show quick-nav
   settings.quickMenu ? $('.service-btn-host').show() : $('.service-btn-host').hide()
   !settings.quickMenu && !isMac ? $('.header-bar').hide() : $('.header-bar').show()
