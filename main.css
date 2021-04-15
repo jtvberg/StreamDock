@@ -313,8 +313,8 @@ body {
   padding: 3px;
   padding-left: 4px;
   margin: 3px;
-  color: var(--color-fg);
-  background-color: var(--color-bg);
+  color: var(--color-bg);
+  background-color: var(--color-fg);
   border-radius: 2.5px;
   height: 16px;
   width: 16px;
@@ -323,8 +323,8 @@ body {
 }
 
 .bookmarks-btn:hover {
-  color: var(--color-bg);
-  background-color: var(--color-fg);
+  color: var(--color-fg);
+  background-color: var(--color-bg);
 }
 
 .control-btn {
