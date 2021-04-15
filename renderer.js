@@ -5,6 +5,7 @@
 // Imports and variable declarations
 const { ipcRenderer, nativeImage, clipboard } = require('electron')
 const $ = require('jquery')
+const isMac = process.platform === 'darwin'
 let streamList = []
 let settings = []
 let nfFacets = []
@@ -123,9 +124,14 @@ function applyInitialSettings() {
 
 // Apply loaded settings
 function applyUpdateSettings() {
+  // Set background if win10
+  if (!isMac) {
+    $('body').css('background-color: var(--color-bg);')
+  }
+
   // Show quick-nav
   settings.quickMenu ? $('.service-btn-host').show() : $('.service-btn-host').hide()
-  !settings.quickMenu && process.platform !== 'darwin' ? $('.header-bar').hide() : $('.header-bar').show()
+  !settings.quickMenu && !isMac ? $('.header-bar').hide() : $('.header-bar').show()
   ipcRenderer.send('hide-header-bar', settings.quickMenu)
 
   // Auto-hide navbar buttons

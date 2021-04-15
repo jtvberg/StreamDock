@@ -1,6 +1,6 @@
 :root {
   --color-white: #d4d4d4;
-  --color-black: #303030;
+  --color-black: #2A2A2C;
   --color-fg: var(--color-white);
   --color-bg: var(--color-black);
   --color-bg-trans: #00000065;

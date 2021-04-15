@@ -184,6 +184,7 @@ function getAccent() {
   win.webContents.send('set-accent', `#${systemPreferences.getAccentColor()}`)
 }
 
+// Set systray color in win10
 function setWinTrayTheme() {
   if (nativeTheme.shouldUseDarkColors) {
     tray.setImage(path.join(__dirname, '/res/logo/icon_win_tray_white.png'))
