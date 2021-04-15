@@ -150,14 +150,11 @@ const createWindow = () => {
   nativeTheme.on('updated', () => {
     if (nativeTheme.shouldUseDarkColors) {
       win.setVibrancy('dark')
-      if (!isMac) {
-        tray.setImage(path.join(__dirname, '/res/logo/icon_win_tray_white.png'))
-      }
     } else {
       win.setVibrancy('light')
-      if (!isMac) {
-        tray.setImage(path.join(__dirname, '/res/logo/iconTemplate@2x.png'))
-      }
+    }
+    if (!isMac) {
+      setWinTrayTheme()
     }
   })
 }
@@ -184,6 +181,14 @@ const createTray = () => {
 // Get system accent color
 function getAccent() {
   win.webContents.send('set-accent', `#${systemPreferences.getAccentColor()}`)
+}
+
+function setWinTrayTheme() {
+  if (nativeTheme.shouldUseDarkColors) {
+    tray.setImage(path.join(__dirname, '/res/logo/icon_win_tray_white.png'))
+  } else {
+    tray.setImage(path.join(__dirname, '/res/logo/iconTemplate@2x.png'))
+  }
 }
 
 // Pause stream
@@ -583,6 +588,7 @@ app.on('widevine-ready', () => {
   })
   createWindow()
   createTray()
+  setWinTrayTheme()
 })
 
 // Widvine DRM error handling
