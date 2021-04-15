@@ -5,7 +5,6 @@
 // Imports and variable declarations
 const { ipcRenderer, nativeImage, clipboard } = require('electron')
 const $ = require('jquery')
-const isMac = process.platform === 'darwin'
 let streamList = []
 let settings = []
 let nfFacets = []
@@ -124,6 +123,10 @@ function applyInitialSettings() {
 
 // Apply loaded settings
 function applyUpdateSettings() {
+  // Show quick-nav
+  settings.quickMenu ? $('.service-btn-host').show() : $('.service-btn-host').hide()
+  ipcRenderer.send('hide-header-bar', settings.quickMenu)
+
   // Auto-hide navbar buttons
   settings.hideNav ? $('.header-bar').children().addClass('nav-hide') : $('.header-bar').children().removeClass('nav-hide')
 
@@ -173,9 +176,7 @@ function loadServices() {
   $('.service-btn-host').append('<div class="far fa-bookmark fa-xs bookmarks-btn" title="Toggle Bookmarks"></div>')
   streamList.forEach(function (serv) {
     if (serv.active) {
-      if (isMac && settings.quickMenu) {
-        $('.service-btn-host').append(`<div class="service-btn-color" style="color:${serv.color}; background-color:${serv.bgColor};"><div class="service-btn" data-val="${serv.id}" data-url="${serv.url}" title="${serv.title}">${serv.glyph}</div></div>`)
-      }
+      $('.service-btn-host').append(`<div class="service-btn-color" style="color:${serv.color}; background-color:${serv.bgColor};"><div class="service-btn" data-val="${serv.id}" data-url="${serv.url}" title="${serv.title}">${serv.glyph}</div></div>`)
       ipcRenderer.send('add-stream', serv)
     }
   })

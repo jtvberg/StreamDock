@@ -7,9 +7,10 @@ const { TouchBarButton } = TouchBar
 const path = require('path')
 const isMac = process.platform === 'darwin'
 const updater = require('./updater')
-const headerSize = isMac ? 22 : 0
 const winAdjustHeight = isMac ? 22 : 57
 const winAdjustWidth = isMac ? 240 : 256
+const baseHeaderSize = 22
+let headerSize = baseHeaderSize
 let wb = { x: 0, y: 0, height: 0, width: 0 }
 let allowQuit = false
 let isPlaying = false
@@ -744,6 +745,15 @@ ipcMain.on('set-amzrecapskip', (e, bool) => {
 // IPC channel to skip Netflix recap
 ipcMain.on('set-nfrecapskip', (e, bool) => {
   nfSkipRecap = bool
+})
+
+// IPC channel to hide/show header
+ipcMain.on('hide-header-bar', (e, bool) => {
+  if (!isMac && !bool) {
+    headerSize = 0
+  } else {
+    headerSize = baseHeaderSize
+  }
 })
 
 // Build menu template
