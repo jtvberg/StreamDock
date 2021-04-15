@@ -125,6 +125,7 @@ function applyInitialSettings() {
 function applyUpdateSettings() {
   // Show quick-nav
   settings.quickMenu ? $('.service-btn-host').show() : $('.service-btn-host').hide()
+  !settings.quickMenu && process.platform !== 'darwin' ? $('.header-bar').hide() : $('.header-bar').show()
   ipcRenderer.send('hide-header-bar', settings.quickMenu)
 
   // Auto-hide navbar buttons
