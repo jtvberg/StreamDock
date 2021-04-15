@@ -22,6 +22,9 @@
     --color-bg-trans: #00000081;
     --color-neutral-light: #ffffff23;
   }
+  .logo::after {
+    content: url('res/logo/sd_logo_white.png');
+  }
 }
 
 @media (prefers-color-scheme: light) {
@@ -30,6 +33,9 @@
     --color-bg: var(--color-white);
     --color-bg-trans: #dfdfdf65;
     --color-neutral-light: #c7c7c7b2;
+  }
+  .logo::after {
+    content: url('res/logo/sd_logo_black.png');
   }
 }
 
@@ -64,7 +70,7 @@ body {
 .logo {
   position: absolute;
   right: 10px;
-  bottom: 10px;
+  bottom: 5px;
 }
 
 .bookmark-host {
