@@ -267,6 +267,7 @@ function streamLoaded() {
   setTimeout(amzPreviewSkip, 3000)
   setTimeout(amzRecapSkip, 3000)
   nfRecapSkip()
+  enableFacets()
 }
 
 // Toggle facets if Netflix
@@ -521,6 +522,17 @@ function toggleBookmarks() {
   }
 }
 
+// Toggle facets view
+function toggleFacets() {
+  showFacets = currentStream === 'nf' && view.getBounds().width === wb.width
+  setViewBounds()
+}
+
+// Enable genre menuitem
+function enableFacets() {
+  menu.getMenuItemById('toggleGenres').enabled = currentStream === 'nf'
+}
+
 // Send bookmark to renderer
 async function sendBookmark() {
   let currentUrl = await getCurrentUrl()
@@ -712,10 +724,9 @@ ipcMain.on('nav-forward', () => {
   navForward()
 })
 
-// IPC channel to navigate forwards
+// IPC channel to toggle facets
 ipcMain.on('toggle-facets', () => {
-  showFacets = currentStream === 'nf' && view.getBounds().width === wb.width
-  setViewBounds()
+  toggleFacets()
 })
 
 // IPC channel to save bookmark
@@ -926,6 +937,17 @@ const template = [{
   },
   {
     role: 'forcereload'
+  },
+  {
+    type: 'separator'
+  },
+  {
+    label: 'Toggle Genres',
+    id: 'toggleGenres',
+    enabled: false,
+    click() {
+      toggleFacets()
+    }
   },
   {
     type: 'separator'
