@@ -7,10 +7,11 @@ const { TouchBarButton } = TouchBar
 const path = require('path')
 const isMac = process.platform === 'darwin'
 const updater = require('./updater')
-const winAdjustHeight = isMac ? 22 : 57
-const winAdjustWidth = isMac ? 240 : 256
 const baseHeaderSize = 22
+const baseMenuHeight = 57
+const winAdjustWidth = isMac ? 240 : 256
 let headerSize = baseHeaderSize
+let winAdjustHeight = isMac ? headerSize : baseMenuHeight + headerSize
 let wb = { x: 0, y: 0, height: 0, width: 0 }
 let allowQuit = false
 let isPlaying = false
@@ -766,6 +767,7 @@ ipcMain.on('hide-header-bar', (e, bool) => {
   } else {
     headerSize = baseHeaderSize
   }
+  winAdjustHeight = isMac ? headerSize : baseMenuHeight + headerSize
 })
 
 // Build menu template
