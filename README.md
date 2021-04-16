@@ -57,8 +57,8 @@
    You can bookmark streams via the bookmark button in the header or via the 'View' menu.\
    Toggle bookmarks via the far left quick access button.\
    You can also view the extended Netflix genres via 'Show Genres' button (only shows up when in Netflix on macOS) or alternatively in the 'View' menu.\
-   Various behaviors can be toggled in the settings under preferences including:\
+   Various behaviors can be toggled in the settings under preferences including:
    - Which streaming services are present and what colors and glyphs are used to represent them in the quick access bar (macOS)\
    - The ability to skip Prime previews and Prime episode recaps\
    - Netflix recap skipping\
-   - You can also skip YouTube ads and dismiss ad overlays when possible (while not all ads are skipable, if turned on it will even skip ads before the skip button even appears.)\
+   - You can also skip YouTube ads and dismiss ad overlays when possible (while not all ads are skipable, if turned on it will even skip ads before the skip button even appears.)
