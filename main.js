@@ -526,6 +526,7 @@ function nfEpisodeNext() {
                 }
               } catch(err) { console.log(err) }
             }
+          }
         })
       `)
       view.webContents.executeJavaScript(`obsNext.observe(document.querySelector('#appMountPoint'), { childList: true, subtree: true})`)
