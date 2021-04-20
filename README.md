@@ -62,7 +62,7 @@
    - Which streaming services are present and what colors and glyphs are used to represent them in the quick access bar
    - The ability to skip Prime previews and Prime episode recaps
    - Netflix recap skipping
-   - You can also skip YouTube ads and dismiss ad overlays when possible (while not all ads are skipable, if turned on it will even skip ads before the skip button even appears.)
+   - You can also skip YouTube ads and dismiss ad overlays when possible (while not all ads are skipable, if turned on it will even skip ads before the skip button even appears)
 
 ## TODO
    - I need to look into adding Google OAuth to allow logins for YouTube TV and other services
