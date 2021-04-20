@@ -65,11 +65,11 @@
    - You can also skip YouTube ads and dismiss ad overlays when possible (while not all ads are skipable, if turned on it will even skip ads before the skip button even appears.)
 
 ## TODO
-   I need to look into adding Google OAuth to allow logins for YouTube TV and other services.\
-   Working on a 'Binge Mode' for Netflix that automatically starts the next episode in a series.\
-   Contemplating multiple windows but in general, this seems silly (leave a comment if you think there is a good reason to do this!)\
-   I don't like how there is no z-order for the BrowserWindow vs. BrowserView. This means I can't render any UI elements above the view (and why video is hidden when using the preferences menu.) In general, this is not a big deal but there are some cool UI tricks I could implement if I moved portions of the UI to another BrowserView (for instance, I could use custom tooltips and auto-hide the header bar.)\
-   Would like to be able to allow the user to add services. As it is, you can do this by changing the URLs for existing services (which I don't recommend as there is service specific code associated with the service ID) or by adding bookmarks to other services.\
-   Still looking into the Peacock thing (won't allow login.)\
-   Would really like to be able to skin the scroll bars in the service view. As this is rendered by the browser engine (Chromium) I don't think this is possible but I swear I have seen it done.
+   - I need to look into adding Google OAuth to allow logins for YouTube TV and other services.
+   - Working on a 'Binge Mode' for Netflix that automatically starts the next episode in a series.
+   - Contemplating multiple windows but in general, this seems silly (leave a comment if you think there is a good reason to do this!)
+   - I don't like how there is no z-order for the BrowserWindow vs. BrowserView. This means I can't render any UI elements above the view (and why video is hidden when using the preferences menu.) In general, this is not a big deal but there are some cool UI tricks I could implement if I moved portions of the UI to another BrowserView (for instance, I could use custom tooltips and auto-hide the header bar.)
+   - Would like to be able to allow the user to add services. As it is, you can do this by changing the URLs for existing services (which I don't recommend as there is service specific code associated with the service ID) or by adding bookmarks to other services.
+   - Still looking into the Peacock thing (won't allow login.)
+   - Would really like to be able to skin the scroll bars in the service view. As this is rendered by the browser engine (Chromium) I don't think this is possible but I swear I have seen it done.
    
