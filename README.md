@@ -8,19 +8,19 @@
 <img src="/res/screenshots/services.png" width="600"/>
 
 ## Using the code
-    Clone repo
-    Provided instructions assume you are using npm as your package manager
-    Code has not been tested with other package managers such as Yarn
-    Navigate to directory and run 'npm install' to install dependencies
+   Clone repo\
+   Provided instructions assume you are using npm as your package manager\
+   Code has not been tested with other package managers such as Yarn\
+   Navigate to directory and run ```npm install``` to install dependencies
 
 ## Running the code
-    Some npm scripts are already setup in package.json
-    'npm start' will launch the app (alternatively you can use 'electron .')
-    You can uncomment the dev tools load on start up in main.js (~webContents.openDevTools())
-    To debug main.js you can use the following commands (assumes you are using npm):
-    'npm run debug' will launch in main process debug mode on port 7171
-    'npm run break' will launch the app and break at entry point also on port 7171
-    Use chrome://inspect and configure the target with above port
+   Some npm scripts are already setup in package.json\
+   ```npm start``` will launch the app (alternatively you can use ```electron .```)\
+   You can uncomment the dev tools load on start up in ```main.js``` (~```webContents.openDevTools()```)\
+   To debug main.js you can use the following commands (assumes you are using npm):\
+   ```npm run debug``` will launch in main process debug mode on port 7171\
+   ```npm run break``` will launch the app and break at entry point also on port 7171\
+   Use chrome://inspect and configure the target with above port
 
 ## Widevine DRM
    I used the Castlabs Electron fork for ECS located [here](https://github.com/castlabs/electron-releases).\
@@ -33,7 +33,8 @@
    NOTE: You have to sign up for an EVS account and you will need to have Python to use it.
 
 ## Building
-   The code builds for Mac and Windows currently, but I have not tested the build process on Linux.
+   The code builds for Mac and Windows currently but, while it shoudl work, I have not tested the build process on Linux.
+   There are also some build scripts in place (NOTE: You may want to disable notarization in the mac build script while testing your build as this can take a    long time.)
 
 ## Releases / Known Issues
    The current release works on Mac (signed and notarized) and Windows (only self-signed). It should install without much hassle on both platforms.
