@@ -342,31 +342,35 @@ function ytAdsSkip() {
       view.webContents.executeJavaScript(`try {
         document.querySelector('.ytp-ad-skip-button').click()
       } catch(err) { console.log(err) }`)
-      view.webContents.executeJavaScript(`const obsAds = new MutationObserver(function(ml) {
-        for(const mut of ml) {
-          if (mut.type === 'childList' && mut.target.classList.contains('ytp-ad-text')) {
-            try {
-              document.querySelector('.ytp-ad-skip-button').click()
-            } catch(err) { console.log(err) }
+      view.webContents.executeJavaScript(`
+        const obsAds = new MutationObserver(function(ml) {
+          for(const mut of ml) {
+            if (mut.type === 'childList' && mut.target.classList.contains('ytp-ad-text')) {
+              try {
+                document.querySelector('.ytp-ad-skip-button').click()
+              } catch(err) { console.log(err) }
+            }
+            if (mut.type === 'childList' && mut.target.classList.contains('ytp-ad-module')) {
+              try {
+                document.querySelector('.ytp-ad-overlay-close-button').click()
+              } catch(err) { console.log(err) }
+            }
+            if (mut.type === 'childList' && mut.target.classList.contains('ytd-mealbar-promo-renderer')) {
+              try {
+                document.querySelectorAll('#dismiss-button').forEach(input => { input.click() })
+                console.log('promo skip')
+              } catch(err) { console.log(err) }
+            }
           }
-          if (mut.type === 'childList' && mut.target.classList.contains('ytp-ad-module')) {
-            try {
-              document.querySelector('.ytp-ad-overlay-close-button').click()
-            } catch(err) { console.log(err) }
-          }
-          if (mut.type === 'childList' && mut.target.classList.contains('ytd-mealbar-promo-renderer')) {
-            try {
-              document.querySelectorAll('#dismiss-button').forEach(input => { input.click() })
-              console.log('promo skip')
-            } catch(err) { console.log(err) }
-          }
-        }
-      }).observe(document.querySelector('ytd-app'), { childList: true, subtree: true})`)
+        })
+      `)
+      view.webContents.executeJavaScript(`obsAds.observe(document.querySelector('ytd-app'), { childList: true, subtree: true})`)
     } catch(err) {
       console.log(err)
     }
   } else if (currentStream === 'yt') {
     try {
+      view.webContents.executeJavaScript('obsAds.disconnect()')
       console.log('dereg ytadskip')
     } catch(err) {
       console.log(err)
@@ -395,13 +399,15 @@ function amzPreviewSkip() {
               } catch(err) { console.log(err) }
             }
           }
-        }).observe(document.querySelector('.webPlayerUIContainer'), { childList: true, subtree: true})
+        })
       `)
+      view.webContents.executeJavaScript(`obsPreview.observe(document.querySelector('.webPlayerUIContainer'), { childList: true, subtree: true})`)
     } catch(err) {
       console.log(err)
     }
   } else if (currentStream === 'ap') {
     try {
+      view.webContents.executeJavaScript('obsPreview.disconnect()')
       console.log('dereg amzprevskip')
     } catch(err) {
       console.log(err)
@@ -430,13 +436,15 @@ function amzRecapSkip() {
               } catch(err) { console.log(err) }
             }
           }
-        }).observe(document.querySelector('.webPlayerUIContainer'), { childList: true, subtree: true})
+        })
       `)
+      view.webContents.executeJavaScript(`obsRecap.observe(document.querySelector('.webPlayerUIContainer'), { childList: true, subtree: true})`)
     } catch(err) {
       console.log('err')
     }
   } else if (currentStream === 'ap') {
     try {
+      view.webContents.executeJavaScript('obsRecap.disconnect()')
       console.log('dereg ytrecapskip')
     } catch(err) {
       console.log(err)
@@ -482,13 +490,15 @@ function nfRecapSkip() {
               } catch(err) { console.log(err) }
             }
           }
-        }).observe(document.querySelector('#appMountPoint'), { childList: true, subtree: true})
+        })
       `)
+      view.webContents.executeJavaScript(`obsRecap.observe(document.querySelector('#appMountPoint'), { childList: true, subtree: true})`)
     } catch(err) {
       console.log('err')
     }
   } else if (currentStream === 'nf') {
     try {
+      view.webContents.executeJavaScript('obsRecap.disconnect()')
       console.log('dereg nfrecapskip')
     } catch(err) {
       console.log(err)
@@ -516,14 +526,15 @@ function nfEpisodeNext() {
                 }
               } catch(err) { console.log(err) }
             }
-          }
-        }).observe(document.querySelector('#appMountPoint'), { childList: true, subtree: true})
+        })
       `)
+      view.webContents.executeJavaScript(`obsNext.observe(document.querySelector('#appMountPoint'), { childList: true, subtree: true})`)
     } catch(err) {
       console.log('err')
     }
   } else if (currentStream === 'nf') {
     try {
+      view.webContents.executeJavaScript('obsNext.disconnect()')
       console.log('dereg nfepinext')
     } catch(err) {
       console.log(err)
