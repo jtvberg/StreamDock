@@ -365,6 +365,12 @@ function ytAdsSkip() {
     } catch(err) {
       console.log(err)
     }
+  } else if (currentStream === 'yt') {
+    try {
+      console.log('dereg ytadskip')
+    } catch(err) {
+      console.log(err)
+    }
   }
 }
 
@@ -391,6 +397,12 @@ function amzPreviewSkip() {
           }
         }).observe(document.querySelector('.webPlayerUIContainer'), { childList: true, subtree: true})
       `)
+    } catch(err) {
+      console.log(err)
+    }
+  } else if (currentStream === 'ap') {
+    try {
+      console.log('dereg amzprevskip')
     } catch(err) {
       console.log(err)
     }
@@ -422,6 +434,12 @@ function amzRecapSkip() {
       `)
     } catch(err) {
       console.log('err')
+    }
+  } else if (currentStream === 'ap') {
+    try {
+      console.log('dereg ytrecapskip')
+    } catch(err) {
+      console.log(err)
     }
   }
 }
@@ -469,6 +487,12 @@ function nfRecapSkip() {
     } catch(err) {
       console.log('err')
     }
+  } else if (currentStream === 'nf') {
+    try {
+      console.log('dereg nfrecapskip')
+    } catch(err) {
+      console.log(err)
+    }
   }
 }
 
@@ -497,6 +521,12 @@ function nfEpisodeNext() {
       `)
     } catch(err) {
       console.log('err')
+    }
+  } else if (currentStream === 'nf') {
+    try {
+      console.log('dereg nfepinext')
+    } catch(err) {
+      console.log(err)
     }
   }
 }
@@ -774,26 +804,31 @@ ipcMain.on('toggle-bookmarks', () => {
 // IPC channel to skip YouTube ads
 ipcMain.on('set-ytadskip', (e, bool) => {
   ytSkipAds = bool
+  ytAdsSkip()
 })
 
 // IPC channel to skip Prime previews
 ipcMain.on('set-amzprevskip', (e, bool) => {
   amzSkipPreview = bool
+  amzPreviewSkip()
 })
 
 // IPC channel to skip Prime recap
 ipcMain.on('set-amzrecapskip', (e, bool) => {
   amzSkipRecap = bool
+  amzRecapSkip()
 })
 
 // IPC channel to skip Netflix recap
 ipcMain.on('set-nfrecapskip', (e, bool) => {
   nfSkipRecap = bool
+  nfRecapSkip()
 })
 
 // IPC channel to automatically start next episode on Netflix
 ipcMain.on('set-nfepisodenext', (e, bool) => {
   nfNextEpisode = bool
+  nfEpisodeNext()
 })
 
 // IPC channel to hide/show header
