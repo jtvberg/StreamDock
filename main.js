@@ -370,8 +370,10 @@ function ytAdsSkip() {
     }
   } else if (currentStream === 'yt') {
     try {
-      view.webContents.executeJavaScript('obsAds.disconnect()')
-      console.log('dereg ytadskip')
+      view.webContents.executeJavaScript(`
+        obsAds.disconnect()
+        console.log('dereg ytadskip')
+      `)
     } catch(err) {
       console.log(err)
     }
@@ -407,8 +409,10 @@ function amzPreviewSkip() {
     }
   } else if (currentStream === 'ap') {
     try {
-      view.webContents.executeJavaScript('obsPreview.disconnect()')
-      console.log('dereg amzprevskip')
+      view.webContents.executeJavaScript(`
+        obsPreview.disconnect()
+        console.log('dereg amzprevskip')
+      `)
     } catch(err) {
       console.log(err)
     }
@@ -444,8 +448,10 @@ function amzRecapSkip() {
     }
   } else if (currentStream === 'ap') {
     try {
-      view.webContents.executeJavaScript('obsRecap.disconnect()')
-      console.log('dereg ytrecapskip')
+      view.webContents.executeJavaScript(`
+        obsRecap.disconnect()
+        console.log('dereg ytrecapskip')
+      `)
     } catch(err) {
       console.log(err)
     }
@@ -498,8 +504,10 @@ function nfRecapSkip() {
     }
   } else if (currentStream === 'nf') {
     try {
-      view.webContents.executeJavaScript('obsRecap.disconnect()')
-      console.log('dereg nfrecapskip')
+      view.webContents.executeJavaScript(`
+        obsRecap.disconnect()
+        console.log('dereg nfrecapskip')
+      `)
     } catch(err) {
       console.log(err)
     }
@@ -535,8 +543,10 @@ function nfEpisodeNext() {
     }
   } else if (currentStream === 'nf') {
     try {
-      view.webContents.executeJavaScript('obsNext.disconnect()')
-      console.log('dereg nfepinext')
+      view.webContents.executeJavaScript(`
+        obsNext.disconnect()
+        console.log('dereg nfepinext')
+      `)
     } catch(err) {
       console.log(err)
     }
