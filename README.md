@@ -67,6 +67,7 @@
 ## TODO
    - I need to look into adding Google OAuth to allow logins for YouTube TV and other services
    - Working on a 'Binge Mode' for Netflix that automatically starts the next episode in a series
+   - Some of the skipping code for various services is done by mutation observer which I don't add or destroy if you change the setting to use it. This means you need to reload the service for the change to take effect. Working on removing the need to do that
    - Contemplating multiple windows but in general, this seems silly (leave a comment if you think there is a good reason to do this!)
    - I don't like how there is no z-order for the BrowserWindow vs. BrowserView. This means I can't render any UI elements above the view (and why video is hidden when using the preferences menu.) In general, this is not a big deal but there are some cool UI tricks I could implement if I moved portions of the UI to another BrowserView (for instance, I could use custom tooltips and auto-hide the header bar)
    - Would like to be able to allow the user to add services. As it is, you can do this by changing the URLs for existing services (which I don't recommend as there is service specific code associated with the service ID) or by adding bookmarks to other services

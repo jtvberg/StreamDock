@@ -22,6 +22,7 @@ let ytSkipAds = false
 let amzSkipPreview = false
 let amzSkipRecap = false
 let nfSkipRecap = false
+let nfNextEpisode = false
 let showBookmarks = false
 let userAgent = ''
 let currentStream = ''
@@ -268,6 +269,7 @@ function streamLoaded() {
   setTimeout(amzPreviewSkip, 3000)
   setTimeout(amzRecapSkip, 3000)
   nfRecapSkip()
+  nfEpisodeNext()
   enableFacets()
 }
 
@@ -456,6 +458,35 @@ function nfRecapSkip() {
                     if (element.classList && element.classList.contains('skip-credits')) {
                       console.log('recap skip')
                       document.querySelector('.skip-credits > a').click()
+                    }
+                  })
+                }
+              } catch(err) { console.log(err) }
+            }
+          }
+        }).observe(document.querySelector('#appMountPoint'), { childList: true, subtree: true})
+      `)
+    } catch(err) {
+      console.log('err')
+    }
+  }
+}
+
+// EXPERIMENTAL
+// Automatically start next Netlfix episode
+function nfEpisodeNext() {
+  if (nfNextEpisode && currentStream === 'nf') {
+    try {
+      view.webContents.executeJavaScript(`
+        const obsNext = new MutationObserver(function(ml) {
+          for(const mut of ml) {
+            if (mut.type === 'childList') {
+              try {
+                if (mut.addedNodes && mut.addedNodes.length > 0) {
+                  mut.addedNodes.forEach(element => {
+                    if (element.classList && element.classList.contains('ltr-v8pdkb')) {
+                      console.log('next episode')
+                      document.querySelector('[data-uia = "next-episode-seamless-button"]').click()
                     }
                   })
                 }
@@ -758,6 +789,11 @@ ipcMain.on('set-amzrecapskip', (e, bool) => {
 // IPC channel to skip Netflix recap
 ipcMain.on('set-nfrecapskip', (e, bool) => {
   nfSkipRecap = bool
+})
+
+// IPC channel to automatically start next episode on Netflix
+ipcMain.on('set-nfepisodenext', (e, bool) => {
+  nfNextEpisode = bool
 })
 
 // IPC channel to hide/show header

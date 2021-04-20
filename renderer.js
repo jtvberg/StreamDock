@@ -156,6 +156,9 @@ function applyUpdateSettings() {
 
   // Skip Netflix recap skip
   ipcRenderer.send('set-nfrecapskip', settings.nfSkipRecap)
+
+  // Skip Netflix recap skip
+  ipcRenderer.send('set-nfepisodenext', settings.nfNextEpisode)
 }
 
 // Iterate through stored services and create buttons/menu entries
@@ -324,9 +327,10 @@ function getDefaultSettings() {
     themeMode: 'system',
     lastStream: { id: getDefaultStreams()[0].id, url: getDefaultStreams()[0].url },
     ytSkipAds: true,
-    amzSkipPreview: true,
+    amzSkipPreview: false,
     amzSkipRecap: false,
     nfSkipRecap: false,
+    nfNextEpisode: false,
     windowSizeLocation: {
       x: 0,
       y: 0,
@@ -359,6 +363,7 @@ function loadSettingsModal() {
   $('#amz-preview-check').prop('checked', settings.amzSkipPreview)
   $('#amz-recap-check').prop('checked', settings.amzSkipRecap)
   $('#nf-recap-check').prop('checked', settings.nfSkipRecap)
+  $('#nf-next-check').prop('checked', settings.nfNextEpisode)
   $('input[name=radio-theme]').prop('checked', false).parent('.btn').removeClass('active')
   $(`input[name=radio-theme][value=${settings.themeMode}]`).prop('checked', true).parent('.btn').addClass('active')
   $('#settings-services-available').empty()
@@ -413,6 +418,7 @@ function saveSettings() {
     amzSkipPreview: $('#amz-preview-check').is(':checked'),
     amzSkipRecap: $('#amz-recap-check').is(':checked'),
     nfSkipRecap: $('#nf-recap-check').is(':checked'),
+    nfNextEpisode: $('#nf-next-check').is(':checked'),
     themeMode: $('#choose-theme input:radio:checked').val(),
     lastStream: settings.lastStream,
     windowSizeLocation: settings.windowSizeLocation
@@ -444,6 +450,12 @@ function loadDefaultSettings() {
   $('#fullscreen-check').prop('checked', defaultSettings.fullScreen)
   $('#restore-play-check').prop('checked', defaultSettings.restorePlay)
   $('#quick-check').prop('checked', defaultSettings.quickMenu)
+  $('#nav-check').prop('checked', defaultSettings.hideNav)
+  $('#yt-skip-check').prop('checked', defaultSettings.ytSkipAds)
+  $('#amz-preview-check').prop('checked', defaultSettings.amzSkipPreview)
+  $('#amz-recap-check').prop('checked', defaultSettings.amzSkipRecap)
+  $('#nf-recap-check').prop('checked', defaultSettings.nfSkipRecap)
+  $('#nf-next-check').prop('checked', defaultSettings.nfNextEpisode)
   $('.serv-check').prop('checked', true)
   $('.serv-color-input').each(function () {
     $(this).val($(this).data('default-color'))
