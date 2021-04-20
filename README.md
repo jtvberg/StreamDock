@@ -45,7 +45,7 @@
    Peacock is set to off by default as the login is not working.
 
 ## App Control
-   Click on the quick-access buttons across the top (macOS only) to load streaming services as selected in the settings menu under preferences (or use the 'Streams' menu).\
+   Click on the quick-access buttons across the top to load streaming services as selected in the settings menu under preferences (or use the 'Streams' menu).\
    A limited set of stream services will also be available in the Mac touch bar (beacuse why not)\
    Left-click on the tray icon (or right-click on app header) will hide and pause the window/stream (if playing.)\
    If hidden already, another left-click will restore the window but not resume play (unless restore auto-play is checked in the settings.)\
@@ -56,9 +56,9 @@
    You can scale the video to 16:9 (or 4:3) either vertically or horizontally also in the view menu (or in the header for 16:9 only).\
    You can bookmark streams via the bookmark button in the header or via the 'View' menu.\
    Toggle bookmarks via the far left quick access button.\
-   You can also view the extended Netflix genres via 'Show Genres' button (only shows up when in Netflix on macOS) or alternatively in the 'View' menu.\
+   You can also view the extended Netflix genres via 'Show Genres' button or alternatively in the 'View' menu.\
    Various behaviors can be toggled in the settings under preferences including:
-   - Which streaming services are present and what colors and glyphs are used to represent them in the quick access bar (macOS)\
-   - The ability to skip Prime previews and Prime episode recaps\
-   - Netflix recap skipping\
+   - Which streaming services are present and what colors and glyphs are used to represent them in the quick access bar
+   - The ability to skip Prime previews and Prime episode recaps
+   - Netflix recap skipping
    - You can also skip YouTube ads and dismiss ad overlays when possible (while not all ads are skipable, if turned on it will even skip ads before the skip button even appears.)
