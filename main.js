@@ -372,7 +372,7 @@ function ytAdsSkip() {
     try {
       view.webContents.executeJavaScript(`
         obsAds.disconnect()
-        console.log('dereg ytadskip')
+        console.log('discon ytadskip')
       `)
     } catch(err) {
       console.log(err)
@@ -411,7 +411,7 @@ function amzPreviewSkip() {
     try {
       view.webContents.executeJavaScript(`
         obsPreview.disconnect()
-        console.log('dereg amzprevskip')
+        console.log('discon amzprevskip')
       `)
     } catch(err) {
       console.log(err)
@@ -450,7 +450,7 @@ function amzRecapSkip() {
     try {
       view.webContents.executeJavaScript(`
         obsRecap.disconnect()
-        console.log('dereg ytrecapskip')
+        console.log('discon ytrecapskip')
       `)
     } catch(err) {
       console.log(err)
@@ -506,7 +506,7 @@ function nfRecapSkip() {
     try {
       view.webContents.executeJavaScript(`
         obsRecap.disconnect()
-        console.log('dereg nfrecapskip')
+        console.log('discon nfrecapskip')
       `)
     } catch(err) {
       console.log(err)
@@ -526,9 +526,9 @@ function nfEpisodeNext() {
               try {
                 if (mut.addedNodes && mut.addedNodes.length > 0) {
                   mut.addedNodes.forEach(element => {
-                    if (element.classList && element.classList.contains('ltr-v8pdkb')) {
+                    if (element.classList && element.classList.contains('main-hitzone-element-container')) {
                       console.log('next episode')
-                      document.querySelector('[data-uia = "next-episode-seamless-button"]').click()
+                      document.querySelector('.button-nfplayerNextEpisode').click()
                     }
                   })
                 }
@@ -545,7 +545,7 @@ function nfEpisodeNext() {
     try {
       view.webContents.executeJavaScript(`
         obsNext.disconnect()
-        console.log('dereg nfepinext')
+        console.log('discon nfepinext')
       `)
     } catch(err) {
       console.log(err)
