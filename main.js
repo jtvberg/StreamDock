@@ -528,7 +528,8 @@ function nfEpisodeNext() {
                   mut.addedNodes.forEach(element => {
                     if (element.classList && element.classList.contains('main-hitzone-element-container')) {
                       console.log('next episode')
-                      document.querySelector('.button-nfplayerNextEpisode').click()
+                      document.querySelector('[data-uia = "next-episode-seamless-button-draining"]').click()
+                      document.querySelector('[data-uia = "next-episode-seamless-button"]').click()
                     }
                   })
                 }
