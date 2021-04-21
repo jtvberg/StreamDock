@@ -10,8 +10,8 @@ const isLinux = process.platform === 'linux'
 const isWindows = process.platform === 'win32'
 const updater = require('./updater')
 const baseHeaderSize = 22
-const baseMenuHeight = 57
-const winAdjustWidth = isMac ? 240 : 256
+const baseMenuHeight = isLinux ? 25 : 57
+const winAdjustWidth = isWindows ? 256 : 240
 let headerSize = baseHeaderSize
 let winAdjustHeight = isMac ? headerSize : baseMenuHeight + headerSize
 let wb = { x: 0, y: 0, height: 0, width: 0 }
