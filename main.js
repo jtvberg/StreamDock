@@ -6,6 +6,8 @@ const { app, BrowserWindow, ipcMain, BrowserView, Tray, TouchBar, session, Menu,
 const { TouchBarButton } = TouchBar
 const path = require('path')
 const isMac = process.platform === 'darwin'
+const isLinux = process.platform === 'linux'
+const isWindows = process.platform === 'win32'
 const updater = require('./updater')
 const baseHeaderSize = 22
 const baseMenuHeight = 57
@@ -33,14 +35,16 @@ if (isMac) {
   systemPreferences.setUserDefault('NSDisabledDictationMenuItem', 'boolean', true)
   systemPreferences.setUserDefault('NSDisabledCharacterPaletteMenuItem', 'boolean', true)
   userAgent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 11_2_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.150 Safari/537.36'
-} else {
+} else if (isWindows) {
   userAgent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.182 Safari/537.36'
+} else if (isLinux) {
+  app.disableHardwareAcceleration()
+  userAgent = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.66 Safari/537.36'
+} else {
+  userAgent = 'Chrome'
 }
 
 // Dev code
-// Disable hardware acceleration (buggy)
-// app.disableHardwareAcceleration()
-
 // Enable Electron-Reload (dev only)
 // require('electron-reload')(__dirname)
 
