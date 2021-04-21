@@ -62,7 +62,7 @@ const createWindow = () => {
     width: 800,
     minHeight: 348,
     minWidth: 580,
-    transparent: !!isMac,
+    transparent: isMac,
     hasShadow: false,
     frame: !isMac,
     visualEffectState: 'active',
@@ -145,7 +145,9 @@ const createWindow = () => {
 
   // When win ready set accent color and subscribe to changes if macOS
   win.on('ready-to-show', () => {
-    getAccent()
+    if (!isLinux) {
+      getAccent()
+    }
     if (isMac) {
       systemPreferences.subscribeNotification('AppleColorPreferencesChangedNotification', () => {
         getAccent()
