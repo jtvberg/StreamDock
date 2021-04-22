@@ -52,8 +52,10 @@
     "win": {
       "certificateFile": "private/jtvberg.p12",
       "certificatePassword": "",
-      "verifyUpdateCodeSignature": false,
-      "target": "zip"
+      "verifyUpdateCodeSignature": false
+    },
+    "linux": {
+      "category": "Video"
     },
     "publish": {
       "provider": "github"

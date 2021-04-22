@@ -163,9 +163,7 @@ const createWindow = () => {
     } else {
       win.setVibrancy('light')
     }
-    if (!isMac) {
-      setWinTrayTheme()
-    }
+    setWinTrayTheme()
   })
 }
 
@@ -193,12 +191,14 @@ function getAccent() {
   win.webContents.send('set-accent', `#${systemPreferences.getAccentColor()}`)
 }
 
-// Set systray color in win10
+// Set systray color in win10/Linux
 function setWinTrayTheme() {
-  if (nativeTheme.shouldUseDarkColors) {
-    tray.setImage(path.join(__dirname, '/res/logo/icon_tray_white_32.png'))
-  } else {
-    tray.setImage(path.join(__dirname, '/res/logo/iconTemplate@2x.png'))
+  if (!isMac) {
+    if (nativeTheme.shouldUseDarkColors) {
+      tray.setImage(path.join(__dirname, '/res/logo/icon_tray_white_32.png'))
+    } else {
+      tray.setImage(path.join(__dirname, '/res/logo/iconTemplate@2x.png'))
+    }
   }
 }
 
@@ -694,9 +694,7 @@ app.on('widevine-ready', () => {
   })
   createWindow()
   createTray()
-  if (!isMac) {
-    setWinTrayTheme()
-  }
+  setWinTrayTheme()
 })
 
 // Widvine DRM error handling

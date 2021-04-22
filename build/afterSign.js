@@ -15,7 +15,7 @@ exports.default = function (context) {
       appleId: process.env.appleId,
       appleIdPassword: process.env.appleIdPassword
     })
-  } else {
+  } else if (process.platform === 'win32') {
     // VMP sign via EVS
     const {
       execSync
