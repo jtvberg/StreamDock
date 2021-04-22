@@ -33,11 +33,11 @@
    NOTE: You have to sign up for an EVS account and you will need to have Python to use it.
 
 ## Building
-   The code builds for Mac and Windows currently but, while it shoudl work, I have not tested the build process on Linux.
+   The code builds for Mac, Windows and Linux.
    There are also some build scripts in place (NOTE: You may want to disable notarization in the mac build script while testing your build as this can take a    long time.)
 
 ## Releases / Known Issues
-   The current release works on Mac (signed and notarized) and Windows (only self-signed). It should install without much hassle on both platforms.
+   The current release works on Mac (signed and notarized) and Windows (only self-signed). It should install without much hassle on both platforms.\
    Just added Linux to the last release. The app icon is not behaving but it works the same.\
    At the moment, any service using Google auth is broken if you have to sign-in to use (so, YouTube works, YouTube TV will not.)\
    The user agent spoofing is no longer working so Google OAuth will need to be implemented. 
