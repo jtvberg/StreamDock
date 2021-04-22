@@ -196,7 +196,7 @@ function getAccent() {
 // Set systray color in win10
 function setWinTrayTheme() {
   if (nativeTheme.shouldUseDarkColors) {
-    tray.setImage(path.join(__dirname, '/res/logo/icon_win_tray_white.png'))
+    tray.setImage(path.join(__dirname, '/res/logo/icon_tray_white_32.png'))
   } else {
     tray.setImage(path.join(__dirname, '/res/logo/iconTemplate@2x.png'))
   }
@@ -694,7 +694,9 @@ app.on('widevine-ready', () => {
   })
   createWindow()
   createTray()
-  setWinTrayTheme()
+  if (!isMac) {
+    setWinTrayTheme()
+  }
 })
 
 // Widvine DRM error handling
