@@ -19,7 +19,7 @@
     "Streaming",
     "Video"
   ],
-  "author": "jtvberg",
+  "author": "jtvberg <streamdockapp@gmail.com> (https://github.com/jtvberg/StreamDock)",
   "license": "CC0-1.0",
   "devDependencies": {
     "electron": "github:castlabs/electron-releases#v11.4.2-wvvmp",
@@ -53,10 +53,12 @@
     "win": {
       "certificateFile": "private/jtvberg.p12",
       "certificatePassword": "",
-      "verifyUpdateCodeSignature": false
+      "verifyUpdateCodeSignature": false,
+      "target": ["nsis", "zip"]
     },
     "linux": {
-      "category": "Video"
+      "category": "Video",
+      "target": ["AppImage", "snap", "deb"]
     },
     "publish": {
       "provider": "github"
