@@ -566,7 +566,7 @@ function scaleHeight(width, height) {
   win.setBounds({
     x: wb.x,
     y: wb.y,
-    height: Math.round(((wb.width * height) / width) + winAdjustHeight),
+    height: Math.round((((wb.width - baseAdjustWidth) * height) / width) + winAdjustHeight),
     width: wb.width
   })
 }
@@ -577,7 +577,7 @@ function scaleWidth(width, height) {
     x: wb.x,
     y: wb.y,
     height: wb.height,
-    width: Math.round(((wb.height - winAdjustHeight) * width) / height)
+    width: Math.round(((wb.height - winAdjustHeight) * width) / height) + baseAdjustWidth
   })
 }
 
@@ -616,7 +616,7 @@ function toggleBookmarks() {
 
 // Toggle facets view
 function toggleFacets() {
-  showFacets = currentStream === 'nf' && view.getBounds().width === wb.width
+  showFacets = currentStream === 'nf' && view.getBounds().width === wb.width - baseAdjustWidth
   setViewBounds()
 }
 
