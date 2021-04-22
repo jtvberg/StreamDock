@@ -79,6 +79,11 @@ const createWindow = () => {
     }
   })
 
+  // Add app icon in Linux (automatic otherwise)
+  if (isLinux) {
+    win.setIcon(path.join(__dirname, '/res/logo/icon.png'))
+  }
+
   // HTML file to load into window
   win.loadFile('main.html', {
     userAgent: 'Chrome'

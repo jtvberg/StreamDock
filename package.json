@@ -9,6 +9,7 @@
     "break": "electron --inspect-brk=7171 .",
     "buildMac": "electron-builder -m",
     "buildWin": "electron-builder -w",
+    "buildLinux": "electron-builder -l",
     "releaseMac": "electron-builder -m -p 'onTagOrDraft'"
   },
   "repository": "https://github.com/jtvberg/StreamDock",
