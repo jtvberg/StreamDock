@@ -38,7 +38,7 @@
 
 ## Releases / Known Issues
    The current release works on Mac (signed and notarized) and Windows (only self-signed). It should install without much hassle on both platforms.
-   No Linux version in the release.\
+   Just added Linux to the last release. The app icon is not behaving but it works the same.\
    At the moment, any service using Google auth is broken if you have to sign-in to use (so, YouTube works, YouTube TV will not.)\
    The user agent spoofing is no longer working so Google OAuth will need to be implemented. 
    Look for that in a future release.\
