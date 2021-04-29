@@ -183,9 +183,17 @@ function loadServices() {
   ipcRenderer.send('reset-menu')
   $('.service-btn-host').empty()
   $('.service-btn-host').append('<div class="far fa-bookmark fa-xs bookmarks-btn" title="Toggle Bookmarks"></div>')
+  const template = document.getElementById('service-btn-instance')
   streamList.forEach(function (serv) {
     if (serv.active) {
-      $('.service-btn-host').append(`<div class="service-btn-color" style="color:${serv.color}; background-color:${serv.bgColor};"><div class="service-btn" data-val="${serv.id}" data-url="${serv.url}" title="${serv.title}">${serv.glyph}</div></div>`)
+      const instance = document.importNode(template.content, true)
+      instance.querySelector('.service-btn-color').style.color = serv.color
+      instance.querySelector('.service-btn-color').style.backgroundColor = serv.bgColor
+      instance.querySelector('.service-btn').setAttribute('data-val', serv.id)
+      instance.querySelector('.service-btn').setAttribute('data-url', serv.url)
+      instance.querySelector('.service-btn').setAttribute('title', serv.title)
+      instance.querySelector('.service-btn').innerHTML = serv.glyph
+      $('.service-btn-host').append(instance)
       ipcRenderer.send('add-stream', serv)
     }
   })
@@ -501,16 +509,19 @@ function loadBookmarks() {
   })
 }
 
-// Update bookmarks
+// Add bookmarks to UI
 function addBookmark(bookmark) {
-  $('.bookmark-stream-host').append(`<div class="bookmark-tile" data-ts="${bookmark.timestamp}">
-    <img src="${bookmark.image}" style="width: 100%">
-    <div class="fas fa-link bookmark-url-btn fa-2x" data-url="${bookmark.url}" title="Copy URL"></div>
-    <div class="fas fa-times-circle bookmark-delete-btn fa-2x" data-ts="${bookmark.timestamp}" title="Delete Bookmark"></div>
-    <div class="fas fa-circle fa-3x bookmark-play-btn-bg"></div>
-    <div class="fas fa-play fa-2x bookmark-play-btn" data-val="${bookmark.serv}" data-url="${bookmark.url}" title="Play Stream"></div>
-    <div class="bookmark-title" title="${bookmark.title}">${bookmark.title}</div>
-  </div>`)
+  const template = document.getElementById('boomark-instance')
+  const instance = document.importNode(template.content, true)
+  instance.querySelector('.bookmark-tile').setAttribute('data-ts', bookmark.timestamp)
+  instance.querySelector('.bookmark-image').setAttribute('src', bookmark.image)
+  instance.querySelector('.bookmark-url-btn').setAttribute('data-url', bookmark.url)
+  instance.querySelector('.bookmark-delete-btn').setAttribute('data-ts', bookmark.timestamp)
+  instance.querySelector('.bookmark-play-btn').setAttribute('data-url', bookmark.url)
+  instance.querySelector('.bookmark-play-btn').setAttribute('data-val', bookmark.serv)
+  instance.querySelector('.bookmark-title').setAttribute('title', bookmark.title)
+  instance.querySelector('.bookmark-title').innerHTML = bookmark.title
+  $('.bookmark-stream-host').append(instance)
 }
 
 // Resize image and store off with url
