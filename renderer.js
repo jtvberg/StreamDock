@@ -376,38 +376,38 @@ function loadSettingsModal() {
   $(`input[name=radio-theme][value=${settings.themeMode}]`).prop('checked', true).parent('.btn').addClass('active')
   $('#settings-services-available').empty()
   const defaultStreams = getDefaultStreams()
+  const template = document.getElementById('service-host-instance')
   streamList.forEach(function (serv) {
     const defaultStream = defaultStreams.find(item => item.id === serv.id)
     const checked = serv.active ? 'checked' : ''
-    $('#settings-services-available').append(
-      `<div class="service-host" data-id="${serv.id}">
-        <div class="custom-control custom-checkbox serv-check-host">
-          <input type="checkbox" class="custom-control-input serv-check" id="check-${serv.id}" data-id="${serv.id}" ${checked}>
-          <label class="custom-control-label serv-check-label" for="check-${serv.id}" style="width:0px"></label>
-        </div>
-        <img src="./res/serv_logos/large/${serv.id}.png" for="check-${serv.id}"></img>
-        <div class="input-group input-group-sm serv-url">
-          <input type="url" class="form-control text-url" id="input-url-${serv.id}" data-undo-url="${serv.url}" data-default-url="${defaultStream.url}" value="${serv.url}"/>
-          <div class="input-group-append">
-            <button class="btn btn-outline-secondary url-undo-btn" type="button" title="Revert to previous">Undo</button>
-            <button class="btn btn-outline-secondary url-default-btn" type="button" title="Load default URL">Default</button>
-          </div>
-        </div>
-        <div class="input-group input-group-sm serv-glyph-pick">
-          <label class="label-text">Quick Access Glyph:</label>
-          <input type="text" class="form-control text-glyph" id="input-glyph-${serv.id}"" data-default-glyph="${defaultStream.glyph}" value="${serv.glyph}" maxlength="1"/>
-        </div>
-        <div class="serv-color-pick">
-          <span class="fa fa-square serv-color-btn" style="color:${serv.color};"></span>  
-          <input type="color" class="serv-color-input" id="serv-color-${serv.id}" data-undo-color="${serv.color}" data-default-color="${defaultStream.color}" value="${serv.color}">
-          <label class="label-text" for="serv-color-${serv.id}">Color</label>
-        </div>
-        <div class="serv-bg-pick">
-          <span class="fa fa-square serv-color-btn" style="color:${serv.bgColor};"></span>
-          <input type="color" class="serv-color-input" id="serv-bg-${serv.id}" data-undo-color="${serv.bgColor}" data-default-color="${defaultStream.bgColor}" value="${serv.bgColor}">
-          <label class="label-text" for="serv-bg-${serv.id}">Background</label>
-        </div>
-      </div>`)
+    const instance = document.importNode(template.content, true)
+    instance.querySelector('.service-host').setAttribute('data-id', serv.id)
+    instance.querySelector('.serv-check').setAttribute('data-id', serv.id)
+    instance.querySelector('.serv-check').setAttribute('id', `check-${serv.id}`)
+    instance.querySelector('.serv-check').checked = checked
+    instance.querySelector('.serv-check-label').setAttribute('for', `check-${serv.id}`)
+    instance.querySelector('.serv-check-img').setAttribute('src', `./res/serv_logos/large/${serv.id}.png`)
+    instance.querySelector('.serv-check-img').setAttribute('for', `check-${serv.id}`)
+    instance.querySelector('.serv-url-input').setAttribute('id', `input-url-${serv.id}`)
+    instance.querySelector('.serv-url-input').setAttribute('data-undo-url', serv.url)
+    instance.querySelector('.serv-url-input').setAttribute('data-default-url', defaultStream.url)
+    instance.querySelector('.serv-url-input').setAttribute('value', serv.url)
+    instance.querySelector('.text-glyph').setAttribute('id', `input-glyph-${serv.id}`)
+    instance.querySelector('.text-glyph').setAttribute('data-default-glyph', defaultStream.glyph)
+    instance.querySelector('.text-glyph').setAttribute('value', serv.glyph)
+    instance.querySelector('.serv-color-pick-btn').style.color = serv.color
+    instance.querySelector('.serv-color-pick-input').setAttribute('id', `serv-color-${serv.id}`)
+    instance.querySelector('.serv-color-pick-input').setAttribute('data-undo-color', serv.color)
+    instance.querySelector('.serv-color-pick-input').setAttribute('value', serv.color)
+    instance.querySelector('.serv-color-pick-input').setAttribute('data-default-color', defaultStream.color)
+    instance.querySelector('.serv-color-pick-label').setAttribute('for', `serv-color-${serv.id}`)
+    instance.querySelector('.serv-bg-pick-btn').style.color = serv.bgColor
+    instance.querySelector('.serv-bg-pick-input').setAttribute('id', `serv-bg-${serv.id}`)
+    instance.querySelector('.serv-bg-pick-input').setAttribute('data-undo-color', serv.bgColor)
+    instance.querySelector('.serv-bg-pick-input').setAttribute('value', serv.bgColor)
+    instance.querySelector('.serv-bg-pick-input').setAttribute('data-default-color', defaultStream.bgColor)
+    instance.querySelector('.serv-bg-pick-label').setAttribute('for', `serv-color-${serv.id}`)
+    $('#settings-services-available').append(instance)
   })
   $('#settings-modal').modal('show')
 }

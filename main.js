@@ -1,3 +1,4 @@
+/* eslint-disable quotes */
 // TODO: Peacock won't login
 // TODO: Scrollbar css
 
@@ -351,9 +352,11 @@ function setStreamId(url) {
 function ytAdsSkip() {
   if (ytSkipAds && currentStream === 'yt') {
     try {
-      view.webContents.executeJavaScript(`try {
-        document.querySelector('.ytp-ad-skip-button').click()
-      } catch(err) { console.log(err) }`)
+      view.webContents.executeJavaScript(`
+        try {
+          document.querySelector('.ytp-ad-skip-button').click()
+        } catch(err) { console.log(err) }
+      `)
       view.webContents.executeJavaScript(`
         const obsAds = new MutationObserver(function(ml) {
           for(const mut of ml) {

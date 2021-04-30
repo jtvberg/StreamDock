@@ -200,7 +200,7 @@
       </div>
     </div>
   </div>
-  
+
   <template id="boomark-instance">
     <div class="bookmark-tile">
       <img class="bookmark-image" style="width: 100%">
@@ -214,6 +214,36 @@
   <template id="service-btn-instance">
     <div class="service-btn-color">
       <div class="service-btn"></div>
+    </div>
+  </template>
+  <template id="service-host-instance">
+    <div class="service-host">
+      <div class="custom-control custom-checkbox serv-check-host">
+        <input type="checkbox" class="custom-control-input serv-check" ${checked}>
+        <label class="custom-control-label serv-check-label" style="width:0px"></label>
+      </div>
+      <img class="serv-check-img"></img>
+      <div class="input-group input-group-sm serv-url">
+        <input type="url" class="form-control text-url serv-url-input"/>
+        <div class="input-group-append">
+          <button class="btn btn-outline-secondary url-undo-btn" type="button" title="Revert to previous">Undo</button>
+          <button class="btn btn-outline-secondary url-default-btn" type="button" title="Load default URL">Default</button>
+        </div>
+      </div>
+      <div class="input-group input-group-sm serv-glyph-pick">
+        <label class="label-text">Quick Access Glyph:</label>
+        <input type="text" class="form-control text-glyph" maxlength="1"/>
+      </div>
+      <div class="serv-color-pick">
+        <span class="fa fa-square serv-color-btn serv-color-pick-btn"></span>  
+        <input type="color" class="serv-color-input serv-color-pick-input">
+        <label class="label-text serv-color-pick-label">Color</label>
+      </div>
+      <div class="serv-bg-pick">
+        <span class="fa fa-square serv-color-btn serv-bg-pick-btn"></span>
+        <input type="color" class="serv-color-input serv-bg-pick-input">
+        <label class="label-text serv-bg-pick-label">Background</label>
+      </div>
     </div>
   </template>
 
