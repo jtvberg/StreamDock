@@ -356,8 +356,8 @@ function maxRestoreWindow() {
 
 // Load stored values into settings modal
 function loadSettingsModal() {
-  $('.facet-host').css({ 'opacity': '0' })
-  $('.bookmark-host').css({ 'opacity': '0' })
+  $('.facet-host').css('opacity', '0')
+  $('.bookmark-host').css('opacity', '0')
   ipcRenderer.send('view-hide')
   $('#collapse-general, #collapse-services').collapse('hide')
   $('#ontop-check').prop('checked', settings.onTop)
@@ -511,16 +511,12 @@ function loadBookmarks() {
 
 // Add bookmarks to UI
 function addBookmark(bookmark) {
-  const template = document.getElementById('boomark-instance')
-  const instance = document.importNode(template.content, true)
-  instance.querySelector('.bookmark-tile').setAttribute('data-ts', bookmark.timestamp)
-  instance.querySelector('.bookmark-image').setAttribute('src', bookmark.image)
-  instance.querySelector('.bookmark-url-btn').setAttribute('data-url', bookmark.url)
-  instance.querySelector('.bookmark-delete-btn').setAttribute('data-ts', bookmark.timestamp)
-  instance.querySelector('.bookmark-play-btn').setAttribute('data-url', bookmark.url)
-  instance.querySelector('.bookmark-play-btn').setAttribute('data-val', bookmark.serv)
-  instance.querySelector('.bookmark-title').setAttribute('title', bookmark.title)
-  instance.querySelector('.bookmark-title').innerHTML = bookmark.title
+  const instance = $($('#boomark\\-instance').html())
+  $('.bookmark-image', instance).prop('src', bookmark.image)
+  $('.bookmark-url-btn', instance).data('url', bookmark.url)
+  $('.bookmark-delete-btn', instance).data('ts', bookmark.timestamp)
+  $('.bookmark-play-btn', instance).data('url', bookmark.url).data('val', bookmark.serv)
+  $('.bookmark-title', instance).prop('title', bookmark.title).text(bookmark.title)
   $('.bookmark-stream-host').append(instance)
 }
 
@@ -545,11 +541,6 @@ function deleteBookmark(ts) {
   $.each(bookmarks, function(i){
     if (this.timestamp === ts){
       bookmarks.splice(i, 1)
-    }
-  })
-  $('.bookmark-tile').each(function () {
-    if ($(this).data('ts') === ts) {
-      $(this).remove()
     }
   })
   localStorage.setItem('bookmarks', JSON.stringify(bookmarks))
@@ -624,18 +615,12 @@ $(document).on('click', '.url-default-btn', function () {
 $(document).on('mouseenter', '.service-btn', function () {
   const c = $(this).closest('.service-btn-color').css('color')
   const b = $(this).closest('.service-btn-color').css('background-color')
-  $(this).css({
-    'color': b,
-    'background-color': c
-  })
+  $(this).css({ 'color': b, 'background-color': c })
 })
 
 // Restore service btn color
 $(document).on('mouseleave', '.service-btn', function () {
-  $(this).css({
-    'color': '',
-    'background-color': ''
-  })
+  $(this).css({ 'color': '', 'background-color': '' })
 })
 
 // Play bookmarked stream
@@ -646,6 +631,7 @@ $(document).on('click', '.bookmark-play-btn', function () {
 // Play bookmarked stream
 $(document).on('click', '.bookmark-delete-btn', function () {
   deleteBookmark($(this).data('ts'))
+  $(this).closest('.bookmark-tile').remove()
 })
 
 // Copy bookmark link to clipboard
@@ -732,8 +718,8 @@ $('.header-bar').on('contextmenu', () => {
 
 // Settings close restore View
 $('#settings-modal').on('hidden.bs.modal', () => {
-  $('.facet-host').css({ 'opacity': '1' })
-  $('.bookmark-host').css({ 'opacity': '1' })
+  $('.facet-host').css('opacity', '1')
+  $('.bookmark-host').css('opacity', '1')
   ipcRenderer.send('view-show')
 })
 
