@@ -212,12 +212,22 @@ function setWinTrayTheme() {
 function pause() {
   switch (currentStream) {
     case 'at':
-      view.webContents.executeJavaScript(`document.querySelector('apple-tv-plus-player').shadowRoot.querySelector('amp-video-player-internal').shadowRoot.querySelector('amp-video-player').shadowRoot.querySelector('video').pause()`)
+      view.webContents.executeJavaScript(`(${amzPause.toString()})()`)
       break
     default:
-      view.webContents.executeJavaScript(`document.querySelectorAll('video').forEach(input => { input.pause() })`)
+      view.webContents.executeJavaScript(`(${defaultPause.toString()})()`)
       break
   }
+}
+
+// Amazon pause function
+function amzPause() {
+  document.querySelector('apple-tv-plus-player').shadowRoot.querySelector('amp-video-player-internal').shadowRoot.querySelector('amp-video-player').shadowRoot.querySelector('video').pause()
+}
+
+// Default pause function
+function defaultPause() {
+  document.querySelectorAll('video').forEach(input => { input.pause() })
 }
 
 // Play stream
@@ -225,16 +235,31 @@ function play() {
   if (!showBookmarks) {
     switch (currentStream) {
       case 'at':
-        view.webContents.executeJavaScript(`document.querySelector('apple-tv-plus-player').shadowRoot.querySelector('amp-video-player-internal').shadowRoot.querySelector('amp-video-player').shadowRoot.querySelector('video').play()`)
+        view.webContents.executeJavaScript(`(${apPlay.toString()})()`)
         break
       case 'ap':
-        view.webContents.executeJavaScript(`document.querySelectorAll('.rendererContainer>video').forEach(input => { input.play() })`)
+        view.webContents.executeJavaScript(`(${amzPlay.toString()})()`)
         break
       default:
-        view.webContents.executeJavaScript(`document.querySelectorAll('video').forEach(input => { input.play() })`)
+        view.webContents.executeJavaScript(`(${defaultPlay.toString()})()`)
         break
     }
   }
+}
+
+// Apple play function
+function apPlay() {
+  document.querySelector('apple-tv-plus-player').shadowRoot.querySelector('amp-video-player-internal').shadowRoot.querySelector('amp-video-player').shadowRoot.querySelector('video').play()
+}
+
+// Amazon play function
+function amzPlay() {
+  document.querySelectorAll('.rendererContainer>video').forEach(input => { input.play() })
+}
+
+// Default play function
+function defaultPlay() {
+  document.querySelectorAll('video').forEach(input => { input.play() })
 }
 
 // Remove view from window
