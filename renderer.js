@@ -187,12 +187,7 @@ function loadServices() {
   streamList.forEach(function (serv) {
     if (serv.active) {
       const instance = document.importNode(template.content, true)
-      instance.querySelector('.service-btn-color').style.color = serv.color
-      instance.querySelector('.service-btn-color').style.backgroundColor = serv.bgColor
-      instance.querySelector('.service-btn').setAttribute('data-val', serv.id)
-      instance.querySelector('.service-btn').setAttribute('data-url', serv.url)
-      instance.querySelector('.service-btn').setAttribute('title', serv.title)
-      instance.querySelector('.service-btn').innerHTML = serv.glyph
+      $('.service-btn', instance).css({ 'color': serv.color, 'background-color': serv.bgColor }).data('color', serv.color).data('bgcolor', serv.bgColor).data('val', serv.id).data('url', serv.url).prop('title', serv.title).text(serv.glyph)
       $('.service-btn-host').append(instance)
       ipcRenderer.send('add-stream', serv)
     }
@@ -381,32 +376,18 @@ function loadSettingsModal() {
     const defaultStream = defaultStreams.find(item => item.id === serv.id)
     const checked = serv.active ? 'checked' : ''
     const instance = document.importNode(template.content, true)
-    instance.querySelector('.service-host').setAttribute('data-id', serv.id)
-    instance.querySelector('.serv-check').setAttribute('data-id', serv.id)
-    instance.querySelector('.serv-check').setAttribute('id', `check-${serv.id}`)
-    instance.querySelector('.serv-check').checked = checked
-    instance.querySelector('.serv-check-label').setAttribute('for', `check-${serv.id}`)
-    instance.querySelector('.serv-check-img').setAttribute('src', `./res/serv_logos/large/${serv.id}.png`)
-    instance.querySelector('.serv-check-img').setAttribute('for', `check-${serv.id}`)
-    instance.querySelector('.serv-url-input').setAttribute('id', `input-url-${serv.id}`)
-    instance.querySelector('.serv-url-input').setAttribute('data-undo-url', serv.url)
-    instance.querySelector('.serv-url-input').setAttribute('data-default-url', defaultStream.url)
-    instance.querySelector('.serv-url-input').setAttribute('value', serv.url)
-    instance.querySelector('.text-glyph').setAttribute('id', `input-glyph-${serv.id}`)
-    instance.querySelector('.text-glyph').setAttribute('data-default-glyph', defaultStream.glyph)
-    instance.querySelector('.text-glyph').setAttribute('value', serv.glyph)
-    instance.querySelector('.serv-color-pick-btn').style.color = serv.color
-    instance.querySelector('.serv-color-pick-input').setAttribute('id', `serv-color-${serv.id}`)
-    instance.querySelector('.serv-color-pick-input').setAttribute('data-undo-color', serv.color)
-    instance.querySelector('.serv-color-pick-input').setAttribute('value', serv.color)
-    instance.querySelector('.serv-color-pick-input').setAttribute('data-default-color', defaultStream.color)
-    instance.querySelector('.serv-color-pick-label').setAttribute('for', `serv-color-${serv.id}`)
-    instance.querySelector('.serv-bg-pick-btn').style.color = serv.bgColor
-    instance.querySelector('.serv-bg-pick-input').setAttribute('id', `serv-bg-${serv.id}`)
-    instance.querySelector('.serv-bg-pick-input').setAttribute('data-undo-color', serv.bgColor)
-    instance.querySelector('.serv-bg-pick-input').setAttribute('value', serv.bgColor)
-    instance.querySelector('.serv-bg-pick-input').setAttribute('data-default-color', defaultStream.bgColor)
-    instance.querySelector('.serv-bg-pick-label').setAttribute('for', `serv-color-${serv.id}`)
+    $('.service-host', instance).data('id', serv.id)
+    $('.serv-check', instance).data('id', serv.id).prop('id', `check-${serv.id}`).prop('checked', checked)
+    $('.serv-check-label', instance).prop('for', `check-${serv.id}`)
+    $('.serv-check-img', instance).prop('src', `./res/serv_logos/large/${serv.id}.png`).prop('for', `check-${serv.id}`)
+    $('.serv-url-input', instance).prop('id', `input-url-${serv.id}`).data('undo-url', serv.url).data('default-url', defaultStream.url).prop('value', serv.url)
+    $('.text-glyph', instance).prop('id', `input-glyph-${serv.id}`).data('default-glyph', defaultStream.glyph).prop('value', serv.glyph)
+    $('.serv-color-pick-btn', instance).css('color', serv.color)
+    $('.serv-color-pick-input', instance).prop('id', `serv-color-${serv.id}`).data('undo-color', serv.color).data('default-color', defaultStream.color).prop('value', serv.color)
+    $('.serv-color-pick-label', instance).prop('for', `serv-color-${serv.id}`)
+    $('.serv-bg-pick-btn', instance).css('color', serv.bgColor)
+    $('.serv-bg-pick-input', instance).prop('id', `serv-bg-${serv.id}`).data('undo-color', serv.bgColor).data('default-color', defaultStream.bgColor).prop('value', serv.bgColor)
+    $('.serv-bg-pick-label', instance).prop('for', `serv-bg-${serv.id}`)
     $('#settings-services-available').append(instance)
   })
   $('#settings-modal').modal('show')
@@ -464,6 +445,7 @@ function loadDefaultSettings() {
   $('#amz-recap-check').prop('checked', defaultSettings.amzSkipRecap)
   $('#nf-recap-check').prop('checked', defaultSettings.nfSkipRecap)
   $('#nf-next-check').prop('checked', defaultSettings.nfNextEpisode)
+  // TODO: this should be the default not all true
   $('.serv-check').prop('checked', true)
   $('.serv-color-input').each(function () {
     $(this).val($(this).data('default-color'))
@@ -613,14 +595,12 @@ $(document).on('click', '.url-default-btn', function () {
 
 // Invert servivce btn colors on hover
 $(document).on('mouseenter', '.service-btn', function () {
-  const c = $(this).closest('.service-btn-color').css('color')
-  const b = $(this).closest('.service-btn-color').css('background-color')
-  $(this).css({ 'color': b, 'background-color': c })
+  $(this).css({ 'color': $(this).data('bgcolor'), 'background-color': $(this).data('color') })
 })
 
 // Restore service btn color
 $(document).on('mouseleave', '.service-btn', function () {
-  $(this).css({ 'color': '', 'background-color': '' })
+  $(this).css({ 'color': $(this).data('color'), 'background-color': $(this).data('bgcolor') })
 })
 
 // Play bookmarked stream

@@ -282,13 +282,9 @@ body {
   opacity: 1;
 }
 
-.service-btn-color {
+.service-btn {
   border-radius: 3px;
   margin: 3px;
-}
-
-.service-btn {
-  border-radius: 2.5px;
   font-family: 'Gill Sans', Calibri, sans-serif;
   padding: 1px;
   width: 16px;
