@@ -222,12 +222,16 @@ function pause() {
 
 // Amazon pause function
 function amzPause() {
-  document.querySelector('apple-tv-plus-player').shadowRoot.querySelector('amp-video-player-internal').shadowRoot.querySelector('amp-video-player').shadowRoot.querySelector('video').pause()
+  try {
+    document.querySelector('apple-tv-plus-player').shadowRoot.querySelector('amp-video-player-internal').shadowRoot.querySelector('amp-video-player').shadowRoot.querySelector('video').pause()
+  } catch (err) { console.log(err) }
 }
 
 // Default pause function
 function defaultPause() {
-  document.querySelectorAll('video').forEach(input => { input.pause() })
+  try {
+    document.querySelectorAll('video').forEach(input => { input.pause() })
+  } catch (err) { console.log(err) }
 }
 
 // Play stream
@@ -249,17 +253,23 @@ function play() {
 
 // Apple play function
 function apPlay() {
-  document.querySelector('apple-tv-plus-player').shadowRoot.querySelector('amp-video-player-internal').shadowRoot.querySelector('amp-video-player').shadowRoot.querySelector('video').play()
+  try {
+    document.querySelector('apple-tv-plus-player').shadowRoot.querySelector('amp-video-player-internal').shadowRoot.querySelector('amp-video-player').shadowRoot.querySelector('video').play()
+  } catch (err) { console.log(err) }
 }
 
 // Amazon play function
 function amzPlay() {
-  document.querySelectorAll('.rendererContainer>video').forEach(input => { input.play() })
+  try {
+    document.querySelectorAll('.rendererContainer>video').forEach(input => { input.play() })
+  } catch (err) { console.log(err) }
 }
 
 // Default play function
 function defaultPlay() {
-  document.querySelectorAll('video').forEach(input => { input.play() })
+  try {
+    document.querySelectorAll('video').forEach(input => { input.play() })
+  } catch (err) { console.log(err) }
 }
 
 // Remove view from window
@@ -372,52 +382,69 @@ function setStreamId(url) {
   return currentStream
 }
 
-// EXPERIMENTAL (3rd clause)
+// YouTube observer dummy declaration
+let obsAds = null
+
 // Skip/close YouTube ads
 function ytAdsSkip() {
   if (ytSkipAds && currentStream === 'yt') {
-    try {
-      view.webContents.executeJavaScript(`
-        try {
-          document.querySelector('.ytp-ad-skip-button').click()
-        } catch(err) { console.log(err) }
-      `)
-      view.webContents.executeJavaScript(`
-        const obsAds = new MutationObserver(function(ml) {
-          for(const mut of ml) {
-            if (mut.type === 'childList' && mut.target.classList.contains('ytp-ad-text')) {
-              try {
-                document.querySelector('.ytp-ad-skip-button').click()
-              } catch(err) { console.log(err) }
-            }
-            if (mut.type === 'childList' && mut.target.classList.contains('ytp-ad-module')) {
-              try {
-                document.querySelector('.ytp-ad-overlay-close-button').click()
-              } catch(err) { console.log(err) }
-            }
-            if (mut.type === 'childList' && mut.target.classList.contains('ytd-mealbar-promo-renderer')) {
-              try {
-                document.querySelectorAll('#dismiss-button').forEach(input => { input.click() })
-                console.log('promo skip')
-              } catch(err) { console.log(err) }
-            }
-          }
-        })
-      `)
-      view.webContents.executeJavaScript(`obsAds.observe(document.querySelector('ytd-app'), { childList: true, subtree: true})`)
-    } catch(err) {
-      console.log(err)
-    }
+    view.webContents.executeJavaScript(`(${ytAdSkipClick.toString()})()`)
+    view.webContents.executeJavaScript('try { let obsAds = null } catch(err) { console.log(err) }')
+    view.webContents.executeJavaScript(`(${ytAddSkipMut.toString()})()`)
+    view.webContents.executeJavaScript(`(${ytAddSkipObs.toString()})()`)
   } else if (currentStream === 'yt') {
-    try {
-      view.webContents.executeJavaScript(`
-        obsAds.disconnect()
-        console.log('discon ytadskip')
-      `)
-    } catch(err) {
-      console.log(err)
-    }
+    view.webContents.executeJavaScript(`(${ytAddSkipDis.toString()})()`)
   }
+}
+
+// YouTube ad skip click
+function ytAdSkipClick() {
+  try {
+    document.querySelector('.ytp-ad-skip-button').click()
+  } catch(err) { console.log(err) }
+}
+
+// YouTube ad skip mutation observer
+function ytAddSkipMut() {
+  try {
+    console.log('obsAds')
+    obsAds = new MutationObserver(function(ml) {
+      for(const mut of ml) {
+        if (mut.type === 'childList' && mut.target.classList.contains('ytp-ad-text')) {
+          try {
+            document.querySelector('.ytp-ad-skip-button').click()
+            console.log('ad skip')
+          } catch(err) { console.log(err) }
+        }
+        if (mut.type === 'childList' && mut.target.classList.contains('ytp-ad-module')) {
+          try {
+            document.querySelector('.ytp-ad-overlay-close-button').click()
+            console.log('overlay close')
+          } catch(err) { console.log(err) }
+        }
+        if (mut.type === 'childList' && mut.target.classList.contains('ytd-mealbar-promo-renderer')) {
+          try {
+            document.querySelectorAll('#dismiss-button').forEach(input => { input.click() })
+            console.log('promo skip')
+          } catch(err) { console.log(err) }
+        }
+      }
+    })
+  } catch (err) { console.log(err) }
+}
+
+// YouTube ad skip observer invocation
+function ytAddSkipObs() {
+  try {
+    obsAds.observe(document.querySelector('ytd-app'), { childList: true, subtree: true })
+  } catch (err) { console.log(err) }
+}
+
+// YouTube ad skip observer disconnection
+function ytAddSkipDis() {
+  try {
+    obsAds.disconnect()
+  } catch (err) { console.log(err) }
 }
 
 // EXPERIMENTAL
@@ -509,9 +536,7 @@ function amzGetUrl() {
             document.querySelectorAll('.tst-play-button').forEach(function(btn) { btn.addEventListener('click', function() { sdAmzUrl = this.href }) })
           } catch(err) { console.log(err) }
       `)
-    } catch(err) {
-      console.log(err)
-    }
+    } catch(err) { console.log(err) }
   }
 }
 
@@ -674,7 +699,7 @@ async function sendCurrentStream() {
 async function getCurrentUrl() {
   let url = view.webContents.getURL()
   if (currentStream === 'ap') {
-    url = await view.webContents.executeJavaScript('sdAmzUrl')
+    url = await view.webContents.executeJavaScript('try { sdAmzUrl } catch(err) { console.log(err) }')
   }
   return url
 }
