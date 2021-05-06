@@ -58,19 +58,13 @@ ipcRenderer.on('hide-bookmarks', () => {
 // Stream loaded
 ipcRenderer.on('stream-loaded', (e, stream) => {
   settings.lastStream = stream
-  console.log('load-', stream)
+  console.log(stream)
   if (settings.lastStream.url && settings.lastStream.url.includes('.netflix.com')) {
     $('#facets-btn').show()
   } else {
     $('#facets-btn').hide()
   }
   $('.loading').hide()
-})
-
-// Stream url updated
-ipcRenderer.on('stream-update', (e, stream) => {
-  console.log('up-', stream)
-  settings.lastStream = stream
 })
 
 // Save bookmark

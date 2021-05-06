@@ -524,8 +524,8 @@ function ytAdOverlayClick() {
 function ytPromoCloseClick() {
   try {
     console.log('promo skip')
-    if (document.querySelectorAll('.dismiss-button').length > 0) {
-      document.querySelectorAll('.dismiss-button').forEach(input => { input.click() })
+    if (document.querySelectorAll('#dismiss-button').length > 0) {
+      document.querySelectorAll('#dismiss-button').forEach(input => { input.click() })
     }
   } catch(err) { console.log(err) }
 }
@@ -582,26 +582,20 @@ function ytAdSkipDis() {
 
 //#region Amazon Prime scripts
 
-// Prime URL var dummy declaration (this is not actually used as it is sent over as a string!)
-let sdAmzUrl = null
-
-// Get acutal URL for Amazon Prime videos
+// Track the acutal URL for Amazon Prime videos
 function amzGetUrl() {
   if (currentStream === 'ap') {
-    sdAmzUrl = view.webContents.getURL()
-    view.webContents.executeJavaScript(`try { let sdAmzUrl = '${sdAmzUrl}' } catch(err) { console.log(err) }`)
-      .then(() => view.webContents.executeJavaScript(`(${amzUrlEvent.toString()})()`))
-      .catch((err) => { console.error(err) })
+    try {
+      view.webContents.executeJavaScript(`
+        console.log('getUrl')
+        let sdAmzUrl = '${view.webContents.getURL()}'
+        try {
+            document.querySelectorAll('.tst-title-card').forEach(function(tile) { tile.dispatchEvent(new MouseEvent('mouseover', { 'bubbles': true })) })
+            document.querySelectorAll('.tst-play-button').forEach(function(btn) { btn.addEventListener('click', function() { sdAmzUrl = this.href }) })
+          } catch(err) { console.log(err) }
+      `)
+    } catch(err) { console.log(err) }
   }
-}
-
-// Attach click event to get Amazon Prime URL
-function amzUrlEvent() {
-  try {
-    console.log('getUrl events')
-    document.querySelectorAll('.tst-title-card').forEach(function(tile) { tile.dispatchEvent(new MouseEvent('mouseover', { 'bubbles': true })) })
-    document.querySelectorAll('.tst-play-button').forEach(function(btn) { btn.addEventListener('click', function() { sdAmzUrl = this.href }) })
-  } catch(err) { console.log(err) }
 }
 
 // Prime observer dummy declaration (this is not actually used as it is sent over as a string!)
