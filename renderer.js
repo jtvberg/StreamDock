@@ -58,7 +58,8 @@ ipcRenderer.on('hide-bookmarks', () => {
 // Stream loaded
 ipcRenderer.on('stream-loaded', (e, stream) => {
   settings.lastStream = stream
-  if (settings.lastStream.url.includes('.netflix.com')) {
+  console.log('load-', stream)
+  if (settings.lastStream.url && settings.lastStream.url.includes('.netflix.com')) {
     $('#facets-btn').show()
   } else {
     $('#facets-btn').hide()
@@ -68,6 +69,7 @@ ipcRenderer.on('stream-loaded', (e, stream) => {
 
 // Stream url updated
 ipcRenderer.on('stream-update', (e, stream) => {
+  console.log('up-', stream)
   settings.lastStream = stream
 })
 

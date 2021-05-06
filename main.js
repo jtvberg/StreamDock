@@ -382,284 +382,6 @@ function setStreamId(url) {
   return currentStream
 }
 
-// YouTube observer dummy declaration (this is not actually used as it is sent over as a string!)
-let obsYtAds = null
-
-// Skip/close YouTube ads
-function ytAdsSkip() {
-  if (ytSkipAds && currentStream === 'yt') {
-    view.webContents.executeJavaScript(`${ytAdOverlayClick.toString()}`).catch((err) => { console.error(err) })
-    view.webContents.executeJavaScript(`${ytPromoCloseClick.toString()}`).catch((err) => { console.error(err) })
-    view.webContents.executeJavaScript(`${ytAdSkipClick.toString()}`).catch((err) => { console.error(err) })
-      .then(() => ('ytAdSkipClick()').catch((err) => { console.error(err) }))
-    view.webContents.executeJavaScript('try { let obsYtAds = null } catch(err) { console.log(err) }')
-      .then(() => view.webContents.executeJavaScript(`(${ytAdSkipMut.toString()})()`))
-      .then(() => view.webContents.executeJavaScript(`(${ytAdSkipObs.toString()})()`))
-      .catch((err) => { console.error(err) })
-  } else if (currentStream === 'yt') {
-    view.webContents.executeJavaScript(`(${ytAdSkipDis.toString()})()`).catch((err) => { console.error(err) })
-  }
-}
-
-// YouTube ad skip click
-function ytAdSkipClick() {
-  try {
-    console.log('ad skip')
-    if (document.querySelector('.ytp-ad-skip-button') != undefined) {
-      document.querySelector('.ytp-ad-skip-button').click()
-    }
-  } catch(err) { console.log(err) }
-}
-
-// YouTube overlay close click
-function ytAdOverlayClick() {
-  try {
-    console.log('overlay close')
-    if (document.querySelector('.ytp-ad-overlay-close-button') != undefined) {
-      document.querySelector('.ytp-ad-overlay-close-button').click()
-    }
-  } catch(err) { console.log(err) }
-}
-
-// YouTube promo close click
-function ytPromoCloseClick() {
-  try {
-    console.log('promo skip')
-    if (document.querySelectorAll('.dismiss-button').length > 0) {
-      document.querySelectorAll('.dismiss-button').forEach(input => { input.click() })
-    }
-  } catch(err) { console.log(err) }
-}
-
-// YouTube ad skip mutation observer
-function ytAdSkipMut() {
-  try {
-    console.log('mut ads')
-    obsYtAds = new MutationObserver(function(ml) {
-      for(const mut of ml) {
-        if (mut.type === 'childList' && mut.target.classList.contains('ytp-ad-text')) {
-          ytAdSkipClick()
-        }
-        if (mut.type === 'childList' && mut.target.classList.contains('ytp-ad-module')) {
-          ytAdOverlayClick()
-        }
-        if (mut.type === 'childList' && mut.target.classList.contains('ytd-mealbar-promo-renderer')) {
-          ytPromoCloseClick()
-        }
-      }
-    })
-  } catch (err) { console.log(err) }
-}
-
-// YouTube ad skip observer invocation
-function ytAdSkipObs() {
-  try {
-    console.log('obs ads')
-    obsYtAds.observe(document.querySelector('ytd-app'), { childList: true, subtree: true })
-  } catch (err) { console.log(err) }
-}
-
-// YouTube ad skip observer disconnection
-function ytAdSkipDis() {
-  try {
-    console.log('dis ads')
-    obsYtAds.disconnect()
-  } catch (err) { console.log(err) }
-}
-
-// Prime observer dummy declaration (this is not actually used as it is sent over as a string!)
-let obsAmzPreview = null
-
-// Skip/close Prime preivews
-function amzPreviewSkip() {
-  if (amzSkipPreview && currentStream === 'ap') {
-    view.webContents.executeJavaScript(`${amzPrevSkipClick.toString()}`).catch((err) => { console.error(err) })
-    view.webContents.executeJavaScript('try { let obsAmzPreview = null } catch(err) { console.log(err) }')
-      .then(() => view.webContents.executeJavaScript(`(${amzPreviewSkipMut.toString()})()`))
-      .then(() => view.webContents.executeJavaScript(`(${amzPreviewSkipObs.toString()})()`))
-      .catch((err) => { console.error(err) })
-  } else if (currentStream === 'ap') {
-    view.webContents.executeJavaScript(`(${amzPreviewSkipDis.toString()})()`).catch((err) => { console.error(err) })
-  }
-}
-
-// Prime preview skip click
-function amzPrevSkipClick() {
-  try {
-    console.log('prev skip')
-    if (document.querySelector('.fu4rd6c') != undefined) {
-      document.querySelector('.fu4rd6c').click()
-    }
-  } catch(err) { console.log(err) }
-}
-
-// Prime preview skip mutation observer
-function amzPreviewSkipMut() {
-  try {
-    console.log('prev mut')
-    obsAmzPreview = new MutationObserver(function(ml) {
-      for(const mut of ml) {
-        if (mut.type === 'childList' && mut.addedNodes && mut.addedNodes.length > 0) {
-          mut.addedNodes.forEach(element => {
-            if (element.classList && element.classList.contains('fu4rd6c')) {
-              amzPrevSkipClick()
-            }
-          })
-        }
-      }
-    })
-  } catch(err) { console.log(err) }
-}
-
-// Prime preview skip observer invocation
-function amzPreviewSkipObs() {
-  try {
-    console.log('prev obs')
-    obsAmzPreview.observe(document.querySelector('.webPlayerUIContainer'), { childList: true, subtree: true })
-  } catch (err) { console.log(err) }
-}
-
-// Prime preview skip observer disconnection
-function amzPreviewSkipDis() {
-  try {
-    console.log('prev dis')
-    obsAmzPreview.disconnect()
-  } catch (err) { console.log(err) }
-}
-
-// EXPERIMENTAL
-// Skip/close Prime episode recap & intros
-function amzRecapSkip() {
-  if (amzSkipRecap && currentStream === 'ap') {
-    try {
-      view.webContents.executeJavaScript(`
-        const obsRecap = new MutationObserver(function(ml) {
-          for(const mut of ml) {
-            if (mut.type === 'childList') {
-              try {
-                if (mut.addedNodes && mut.addedNodes.length > 0) {
-                  mut.addedNodes.forEach(element => {
-                    if (element.classList && element.classList.contains('atvwebplayersdk-skipelement-button')) {
-                      console.log('recap skip')
-                      document.querySelector('.atvwebplayersdk-skipelement-button').click()
-                    }
-                  })
-                }
-              } catch(err) { console.log(err) }
-            }
-          }
-        })
-      `)
-      view.webContents.executeJavaScript(`obsRecap.observe(document.querySelector('.webPlayerUIContainer'), { childList: true, subtree: true})`)
-    } catch(err) {
-      console.log('err')
-    }
-  } else if (currentStream === 'ap') {
-    try {
-      view.webContents.executeJavaScript(`
-        obsRecap.disconnect()
-        console.log('discon ytrecapskip')
-      `)
-    } catch(err) {
-      console.log(err)
-    }
-  }
-}
-
-// Get acutal URL for Amazon videos
-function amzGetUrl() {
-  if (currentStream === 'ap') {
-    try {
-      view.webContents.executeJavaScript(`
-        let sdAmzUrl = '${view.webContents.getURL()}'
-        try {
-            document.querySelectorAll('.tst-title-card').forEach(function(tile) { tile.dispatchEvent(new MouseEvent('mouseover', { 'bubbles': true })) })
-            document.querySelectorAll('.tst-play-button').forEach(function(btn) { btn.addEventListener('click', function() { sdAmzUrl = this.href }) })
-          } catch(err) { console.log(err) }
-      `)
-    } catch(err) { console.log(err) }
-  }
-}
-
-// EXPERIMENTAL
-// Skip/close Netlfix episode recap & intros
-function nfRecapSkip() {
-  if (nfSkipRecap && currentStream === 'nf') {
-    try {
-      view.webContents.executeJavaScript(`
-        const obsRecap = new MutationObserver(function(ml) {
-          for(const mut of ml) {
-            if (mut.type === 'childList') {
-              try {
-                if (mut.addedNodes && mut.addedNodes.length > 0) {
-                  mut.addedNodes.forEach(element => {
-                    if (element.classList && element.classList.contains('skip-credits')) {
-                      console.log('recap skip')
-                      document.querySelector('.skip-credits > a').click()
-                    }
-                  })
-                }
-              } catch(err) { console.log(err) }
-            }
-          }
-        })
-      `)
-      view.webContents.executeJavaScript(`obsRecap.observe(document.querySelector('#appMountPoint'), { childList: true, subtree: true})`)
-    } catch(err) {
-      console.log('err')
-    }
-  } else if (currentStream === 'nf') {
-    try {
-      view.webContents.executeJavaScript(`
-        obsRecap.disconnect()
-        console.log('discon nfrecapskip')
-      `)
-    } catch(err) {
-      console.log(err)
-    }
-  }
-}
-
-// EXPERIMENTAL
-// Automatically start next Netlfix episode
-function nfEpisodeNext() {
-  if (nfNextEpisode && currentStream === 'nf') {
-    try {
-      view.webContents.executeJavaScript(`
-        const obsNext = new MutationObserver(function(ml) {
-          for(const mut of ml) {
-            if (mut.type === 'childList') {
-              try {
-                if (mut.addedNodes && mut.addedNodes.length > 0) {
-                  mut.addedNodes.forEach(element => {
-                    if (element.classList && element.classList.contains('main-hitzone-element-container')) {
-                      console.log('next episode')
-                      document.querySelector('[data-uia = "next-episode-seamless-button-draining"]').click()
-                      document.querySelector('[data-uia = "next-episode-seamless-button"]').click()
-                    }
-                  })
-                }
-              } catch(err) { console.log(err) }
-            }
-          }
-        })
-      `)
-      view.webContents.executeJavaScript(`obsNext.observe(document.querySelector('#appMountPoint'), { childList: true, subtree: true})`)
-    } catch(err) {
-      console.log('err')
-    }
-  } else if (currentStream === 'nf') {
-    try {
-      view.webContents.executeJavaScript(`
-        obsNext.disconnect()
-        console.log('discon nfepinext')
-      `)
-    } catch(err) {
-      console.log(err)
-    }
-  }
-}
-
 // Scale height to supplied aspect ratio
 function scaleHeight(width, height) {
   win.setBounds({
@@ -740,7 +462,7 @@ async function sendCurrentStream() {
 async function getCurrentUrl() {
   let url = view.webContents.getURL()
   if (currentStream === 'ap') {
-    url = await view.webContents.executeJavaScript('try { sdAmzUrl } catch(err) { console.log(err) }')
+    url = await view.webContents.executeJavaScript(`try { sdAmzUrl } catch(err) { console.log('not yet') }`)
   }
   return url
 }
@@ -765,6 +487,379 @@ async function saveSettings() {
   }
   win.webContents.send('save-settings', data)
 }
+
+//#region YouTube scripts
+
+// YouTube observer dummy declaration (this is not actually used as it is sent over as a string!)
+let obsYtAds = null
+
+// YouTube ad script injection
+function ytAdsSkip() {
+  if (ytSkipAds && currentStream === 'yt') {
+    view.webContents.executeJavaScript(`${ytAdOverlayClick.toString()}`).catch((err) => { console.error(err) })
+    view.webContents.executeJavaScript(`${ytPromoCloseClick.toString()}`).catch((err) => { console.error(err) })
+    view.webContents.executeJavaScript(`${ytAdSkipClick.toString()}`)
+      .then(() => ('ytAdSkipClick()'))
+      .catch((err) => { console.error(err) })
+    view.webContents.executeJavaScript('try { let obsYtAds = null } catch(err) { console.log(err) }')
+      .then(() => view.webContents.executeJavaScript(`(${ytAdSkipMut.toString()})()`))
+      .then(() => view.webContents.executeJavaScript(`(${ytAdSkipObs.toString()})()`))
+      .catch((err) => { console.error(err) })
+  } else if (currentStream === 'yt') {
+    view.webContents.executeJavaScript(`(${ytAdSkipDis.toString()})()`).catch((err) => { console.error(err) })
+  }
+}
+
+// YouTube overlay close click
+function ytAdOverlayClick() {
+  try {
+    console.log('overlay close')
+    if (document.querySelector('.ytp-ad-overlay-close-button') != undefined) {
+      document.querySelector('.ytp-ad-overlay-close-button').click()
+    }
+  } catch(err) { console.log(err) }
+}
+
+// YouTube promo close click
+function ytPromoCloseClick() {
+  try {
+    console.log('promo skip')
+    if (document.querySelectorAll('.dismiss-button').length > 0) {
+      document.querySelectorAll('.dismiss-button').forEach(input => { input.click() })
+    }
+  } catch(err) { console.log(err) }
+}
+
+// YouTube ad skip click
+function ytAdSkipClick() {
+  try {
+    console.log('ad skip')
+    if (document.querySelector('.ytp-ad-skip-button') != undefined) {
+      document.querySelector('.ytp-ad-skip-button').click()
+    }
+  } catch(err) { console.log(err) }
+}
+
+// YouTube ad skip mutation observer
+function ytAdSkipMut() {
+  try {
+    console.log('mut ads')
+    obsYtAds = new MutationObserver(function(ml) {
+      for(const mut of ml) {
+        if (mut.type === 'childList' && mut.target.classList.contains('ytp-ad-text')) {
+          ytAdSkipClick()
+        }
+        if (mut.type === 'childList' && mut.target.classList.contains('ytp-ad-module')) {
+          ytAdOverlayClick()
+        }
+        if (mut.type === 'childList' && mut.target.classList.contains('ytd-mealbar-promo-renderer')) {
+          ytPromoCloseClick()
+        }
+      }
+    })
+  } catch (err) { console.log(err) }
+}
+
+// YouTube ad skip observer invocation
+function ytAdSkipObs() {
+  try {
+    console.log('obs ads')
+    obsYtAds.observe(document.querySelector('ytd-app'), { childList: true, subtree: true })
+  } catch (err) { console.log(err) }
+}
+
+// YouTube ad skip observer disconnection
+function ytAdSkipDis() {
+  try {
+    console.log('dis ads')
+    if (typeof obsYtAds !== 'undefined') {
+      obsYtAds.disconnect()
+    }
+  } catch (err) { console.log(err) }
+}
+
+//#endregion
+
+//#region Amazon Prime scripts
+
+// Prime URL var dummy declaration (this is not actually used as it is sent over as a string!)
+let sdAmzUrl = null
+
+// Get acutal URL for Amazon Prime videos
+function amzGetUrl() {
+  if (currentStream === 'ap') {
+    sdAmzUrl = view.webContents.getURL()
+    view.webContents.executeJavaScript(`try { let sdAmzUrl = '${sdAmzUrl}' } catch(err) { console.log(err) }`)
+      .then(() => view.webContents.executeJavaScript(`(${amzUrlEvent.toString()})()`))
+      .catch((err) => { console.error(err) })
+  }
+}
+
+// Attach click event to get Amazon Prime URL
+function amzUrlEvent() {
+  try {
+    console.log('getUrl events')
+    document.querySelectorAll('.tst-title-card').forEach(function(tile) { tile.dispatchEvent(new MouseEvent('mouseover', { 'bubbles': true })) })
+    document.querySelectorAll('.tst-play-button').forEach(function(btn) { btn.addEventListener('click', function() { sdAmzUrl = this.href }) })
+  } catch(err) { console.log(err) }
+}
+
+// Prime observer dummy declaration (this is not actually used as it is sent over as a string!)
+let obsAmzPreview = null
+
+// Skip/close Prime previews
+function amzPreviewSkip() {
+  if (amzSkipPreview && currentStream === 'ap') {
+    view.webContents.executeJavaScript(`${amzPrevSkipClick.toString()}`).catch((err) => { console.error(err) })
+    view.webContents.executeJavaScript('try { let obsAmzPreview = null } catch(err) { console.log(err) }')
+      .then(() => view.webContents.executeJavaScript(`(${amzPreviewSkipMut.toString()})()`))
+      .then(() => view.webContents.executeJavaScript(`(${amzPreviewSkipObs.toString()})()`))
+      .catch((err) => { console.error(err) })
+  } else if (currentStream === 'ap') {
+    view.webContents.executeJavaScript(`(${amzPreviewSkipDis.toString()})()`).catch((err) => { console.error(err) })
+  }
+}
+
+// Prime preview skip click
+function amzPrevSkipClick() {
+  try {
+    console.log('prev skip')
+    if (document.querySelector('.fu4rd6c') != undefined) {
+      document.querySelector('.fu4rd6c').click()
+    }
+  } catch(err) { console.log(err) }
+}
+
+// Prime preview skip mutation observer
+function amzPreviewSkipMut() {
+  try {
+    console.log('prev mut')
+    obsAmzPreview = new MutationObserver(function(ml) {
+      for(const mut of ml) {
+        if (mut.type === 'childList' && mut.addedNodes && mut.addedNodes.length > 0) {
+          mut.addedNodes.forEach(element => {
+            if (element.classList && element.classList.contains('fu4rd6c')) {
+              amzPrevSkipClick()
+            }
+          })
+        }
+      }
+    })
+  } catch(err) { console.log(err) }
+}
+
+// Prime preview skip observer invocation
+function amzPreviewSkipObs() {
+  try {
+    console.log('prev obs')
+    obsAmzPreview.observe(document.querySelector('.webPlayerUIContainer'), { childList: true, subtree: true })
+  } catch (err) { console.log(err) }
+}
+
+// Prime preview skip observer disconnection
+function amzPreviewSkipDis() {
+  try {
+    console.log('prev dis')
+    if (typeof obsAmzPreview !== 'undefined') {
+      obsAmzPreview.disconnect()
+    }
+  } catch (err) { console.log(err) }
+}
+
+// Prime observer dummy declaration (this is not actually used as it is sent over as a string!)
+let obsAmzRecap = null
+
+// Skip/close Prime episode recap & intros
+function amzRecapSkip() {
+  if (amzSkipRecap && currentStream === 'ap') {
+    view.webContents.executeJavaScript(`${amzRecapSkipClick.toString()}`).catch((err) => { console.error(err) })
+    view.webContents.executeJavaScript('try { let obsAmzRecap = null } catch(err) { console.log(err) }')
+      .then(() => view.webContents.executeJavaScript(`(${amzRecapSkipMut.toString()})()`))
+      .then(() => view.webContents.executeJavaScript(`(${amzRecapSkipObs.toString()})()`))
+      .catch((err) => { console.error(err) })
+  } else if (currentStream === 'ap') {
+    view.webContents.executeJavaScript(`(${amzRecapSkipDis.toString()})()`).catch((err) => { console.error(err) })
+  }
+}
+
+// Prime recap skip click
+function amzRecapSkipClick() {
+  try {
+    console.log('recap skip')
+    if (document.querySelector('.atvwebplayersdk-skipelement-button') != undefined) {
+      document.querySelector('.atvwebplayersdk-skipelement-button').click()
+    }
+  } catch(err) { console.log(err) }
+}
+
+// Prime recap skip mutation observer
+function amzRecapSkipMut() {
+  try {
+    console.log('recap mut')
+    obsAmzRecap = new MutationObserver(function(ml) {
+      for(const mut of ml) {
+        if (mut.type === 'childList' && mut.addedNodes && mut.addedNodes.length > 0) {
+          mut.addedNodes.forEach(element => {
+            if (element.classList && element.classList.contains('atvwebplayersdk-skipelement-button')) {
+              amzRecapSkipClick()
+            }
+          })
+        }
+      }
+    })
+  } catch(err) { console.log(err) }
+}
+
+// Prime recap skip observer invocation
+function amzRecapSkipObs() {
+  try {
+    console.log('recap obs')
+    obsAmzRecap.observe(document.querySelector('.webPlayerUIContainer'), { childList: true, subtree: true })
+  } catch (err) { console.log(err) }
+}
+
+// Prime recap skip observer disconnection
+function amzRecapSkipDis() {
+  try {
+    console.log('recap dis')
+    if (typeof obsAmzRecap !== 'undefined') {
+      obsAmzRecap.disconnect()
+    }
+  } catch (err) { console.log(err) }
+}
+
+//#endregion
+
+//#region Netflix scripts
+
+// Netflix observer dummy declaration (this is not actually used as it is sent over as a string!)
+let obsNfSkip = null
+
+// Skip/close Netlfix episode recap & intros
+function nfRecapSkip() {
+  if (nfSkipRecap && currentStream === 'nf') {
+    view.webContents.executeJavaScript(`${nfRecapSkipClick.toString()}`).catch((err) => { console.error(err) })
+    view.webContents.executeJavaScript('try { let obsNfSkip = null } catch(err) { console.log(err) }')
+      .then(() => view.webContents.executeJavaScript(`(${nfRecapSkipMut.toString()})()`))
+      .then(() => view.webContents.executeJavaScript(`(${nfRecapSkipObs.toString()})()`))
+      .catch((err) => { console.error(err) })
+  } else if (currentStream === 'nf') {
+    view.webContents.executeJavaScript(`(${nfRecapSkipDis.toString()})()`).catch((err) => { console.error(err) })
+  }
+}
+
+// Netflix recap skip click
+function nfRecapSkipClick() {
+  try {
+    console.log('recap skip')
+    if (document.querySelector('.skip-credits') != undefined) {
+      document.querySelector('.skip-credits > a').click()
+    }
+  } catch(err) { console.log(err) }
+}
+
+// Netflix recap skip mutation observer
+function nfRecapSkipMut() {
+  try {
+    console.log('recap mut')
+    obsNfSkip = new MutationObserver(function(ml) {
+      for(const mut of ml) {
+        if (mut.type === 'childList' && mut.addedNodes && mut.addedNodes.length > 0) {
+          mut.addedNodes.forEach(element => {
+            if (element.classList && element.classList.contains('skip-credits')) {
+              nfEpisodeNextClick()
+            }
+          })
+        }
+      }
+    })
+  } catch(err) { console.log(err) }
+}
+
+// Netflix recap skip observer invocation
+function nfRecapSkipObs() {
+  try {
+    console.log('recap obs')
+    obsNfSkip.observe(document.querySelector('#appMountPoint'), { childList: true, subtree: true })
+  } catch (err) { console.log(err) }
+}
+
+// Netflix recap skip observer disconnection
+function nfRecapSkipDis() {
+  try {
+    console.log('recap dis')
+    if (typeof obsNfSkip !== 'undefined') {
+      obsNfSkip.disconnect()
+    }
+  } catch (err) { console.log('dis ' + err) }
+}
+
+// Netflix observer dummy declaration (this is not actually used as it is sent over as a string!)
+let obsNfNext = null
+
+// Automatically start next Netlfix episode
+function nfEpisodeNext() {
+  if (nfNextEpisode && currentStream === 'nf') {
+    view.webContents.executeJavaScript(`${nfEpisodeNextClick.toString()}`).catch((err) => { console.error(err) })
+    view.webContents.executeJavaScript('try { let obsNfNext = null } catch(err) { console.log(err) }')
+      .then(() => view.webContents.executeJavaScript(`(${nfEpisodeNextMut.toString()})()`))
+      .then(() => view.webContents.executeJavaScript(`(${nfEpisodeNextObs.toString()})()`))
+      .catch((err) => { console.error(err) })
+  } else if (currentStream === 'nf') {
+    view.webContents.executeJavaScript(`(${nfEpisodeNextDis.toString()})()`).catch((err) => { console.error(err) })
+  }
+}
+
+// Netflix next episode click
+function nfEpisodeNextClick() {
+  try {
+    console.log('next episode')
+    if (document.querySelector('[data-uia = "next-episode-seamless-button-draining"]') != undefined) {
+      document.querySelector('[data-uia = "next-episode-seamless-button-draining"]').click()
+    }
+    if (document.querySelector('[data-uia = "next-episode-seamless-button"]') != undefined) {
+      document.querySelector('[data-uia = "next-episode-seamless-button"]').click()
+    }
+  } catch(err) { console.log(err) }
+}
+
+// Netflix next episode mutation observer
+function nfEpisodeNextMut() {
+  try {
+    console.log('next mut')
+    obsNfNext = new MutationObserver(function(ml) {
+      for(const mut of ml) {
+        if (mut.type === 'childList' && mut.addedNodes && mut.addedNodes.length > 0) {
+          mut.addedNodes.forEach(element => {
+            if (element.classList && element.classList.contains('main-hitzone-element-container')) {
+              nfEpisodeNextClick()
+            }
+          })
+        }
+      }
+    })
+  } catch(err) { console.log(err) }
+}
+
+// Netflix next episode observer invocation
+function nfEpisodeNextObs() {
+  try {
+    console.log('next obs')
+    obsNfNext.observe(document.querySelector('#appMountPoint'), { childList: true, subtree: true })
+  } catch (err) { console.log(err) }
+}
+
+// Netflix next episode observer disconnection
+function nfEpisodeNextDis() {
+  try {
+    console.log('next dis')
+    if (typeof obsNfNext !== 'undefined') {
+      obsNfNext.disconnect()
+    }
+  } catch (err) { console.log(err) }
+}
+
+//#endregion
 
 // Widvine DRM setup
 app.commandLine.appendSwitch('no-verify-widevine-cdm')
