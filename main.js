@@ -382,51 +382,69 @@ function setStreamId(url) {
   return currentStream
 }
 
-// YouTube observer dummy declaration
-let obsAds = null
+// YouTube observer dummy declaration (this is not actually used as it is sent over as a string!)
+let obsYtAds = null
 
 // Skip/close YouTube ads
 function ytAdsSkip() {
   if (ytSkipAds && currentStream === 'yt') {
-    view.webContents.executeJavaScript(`(${ytAdSkipClick.toString()})()`)
-    view.webContents.executeJavaScript('try { let obsAds = null } catch(err) { console.log(err) }')
-    view.webContents.executeJavaScript(`(${ytAddSkipMut.toString()})()`)
-    view.webContents.executeJavaScript(`(${ytAddSkipObs.toString()})()`)
+    view.webContents.executeJavaScript(`${ytAdOverlayClick.toString()}`).catch((err) => { console.error(err) })
+    view.webContents.executeJavaScript(`${ytPromoCloseClick.toString()}`).catch((err) => { console.error(err) })
+    view.webContents.executeJavaScript(`${ytAdSkipClick.toString()}`).catch((err) => { console.error(err) })
+      .then(() => ('ytAdSkipClick()').catch((err) => { console.error(err) }))
+    view.webContents.executeJavaScript('try { let obsYtAds = null } catch(err) { console.log(err) }')
+      .then(() => view.webContents.executeJavaScript(`(${ytAdSkipMut.toString()})()`))
+      .then(() => view.webContents.executeJavaScript(`(${ytAdSkipObs.toString()})()`))
+      .catch((err) => { console.error(err) })
   } else if (currentStream === 'yt') {
-    view.webContents.executeJavaScript(`(${ytAddSkipDis.toString()})()`)
+    view.webContents.executeJavaScript(`(${ytAdSkipDis.toString()})()`).catch((err) => { console.error(err) })
   }
 }
 
 // YouTube ad skip click
 function ytAdSkipClick() {
   try {
-    document.querySelector('.ytp-ad-skip-button').click()
+    console.log('ad skip')
+    if (document.querySelector('.ytp-ad-skip-button') != undefined) {
+      document.querySelector('.ytp-ad-skip-button').click()
+    }
+  } catch(err) { console.log(err) }
+}
+
+// YouTube overlay close click
+function ytAdOverlayClick() {
+  try {
+    console.log('overlay close')
+    if (document.querySelector('.ytp-ad-overlay-close-button') != undefined) {
+      document.querySelector('.ytp-ad-overlay-close-button').click()
+    }
+  } catch(err) { console.log(err) }
+}
+
+// YouTube promo close click
+function ytPromoCloseClick() {
+  try {
+    console.log('promo skip')
+    if (document.querySelectorAll('.dismiss-button').length > 0) {
+      document.querySelectorAll('.dismiss-button').forEach(input => { input.click() })
+    }
   } catch(err) { console.log(err) }
 }
 
 // YouTube ad skip mutation observer
-function ytAddSkipMut() {
+function ytAdSkipMut() {
   try {
-    console.log('obsAds')
-    obsAds = new MutationObserver(function(ml) {
+    console.log('mut ads')
+    obsYtAds = new MutationObserver(function(ml) {
       for(const mut of ml) {
         if (mut.type === 'childList' && mut.target.classList.contains('ytp-ad-text')) {
-          try {
-            document.querySelector('.ytp-ad-skip-button').click()
-            console.log('ad skip')
-          } catch(err) { console.log(err) }
+          ytAdSkipClick()
         }
         if (mut.type === 'childList' && mut.target.classList.contains('ytp-ad-module')) {
-          try {
-            document.querySelector('.ytp-ad-overlay-close-button').click()
-            console.log('overlay close')
-          } catch(err) { console.log(err) }
+          ytAdOverlayClick()
         }
         if (mut.type === 'childList' && mut.target.classList.contains('ytd-mealbar-promo-renderer')) {
-          try {
-            document.querySelectorAll('#dismiss-button').forEach(input => { input.click() })
-            console.log('promo skip')
-          } catch(err) { console.log(err) }
+          ytPromoCloseClick()
         }
       }
     })
@@ -434,56 +452,79 @@ function ytAddSkipMut() {
 }
 
 // YouTube ad skip observer invocation
-function ytAddSkipObs() {
+function ytAdSkipObs() {
   try {
-    obsAds.observe(document.querySelector('ytd-app'), { childList: true, subtree: true })
+    console.log('obs ads')
+    obsYtAds.observe(document.querySelector('ytd-app'), { childList: true, subtree: true })
   } catch (err) { console.log(err) }
 }
 
 // YouTube ad skip observer disconnection
-function ytAddSkipDis() {
+function ytAdSkipDis() {
   try {
-    obsAds.disconnect()
+    console.log('dis ads')
+    obsYtAds.disconnect()
   } catch (err) { console.log(err) }
 }
 
-// EXPERIMENTAL
+// Prime observer dummy declaration (this is not actually used as it is sent over as a string!)
+let obsAmzPreview = null
+
 // Skip/close Prime preivews
 function amzPreviewSkip() {
   if (amzSkipPreview && currentStream === 'ap') {
-    try {
-      view.webContents.executeJavaScript(`
-        const obsPreview = new MutationObserver(function(ml) {
-          for(const mut of ml) {
-            if (mut.type === 'childList') {
-              try {
-                if (mut.addedNodes && mut.addedNodes.length > 0) {
-                  mut.addedNodes.forEach(element => {
-                    if (element.classList && element.classList.contains('fu4rd6c')) {
-                      console.log('preview skip')
-                      document.querySelector('.fu4rd6c').click()
-                    }
-                  })
-                }
-              } catch(err) { console.log(err) }
-            }
-          }
-        })
-      `)
-      view.webContents.executeJavaScript(`obsPreview.observe(document.querySelector('.webPlayerUIContainer'), { childList: true, subtree: true})`)
-    } catch(err) {
-      console.log(err)
-    }
+    view.webContents.executeJavaScript(`${amzPrevSkipClick.toString()}`).catch((err) => { console.error(err) })
+    view.webContents.executeJavaScript('try { let obsAmzPreview = null } catch(err) { console.log(err) }')
+      .then(() => view.webContents.executeJavaScript(`(${amzPreviewSkipMut.toString()})()`))
+      .then(() => view.webContents.executeJavaScript(`(${amzPreviewSkipObs.toString()})()`))
+      .catch((err) => { console.error(err) })
   } else if (currentStream === 'ap') {
-    try {
-      view.webContents.executeJavaScript(`
-        obsPreview.disconnect()
-        console.log('discon amzprevskip')
-      `)
-    } catch(err) {
-      console.log(err)
-    }
+    view.webContents.executeJavaScript(`(${amzPreviewSkipDis.toString()})()`).catch((err) => { console.error(err) })
   }
+}
+
+// Prime preview skip click
+function amzPrevSkipClick() {
+  try {
+    console.log('prev skip')
+    if (document.querySelector('.fu4rd6c') != undefined) {
+      document.querySelector('.fu4rd6c').click()
+    }
+  } catch(err) { console.log(err) }
+}
+
+// Prime preview skip mutation observer
+function amzPreviewSkipMut() {
+  try {
+    console.log('prev mut')
+    obsAmzPreview = new MutationObserver(function(ml) {
+      for(const mut of ml) {
+        if (mut.type === 'childList' && mut.addedNodes && mut.addedNodes.length > 0) {
+          mut.addedNodes.forEach(element => {
+            if (element.classList && element.classList.contains('fu4rd6c')) {
+              amzPrevSkipClick()
+            }
+          })
+        }
+      }
+    })
+  } catch(err) { console.log(err) }
+}
+
+// Prime preview skip observer invocation
+function amzPreviewSkipObs() {
+  try {
+    console.log('prev obs')
+    obsAmzPreview.observe(document.querySelector('.webPlayerUIContainer'), { childList: true, subtree: true })
+  } catch (err) { console.log(err) }
+}
+
+// Prime preview skip observer disconnection
+function amzPreviewSkipDis() {
+  try {
+    console.log('prev dis')
+    obsAmzPreview.disconnect()
+  } catch (err) { console.log(err) }
 }
 
 // EXPERIMENTAL
