@@ -314,6 +314,7 @@ function streamChange(stream) {
 function streamLoaded() {
   ytAdsSkip()
   amzGetUrl()
+  setTimeout(amzUpgradeDismiss, 3000)
   setTimeout(amzPreviewSkip, 3000)
   setTimeout(amzRecapSkip, 3000)
   nfRecapSkip()
@@ -596,6 +597,56 @@ function amzGetUrl() {
       `)
     } catch(err) { console.log(err) }
   }
+}
+
+// Prime observer dummy declaration (this is not actually used as it is sent over as a string!)
+let obsAmzUpgrade = null
+
+// Prime dismiss browser upgrade notification
+function amzUpgradeDismiss() {
+  if (currentStream === 'ap') {
+    view.webContents.executeJavaScript(`${amzUpgradeDismissClick.toString()}`).catch((err) => { console.error(err) })
+    view.webContents.executeJavaScript('try { let obsAmzUpgrade = null } catch(err) { console.log(err) }')
+      .then(() => view.webContents.executeJavaScript(`(${amzUpgradeDismissMut.toString()})()`))
+      .then(() => view.webContents.executeJavaScript(`(${amzUpgradeDismissObs.toString()})()`))
+      .catch((err) => { console.error(err) })
+  }
+}
+
+// Prime upgrade your browser dismiss click
+function amzUpgradeDismissClick() {
+  try {
+    console.log('upgrade dismiss')
+    if (document.querySelector('.f1dk4awg') != undefined) {
+      document.querySelector('.f1dk4awg').click()
+    }
+  } catch(err) { console.log(err) }
+}
+
+// Prime upgrade your browser dismiss mutation observer
+function amzUpgradeDismissMut() {
+  try {
+    console.log('upgrade mut')
+    obsAmzUpgrade = new MutationObserver(function(ml) {
+      for(const mut of ml) {
+        if (mut.type === 'childList' && mut.addedNodes && mut.addedNodes.length > 0) {
+          mut.addedNodes.forEach(element => {
+            if (element.classList && element.classList.contains('f1dk4awg')) {
+              amzUpgradeDismissClick()
+            }
+          })
+        }
+      }
+    })
+  } catch(err) { console.log(err) }
+}
+
+// Prime upgrade your browser dismiss observer invocation
+function amzUpgradeDismissObs() {
+  try {
+    console.log('upgrade obs')
+    obsAmzUpgrade.observe(document.querySelector('.webPlayerUIContainer'), { childList: true, subtree: true })
+  } catch (err) { console.log(err) }
 }
 
 // Prime observer dummy declaration (this is not actually used as it is sent over as a string!)
