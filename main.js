@@ -463,7 +463,7 @@ async function sendCurrentStream() {
 async function getCurrentUrl() {
   let url = view.webContents.getURL()
   if (currentStream === 'ap') {
-    url = await view.webContents.executeJavaScript(`try { sdAmzUrl } catch(err) { console.log('not yet') }`)
+    url = await view.webContents.executeJavaScript(`try { console.log('got url'); sdAmzUrl; } catch(err) { console.log('not yet') }`)
   }
   return url
 }
@@ -631,7 +631,7 @@ function amzUpgradeDismissMut() {
       for(const mut of ml) {
         if (mut.type === 'childList' && mut.addedNodes && mut.addedNodes.length > 0) {
           mut.addedNodes.forEach(element => {
-            if (element.classList && element.classList.contains('f1dk4awg')) {
+            if (element.classList && element.classList.contains('f1jhb4b3')) {
               amzUpgradeDismissClick()
             }
           })
