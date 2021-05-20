@@ -74,9 +74,7 @@ const createWindow = () => {
       y: 7
     },
     webPreferences: {
-      plugins: true,
       nodeIntegration: true,
-      enableRemoteModule: false,
       contextIsolation: false
     }
   })
@@ -95,7 +93,12 @@ const createWindow = () => {
   // win.webContents.openDevTools('detach')
 
   // Create main browserView
-  view = new BrowserView()
+  view = new BrowserView({
+    webPreferences: {
+      nodeIntegration: false,
+      contextIsolation: true
+    }
+  })
 
   // Show browserView when loaded
   view.webContents.on('did-finish-load', () => {
