@@ -154,6 +154,12 @@ function applyUpdateSettings() {
 
   // Skip Netflix recap skip
   ipcRenderer.send('set-nfepisodenext', settings.nfNextEpisode)
+
+  // Skip Hulu recap skip
+  ipcRenderer.send('set-hlrecapskip', settings.hlSkipRecap)
+
+  // Skip Hulu recap skip
+  ipcRenderer.send('set-hlepisodenext', settings.hlNextEpisode)
 }
 
 // Iterate through stored services and create buttons/menu entries
@@ -329,6 +335,8 @@ function getDefaultSettings() {
     amzSkipRecap: false,
     nfSkipRecap: false,
     nfNextEpisode: false,
+    hlSkipRecap: false,
+    hlNextEpisode: false,
     windowSizeLocation: {
       x: 0,
       y: 0,
@@ -349,7 +357,7 @@ function loadSettingsModal() {
   $('.facet-host').css('opacity', '0')
   $('.bookmark-host').css('opacity', '0')
   ipcRenderer.send('view-hide')
-  $('#collapse-general, #collapse-services').collapse('hide')
+  $('#collapse-general, #collapse-services, #collapse-service-specific').collapse('hide')
   $('#ontop-check').prop('checked', settings.onTop)
   $('#last-check').prop('checked', settings.openLast)
   $('#window-check').prop('checked', settings.saveWindow)
@@ -362,6 +370,8 @@ function loadSettingsModal() {
   $('#amz-recap-check').prop('checked', settings.amzSkipRecap)
   $('#nf-recap-check').prop('checked', settings.nfSkipRecap)
   $('#nf-next-check').prop('checked', settings.nfNextEpisode)
+  $('#hl-recap-check').prop('checked', settings.hlSkipRecap)
+  $('#hl-next-check').prop('checked', settings.hlNextEpisode)
   $('input[name=radio-theme]').prop('checked', false).parent('.btn').removeClass('active')
   $(`input[name=radio-theme][value=${settings.themeMode}]`).prop('checked', true).parent('.btn').addClass('active')
   $('#settings-services-available').empty()
@@ -403,6 +413,8 @@ function saveSettings() {
     amzSkipRecap: $('#amz-recap-check').is(':checked'),
     nfSkipRecap: $('#nf-recap-check').is(':checked'),
     nfNextEpisode: $('#nf-next-check').is(':checked'),
+    hlSkipRecap: $('#hl-recap-check').is(':checked'),
+    hlNextEpisode: $('#hl-next-check').is(':checked'),
     themeMode: $('#choose-theme input:radio:checked').val(),
     lastStream: settings.lastStream,
     windowSizeLocation: settings.windowSizeLocation

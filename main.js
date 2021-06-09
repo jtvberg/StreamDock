@@ -13,7 +13,8 @@ const updater = require('./updater')
 const baseHeaderSize = 22
 const baseMenuHeight = isLinux ? 25 : 57
 const baseAdjustWidth = isWindows ? 16 : 0
-const winAdjustWidth = isWindows ? 265 : 250
+const facetAdjustWidth = isWindows ? 265 : 250
+const bookmarkAdjustWidth = 230
 let headerSize = baseHeaderSize
 let winAdjustHeight = isMac ? headerSize : baseMenuHeight + headerSize
 let wb = { x: 0, y: 0, height: 0, width: 0 }
@@ -27,6 +28,8 @@ let amzSkipPreview = false
 let amzSkipRecap = false
 let nfSkipRecap = false
 let nfNextEpisode = false
+let hlSkipRecap = false
+let hlNextEpisode = false
 let showBookmarks = false
 let userAgent = ''
 let currentStream = ''
@@ -216,7 +219,10 @@ function setWinTrayTheme() {
 function pause() {
   switch (currentStream) {
     case 'at':
-      view.webContents.executeJavaScript(`(${amzPause.toString()})()`)
+      view.webContents.executeJavaScript(`(${atPause.toString()})()`)
+      break
+    case 'hl':
+      view.webContents.executeJavaScript(`(${hlPause.toString()})()`)
       break
     default:
       view.webContents.executeJavaScript(`(${defaultPause.toString()})()`)
@@ -225,9 +231,16 @@ function pause() {
 }
 
 // Amazon pause function
-function amzPause() {
+function atPause() {
   try {
     document.querySelector('apple-tv-plus-player').shadowRoot.querySelector('amp-video-player-internal').shadowRoot.querySelector('amp-video-player').shadowRoot.querySelector('video').pause()
+  } catch (err) { console.log(err) }
+}
+
+// Hulu pause function
+function hlPause() {
+  try {
+    document.querySelector('.PauseButton').click()
   } catch (err) { console.log(err) }
 }
 
@@ -243,10 +256,13 @@ function play() {
   if (!showBookmarks) {
     switch (currentStream) {
       case 'at':
-        view.webContents.executeJavaScript(`(${apPlay.toString()})()`)
+        view.webContents.executeJavaScript(`(${atPlay.toString()})()`)
         break
       case 'ap':
         view.webContents.executeJavaScript(`(${amzPlay.toString()})()`)
+        break
+      case 'hl':
+        view.webContents.executeJavaScript(`(${hlPlay.toString()})()`)
         break
       default:
         view.webContents.executeJavaScript(`(${defaultPlay.toString()})()`)
@@ -256,9 +272,16 @@ function play() {
 }
 
 // Apple play function
-function apPlay() {
+function atPlay() {
   try {
     document.querySelector('apple-tv-plus-player').shadowRoot.querySelector('amp-video-player-internal').shadowRoot.querySelector('amp-video-player').shadowRoot.querySelector('video').play()
+  } catch (err) { console.log(err) }
+}
+
+// Hulu play function
+function hlPlay() {
+  try {
+    document.querySelector('.PlayButton').click()
   } catch (err) { console.log(err) }
 }
 
@@ -292,8 +315,9 @@ function setView() {
 // Adjust view bounds to window
 function setViewBounds() {
   if (!showBookmarks && !showPrefs) {
+  // if (!showPrefs) {
     updateShowFacets()
-    let waw = showFacets ? winAdjustWidth : baseAdjustWidth
+    let waw = showFacets ? facetAdjustWidth : baseAdjustWidth
     view.setBounds({
       x: 0,
       y: headerSize,
@@ -323,6 +347,8 @@ function streamLoaded() {
   setTimeout(amzRecapSkip, 3000)
   nfRecapSkip()
   nfEpisodeNext()
+  setTimeout(hlRecapSkip, 3000)
+  setTimeout(hlEpisodeNext, 3000)
   enableFacets()
 }
 
@@ -426,6 +452,7 @@ function captureStream() {
   setTimeout(sendBookmark, 1000)
 }
 
+// TODO: Make docked on left of video
 // Toggle bookmarks page
 function toggleBookmarks() {
   if (showBookmarks) {
@@ -436,7 +463,8 @@ function toggleBookmarks() {
     isPlaying ? pause() : null
     showBookmarks = true
     win.webContents.send('show-bookmarks')
-    view.setBounds({ x: 0, y: 0, width: 0, height: 0 })
+    view.setBounds({ x: 0, y: 0, width: 0, height: 0})
+    // view.setBounds({ x: bookmarkAdjustWidth, y: baseHeaderSize, width: wb.width - bookmarkAdjustWidth, height: wb.height - baseHeaderSize })
   }
 }
 
@@ -548,7 +576,7 @@ function ytAdSkipClick() {
 // YouTube ad skip mutation observer
 function ytAdSkipMut() {
   try {
-    console.log('mut ads')
+    console.log('ads mut')
     obsYtAds = new MutationObserver(function(ml) {
       for(const mut of ml) {
         if (mut.type === 'childList' && mut.target.classList.contains('ytp-ad-text')) {
@@ -568,7 +596,7 @@ function ytAdSkipMut() {
 // YouTube ad skip observer invocation
 function ytAdSkipObs() {
   try {
-    console.log('obs ads')
+    console.log('ads obs')
     obsYtAds.observe(document.querySelector('ytd-app'), { childList: true, subtree: true })
   } catch (err) { console.log(err) }
 }
@@ -576,7 +604,7 @@ function ytAdSkipObs() {
 // YouTube ad skip observer disconnection
 function ytAdSkipDis() {
   try {
-    console.log('dis ads')
+    console.log('ads dis')
     if (typeof obsYtAds !== 'undefined') {
       obsYtAds.disconnect()
     }
@@ -910,6 +938,118 @@ function nfEpisodeNextDis() {
 
 //#endregion
 
+//#region Hulu scripts
+
+// Hulu observer dummy declaration (this is not actually used as it is sent over as a string!)
+let obsHlRecapSkip = null
+
+// Hulu recap & credits script injection
+function hlRecapSkip() {
+  if (hlSkipRecap && currentStream === 'hl') {
+    view.webContents.executeJavaScript(`${hlRecapSkipClick.toString()}`).catch((err) => { console.error(err) })
+    view.webContents.executeJavaScript('try { let obsHlRecapSkip = null } catch(err) { console.log(err) }')
+      .then(() => view.webContents.executeJavaScript(`(${hlRecapSkipMut.toString()})()`))
+      .then(() => view.webContents.executeJavaScript(`(${hlRecapSkipObs.toString()})()`))
+      .catch((err) => { console.error(err) })
+  } else if (currentStream === 'hl') {
+    view.webContents.executeJavaScript(`(${hlRecapSkipDis.toString()})()`).catch((err) => { console.error(err) })
+  }
+}
+
+// Hulu skip click
+function hlRecapSkipClick() {
+  try {
+    console.log('skip recap')
+    if (document.querySelector('.SkipButton__button') != undefined) {
+      document.querySelector('.SkipButton__button').click()
+    }
+  } catch(err) { console.log(err) }
+}
+
+// Hulu skip mutation observer
+function hlRecapSkipMut() {
+  try {
+    console.log('skip mut')
+    obsHlRecapSkip = new MutationObserver(function() {
+      hlRecapSkipClick()
+    })
+  } catch (err) { console.log(err) }
+}
+
+// Hulu skip observer invocation
+function hlRecapSkipObs() {
+  try {
+    console.log('skip obs')
+    obsHlRecapSkip.observe(document.querySelector('.SkipButton').parentElement, { attributes: true, attributeFilter: ['style'] })
+  } catch (err) { console.log(err) }
+}
+
+// Hulu skip observer disconnect
+function hlRecapSkipDis() {
+  try {
+    console.log('skip dis')
+    if (typeof obsHlRecapSkip !== 'undefined') {
+      obsHlRecapSkip.disconnect()
+    }
+  } catch (err) { console.log(err) }
+}
+
+// Hulu observer dummy declaration (this is not actually used as it is sent over as a string!)
+let obsHlNext = null
+
+// Automatically start next Hulu episode
+function hlEpisodeNext() {
+  if (hlNextEpisode && currentStream === 'hl') {
+    view.webContents.executeJavaScript(`${hlEpisodeNextClick.toString()}`).catch((err) => { console.error(err) })
+    view.webContents.executeJavaScript('try { let obsHlNext = null } catch(err) { console.log(err) }')
+      .then(() => view.webContents.executeJavaScript(`(${hlEpisodeNextMut.toString()})()`))
+      .then(() => view.webContents.executeJavaScript(`(${hlEpisodeNextObs.toString()})()`))
+      .catch((err) => { console.error(err) })
+  } else if (currentStream === 'hl') {
+    view.webContents.executeJavaScript(`(${hlEpisodeNextDis.toString()})()`).catch((err) => { console.error(err) })
+  }
+}
+
+// Hulu next episode click
+function hlEpisodeNextClick() {
+  try {
+    console.log('next episode')
+    if (document.querySelector('.EndCardButton').closest('.ControlsContainer__transition').style.visibility === 'visible') {
+      document.querySelector('.EndCardButton').click()
+    }
+  } catch(err) { console.log(err) }
+}
+
+// Hulu next episode mutation observer
+function hlEpisodeNextMut() {
+  try {
+    console.log('next mut')
+    obsHlNext = new MutationObserver(function() {
+      hlEpisodeNextClick()
+    })
+  } catch(err) { console.log(err) }
+}
+
+// Hulu next episode observer invocation
+function hlEpisodeNextObs() {
+  try {
+    console.log('next obs')
+    obsHlNext.observe(document.querySelector('.EndCardButton').closest('.ControlsContainer__transition'), { attributes: true, attributeFilter: ['visibility'] })
+  } catch (err) { console.log(err) }
+}
+
+// Hulu next episode observer disconnection
+function hlEpisodeNextDis() {
+  try {
+    console.log('next dis')
+    if (typeof obsHlNext !== 'undefined') {
+      obsHlNext.disconnect()
+    }
+  } catch (err) { console.log(err) }
+}
+
+//#endregion
+
 // Widvine DRM setup
 app.commandLine.appendSwitch('no-verify-widevine-cdm')
 const isOffline = false
@@ -1102,6 +1242,18 @@ ipcMain.on('set-nfrecapskip', (e, bool) => {
 ipcMain.on('set-nfepisodenext', (e, bool) => {
   nfNextEpisode = bool
   nfEpisodeNext()
+})
+
+// IPC channel to skip Hulu recap
+ipcMain.on('set-hlrecapskip', (e, bool) => {
+  hlSkipRecap = bool
+  hlRecapSkip()
+})
+
+// IPC channel to automatically start next episode on Hulu
+ipcMain.on('set-hlepisodenext', (e, bool) => {
+  hlNextEpisode = bool
+  hlEpisodeNext()
 })
 
 // IPC channel to hide/show header

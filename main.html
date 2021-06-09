@@ -114,6 +114,39 @@
                           <small class="text-muted">Check to auto-hide quick access and control buttons (Mac only)</small>
                         </div>
                       </div>
+                      <div class="form-group">
+                        <div style="margin-bottom: 3px;">Theme Mode</div>
+                        <div class="btn-group btn-group-toggle settings-shift" data-toggle="buttons" id="choose-theme">
+                          <label class="btn btn-secondary btn-sm">
+                              <input type="radio" name="radio-theme" value="system">System
+                          </label>
+                          <label class="btn btn-secondary btn-sm">
+                              <input type="radio" name="radio-theme" value="dark">Dark
+                          </label>
+                          <label class="btn btn-secondary btn-sm">
+                              <input type="radio" name="radio-theme" value="light">Light
+                          </label>
+                        </div>
+                        <div class="settings-shift">
+                          <small class="text-muted check-description">Select 'System' to use system-driven setting or other option to override</small>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="form-group">
+              <div class="panel-group" id="panel-service-specific">
+                <div class="panel">
+                  <div class="panel-header">
+                    <a class="collapsed" data-toggle="collapse" data-target="#collapse-service-specific">
+                      <i class="fa fa-chevron-down"></i>
+                      Service Specific Settings
+                    </a>
+                  </div>
+                  <div class="panel-body">
+                    <div id="collapse-service-specific" class="collapse settings-group" data-parent="#panel-service-specific">
                       <div class="custom-control custom-checkbox">
                         <input type="checkbox" class="custom-control-input settings-check" id="yt-skip-check">
                         <label class="custom-control-label" for="yt-skip-check">Skip or Dismiss Ads (YouTube)</label>
@@ -149,21 +182,18 @@
                           <small class="text-muted">Check to automatically start the next episode on Netflix (no delay)</small>
                         </div>
                       </div>
-                      <div class="form-group">
-                        <div style="margin-bottom: 3px;">Theme Mode</div>
-                        <div class="btn-group btn-group-toggle settings-shift" data-toggle="buttons" id="choose-theme">
-                          <label class="btn btn-secondary btn-sm">
-                              <input type="radio" name="radio-theme" value="system">System
-                          </label>
-                          <label class="btn btn-secondary btn-sm">
-                              <input type="radio" name="radio-theme" value="dark">Dark
-                          </label>
-                          <label class="btn btn-secondary btn-sm">
-                              <input type="radio" name="radio-theme" value="light">Light
-                          </label>
+                      <div class="custom-control custom-checkbox">
+                        <input type="checkbox" class="custom-control-input settings-check" id="hl-recap-check">
+                        <label class="custom-control-label" for="hl-recap-check"">Skip Episode Recap (Hulu)</label>
+                        <div class="helper-text">
+                          <small class="text-muted">Check to automatically skip episode recaps and intros on Hulu</small>
                         </div>
-                        <div class="settings-shift">
-                          <small class="text-muted check-description">Select 'System' to use system-driven setting or other option to override</small>
+                      </div>
+                      <div class="custom-control custom-checkbox">
+                        <input type="checkbox" class="custom-control-input settings-check" id="hl-next-check">
+                        <label class="custom-control-label" for="hl-next-check"">Binge Mode (Hulu)</label>
+                        <div class="helper-text">
+                          <small class="text-muted">Check to automatically start the next episode on Hulu (no delay)</small>
                         </div>
                       </div>
                     </div>
