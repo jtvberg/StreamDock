@@ -996,14 +996,20 @@ function hlRecapSkipDis() {
 
 // Hulu observer dummy declaration (this is not actually used as it is sent over as a string!)
 let obsHlNext = null
+let obsHlNextImp = null
 
 // Automatically start next Hulu episode
 function hlEpisodeNext() {
   if (hlNextEpisode && currentStream === 'hl') {
+    view.webContents.executeJavaScript('let obsHlNextBool = true')
     view.webContents.executeJavaScript(`${hlEpisodeNextClick.toString()}`).catch((err) => { console.error(err) })
     view.webContents.executeJavaScript('try { let obsHlNext = null } catch(err) { console.log(err) }')
       .then(() => view.webContents.executeJavaScript(`(${hlEpisodeNextMut.toString()})()`))
-      .then(() => view.webContents.executeJavaScript(`(${hlEpisodeNextObs.toString()})()`))
+      .then(() => view.webContents.executeJavaScript(`${hlEpisodeNextObs.toString()}`))
+      .catch((err) => { console.error(err) })
+    view.webContents.executeJavaScript('try { let obsHlNextImp = null } catch(err) { console.log(err) }')
+      .then(() => view.webContents.executeJavaScript(`(${hlEpisodeNextImpMut.toString()})()`))
+      .then(() => view.webContents.executeJavaScript(`(${hlEpisodeNextImpObs.toString()})()`))
       .catch((err) => { console.error(err) })
   } else if (currentStream === 'hl') {
     view.webContents.executeJavaScript(`(${hlEpisodeNextDis.toString()})()`).catch((err) => { console.error(err) })
@@ -1020,6 +1026,32 @@ function hlEpisodeNextClick() {
   } catch(err) { console.log(err) }
 }
 
+// Hulu next episode implementation mutation observer
+function hlEpisodeNextImpMut() {
+  try {
+    console.log('imp mut')
+    obsHlNextImp = new MutationObserver(function(ml) {
+      for(const mut of ml) {
+        if (mut.type === 'childList' && mut.addedNodes && mut.addedNodes.length > 0) {
+          mut.addedNodes.forEach(element => {
+            if (element.classList && element.classList.contains('PlayerMetadata')) {
+              setTimeout(hlEpisodeNextObs, 3000)
+            }
+          })
+        }
+      }
+    })
+  } catch(err) { console.log(err) }
+}
+
+// Hulu next episode implementation observer invocation
+function hlEpisodeNextImpObs() {
+  try {
+    console.log('imp obs')
+    obsHlNextImp.observe(document.querySelector('.ControlsContainer'), { childList: true, subtree: true })
+  } catch (err) { console.log(err) }
+}
+
 // Hulu next episode mutation observer
 function hlEpisodeNextMut() {
   try {
@@ -1030,11 +1062,17 @@ function hlEpisodeNextMut() {
   } catch(err) { console.log(err) }
 }
 
+// Hulu bool dummy declaration
+let obsHlNextBool = true
+
 // Hulu next episode observer invocation
 function hlEpisodeNextObs() {
   try {
-    console.log('next obs')
-    obsHlNext.observe(document.querySelector('.EndCardButton').closest('.ControlsContainer__transition'), { attributes: true, attributeFilter: ['visibility'] })
+    if (obsHlNextBool) {
+      console.log('next obs')
+      obsHlNext.observe(document.querySelector('.EndCardButton').closest('.ControlsContainer__transition'), { attributes: true })
+      obsHlNextBool = false
+    }
   } catch (err) { console.log(err) }
 }
 

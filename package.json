@@ -1,6 +1,6 @@
 {
   "name": "StreamDock",
-  "version": "0.5.2",
+  "version": "0.5.3",
   "description": "Streaming service viewer",
   "main": "main.js",
   "scripts": {
@@ -22,11 +22,11 @@
   "author": "jtvberg <streamdockapp@gmail.com> (https://github.com/jtvberg/StreamDock)",
   "license": "CC0-1.0",
   "devDependencies": {
-    "electron": "github:castlabs/electron-releases#v12.0.10-wvvmp",
-    "electron-builder": "^22.11.5",
+    "electron": "github:castlabs/electron-releases#v12.0.14-wvvmp",
+    "electron-builder": "^22.11.7",
     "electron-notarize": "^1.0.0",
     "electron-reload": "^1.5.0",
-    "eslint": "^7.26.0",
+    "eslint": "^7.30.0",
     "eslint-plugin-import": "^2.23.2",
     "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-promise": "^5.1.0"
