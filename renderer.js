@@ -163,6 +163,18 @@ function applyUpdateSettings() {
 
   // Skip Hulu next episode
   ipcRenderer.send('set-hlepisodenext', settings.hlNextEpisode)
+
+  // Skip Disney recap skip
+  ipcRenderer.send('set-dprecapskip', settings.dpSkipRecap)
+
+  // Skip Disney next episode
+  ipcRenderer.send('set-dpepisodenext', settings.dpNextEpisode)
+
+  // Skip HBO recap skip
+  ipcRenderer.send('set-hmrecapskip', settings.hmSkipRecap)
+
+  // Skip HBO next episode
+  ipcRenderer.send('set-hmepisodenext', settings.hmNextEpisode)
 }
 
 // Iterate through stored services and create buttons/menu entries
@@ -341,6 +353,10 @@ function getDefaultSettings() {
     nfNextEpisode: false,
     hlSkipRecap: false,
     hlNextEpisode: false,
+    disSkipRecap: false,
+    disNextEpisode: false,
+    hmSkipRecap: false,
+    hmNextEpisode: false,
     windowSizeLocation: {
       x: 0,
       y: 0,
@@ -377,6 +393,10 @@ function loadSettingsModal() {
   $('#nf-next-check').prop('checked', settings.nfNextEpisode)
   $('#hl-recap-check').prop('checked', settings.hlSkipRecap)
   $('#hl-next-check').prop('checked', settings.hlNextEpisode)
+  $('#dis-recap-check').prop('checked', settings.disSkipRecap)
+  $('#dis-next-check').prop('checked', settings.disNextEpisode)
+  $('#hm-recap-check').prop('checked', settings.hmSkipRecap)
+  $('#hm-next-check').prop('checked', settings.hmNextEpisode)
   $('input[name=radio-theme]').prop('checked', false).parent('.btn').removeClass('active')
   $(`input[name=radio-theme][value=${settings.themeMode}]`).prop('checked', true).parent('.btn').addClass('active')
   $('#settings-services-available').empty()
@@ -421,6 +441,10 @@ function saveSettings() {
     nfNextEpisode: $('#nf-next-check').is(':checked'),
     hlSkipRecap: $('#hl-recap-check').is(':checked'),
     hlNextEpisode: $('#hl-next-check').is(':checked'),
+    disSkipRecap: $('#dis-recap-check').is(':checked'),
+    disNextEpisode: $('#dis-next-check').is(':checked'),
+    hmSkipRecap: $('#hm-recap-check').is(':checked'),
+    hmNextEpisode: $('#hm-next-check').is(':checked'),
     themeMode: $('#choose-theme input:radio:checked').val(),
     lastStream: settings.lastStream,
     windowSizeLocation: settings.windowSizeLocation
@@ -461,6 +485,10 @@ function loadDefaultSettings() {
   $('#nf-next-check').prop('checked', defaultSettings.nfNextEpisode)
   $('#hl-recap-check').prop('checked', defaultSettings.hlSkipRecap)
   $('#hl-next-check').prop('checked', defaultSettings.hlNextEpisode)
+  $('#dis-recap-check').prop('checked', defaultSettings.disSkipRecap)
+  $('#dis-next-check').prop('checked', defaultSettings.disNextEpisode)
+  $('#hm-recap-check').prop('checked', defaultSettings.hmSkipRecap)
+  $('#hm-next-check').prop('checked', defaultSettings.hmNextEpisode)
   // TODO: this should come from servuce defaults not all 'true'
   $('.serv-check').prop('checked', true)
   $('.serv-color-input').each(function () {
