@@ -14,7 +14,7 @@ const baseHeaderSize = 22
 const baseMenuHeight = isLinux ? 25 : 57
 const baseAdjustWidth = isWindows ? 16 : 0
 const facetAdjustWidth = isWindows ? 265 : 250
-const bookmarkAdjustWidth = 230
+// const bookmarkAdjustWidth = 230
 let headerSize = baseHeaderSize
 let winAdjustHeight = isMac ? headerSize : baseMenuHeight + headerSize
 let wb = { x: 0, y: 0, height: 0, width: 0 }
@@ -26,6 +26,7 @@ let showPrefs = false
 let ytSkipAds = false
 let amzSkipPreview = false
 let amzSkipRecap = false
+let amzNextEpisode = false
 let nfSkipRecap = false
 let nfNextEpisode = false
 let hlSkipRecap = false
@@ -345,6 +346,7 @@ function streamLoaded() {
   setTimeout(amzUpgradeDismiss, 3000)
   setTimeout(amzPreviewSkip, 3000)
   setTimeout(amzRecapSkip, 3000)
+  setTimeout(amzEpisodeNext, 3000)
   nfRecapSkip()
   nfEpisodeNext()
   setTimeout(hlRecapSkip, 3000)
@@ -577,7 +579,7 @@ function ytAdSkipClick() {
 function ytAdSkipMut() {
   try {
     console.log('ads mut')
-    obsYtAds = new MutationObserver(function(ml) {
+    obsYtAds = new MutationObserver((ml) => {
       for(const mut of ml) {
         if (mut.type === 'childList' && mut.target.classList.contains('ytp-ad-text')) {
           ytAdSkipClick()
@@ -623,8 +625,8 @@ function amzGetUrl() {
         console.log('getUrl')
         let sdAmzUrl = '${view.webContents.getURL()}'
         try {
-            document.querySelectorAll('.tst-title-card').forEach(function(tile) { tile.dispatchEvent(new MouseEvent('mouseover', { 'bubbles': true })) })
-            document.querySelectorAll('.tst-play-button').forEach(function(btn) { btn.addEventListener('click', function() { sdAmzUrl = this.href }) })
+            document.querySelectorAll('.tst-title-card').forEach(function (tile) { tile.dispatchEvent(new MouseEvent('mouseover', { 'bubbles': true })) })
+            document.querySelectorAll('.tst-play-button').forEach(function (btn) { btn.addEventListener('click', function () { sdAmzUrl = this.href }) })
           } catch(err) { console.log(err) }
       `)
     } catch(err) { console.log(err) }
@@ -659,7 +661,7 @@ function amzUpgradeDismissClick() {
 function amzUpgradeDismissMut() {
   try {
     console.log('upgrade mut')
-    obsAmzUpgrade = new MutationObserver(function(ml) {
+    obsAmzUpgrade = new MutationObserver((ml) => {
       for(const mut of ml) {
         if (mut.type === 'childList' && mut.addedNodes && mut.addedNodes.length > 0) {
           mut.addedNodes.forEach(element => {
@@ -711,7 +713,7 @@ function amzPrevSkipClick() {
 function amzPreviewSkipMut() {
   try {
     console.log('prev mut')
-    obsAmzPreview = new MutationObserver(function(ml) {
+    obsAmzPreview = new MutationObserver((ml) => {
       for(const mut of ml) {
         if (mut.type === 'childList' && mut.addedNodes && mut.addedNodes.length > 0) {
           mut.addedNodes.forEach(element => {
@@ -773,7 +775,7 @@ function amzRecapSkipClick() {
 function amzRecapSkipMut() {
   try {
     console.log('recap mut')
-    obsAmzRecap = new MutationObserver(function(ml) {
+    obsAmzRecap = new MutationObserver((ml) => {
       for(const mut of ml) {
         if (mut.type === 'childList' && mut.addedNodes && mut.addedNodes.length > 0) {
           mut.addedNodes.forEach(element => {
@@ -801,6 +803,60 @@ function amzRecapSkipDis() {
     console.log('recap dis')
     if (typeof obsAmzRecap !== 'undefined') {
       obsAmzRecap.disconnect()
+    }
+  } catch (err) { console.log(err) }
+}
+
+// Prime observer dummy declaration (this is not actually used as it is sent over as a string!)
+let obsAmzNext = null
+
+// Automatically start next Prime episode
+function amzEpisodeNext() {
+  if (amzNextEpisode && currentStream === 'ap') {
+    view.webContents.executeJavaScript(`${amzEpisodeNextClick.toString()}`).catch((err) => { console.error(err) })
+    view.webContents.executeJavaScript('try { let obsAmzNext = null } catch(err) { console.log(err) }')
+      .then(() => view.webContents.executeJavaScript(`(${amzEpisodeNextMut.toString()})()`))
+      .then(() => view.webContents.executeJavaScript(`(${amzEpisodeNextObs.toString()})()`))
+      .catch((err) => { console.error(err) })
+  } else if (currentStream === 'ap') {
+    view.webContents.executeJavaScript(`(${amzEpisodeNextDis.toString()})()`).catch((err) => { console.error(err) })
+  }
+}
+
+// Prime next episode click
+function amzEpisodeNextClick() {
+  try {
+    console.log('next episode')
+    if (document.querySelector('.atvwebplayersdk-nextupcard-button') != undefined) {
+      document.querySelector('.atvwebplayersdk-nextupcard-button').click()
+    }
+  } catch(err) { console.log(err) }
+}
+
+// Prime next episode mutation observer
+function amzEpisodeNextMut() {
+  try {
+    console.log('next mut')
+    obsAmzNext = new MutationObserver(() => {
+      amzEpisodeNextClick()
+    })
+  } catch(err) { console.log(err) }
+}
+
+// Prime next episode observer invocation
+function amzEpisodeNextObs() {
+  try {
+    console.log('next obs')
+    obsAmzNext.observe(document.querySelector('.atvwebplayersdk-nextupcard-wrapper'), { childList: true, subtree: true })
+  } catch (err) { console.log(err) }
+}
+
+// Prime next episode observer disconnection
+function amzEpisodeNextDis() {
+  try {
+    console.log('next dis')
+    if (typeof obsAmzNext !== 'undefined') {
+      obsAmzNext.disconnect()
     }
   } catch (err) { console.log(err) }
 }
@@ -839,7 +895,7 @@ function nfRecapSkipClick() {
 function nfRecapSkipMut() {
   try {
     console.log('recap mut')
-    obsNfSkip = new MutationObserver(function(ml) {
+    obsNfSkip = new MutationObserver((ml) => {
       for(const mut of ml) {
         if (mut.type === 'childList' && mut.addedNodes && mut.addedNodes.length > 0) {
           mut.addedNodes.forEach(element => {
@@ -904,7 +960,7 @@ function nfEpisodeNextClick() {
 function nfEpisodeNextMut() {
   try {
     console.log('next mut')
-    obsNfNext = new MutationObserver(function(ml) {
+    obsNfNext = new MutationObserver((ml) => {
       for(const mut of ml) {
         if (mut.type === 'childList' && mut.addedNodes && mut.addedNodes.length > 0) {
           mut.addedNodes.forEach(element => {
@@ -970,7 +1026,7 @@ function hlRecapSkipClick() {
 function hlRecapSkipMut() {
   try {
     console.log('skip mut')
-    obsHlRecapSkip = new MutationObserver(function() {
+    obsHlRecapSkip = new MutationObserver(() => {
       hlRecapSkipClick()
     })
   } catch (err) { console.log(err) }
@@ -1030,7 +1086,7 @@ function hlEpisodeNextClick() {
 function hlEpisodeNextImpMut() {
   try {
     console.log('imp mut')
-    obsHlNextImp = new MutationObserver(function(ml) {
+    obsHlNextImp = new MutationObserver((ml) => {
       for(const mut of ml) {
         if (mut.type === 'childList' && mut.addedNodes && mut.addedNodes.length > 0) {
           mut.addedNodes.forEach(element => {
@@ -1056,7 +1112,7 @@ function hlEpisodeNextImpObs() {
 function hlEpisodeNextMut() {
   try {
     console.log('next mut')
-    obsHlNext = new MutationObserver(function() {
+    obsHlNext = new MutationObserver(() => {
       hlEpisodeNextClick()
     })
   } catch(err) { console.log(err) }
@@ -1267,6 +1323,12 @@ ipcMain.on('set-amzprevskip', (e, bool) => {
 // IPC channel to skip Prime recap
 ipcMain.on('set-amzrecapskip', (e, bool) => {
   amzSkipRecap = bool
+  amzRecapSkip()
+})
+
+// IPC channel to automatically start next episode on Prime
+ipcMain.on('set-amzepisodenext', (e, bool) => {
+  amzNextEpisode = bool
   amzRecapSkip()
 })
 

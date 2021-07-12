@@ -149,16 +149,19 @@ function applyUpdateSettings() {
   // Skip Prime recap skip
   ipcRenderer.send('set-amzrecapskip', settings.amzSkipRecap)
 
+  // Skip Prime next episode
+  ipcRenderer.send('set-amzepisodenext', settings.amzNextEpisode)
+
   // Skip Netflix recap skip
   ipcRenderer.send('set-nfrecapskip', settings.nfSkipRecap)
 
-  // Skip Netflix recap skip
+  // Skip Netflix next episode
   ipcRenderer.send('set-nfepisodenext', settings.nfNextEpisode)
 
   // Skip Hulu recap skip
   ipcRenderer.send('set-hlrecapskip', settings.hlSkipRecap)
 
-  // Skip Hulu recap skip
+  // Skip Hulu next episode
   ipcRenderer.send('set-hlepisodenext', settings.hlNextEpisode)
 }
 
@@ -333,6 +336,7 @@ function getDefaultSettings() {
     ytSkipAds: true,
     amzSkipPreview: false,
     amzSkipRecap: false,
+    amzNextEpisode: false,
     nfSkipRecap: false,
     nfNextEpisode: false,
     hlSkipRecap: false,
@@ -368,6 +372,7 @@ function loadSettingsModal() {
   $('#yt-skip-check').prop('checked', settings.ytSkipAds)
   $('#amz-preview-check').prop('checked', settings.amzSkipPreview)
   $('#amz-recap-check').prop('checked', settings.amzSkipRecap)
+  $('#amz-next-check').prop('checked', settings.amzNextEpisode)
   $('#nf-recap-check').prop('checked', settings.nfSkipRecap)
   $('#nf-next-check').prop('checked', settings.nfNextEpisode)
   $('#hl-recap-check').prop('checked', settings.hlSkipRecap)
@@ -411,6 +416,7 @@ function saveSettings() {
     ytSkipAds: $('#yt-skip-check').is(':checked'),
     amzSkipPreview: $('#amz-preview-check').is(':checked'),
     amzSkipRecap: $('#amz-recap-check').is(':checked'),
+    amzNextEpisode: $('#amz-next-check').is(':checked'),
     nfSkipRecap: $('#nf-recap-check').is(':checked'),
     nfNextEpisode: $('#nf-next-check').is(':checked'),
     hlSkipRecap: $('#hl-recap-check').is(':checked'),
@@ -450,9 +456,12 @@ function loadDefaultSettings() {
   $('#yt-skip-check').prop('checked', defaultSettings.ytSkipAds)
   $('#amz-preview-check').prop('checked', defaultSettings.amzSkipPreview)
   $('#amz-recap-check').prop('checked', defaultSettings.amzSkipRecap)
+  $('#amz-next-check').prop('checked', defaultSettings.amzNextEpisode)
   $('#nf-recap-check').prop('checked', defaultSettings.nfSkipRecap)
   $('#nf-next-check').prop('checked', defaultSettings.nfNextEpisode)
-  // TODO: this should be the default not all true
+  $('#hl-recap-check').prop('checked', defaultSettings.hlSkipRecap)
+  $('#hl-next-check').prop('checked', defaultSettings.hlNextEpisode)
+  // TODO: this should come from servuce defaults not all 'true'
   $('.serv-check').prop('checked', true)
   $('.serv-color-input').each(function () {
     $(this).val($(this).data('default-color'))
