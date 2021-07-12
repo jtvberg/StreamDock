@@ -353,8 +353,8 @@ function getDefaultSettings() {
     nfNextEpisode: false,
     hlSkipRecap: false,
     hlNextEpisode: false,
-    disSkipRecap: false,
-    disNextEpisode: false,
+    dpSkipRecap: false,
+    dpNextEpisode: false,
     hmSkipRecap: false,
     hmNextEpisode: false,
     windowSizeLocation: {
@@ -393,8 +393,8 @@ function loadSettingsModal() {
   $('#nf-next-check').prop('checked', settings.nfNextEpisode)
   $('#hl-recap-check').prop('checked', settings.hlSkipRecap)
   $('#hl-next-check').prop('checked', settings.hlNextEpisode)
-  $('#dis-recap-check').prop('checked', settings.disSkipRecap)
-  $('#dis-next-check').prop('checked', settings.disNextEpisode)
+  $('#dp-recap-check').prop('checked', settings.dpSkipRecap)
+  $('#dp-next-check').prop('checked', settings.dpNextEpisode)
   $('#hm-recap-check').prop('checked', settings.hmSkipRecap)
   $('#hm-next-check').prop('checked', settings.hmNextEpisode)
   $('input[name=radio-theme]').prop('checked', false).parent('.btn').removeClass('active')
@@ -441,8 +441,8 @@ function saveSettings() {
     nfNextEpisode: $('#nf-next-check').is(':checked'),
     hlSkipRecap: $('#hl-recap-check').is(':checked'),
     hlNextEpisode: $('#hl-next-check').is(':checked'),
-    disSkipRecap: $('#dis-recap-check').is(':checked'),
-    disNextEpisode: $('#dis-next-check').is(':checked'),
+    dpSkipRecap: $('#dp-recap-check').is(':checked'),
+    dpNextEpisode: $('#dp-next-check').is(':checked'),
     hmSkipRecap: $('#hm-recap-check').is(':checked'),
     hmNextEpisode: $('#hm-next-check').is(':checked'),
     themeMode: $('#choose-theme input:radio:checked').val(),
@@ -485,8 +485,8 @@ function loadDefaultSettings() {
   $('#nf-next-check').prop('checked', defaultSettings.nfNextEpisode)
   $('#hl-recap-check').prop('checked', defaultSettings.hlSkipRecap)
   $('#hl-next-check').prop('checked', defaultSettings.hlNextEpisode)
-  $('#dis-recap-check').prop('checked', defaultSettings.disSkipRecap)
-  $('#dis-next-check').prop('checked', defaultSettings.disNextEpisode)
+  $('#dp-recap-check').prop('checked', defaultSettings.dpSkipRecap)
+  $('#dp-next-check').prop('checked', defaultSettings.dpNextEpisode)
   $('#hm-recap-check').prop('checked', defaultSettings.hmSkipRecap)
   $('#hm-next-check').prop('checked', defaultSettings.hmNextEpisode)
   // TODO: this should come from servuce defaults not all 'true'

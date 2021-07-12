@@ -31,8 +31,8 @@ let nfSkipRecap = false
 let nfNextEpisode = false
 let hlSkipRecap = false
 let hlNextEpisode = false
-let disNextEpisode = false
-let disSkipRecap = false
+let dpNextEpisode = false
+let dpSkipRecap = false
 let hmNextEpisode = false
 let hmSkipRecap = false
 let showBookmarks = false
@@ -355,8 +355,8 @@ function streamLoaded() {
   nfEpisodeNext()
   setTimeout(hlRecapSkip, 3000)
   setTimeout(hlEpisodeNext, 3000)
-  disRecapSkip()
-  disEpisodeNext()
+  dpRecapSkip()
+  dpEpisodeNext()
   enableFacets()
 }
 
@@ -1153,23 +1153,23 @@ function hlEpisodeNextDis() {
 //#region Disney+ scripts
 
 // Disney observer dummy declaration (this is not actually used as it is sent over as a string!)
-let obsDisRecap = null
+let obsDpRecap = null
 
 // Skip/close Disney episode recap & intros
-function disRecapSkip() {
-  if (disSkipRecap && currentStream === 'dp') {
-    view.webContents.executeJavaScript(`${disRecapSkipClick.toString()}`).catch((err) => { console.error(err) })
-    view.webContents.executeJavaScript('try { let obsDisRecap = null } catch(err) { console.log(err) }')
-      .then(() => view.webContents.executeJavaScript(`(${disRecapSkipMut.toString()})()`))
-      .then(() => view.webContents.executeJavaScript(`(${disRecapSkipObs.toString()})()`))
+function dpRecapSkip() {
+  if (dpSkipRecap && currentStream === 'dp') {
+    view.webContents.executeJavaScript(`${dpRecapSkipClick.toString()}`).catch((err) => { console.error(err) })
+    view.webContents.executeJavaScript('try { let obsDpRecap = null } catch(err) { console.log(err) }')
+      .then(() => view.webContents.executeJavaScript(`(${dpRecapSkipMut.toString()})()`))
+      .then(() => view.webContents.executeJavaScript(`(${dpRecapSkipObs.toString()})()`))
       .catch((err) => { console.error(err) })
   } else if (currentStream === 'dp') {
-    view.webContents.executeJavaScript(`(${disRecapSkipDis.toString()})()`).catch((err) => { console.error(err) })
+    view.webContents.executeJavaScript(`(${dpRecapSkipDis.toString()})()`).catch((err) => { console.error(err) })
   }
 }
 
 // Disney recap skip click
-function disRecapSkipClick() {
+function dpRecapSkipClick() {
   try {
     console.log('recap episode')
     if (document.querySelector('.skip__button') != undefined) {
@@ -1179,15 +1179,15 @@ function disRecapSkipClick() {
 }
 
 // Disney recap skip mutation observer
-function disRecapSkipMut() {
+function dpRecapSkipMut() {
   try {
     console.log('recap mut')
-    obsDisRecap = new MutationObserver(function(ml) {
+    obsDpRecap = new MutationObserver(function(ml) {
       for(const mut of ml) {
         if (mut.type === 'childList' && mut.addedNodes && mut.addedNodes.length > 0) {
           mut.addedNodes.forEach(element => {
             if (element.classList && element.classList.contains('skip__button')) {
-              disRecapSkipClick()
+              dpRecapSkipClick()
             }
           })
         }
@@ -1197,41 +1197,41 @@ function disRecapSkipMut() {
 }
 
 // Disney recap skip observer invocation
-function disRecapSkipObs() {
+function dpRecapSkipObs() {
   try {
     console.log('recap obs')
-    obsDisRecap.observe(document.querySelector('.hudson-container'), { childList: true, subtree: true })
+    obsDpRecap.observe(document.querySelector('.hudson-container'), { childList: true, subtree: true })
   } catch (err) { console.log(err) }
 }
 
 // Disney recap skip observer disconnection
-function disRecapSkipDis() {
+function dpRecapSkipDis() {
   try {
     console.log('recap dis')
-    if (typeof obsDisRecap !== 'undefined') {
-      obsDisRecap.disconnect()
+    if (typeof obsDpRecap !== 'undefined') {
+      obsDpRecap.disconnect()
     }
   } catch (err) { console.log(err) }
 }
 
 // Disney observer dummy declaration (this is not actually used as it is sent over as a string!)
-let obsDisNext = null
+let obsDpNext = null
 
 // Automatically start next Disney episode
-function disEpisodeNext() {
-  if (disNextEpisode && currentStream === 'dp') {
-    view.webContents.executeJavaScript(`${disEpisodeNextClick.toString()}`).catch((err) => { console.error(err) })
-    view.webContents.executeJavaScript('try { let obsDisNext = null } catch(err) { console.log(err) }')
-      .then(() => view.webContents.executeJavaScript(`(${disEpisodeNextMut.toString()})()`))
-      .then(() => view.webContents.executeJavaScript(`(${disEpisodeNextObs.toString()})()`))
+function dpEpisodeNext() {
+  if (dpNextEpisode && currentStream === 'dp') {
+    view.webContents.executeJavaScript(`${dpEpisodeNextClick.toString()}`).catch((err) => { console.error(err) })
+    view.webContents.executeJavaScript('try { let obsDpNext = null } catch(err) { console.log(err) }')
+      .then(() => view.webContents.executeJavaScript(`(${dpEpisodeNextMut.toString()})()`))
+      .then(() => view.webContents.executeJavaScript(`(${dpEpisodeNextObs.toString()})()`))
       .catch((err) => { console.error(err) })
   } else if (currentStream === 'dp') {
-    view.webContents.executeJavaScript(`(${disEpisodeNextDis.toString()})()`).catch((err) => { console.error(err) })
+    view.webContents.executeJavaScript(`(${dpEpisodeNextDis.toString()})()`).catch((err) => { console.error(err) })
   }
 }
 
 // Disney next episode click
-function disEpisodeNextClick() {
+function dpEpisodeNextClick() {
   try {
     console.log('next episode')
     if (document.querySelectorAll('[data-testid = "up-next-play-button"]')[0] != undefined) {
@@ -1241,15 +1241,15 @@ function disEpisodeNextClick() {
 }
 
 // Disney next episode mutation observer
-function disEpisodeNextMut() {
+function dpEpisodeNextMut() {
   try {
     console.log('next mut')
-    obsDisNext = new MutationObserver(function(ml) {
+    obsDpNext = new MutationObserver(function(ml) {
       for(const mut of ml) {
         if (mut.type === 'childList' && mut.addedNodes && mut.addedNodes.length > 0) {
           mut.addedNodes.forEach(element => {
             if (element.classList && element.classList.contains('play')) {
-              disEpisodeNextClick()
+              dpEpisodeNextClick()
             }
           })
         }
@@ -1259,19 +1259,19 @@ function disEpisodeNextMut() {
 }
 
 // Disney next episode observer invocation
-function disEpisodeNextObs() {
+function dpEpisodeNextObs() {
   try {
     console.log('next obs')
-    obsDisNext.observe(document.querySelector('#app_scene_content'), { childList: true, subtree: true })
+    obsDpNext.observe(document.querySelector('#app_scene_content'), { childList: true, subtree: true })
   } catch (err) { console.log(err) }
 }
 
 // Disney next episode observer disconnection
-function disEpisodeNextDis() {
+function dpEpisodeNextDis() {
   try {
     console.log('next dis')
-    if (typeof obsDisRecap !== 'undefined') {
-      obsDisNext.disconnect()
+    if (typeof obsDpRecap !== 'undefined') {
+      obsDpNext.disconnect()
     }
   } catch (err) { console.log(err) }
 }
@@ -1497,15 +1497,15 @@ ipcMain.on('set-hlepisodenext', (e, bool) => {
 })
 
 // IPC channel to skip Disney recap
-ipcMain.on('set-disrecapskip', (e, bool) => {
-  disSkipRecap = bool
-  disRecapSkip()
+ipcMain.on('set-dprecapskip', (e, bool) => {
+  dpSkipRecap = bool
+  dpRecapSkip()
 })
 
 // IPC channel to automatically start next episode on Disney
-ipcMain.on('set-disepisodenext', (e, bool) => {
-  disNextEpisode = bool
-  disEpisodeNext()
+ipcMain.on('set-dpepisodenext', (e, bool) => {
+  dpNextEpisode = bool
+  dpEpisodeNext()
 })
 
 // IPC channel to skip HBO recap
