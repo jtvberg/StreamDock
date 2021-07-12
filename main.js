@@ -1182,16 +1182,8 @@ function dpRecapSkipClick() {
 function dpRecapSkipMut() {
   try {
     console.log('recap mut')
-    obsDpRecap = new MutationObserver(function(ml) {
-      for(const mut of ml) {
-        if (mut.type === 'childList' && mut.addedNodes && mut.addedNodes.length > 0) {
-          mut.addedNodes.forEach(element => {
-            if (element.classList && element.classList.contains('skip__button')) {
-              dpRecapSkipClick()
-            }
-          })
-        }
-      }
+    obsDpRecap = new MutationObserver(() => {
+      dpRecapSkipClick()
     })
   } catch(err) { console.log(err) }
 }
@@ -1244,16 +1236,8 @@ function dpEpisodeNextClick() {
 function dpEpisodeNextMut() {
   try {
     console.log('next mut')
-    obsDpNext = new MutationObserver(function(ml) {
-      for(const mut of ml) {
-        if (mut.type === 'childList' && mut.addedNodes && mut.addedNodes.length > 0) {
-          mut.addedNodes.forEach(element => {
-            if (element.classList && element.classList.contains('play')) {
-              dpEpisodeNextClick()
-            }
-          })
-        }
-      }
+    obsDpNext = new MutationObserver(() => {
+      dpEpisodeNextClick()
     })
   } catch(err) { console.log(err) }
 }
