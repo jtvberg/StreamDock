@@ -355,8 +355,8 @@ function streamLoaded() {
   nfEpisodeNext()
   setTimeout(hlRecapSkip, 3000)
   setTimeout(hlEpisodeNext, 3000)
-  dpRecapSkip()
-  dpEpisodeNext()
+  setTimeout(dpRecapSkip, 3000)
+  setTimeout(dpEpisodeNext, 3000)
   enableFacets()
 }
 
