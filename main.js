@@ -33,8 +33,8 @@ let hlSkipRecap = false
 let hlNextEpisode = false
 let dpNextEpisode = false
 let dpSkipRecap = false
-let hmNextEpisode = false
-let hmSkipRecap = false
+// let hmNextEpisode = false
+// let hmSkipRecap = false
 let showBookmarks = false
 let userAgent = ''
 let currentStream = ''
@@ -1493,16 +1493,16 @@ ipcMain.on('set-dpepisodenext', (e, bool) => {
 })
 
 // IPC channel to skip HBO recap
-ipcMain.on('set-hmrecapskip', (e, bool) => {
-  hmSkipRecap = bool
-  // hmRecapSkip()
-})
+// ipcMain.on('set-hmrecapskip', (e, bool) => {
+//  hmSkipRecap = bool
+//  hmRecapSkip()
+// })
 
 // IPC channel to automatically start next episode on HBO
-ipcMain.on('set-hmepisodenext', (e, bool) => {
-  hmNextEpisode = bool
-  // hmEpisodeNext()
-})
+// ipcMain.on('set-hmepisodenext', (e, bool) => {
+//  hmNextEpisode = bool
+//  hmEpisodeNext()
+// })
 
 // IPC channel to hide/show header
 ipcMain.on('hide-header-bar', (e, bool) => {
