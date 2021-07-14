@@ -171,10 +171,10 @@ function applyUpdateSettings() {
   ipcRenderer.send('set-dpepisodenext', settings.dpNextEpisode)
 
   // Skip HBO recap skip
-  ipcRenderer.send('set-hmrecapskip', settings.hmSkipRecap)
+  // ipcRenderer.send('set-hmrecapskip', settings.hmSkipRecap)
 
   // Skip HBO next episode
-  ipcRenderer.send('set-hmepisodenext', settings.hmNextEpisode)
+  // ipcRenderer.send('set-hmepisodenext', settings.hmNextEpisode)
 }
 
 // Iterate through stored services and create buttons/menu entries

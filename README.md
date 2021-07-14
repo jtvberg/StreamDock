@@ -34,7 +34,7 @@
 
 ## Building
    The code builds for Mac, Windows and Linux.
-   There are also some build scripts in place (NOTE: You may want to disable notarization in the mac build script while testing your build as this can take a    long time.)
+   There are also some build scripts in place (NOTE: You may want to disable notarization in the mac build script while testing your build as this can take a long time.)
 
 ## Releases / Known Issues
    The current release works on Mac (signed and notarized) and Windows (only self-signed). It should install without much hassle on both platforms.\
@@ -61,12 +61,12 @@
    Various service-specific behaviors can be toggled in the settings under preferences including:
    - Which streaming services are present and what colors and glyphs are used to represent them in the quick access bar
    - Prime auto-skip previews
-   - Netflix, Hulu and Prime episode recap auto-skip
-   - Netflix, Hulu and Prime 'Binge Mode' that will automatically start the next episode in a series (skipping delay)
+   - Netflix, Hulu, Disney+ and Prime episode recap/intro auto-skip
+   - Netflix, Hulu, Disney+ and Prime 'Binge Mode' that will automatically start the next episode in a series (skipping delay)
    - You can also skip YouTube ads and dismiss ad overlays when possible (while not all ads are skippable, if turned on it will even skip ads before the skip button even appears)
 
 ## TODO
-   - Add recap skip and binge mode to Disney+ & HBO Max
+   - I haven't given up yet but HBO Max is pretty much impossible to work with around recap/intro/preview/next episode skipping
    - I need to look into adding Google OAuth to allow logins for YouTube TV and other services
    - Contemplating multiple windows but in general, this seems silly (leave a comment if you think there is a good reason to do this!)
    - I don't like how there is no z-order for the BrowserWindow vs. BrowserView. This means I can't render any UI elements above the view (and why video is hidden when using the preferences menu.) In general, this is not a big deal but there are some cool UI tricks I could implement if I moved portions of the UI to another BrowserView (for instance, I could use custom tooltips and auto-hide the header bar)
