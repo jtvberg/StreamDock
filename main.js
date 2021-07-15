@@ -505,17 +505,19 @@ async function sendCurrentStream() {
 async function getCurrentUrl() {
   let url = view.webContents.getURL()
   if (currentStream === 'ap') {
-    url = await view.webContents.executeJavaScript(`try { console.log('got url'); sdAmzUrl; } catch(err) { console.log('not yet') }`).catch((err) => { console.log('ASERR:'+err) })
+    url = await view.webContents.executeJavaScript(
+      `try { console.log('got url'); sdAmzUrl; } catch(err) { console.log('not yet') }`
+    ).catch((err) => { console.log('ASERR:'+err) })
   }
   return url
 }
 
 // Before close
 async function beforeClose() {
-  allowQuit = true
-  await saveSettings().then(
+  await saveSettings().then(() => {
+    allowQuit = true
     app.quit()
-  ).catch((err) => { console.log('ASERR:'+err) })
+  }).catch((err) => { console.log('ASERR:'+err) })
 }
 
 // Send settings
@@ -1285,7 +1287,7 @@ app.on('ready', () => {
     baseDir: widevineDir
   })
   // Check for updates
-  // setTimeout(updater, 3000)
+  setTimeout(updater, 3000)
 })
 
 // Widvine DRM  ready
