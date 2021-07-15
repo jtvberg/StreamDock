@@ -489,35 +489,37 @@ function enableFacets() {
 
 // Send bookmark to renderer
 async function sendBookmark() {
-  let currentUrl = await getCurrentUrl()
-  win.webContents.send('save-bookmark', { id: currentStream, title: view.webContents.getTitle(), url: currentUrl })
+  await getCurrentUrl().then((currentUrl) => {
+    win.webContents.send('save-bookmark', { id: currentStream, title: view.webContents.getTitle(), url: currentUrl })
+  }).catch((err) => { console.log('ASERR:'+err) })
 }
 
 // Send current stream object
 async function sendCurrentStream() {
-  const currentUrl = await getCurrentUrl()
-  win.webContents.send('stream-loaded', { id: setStreamId(currentUrl), url: currentUrl })
+  await getCurrentUrl().then((currentUrl) => {
+    win.webContents.send('stream-loaded', { id: setStreamId(currentUrl), url: currentUrl })
+  }).catch((err) => { console.log('ASERR:'+err) })
 }
 
 // Get current URL
 async function getCurrentUrl() {
   let url = view.webContents.getURL()
   if (currentStream === 'ap') {
-    url = await view.webContents.executeJavaScript(`try { console.log('got url'); sdAmzUrl; } catch(err) { console.log('not yet') }`)
+    url = await view.webContents.executeJavaScript(`try { console.log('got url'); sdAmzUrl; } catch(err) { console.log('not yet') }`).catch((err) => { console.log('ASERR:'+err) })
   }
   return url
 }
 
 // Before close
 async function beforeClose() {
-  await saveSettings()
   allowQuit = true
-  app.quit()
+  await saveSettings().then(
+    app.quit()
+  ).catch((err) => { console.log('ASERR:'+err) })
 }
 
 // Send settings
 async function saveSettings() {
-  await sendCurrentStream()
   const data = {
     windowSizeLocation: {
       x: wb.x,
@@ -526,7 +528,9 @@ async function saveSettings() {
       width: wb.width
     }
   }
-  win.webContents.send('save-settings', data)
+  await sendCurrentStream().then(
+    win.webContents.send('save-settings', data)
+  ).catch((err) => { console.log('ASERR:'+err) })
 }
 
 //#region YouTube scripts
@@ -1281,7 +1285,7 @@ app.on('ready', () => {
     baseDir: widevineDir
   })
   // Check for updates
-  setTimeout(updater, 3000)
+  // setTimeout(updater, 3000)
 })
 
 // Widvine DRM  ready
