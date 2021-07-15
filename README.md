@@ -37,12 +37,12 @@
    There are also some build scripts in place (NOTE: You may want to disable notarization in the mac build script while testing your build as this can take a long time.)
 
 ## Releases / Known Issues
-   The current release works on Mac (signed and notarized) and Windows (only self-signed). It should install without much hassle on both platforms.\
-   Just added Linux to the last release. The app icon is not behaving but it works the same.\
+   The current release works on Mac (signed and notarized).\
+   There is a previous release that works for Windows (only self-signed) and Linux (the app icon is not behaving but it works the same.)\
    At the moment, any service using Google auth is broken if you have to sign-in to use (so, YouTube works, YouTube TV will not.)\
    The user agent spoofing is no longer working so Google OAuth will need to be implemented. 
    Look for that in a future release.\
-   As a work-around: If you have YouTube TV you can sign into ABC with it and this will also sign you in to YouTube TV and YouTube.\
+   As a work-around: If you have YouTube TV you can sign into ABC with YTV as your provider and this will also sign you in to YouTube TV and YouTube.\
    Peacock is set to off by default as the login is not working.
 
 ## App Control
@@ -63,7 +63,7 @@
    - Prime auto-skip previews
    - Netflix, Hulu, Disney+ and Prime episode recap/intro auto-skip
    - Netflix, Hulu, Disney+ and Prime 'Binge Mode' that will automatically start the next episode in a series (skipping delay)
-   - You can also skip YouTube ads and dismiss ad overlays when possible (while not all ads are skippable, if turned on it will even skip ads before the skip button even appears)\
+   - You can also skip YouTube ads and dismiss ad overlays when possible (while not all ads are skippable, if turned on it will even skip ads before the skip button even appears)
 
    One note: On some services there are scenarios where an option to skip something doesn't show up. For instance, on Prime, sometimes the episode recap is not skippable. There doesn't appear to be any rhyme or reason as to why sometimes you can't skip a recap or intro for certain shows on certain services but if you notice that something is playing that you chose to skip and there is no UI element that would allow a user to skip that content, the app is working as intended as there is nothing to key off of for that show/service combo. I have even seen scenarios where for a specific episode, there is no option to skip a recap but you can on other episodes of the same show/service combo.
 
