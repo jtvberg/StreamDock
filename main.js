@@ -491,14 +491,14 @@ function enableFacets() {
 async function sendBookmark() {
   await getCurrentUrl().then((currentUrl) => {
     win.webContents.send('save-bookmark', { id: currentStream, title: view.webContents.getTitle(), url: currentUrl })
-  }).catch((err) => { console.log('ASERR:'+err) })
+  }).catch((err) => { console.log('SBM:'+err) })
 }
 
 // Send current stream object
 async function sendCurrentStream() {
   await getCurrentUrl().then((currentUrl) => {
     win.webContents.send('stream-loaded', { id: setStreamId(currentUrl), url: currentUrl })
-  }).catch((err) => { console.log('ASERR:'+err) })
+  }).catch((err) => { console.log('SCS:'+err) })
 }
 
 // Get current URL
@@ -507,17 +507,19 @@ async function getCurrentUrl() {
   if (currentStream === 'ap') {
     url = await view.webContents.executeJavaScript(
       `try { console.log('got url'); sdAmzUrl; } catch(err) { console.log('not yet') }`
-    ).catch((err) => { console.log('ASERR:'+err) })
+    ).catch((err) => { console.log('GCU:'+err) })
   }
   return url
 }
 
 // Before close
 async function beforeClose() {
-  await saveSettings().then(() => {
-    allowQuit = true
+  allowQuit = true
+  await saveSettings().catch((err) => { 
+    console.log('BC:'+err) 
+  }).finally(() => {
     app.quit()
-  }).catch((err) => { console.log('ASERR:'+err) })
+  })
 }
 
 // Send settings
@@ -532,7 +534,7 @@ async function saveSettings() {
   }
   await sendCurrentStream().then(
     win.webContents.send('save-settings', data)
-  ).catch((err) => { console.log('ASERR:'+err) })
+  ).catch((err) => { console.log('SS:'+err) })
 }
 
 //#region YouTube scripts
