@@ -153,9 +153,8 @@ const createWindow = () => {
     wb = win.getBounds()
   })
 
-  // Hide instead of close window unless quitting (Mac)
+  // Hide instead of close window (Mac)
   win.on('close', (e) => {
-    console.log('close-win')
     e.preventDefault()
     if (isMac) {
       pause()
@@ -1316,15 +1315,8 @@ app.on('widevine-error', (err) => {
   process.exit(1)
 })
 
-// CLose app if all windows are closed (can check for Mac)
-app.on('window-all-closed', () => {
-  console.log('all-closed')
-  // app.quit()
-})
-
 // When closing set window size and location
 app.on('before-quit', (e) => {
-  console.log('before-quit', allowQuit)
   if (!allowQuit) {
     e.preventDefault()
     beforeClose()
