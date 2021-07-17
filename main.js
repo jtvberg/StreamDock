@@ -191,7 +191,25 @@ const createWindow = () => {
 const createTray = () => {
   tray = new Tray(path.join(__dirname, '/res/logo/iconTemplate@2x.png'))
   tray.setToolTip('StreamDock')
+  if (isLinux) {
+    const contextMenu = Menu.buildFromTemplate([
+      { label: 'Toggle Window',
+        click() { toggleWin() }
+      },
+      { label: 'Exit',
+        click() { app.quit() }
+      }
+    ])
+    tray.setContextMenu(contextMenu)
+  }
   tray.on('click', () => {
+    toggleWin()
+  })
+  tray.on('right-click', () => {
+    app.quit()
+  })
+
+  function toggleWin() {
     const isVisible = win.isVisible()
     view.webContents.focus()
     if (isVisible) {
@@ -200,10 +218,7 @@ const createTray = () => {
       play()
     }
     isVisible ? win.hide() : win.show()
-  })
-  tray.on('right-click', () => {
-    app.quit()
-  })
+  }
 }
 
 // Get system accent color
