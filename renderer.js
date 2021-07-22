@@ -489,8 +489,10 @@ function loadDefaultSettings() {
   $('#dp-next-check').prop('checked', defaultSettings.dpNextEpisode)
   $('#hm-recap-check').prop('checked', defaultSettings.hmSkipRecap)
   $('#hm-next-check').prop('checked', defaultSettings.hmNextEpisode)
-  // TODO: this should come from servuce defaults not all 'true'
-  $('.serv-check').prop('checked', true)
+  $('.serv-check').prop('checked', false)
+  getDefaultStreams().forEach((serv) => {
+    $(`#check-${serv.id}`).prop('checked', serv.active ? 'checked' : '')
+  })
   $('.serv-color-input').each(function () {
     $(this).val($(this).data('default-color'))
     $(this).parent().find('.serv-color-btn').css('color', $(this).val())
