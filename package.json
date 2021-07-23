@@ -22,7 +22,7 @@
   "author": "jtvberg <streamdockapp@gmail.com> (https://github.com/jtvberg/StreamDock)",
   "license": "CC0-1.0",
   "devDependencies": {
-    "electron": "github:castlabs/electron-releases#v12.0.14-wvvmp",
+    "electron": "github:castlabs/electron-releases#v12.0.15-wvvmp",
     "electron-builder": "^22.11.7",
     "electron-notarize": "^1.0.0",
     "electron-reload": "^1.5.0",
@@ -44,7 +44,6 @@
       "mirror": "https://github.com/castlabs/electron-releases/releases/download/v"
     },
     "afterPack": "./build/afterPack.js",
-    "afterSign": "./build/afterSign.js",
     "mac": {
       "category": "public.app-category.video",
       "entitlements": "./entitlements.plist"
