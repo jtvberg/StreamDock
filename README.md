@@ -37,8 +37,7 @@
    There are also some build scripts in place (NOTE: You may want to disable notarization in the mac build script while testing your build as this can take a long time.)
 
 ## Releases / Known Issues
-   The current release works on Mac (signed and notarized).\
-   There is a previous release that works for Windows (only self-signed) and Linux (the app icon is not behaving but it works the same.)\
+   The current release works on Mac (signed and notarized), Windows (self-signed) and Linux.\
    At the moment, any service using Google auth is broken if you have to sign-in to use (so, YouTube works, YouTube TV will not.)\
    The user agent spoofing is no longer working so Google OAuth will need to be implemented. 
    Look for that in a future release.\
