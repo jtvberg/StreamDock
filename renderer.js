@@ -1,6 +1,8 @@
 // TODO: Open services in new window
 // TODO: Setting: let user pick whether or not a new window is created
 // TODO: Setting: add services
+// TODO: Inicator for when a bookmark is added
+// TODO: Watchlist vs bookmark
 
 // Imports and variable declarations
 const { ipcRenderer, nativeImage, clipboard } = require('electron')
@@ -595,6 +597,11 @@ function facetFilter(filter) {
   }
 }
 
+// Flash the bookmarks toggle when adding bookmark
+function addBookmarkFlash() {
+  $('.bookmarks-btn').addClass('bookmarks-btn-add')
+}
+
 // Load NF facets from file
 $.getJSON('nffacets.json', function(json) { 
   nfFacets = json
@@ -709,7 +716,11 @@ $('#facets-btn').on('click', () => {
 
 // Bookmark location
 $('#bookmark-btn').on('click', () => {
+  if ($('.bookmarks-btn').hasClass('bookmarks-btn-add')) {
+    $('.bookmarks-btn').removeClass('bookmarks-btn-add')
+  }
   ipcRenderer.send('save-bookmark')
+  setInterval(addBookmarkFlash, 10)
 })
 
 // Back button click handler

@@ -330,6 +330,19 @@ body {
   background-color: var(--color-bg);
 }
 
+.bookmarks-btn-add {
+  animation-name: bm-added;
+  animation-duration: 1s;
+}
+
+@keyframes bm-added {
+  10% { color: var(--color-white); background-color: var(--color-hightlight); }
+  30% { background-color: var(--color-white); }
+  50% { color: var(--color-white); background-color: var(--color-hightlight); }
+  70% { background-color: var(--color-white); }
+  90% { color: var(--color-white); background-color: var(--color-hightlight); }
+}
+
 .control-btn {
   padding-left: 8px;
   color: var(--color-neutral);
