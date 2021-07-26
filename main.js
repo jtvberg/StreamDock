@@ -963,7 +963,7 @@ function nfRecapSkipMut() {
         if (mut.type === 'childList' && mut.addedNodes && mut.addedNodes.length > 0) {
           mut.addedNodes.forEach(element => {
             if (element.classList && element.classList.contains('skip-credits')) {
-              nfEpisodeNextClick()
+              nfRecapSkipClick()
             }
           })
         }
@@ -1113,9 +1113,10 @@ function hlRecapSkipDis() {
   } catch (err) { console.error(err) }
 }
 
-// Hulu observer dummy declaration (this is not actually used as it is sent over as a string!)
+// Hulu dummy declarations (this is not actually used as it is sent over as a string!)
 let obsHlNext = null
 let obsHlNextImp = null
+let obsHlNextBool = true
 
 // Automatically start next Hulu episode
 function hlEpisodeNext() {
@@ -1180,9 +1181,6 @@ function hlEpisodeNextMut() {
     })
   } catch(err) { console.error(err) }
 }
-
-// Hulu bool dummy declaration
-let obsHlNextBool = true
 
 // Hulu next episode observer invocation
 function hlEpisodeNextObs() {
