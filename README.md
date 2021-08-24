@@ -53,7 +53,7 @@
    If you want to minimize the app but keep playing to maintain audio, do so by minimizing to the dock/taskbar.\
    There is an always on top toggle button in the top right corner (or in 'Window' menu).\
    You can open a link from clipboard via the 'View' menu (or in the header).\
-   You can scale the video to 16:9 (or 4:3) either vertically or horizontally also in the view menu (or in the header for 16:9 only).\
+   You can scale the video to 16:9 (or 4:3, 2:1) either vertically or horizontally also in the view menu (or in the header for 16:9 only).\
    You can bookmark streams via the bookmark button in the header or via the 'View' menu.\
    Toggle bookmarks via the far-left quick access button.\
    You can also view the extended Netflix genres via 'Show Genres' button or alternatively in the 'View' menu.\
