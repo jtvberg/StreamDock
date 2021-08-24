@@ -1690,40 +1690,50 @@ const template = [{
     }
   },
   {
-    label: 'Scale Height to 16:9',
-    click() {
-      scaleHeight(16, 9)
-    }
+    label: 'Scale Height',
+    submenu: [
+      {
+        label: '16:9',
+        click() {
+          scaleHeight(16, 9)
+        }
+      },
+      {
+        label: '4:3',
+        click() {
+          scaleHeight(4, 3)
+        }
+      },
+      {
+        label: '2:1',
+        click() {
+          scaleHeight(2, 1)
+        }
+      }
+    ]
   },
   {
-    label: 'Scale Width to 16:9',
-    click() {
-      scaleWidth(16, 9)
-    }
-  },
-  {
-    label: 'Scale Height to 4:3',
-    click() {
-      scaleHeight(4, 3)
-    }
-  },
-  {
-    label: 'Scale Width to 4:3',
-    click() {
-      scaleWidth(4, 3)
-    }
-  },
-  {
-    label: 'Scale Height to 2:1',
-    click() {
-      scaleHeight(2, 1)
-    }
-  },
-  {
-    label: 'Scale Width to 2:1',
-    click() {
-      scaleWidth(2, 1)
-    }
+    label: 'Scale Width',
+    submenu: [
+      {
+        label: '16:9',
+        click() {
+          scaleWidth(16, 9)
+        }
+      },
+      {
+        label: '4:3',
+        click() {
+          scaleWidth(4, 3)
+        }
+      },
+      {
+        label: '2:1',
+        click() {
+          scaleWidth(2, 1)
+        }
+      }
+    ]
   },
   {
     type: 'separator'
