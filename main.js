@@ -1714,6 +1714,18 @@ const template = [{
     }
   },
   {
+    label: 'Scale Height to 2:1',
+    click() {
+      scaleHeight(2, 1)
+    }
+  },
+  {
+    label: 'Scale Width to 2:1',
+    click() {
+      scaleWidth(2, 1)
+    }
+  },
+  {
     type: 'separator'
   },
   {
