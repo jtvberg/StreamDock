@@ -27,7 +27,7 @@
     "electron-notarize": "^1.1.0",
     "electron-reload": "^1.5.0",
     "eslint": "^7.32.0",
-    "eslint-plugin-import": "^2.24.1",
+    "eslint-plugin-import": "^2.24.2",
     "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-promise": "^5.1.0"
   },
@@ -44,7 +44,6 @@
       "mirror": "https://github.com/castlabs/electron-releases/releases/download/v"
     },
     "afterPack": "./build/afterPack.js",
-    "afterSign": "./build/afterSign.js",
     "mac": {
       "category": "public.app-category.video",
       "entitlements": "./entitlements.plist"
