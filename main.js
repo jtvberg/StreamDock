@@ -1706,15 +1706,15 @@ const template = [{
         }
       },
       {
-        label: '2.4:1',
-        click() {
-          scaleHeight(12, 5)
-        }
-      },
-      {
         label: '2:1',
         click() {
           scaleHeight(2, 1)
+        }
+      },
+      {
+        label: '2.4:1',
+        click() {
+          scaleHeight(12, 5)
         }
       }
     ]
@@ -1735,15 +1735,15 @@ const template = [{
         }
       },
       {
-        label: '2.4:1',
-        click() {
-          scaleWidth(12, 5)
-        }
-      },
-      {
         label: '2:1',
         click() {
           scaleWidth(2, 1)
+        }
+      },
+      {
+        label: '2.4:1',
+        click() {
+          scaleWidth(12, 5)
         }
       }
     ]
