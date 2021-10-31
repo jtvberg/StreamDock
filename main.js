@@ -1,11 +1,14 @@
 /* eslint-disable quotes */
 // TODO: Peacock won't login
 // TODO: Scrollbar css
+// BUG: Random rubberbanding when going fullscreen
+// TODO: Hide bar on fullscreen
 
 // Imports and variable declarations
 const { app, BrowserWindow, ipcMain, BrowserView, Tray, TouchBar, session, Menu, MenuItem, systemPreferences, clipboard, nativeTheme, dialog } = require('electron')
 const { TouchBarButton } = TouchBar
 const path = require('path')
+const isDev = !app.isPackaged
 const isMac = process.platform === 'darwin'
 const isLinux = process.platform === 'linux'
 const isWindows = process.platform === 'win32'
@@ -54,10 +57,6 @@ if (isMac) {
   userAgent = 'Chrome'
 }
 
-// Dev code
-// Enable Electron-Reload (dev only)
-// require('electron-reload')(__dirname)
-
 // Main window and view
 let win = null
 let view = null
@@ -98,20 +97,15 @@ const createWindow = () => {
   })
 
   // Open DevTools (window, dev only)
-  // win.webContents.openDevTools('detach')
+  // isDev && win.webContents.openDevTools('detach')
 
   // Create main browserView
-  view = new BrowserView({
-    webPreferences: {
-      nodeIntegration: false,
-      contextIsolation: true
-    }
-  })
+  view = new BrowserView()
 
   // Show browserView when loaded
   view.webContents.on('did-finish-load', () => {
     // Open DevTools (view, dev only)
-    // view.webContents.openDevTools('detach')
+    // isDev && view.webContents.openDevTools('detach')
     sendCurrentStream()
     setView()
     streamLoaded()
@@ -1328,6 +1322,13 @@ app.commandLine.appendSwitch('no-verify-widevine-cdm')
 const isOffline = false
 const widevineDir = app.getPath('userData')
 
+// Load electron-reload in dev
+if (isDev) {
+  require('electron-reload')(__dirname, {
+    electron: path.join(__dirname, 'node_modules', '.bin', 'electron')
+  })
+}
+
 // App ready
 app.on('ready', () => {
   app.verifyWidevineCdm({
@@ -1336,7 +1337,7 @@ app.on('ready', () => {
     baseDir: widevineDir
   })
   // Check for updates
-  setTimeout(updater, 3000)
+  !isDev && setTimeout(updater, 3000)
 })
 
 // Widvine DRM  ready
@@ -1705,6 +1706,12 @@ const template = [{
         }
       },
       {
+        label: '2.4:1',
+        click() {
+          scaleHeight(12, 5)
+        }
+      },
+      {
         label: '2:1',
         click() {
           scaleHeight(2, 1)
@@ -1725,6 +1732,12 @@ const template = [{
         label: '4:3',
         click() {
           scaleWidth(4, 3)
+        }
+      },
+      {
+        label: '2.4:1',
+        click() {
+          scaleWidth(12, 5)
         }
       },
       {

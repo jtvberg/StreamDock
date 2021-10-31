@@ -22,18 +22,15 @@
   "author": "jtvberg <streamdockapp@gmail.com> (https://github.com/jtvberg/StreamDock)",
   "license": "CC0-1.0",
   "devDependencies": {
-    "electron": "github:castlabs/electron-releases#v12.0.18-wvvmp",
-    "electron-builder": "^22.11.7",
-    "electron-notarize": "^1.1.0",
+    "electron": "github:castlabs/electron-releases#v12.2.2-wvvmp",
+    "electron-builder": "^22.13.1",
+    "electron-notarize": "^1.1.1",
     "electron-reload": "^1.5.0",
-    "eslint": "^7.32.0",
-    "eslint-plugin-import": "^2.24.2",
-    "eslint-plugin-node": "^11.1.0",
-    "eslint-plugin-promise": "^5.1.0"
+    "eslint": "^8.1.0"
   },
   "dependencies": {
     "@fortawesome/fontawesome-free": "^5.15.4",
-    "bootstrap": "^4.6.0",
+    "bootstrap": "^4.6.1",
     "electron-updater": "^4.3.9",
     "jquery": "^3.6.0"
   },
