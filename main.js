@@ -47,12 +47,12 @@ let touchBarItems = []
 if (isMac) {
   systemPreferences.setUserDefault('NSDisabledDictationMenuItem', 'boolean', true)
   systemPreferences.setUserDefault('NSDisabledCharacterPaletteMenuItem', 'boolean', true)
-  userAgent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.164 Safari/537.36'
+  userAgent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/95.0.4638.69 Safari/537.36'
 } else if (isWindows) {
-  userAgent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.164 Safari/537.36'
+  userAgent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/95.0.4638.69 Safari/537.36'
 } else if (isLinux) {
   app.disableHardwareAcceleration()
-  userAgent = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.114 Safari/537.36'
+  userAgent = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/95.0.4638.69 Safari/537.36'
 } else {
   userAgent = 'Chrome'
 }
@@ -349,7 +349,11 @@ function streamChange(stream) {
   view.setBounds({ x: 0, y: 0, width: 0, height: 0 })
   showBookmarks = false
   currentStream = stream.id
-  view.webContents.loadURL(stream.url)
+  let localAgent = userAgent
+  if (!stream.url.includes('tv.youtube') && !stream.url.includes('abc.com')) {
+    localAgent = 'Chrome'
+  }
+  view.webContents.loadURL(stream.url, { userAgent: localAgent })
   win.webContents.send('hide-bookmarks')
   win.webContents.send('stream-changed', stream.url)
 }
@@ -1342,13 +1346,6 @@ app.on('ready', () => {
 
 // Widvine DRM  ready
 app.on('widevine-ready', () => {
-  session.defaultSession.webRequest.onBeforeSendHeaders((details, callback) => {
-    details.requestHeaders['User-Agent'] = userAgent
-    callback({
-      cancel: false,
-      requestHeaders: details.requestHeaders
-    })
-  })
   createWindow()
   createTray()
   setWinTrayTheme()
