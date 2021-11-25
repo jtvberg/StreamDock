@@ -133,6 +133,9 @@ function applyUpdateSettings() {
   // Auto-hide navbar buttons
   settings.hideNav ? $('.header-bar').children().addClass('nav-hide') : $('.header-bar').children().removeClass('nav-hide')
 
+  // Hide the dock icon
+  ipcRenderer.send('hide-dock-icon', settings.hideDock)
+
   // Set full-screenable
   ipcRenderer.send('allow-fullscreen', settings.fullScreen)
 
@@ -345,6 +348,7 @@ function getDefaultSettings() {
     restorePlay: true,
     quickMenu: true,
     hideNav: false,
+    hideDock: false,
     themeMode: 'system',
     lastStream: { id: getDefaultStreams()[0].id, url: getDefaultStreams()[0].url },
     ytSkipAds: true,
@@ -387,6 +391,7 @@ function loadSettingsModal() {
   $('#restore-play-check').prop('checked', settings.restorePlay)
   $('#quick-check').prop('checked', settings.quickMenu)
   $('#nav-check').prop('checked', settings.hideNav)
+  $('#dock-check').prop('checked', settings.hideDock)
   $('#yt-skip-check').prop('checked', settings.ytSkipAds)
   $('#amz-preview-check').prop('checked', settings.amzSkipPreview)
   $('#amz-recap-check').prop('checked', settings.amzSkipRecap)
@@ -435,6 +440,7 @@ function saveSettings() {
     restorePlay: $('#restore-play-check').is(':checked'),
     quickMenu: $('#quick-check').is(':checked'),
     hideNav: $('#nav-check').is(':checked'),
+    hideDock: $('#dock-check').is(':checked'),
     ytSkipAds: $('#yt-skip-check').is(':checked'),
     amzSkipPreview: $('#amz-preview-check').is(':checked'),
     amzSkipRecap: $('#amz-recap-check').is(':checked'),
@@ -479,6 +485,7 @@ function loadDefaultSettings() {
   $('#restore-play-check').prop('checked', defaultSettings.restorePlay)
   $('#quick-check').prop('checked', defaultSettings.quickMenu)
   $('#nav-check').prop('checked', defaultSettings.hideNav)
+  $('#dock-check').prop('checked', defaultSettings.hideDock)
   $('#yt-skip-check').prop('checked', defaultSettings.ytSkipAds)
   $('#amz-preview-check').prop('checked', defaultSettings.amzSkipPreview)
   $('#amz-recap-check').prop('checked', defaultSettings.amzSkipRecap)

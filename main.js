@@ -350,9 +350,10 @@ function streamChange(stream) {
   showBookmarks = false
   currentStream = stream.id
   let localAgent = userAgent
-  if (!stream.url.includes('tv.youtube') && !stream.url.includes('abc.com')) {
-    localAgent = 'Chrome'
-  }
+  // TODO: set user agent based on when logged in or not into google
+  // if (!stream.url.includes('tv.youtube') && !stream.url.includes('abc.com')) {
+  //   localAgent = 'Chrome'
+  // }
   view.webContents.loadURL(stream.url, { userAgent: localAgent })
   win.webContents.send('hide-bookmarks')
   win.webContents.send('stream-changed', stream.url)
@@ -1395,6 +1396,11 @@ ipcMain.on('ontop-lock', () => {
 // IPC channel for unlocking app on top
 ipcMain.on('ontop-unlock', () => {
   win.setAlwaysOnTop(false)
+})
+
+// IPC channel for hiding dock icon
+ipcMain.on('hide-dock-icon', (e, data) => {
+  data ? app.dock.hide() : app.dock.show()
 })
 
 // IPC channel for scaling horzizontally to 16:9
