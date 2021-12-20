@@ -42,9 +42,7 @@ ipcRenderer.on('save-settings', (e, data) => {
 // Stream changed
 ipcRenderer.on('stream-changed', (e, url) => {
   $('.loading').show()
-  if (new URL(url).hostname !== 'www.netflix.com') {
-    $('.facet-host').hide()
-  }
+  toggleFacetsButton(url)
 })
 
 // Show bookmarks
@@ -62,11 +60,6 @@ ipcRenderer.on('hide-bookmarks', () => {
 // Stream loaded
 ipcRenderer.on('stream-loaded', (e, stream) => {
   settings.lastStream = stream
-  if (settings.lastStream.url && settings.lastStream.url.includes('.netflix.com')) {
-    $('#facets-btn').show()
-  } else {
-    $('#facets-btn').hide()
-  }
   $('.loading').hide()
 })
 
@@ -588,6 +581,18 @@ function deleteBookmark(ts) {
 // Sent IPC message to open genre facets
 function toggleFacets() {
   ipcRenderer.send('toggle-facets')
+}
+
+// Toggle the NF facets button based on url
+function toggleFacetsButton(url) {
+  $('#facets-btn').hide()
+  try {
+    if (new URL(url).hostname === 'www.netflix.com') {
+      $('#facets-btn').show()
+    }
+  } catch (err) {
+    console.log('invalid URL')
+  }
 }
 
 // Filter facets

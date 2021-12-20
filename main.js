@@ -380,8 +380,8 @@ function updateShowFacets() {
 
 // Open copied link in new BrowserView
 function openLink(url) {
-  currentStream = 'ot'
   if (validateLink(url)) {
+    currentStream = 'ot'
     const stream = {
       id: setStreamId(url),
       url: url
@@ -422,14 +422,12 @@ function navChange() {
 
 // Set the stream ID if it needs to be derived
 function setStreamId(url) {
-  if (currentStream === 'ot') {
-    const host = new URL(url).hostname
-    if (host === 'www.youtube.com' || host === 'youtu.be') {
-      return 'yt'
-    }
-    if (host === 'www.netflix.com') {
-      return 'nf'
-    }
+  const host = new URL(url).hostname
+  if (host === 'www.youtube.com' || host === 'youtu.be') {
+    return 'yt'
+  }
+  if (host === 'www.netflix.com') {
+    return 'nf'
   }
   return currentStream
 }
@@ -458,8 +456,8 @@ function scaleWidth(width, height) {
 function validateLink(url) {
   try {
     new URL(url)
-  } catch (e) {
-    console.error(e)
+  } catch (err) {
+    console.log('invalid URL')
     return false
   }
   return true
@@ -510,7 +508,7 @@ async function sendBookmark() {
 // Send current stream object
 async function sendCurrentStream() {
   await getCurrentUrl().then((currentUrl) => {
-    win.webContents.send('stream-loaded', { id: setStreamId(currentStream), url: currentUrl })
+    win.webContents.send('stream-loaded', { id: setStreamId(currentUrl), url: currentUrl })
   }).catch((err) => { console.error('SCS:'+err) })
 }
 
@@ -521,7 +519,7 @@ async function getCurrentUrl() {
     let urlAp = await view.webContents.executeJavaScript(
       `try { console.log('got url'); sdAmzUrl; } catch(err) { console.log('not yet') }`
     ).catch((err) => { console.error('GCU:'+err) })
-    urlAp === undefined ? url : url = urlAp
+    url = urlAp === undefined ? url : urlAp
   }
   return url
 }
