@@ -461,6 +461,7 @@ body {
   margin-bottom: 5px;
 }
 
+.text-agent,
 .text-glyph,
 .text-url {
   color: var(--color-fg);
@@ -474,6 +475,7 @@ body {
   border-radius: .25rem !important;
 }
 
+.settings-agents,
 .settings-services-host {
   display: flex;
   flex-flow: column;
@@ -554,6 +556,10 @@ body {
   align-self: center;
   margin: 0;
   margin-top: 1px;
+}
+
+.agent-string {
+  margin-top: 4px;
 }
 
 input[type=color] {

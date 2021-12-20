@@ -260,6 +260,31 @@
                 </div>
               </div>
             </div>
+            <div hidden class="form-group">
+              <div class="panel-group" id="panel-agents">
+                <div class="panel">
+                  <div class="panel-header">
+                    <a class="collapsed" data-toggle="collapse" data-target="#collapse-agents">
+                      <i class="fa fa-chevron-down"></i>
+                      User Agent
+                    </a>
+                  </div>
+                  <div class="panel-body">
+                    <div id="collapse-agents" class="collapse" data-parent="#panel-agents">
+                      <div class="agent-host">
+                        <div class="input-group input-group-sm agent-string">
+                          <input type="text" class="form-control text-agent agent-string-input"/>
+                          <div class="input-group-append">
+                            <button class="btn btn-outline-secondary agent-undo-btn" type="button" title="Revert to previous">Undo</button>
+                            <button class="btn btn-outline-secondary agent-default-btn" type="button" title="Load default agent">Default</button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
           </form>
         </div>
         <div class="modal-footer">

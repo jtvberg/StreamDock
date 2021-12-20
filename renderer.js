@@ -8,6 +8,8 @@
 const { ipcRenderer, nativeImage, clipboard } = require('electron')
 const $ = require('jquery')
 const isMac = process.platform === 'darwin'
+const isLinux = process.platform === 'linux'
+const isWindows = process.platform === 'win32'
 let streamList = []
 let settings = []
 let nfFacets = []
@@ -40,7 +42,7 @@ ipcRenderer.on('save-settings', (e, data) => {
 // Stream changed
 ipcRenderer.on('stream-changed', (e, url) => {
   $('.loading').show()
-  if (url && !url.includes('.netflix.com')) {
+  if (new URL(url).hostname !== 'www.netflix.com') {
     $('.facet-host').hide()
   }
 })
@@ -383,7 +385,7 @@ function loadSettingsModal() {
   $('.facet-host').css('opacity', '0')
   $('.bookmark-host').css('opacity', '0')
   ipcRenderer.send('view-hide')
-  $('#collapse-general, #collapse-services, #collapse-service-specific').collapse('hide')
+  $('#collapse-general, #collapse-services, #collapse-service-specific, #collapse-agents').collapse('hide')
   $('#ontop-check').prop('checked', settings.onTop)
   $('#last-check').prop('checked', settings.openLast)
   $('#window-check').prop('checked', settings.saveWindow)

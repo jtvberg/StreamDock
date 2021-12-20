@@ -97,7 +97,7 @@ const createWindow = () => {
   })
 
   // Open DevTools (window, dev only)
-  // isDev && win.webContents.openDevTools('detach')
+  isDev && win.webContents.openDevTools('detach')
 
   // Create main browserView
   view = new BrowserView()
@@ -350,10 +350,6 @@ function streamChange(stream) {
   showBookmarks = false
   currentStream = stream.id
   let localAgent = userAgent
-  // TODO: set user agent based on when logged in or not into google
-  // if (!stream.url.includes('tv.youtube') && !stream.url.includes('abc.com')) {
-  //   localAgent = 'Chrome'
-  // }
   view.webContents.loadURL(stream.url, { userAgent: localAgent })
   win.webContents.send('hide-bookmarks')
   win.webContents.send('stream-changed', stream.url)
@@ -427,10 +423,11 @@ function navChange() {
 // Set the stream ID if it needs to be derived
 function setStreamId(url) {
   if (currentStream === 'ot') {
-    if (url.includes('.youtube.com') && !url.includes('tv.')) {
+    const host = new URL(url).hostname
+    if (host === 'www.youtube.com' || host === 'youtu.be') {
       return 'yt'
     }
-    if (url.includes('.netflix.com')) {
+    if (host === 'www.netflix.com') {
       return 'nf'
     }
   }
