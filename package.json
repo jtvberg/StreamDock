@@ -41,6 +41,7 @@
       "mirror": "https://github.com/castlabs/electron-releases/releases/download/v"
     },
     "afterPack": "./build/afterPack.js",
+    "afterSign": "./build/afterSign.js",
     "mac": {
       "category": "public.app-category.video",
       "entitlements": "./entitlements.plist"
