@@ -343,8 +343,7 @@ function streamChange(stream) {
   view.setBounds({ x: 0, y: 0, width: 0, height: 0 })
   showBookmarks = false
   currentStream = stream.id
-  let localAgent = userAgent
-  view.webContents.loadURL(stream.url, { userAgent: localAgent })
+  view.webContents.loadURL(stream.url, { userAgent: userAgent })
   win.webContents.send('hide-bookmarks')
   win.webContents.send('stream-changed', stream.url)
 }

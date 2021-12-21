@@ -14,13 +14,15 @@ let streamList = []
 let settings = []
 let nfFacets = []
 let bookmarks = []
+let userAgent = ''
+let defaultAgent = ''
 
 // Invoke services load and apply settings
 loadSettings()
+setUserAgent()
 loadServices()
 applyInitialSettings()
 loadBookmarks()
-setUserAgent()
 openLastStream()
 
 // Set system accent color css variable
@@ -86,7 +88,8 @@ function loadSettings() {
   // Add new default settings to current settings
   if (Object.keys(settings).length !== Object.keys(defaultList).length) {
     for (var prop in defaultList) {
-      if (!Object.prototype.hasOwnProperty.call(settings, prop)) {
+      // TODO: the userAgent thing is stupid but it is simpler
+      if (!Object.prototype.hasOwnProperty.call(settings, prop) && prop !== 'userAgent') {
         settings[prop] = defaultList[prop]
       }
     }
@@ -174,8 +177,8 @@ function applyUpdateSettings() {
   // Skip HBO recap skip
   // ipcRenderer.send('set-hmrecapskip', settings.hmSkipRecap)
 
-  // Skip HBO next episode
-  // ipcRenderer.send('set-hmepisodenext', settings.hmNextEpisode)
+  // Set user agent
+  ipcRenderer.send('set-user-agent', userAgent)
 }
 
 // Iterate through stored services and create buttons/menu entries
@@ -213,7 +216,16 @@ function loadServices() {
 
 // Set user agent
 function setUserAgent() {
-  ipcRenderer.send('set-user-agent', settings.userAgent.macos)
+  userAgent = 'Chrome'
+  let defaultAgents = getDefaultSettings().userAgent
+  if (isMac) {
+    defaultAgent = defaultAgents.macos
+  } else if (isLinux) {
+    defaultAgent = defaultAgents.linux
+  } else if (isWindows) {
+    defaultAgent = defaultAgents.win
+  }
+  userAgent = settings.userAgent ? settings.userAgent : defaultAgent
 }
 
 // Open last stream or first service in list
@@ -433,11 +445,13 @@ function loadSettingsModal() {
     $('.serv-bg-pick-label', instance).prop('for', `serv-bg-${serv.id}`)
     $('#settings-services-available').append(instance)
   })
+  $('#agent-string-input').val(userAgent)
   $('#settings-modal').modal('show')
 }
 
 // Save settings to local storage
 function saveSettings() {
+  userAgent = $('#agent-string-input').val()
   settings = {
     onTop: $('#ontop-check').is(':checked'),
     openLast: $('#last-check').is(':checked'),
@@ -461,6 +475,7 @@ function saveSettings() {
     hmNextEpisode: $('#hm-next-check').is(':checked'),
     themeMode: $('#choose-theme input:radio:checked').val(),
     lastStream: settings.lastStream,
+    userAgent: userAgent,
     windowSizeLocation: settings.windowSizeLocation
   }
   localStorage.setItem('settings', JSON.stringify(settings))
@@ -505,6 +520,7 @@ function loadDefaultSettings() {
   $('#hm-recap-check').prop('checked', defaultSettings.hmSkipRecap)
   $('#hm-next-check').prop('checked', defaultSettings.hmNextEpisode)
   $('.serv-check').prop('checked', false)
+  $('#agent-string-input').val(defaultAgent)
   getDefaultStreams().forEach((serv) => {
     $(`#check-${serv.id}`).prop('checked', serv.active ? 'checked' : '')
   })
@@ -793,4 +809,14 @@ $('#settings-save-btn').on('click', () => {
 // Settings default button handler
 $('#settings-default-btn').on('click', () => {
   loadDefaultSettings()
+})
+
+// Settings undo user agent change
+$('#agent-undo-btn').on('click', () => {
+  $('#agent-string-input').val(userAgent)
+})
+
+// Settings set user agent to default
+$('#agent-default-btn').on('click', () => {
+  $('#agent-string-input').val(defaultAgent)
 })
