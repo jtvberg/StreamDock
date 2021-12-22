@@ -560,6 +560,7 @@ body {
 
 .agent-string {
   margin-top: 4px;
+  margin-bottom: 3px;
 }
 
 input[type=color] {
