@@ -761,7 +761,7 @@ function amzPreviewSkipMut() {
 function amzPreviewSkipObs() {
   try {
     console.log('prev obs')
-    obsAmzPreview.observe(document.querySelector(`${obsEleAmzPreview}`), { childList: true, subtree: true })
+    obsAmzPreview.observe(document.querySelector(obsEleAmzPreview), { childList: true, subtree: true })
   } catch (err) { console.error(err) }
 }
 
