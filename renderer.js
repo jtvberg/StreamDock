@@ -401,7 +401,7 @@ function loadSettingsModal() {
   $('.facet-host').css('opacity', '0')
   $('.bookmark-host').css('opacity', '0')
   ipcRenderer.send('view-hide')
-  $('#collapse-general, #collapse-services, #collapse-service-specific, #collapse-agents').collapse('hide')
+  $('#collapse-general, #collapse-services, #collapse-service-specific, #collapse-advanced').collapse('hide')
   $('#ontop-check').prop('checked', settings.onTop)
   $('#last-check').prop('checked', settings.openLast)
   $('#window-check').prop('checked', settings.saveWindow)
