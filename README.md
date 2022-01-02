@@ -42,7 +42,7 @@
    Some possible workarounds:
    - If you have YouTubeTV you can try to sign into YouTube and that should sign you in to YouTubeTV (YMMV)
    - Conversely, if you have ABC (through YouTubeTV), signing into that seems to sign you into YouTube and YouTubeTV as well as ABC looks to be using an older login paradigm
-   - Prior to being signed in, you can update the user agent to just 'Chrome' (under Preferences > Advanced Settings) then login. You then must put it back to the default agent or some other valid one to get the service to actually work.
+   - Prior to being signed in, you can update the user agent to just 'Chrome' (under Preferences > Advanced Settings) then login. You then must put it back to the default agent or some other valid one to get the service to actually work.\
    Peacock is set to off by default as the login is not working at all...
 
 ## App Control
