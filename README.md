@@ -30,7 +30,7 @@
    You must add a call in the build process to EVS via the electron-builder afterPack or afterSign hook.\
    You must sign prior to code signing on Mac and after code signing on Windows. 
 
-   NOTE: You have to sign up for an EVS account and you will need to have Python to use it.
+   NOTE: You must sign up for an EVS account and you will need to have Python to use it.
 
 ## Building
    The code builds for Mac, Windows and Linux.
@@ -39,10 +39,10 @@
 ## Releases / Known Issues
    The current release works on Mac (signed and notarized). There are previous versions for Windows (self-signed) and Linux.\
    At the moment, any service using Google auth may not allow you to login. This only matters if you have to sign-in to use (so, YouTube works (but it is anonymous), YouTubeTV will not.) The user agent spoofing is tempremental.\
-   Some possible work-arounds:\
-   - If you have YouTubeTV you can try to sign into YouTube and that should sign you in to YouTubeTV and ABC as well (YMMV)
+   Some possible workarounds:
+   - If you have YouTubeTV you can try to sign into YouTube and that should sign you in to YouTubeTV (YMMV)
    - Conversely, if you have ABC (through YouTubeTV), signing into that seems to sign you into YouTube and YouTubeTV as well as ABC looks to be using an older login paradigm
-   - Prior to being signed in, you can update the user agent to just 'Chrome' then login. You then have to put it back to the default agent or some other valid one to get the service to actually work.
+   - Prior to being signed in, you can update the user agent to just 'Chrome' (under Preferences > Advanced Settings) then login. You then must put it back to the default agent or some other valid one to get the service to actually work.
    Peacock is set to off by default as the login is not working at all...
 
 ## App Control
@@ -67,11 +67,11 @@
    - Netflix, Hulu, Disney+ and Prime 'Binge Mode' that will automatically start the next episode in a series (skipping delay)
    - You can also skip YouTube ads and dismiss ad overlays when possible (while not all ads are skippable, if turned on it will even skip ads before the skip button even appears)
 
-   One note: On some services there are scenarios where an option to skip something doesn't show up. For instance, on Prime, sometimes the episode recap is not skippable. There doesn't appear to be any rhyme or reason as to why sometimes you can't skip a recap or intro for certain shows on certain services but if you notice that something is playing that you chose to skip and there is no UI element that would allow a user to skip that content, the app is working as intended as there is nothing to key off of for that show/service combo. I have even seen scenarios where for a specific episode, there is no option to skip a recap but you can on other episodes of the same show/service combo.
+   One note: On some services there are scenarios where an option to skip something doesn't show up. For instance, on Prime, sometimes the episode recap is not skippable. There doesn't appear to be any rhyme or reason as to why sometimes you can't skip a recap or intro for certain shows on certain services but if you notice that something is playing that you chose to skip and there is no UI element that would allow a user to skip that content, the app is working as intended as there is nothing to key off of for that show/service combo. I have even seen scenarios where for a specific episode, there is no option to skip a recap, but you can on other episodes of the same show/service combo.
 
 ## TODO
    - I haven't given up yet but HBO Max is pretty much impossible to work with around recap/intro/preview/next episode skipping
-   - I need to look into adding Google OAuth to allow more reliable logins for YouTube TV and other services
+   - I need to investigate adding Google OAuth to allow more reliable logins for YouTube TV and other services
    - Contemplating multiple windows but in general, this seems silly (leave a comment if you think there is a good reason to do this!)
    - I don't like how there is no z-order for the BrowserWindow vs. BrowserView. This means I can't render any UI elements above the view (and why video is hidden when using the preferences menu.) In general, this is not a big deal but there are some cool UI tricks I could implement if I moved portions of the UI to another BrowserView (for instance, I could use custom tooltips and auto-hide the header bar)
    - Would like to be able to allow the user to add services. As it is, you can do this by changing the URLs for existing services (which I don't recommend as there is service specific code associated with the service ID) or by adding bookmarks to other services
