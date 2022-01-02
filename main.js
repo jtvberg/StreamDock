@@ -91,7 +91,7 @@ const createWindow = () => {
   })
 
   // Open DevTools (window, dev only)
-  isDev && win.webContents.openDevTools('detach')
+  // isDev && win.webContents.openDevTools('detach')
 
   // Create main browserView
   view = new BrowserView()
@@ -1561,283 +1561,279 @@ ipcMain.on('set-user-agent', (e, data) => {
 })
 
 // Build menu template
-const template = [{
-  label: app.name,
-  submenu: [{
-    label: 'About',
-    click() {
-      dialog.showMessageBox({
-        title: `About ${app.name}`,
-        message: `StreamDock\nVersion ${app.getVersion()}`,
-        detail: 'Copyright \u00A9 jtvberg 2020-2021',
-        buttons: []
-      })
-    } 
-  },
+const template = [
   {
-    type: 'separator'
-  },
-  {
-    label: 'Preferences',
-    click() {
-      win.webContents.send('load-settings')
-    }
-  },
-  ...(isMac ? [{
-    type: 'separator'
-  },
-  {
-    role: 'services'
-  },
-  {
-    type: 'separator'
-  },
-  {
-    role: 'hide'
-  },
-  {
-    role: 'hideothers'
-  },
-  {
-    role: 'unhide'
-  },
-  {
-    type: 'separator'
-  },
-  {
-    role: 'quit'
-  }
-  ] : [{
-    type: 'separator'
-  },
-  {
-    role: 'quit'
-  }
-  ])
-  ]
-},
-{
-  label: 'Edit',
-  submenu: [{
-    role: 'undo'
-  },
-  {
-    role: 'redo'
-  },
-  {
-    type: 'separator'
-  },
-  {
-    role: 'cut'
-  },
-  {
-    role: 'copy'
-  },
-  {
-    role: 'paste'
-  },
-  ...(isMac ? [{
-    role: 'pasteAndMatchStyle'
-  },
-  {
-    role: 'delete'
-  },
-  {
-    role: 'selectAll'
-  },
-  ] : [{
-    role: 'delete'
-  },
-  {
-    type: 'separator'
-  },
-  {
-    role: 'selectAll'
-  }
-  ])
-  ]
-},
-{
-  label: 'Streams',
-  submenu: []
-},
-{
-  label: 'View',
-  submenu: [{
-    label: 'Toggle Bookmarks',
-    click() {
-      toggleBookmarks()
-    }
-  },
-  {
-    label: 'Bookmark Stream',
-    click() {
-      captureStream()
-    }
-  },
-  {
-    type: 'separator'
-  },
-  {
-    label: 'Toggle Full Screen',
-    id: 'fullScreen',
-    click() {
-      win.setFullScreen(!win.fullScreen)
-    }
-  },
-  {
-    label: 'Scale Height',
+    label: app.name,
     submenu: [
       {
-        label: '16:9',
+        label: 'About',
         click() {
-          scaleHeight(16, 9)
+          dialog.showMessageBox({
+            title: `About ${app.name}`,
+            message: `StreamDock\nVersion ${app.getVersion()}`,
+            detail: 'Copyright \u00A9 jtvberg 2020-2021',
+            buttons: []
+          })
+        } 
+      },
+      {
+        type: 'separator'
+      },
+      {
+        label: 'Preferences',
+        click() {
+          win.webContents.send('load-settings')
+        }
+      },
+      ...(isMac ? [
+        {
+          type: 'separator'
+        },
+        {
+          role: 'services'
+        },
+        {
+          type: 'separator'
+        },
+        {
+          role: 'hide'
+        },
+        {
+          role: 'hideothers'
+        },
+        {
+          role: 'unhide'
+        }
+      ] : []),
+      {
+        type: 'separator'
+      },
+      {
+        role: 'quit'
+      }
+    ]
+  },
+  {
+    label: 'Edit',
+    submenu: [
+      {
+        role: 'undo'
+      },
+      {
+        role: 'redo'
+      },
+      {
+        type: 'separator'
+      },
+      {
+        role: 'cut'
+      },
+      {
+        role: 'copy'
+      },
+      {
+        role: 'paste'
+      },
+      ...(isMac ? [
+        {
+          role: 'pasteAndMatchStyle'
+        }
+      ] : []),
+      {
+        role: 'delete'
+      },
+      {
+        role: 'selectAll'
+      }
+    ]
+  },
+  {
+    label: 'Streams',
+    submenu: []
+  },
+  {
+    label: 'View',
+    submenu: [
+      {
+        label: 'Toggle Bookmarks',
+        click() {
+          toggleBookmarks()
         }
       },
       {
-        label: '4:3',
+        label: 'Bookmark Stream',
         click() {
-          scaleHeight(4, 3)
+          captureStream()
         }
       },
       {
-        label: '2:1',
+        type: 'separator'
+      },
+      {
+        label: 'Toggle Full Screen',
+        id: 'fullScreen',
         click() {
-          scaleHeight(2, 1)
+          win.setFullScreen(!win.fullScreen)
         }
       },
       {
-        label: '2.4:1',
+        label: 'Scale Height',
+        submenu: [
+          {
+            label: '16:9',
+            click() {
+              scaleHeight(16, 9)
+            }
+          },
+          {
+            label: '4:3',
+            click() {
+              scaleHeight(4, 3)
+            }
+          },
+          {
+            label: '2:1',
+            click() {
+              scaleHeight(2, 1)
+            }
+          },
+          {
+            label: '2.4:1',
+            click() {
+              scaleHeight(12, 5)
+            }
+          }
+        ]
+      },
+      {
+        label: 'Scale Width',
+        submenu: [
+          {
+            label: '16:9',
+            click() {
+              scaleWidth(16, 9)
+            }
+          },
+          {
+            label: '4:3',
+            click() {
+              scaleWidth(4, 3)
+            }
+          },
+          {
+            label: '2:1',
+            click() {
+              scaleWidth(2, 1)
+            }
+          },
+          {
+            label: '2.4:1',
+            click() {
+              scaleWidth(12, 5)
+            }
+          }
+        ]
+      },
+      {
+        type: 'separator'
+      },
+      {
+        label: 'Navigate Backward',
         click() {
-          scaleHeight(12, 5)
+          navBack()
+        }
+      },
+      {
+        label: 'Navigate Forward',
+        click() {
+          navForward()
+        }
+      },
+      {
+        role: 'reload'
+      },
+      {
+        role: 'forcereload'
+      },
+      {
+        type: 'separator'
+      },
+      {
+        label: 'Toggle Genres',
+        id: 'toggleGenres',
+        enabled: false,
+        click() {
+          toggleFacets()
+        }
+      },
+      {
+        type: 'separator'
+      },
+      {
+        label: 'Open Copied URL',
+        click() {
+          openLink(clipboard.readText())
         }
       }
     ]
   },
   {
-    label: 'Scale Width',
+    label: 'Window',
     submenu: [
       {
-        label: '16:9',
-        click() {
-          scaleWidth(16, 9)
-        }
+        role: 'minimize'
       },
       {
-        label: '4:3',
-        click() {
-          scaleWidth(4, 3)
-        }
+        role: 'zoom'
       },
       {
-        label: '2:1',
+        label: 'Lock On Top',
         click() {
-          scaleWidth(2, 1)
+          win.isAlwaysOnTop() ? win.setAlwaysOnTop(false) : win.setAlwaysOnTop(true, 'floating')
         }
       },
-      {
-        label: '2.4:1',
-        click() {
-          scaleWidth(12, 5)
+      ...(isMac ? [
+        {
+          type: 'separator'
+        },
+        {
+          role: 'front'
+        },
+        {
+          type: 'separator'
+        },
+        {
+          role: 'window'
         }
-      }
+      ] : [
+        {
+          role: 'close'
+        }
+      ])
     ]
   },
   {
-    type: 'separator'
-  },
-  {
-    label: 'Navigate Backward',
-    click() {
-      navBack()
-    }
-  },
-  {
-    label: 'Navigate Forward',
-    click() {
-      navForward()
-    }
-  },
-  {
-    role: 'reload'
-  },
-  {
-    role: 'forcereload'
-  },
-  {
-    type: 'separator'
-  },
-  {
-    label: 'Toggle Genres',
-    id: 'toggleGenres',
-    enabled: false,
-    click() {
-      toggleFacets()
-    }
-  },
-  {
-    type: 'separator'
-  },
-  {
-    label: 'Open Copied URL',
-    click() {
-      openLink(clipboard.readText())
-    }
+    role: 'help',
+    submenu: [
+      {
+        label: 'Learn More',
+        click: async () => {
+          const { shell } = require('electron')
+          await shell.openExternal('https://github.com/jtvberg/StreamDock')
+        }
+      },
+      {
+        type: 'separator'
+      },
+      {
+        label: 'Open Devtools',
+        click() {
+          win.webContents.openDevTools('detach')
+          view.webContents.openDevTools('detach')
+        }
+      }
+    ]
   }
-  ]
-},
-{
-  label: 'Window',
-  submenu: [{
-    role: 'minimize'
-  },
-  {
-    role: 'zoom'
-  },
-  {
-    label: 'Lock On Top',
-    click() {
-      win.isAlwaysOnTop() ? win.setAlwaysOnTop(false) : win.setAlwaysOnTop(true, 'floating')
-    }
-  },
-  ...(isMac ? [{
-    type: 'separator'
-  },
-  {
-    role: 'front'
-  },
-  {
-    type: 'separator'
-  },
-  {
-    role: 'window'
-  }
-  ] : [{
-    role: 'close'
-  }])
-  ]
-},
-{
-  role: 'help',
-  submenu: [{
-    label: 'Learn More',
-    click: async () => {
-      const { shell } = require('electron')
-      await shell.openExternal('https://github.com/jtvberg/StreamDock')
-    }
-  },
-  {
-    type: 'separator'
-  },
-  {
-    label: 'Open Devtools',
-    click() {
-      win.webContents.openDevTools('detach')
-      view.webContents.openDevTools('detach')
-    }
-  }
-  ]
-}
 ]
 
 // Set template
