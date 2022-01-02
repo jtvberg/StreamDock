@@ -38,9 +38,11 @@
 
 ## Releases / Known Issues
    The current release works on Mac (signed and notarized). There are previous versions for Windows (self-signed) and Linux.\
-   At the moment, any service using Google auth may not allow you to login. This only matters if you have to sign-in to use (so, YouTube works (but it is anonymous), YouTube TV will not.)\
-   The user agent spoofing is tempremental.
-   As a work-around: If you have YouTube TV you can try to sign into YouTube and that should sign you in to YouTubeTV and ABC as well.
+   At the moment, any service using Google auth may not allow you to login. This only matters if you have to sign-in to use (so, YouTube works (but it is anonymous), YouTubeTV will not.) The user agent spoofing is tempremental.\
+   Some possible work-arounds:\
+   - If you have YouTubeTV you can try to sign into YouTube and that should sign you in to YouTubeTV and ABC as well (YMMV)
+   - Conversely, if you have ABC (through YouTubeTV), signing into that seems to sign you into YouTube and YouTubeTV as well as ABC looks to be using an older login paradigm
+   - Prior to being signed in, you can update the user agent to just 'Chrome' then login. You then have to put it back to the default agent or some other valid one to get the service to actually work.
    Peacock is set to off by default as the login is not working at all...
 
 ## App Control
