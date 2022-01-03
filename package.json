@@ -20,7 +20,7 @@
     "Video"
   ],
   "author": "jtvberg <streamdockapp@gmail.com> (https://github.com/jtvberg/StreamDock)",
-  "license": "CC0-1.0",
+  "license": "MIT",
   "devDependencies": {
     "electron": "github:castlabs/electron-releases#v12.2.3-wvvmp",
     "electron-builder": "^22.14.5",
