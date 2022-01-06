@@ -31,7 +31,7 @@
    - You must add a call in the build process to EVS via the electron-builder afterPack or afterSign hook
    - You must sign prior to code signing on Mac and after code signing on Windows
 
-   NOTE: You must sign up for an EVS account and you will need to have Python to use it.
+   NOTE: You must sign up for an EVS account (free) and you will need to have Python to use it.
 
 ## Building
    The code builds for Mac, Windows and Linux.
@@ -40,13 +40,13 @@
 ## Releases / Known Issues
    The current release works on Mac (signed and notarized). There are previous versions for Windows (self-signed) and Linux.
    
-   The auto-update should prompt you as new releases come out and then post download prompt you to install/restart. Sometimes it won't do the restart. If you wait a minute and exit the app completely, it should automatically restart the new version.
+   The auto-update should prompt you as new releases come out and then, post download, prompt you to install/restart. Sometimes, it won't do the restart. If you wait a minute and exit the app completely, it should automatically restart the new version.
    
    At the moment, any service using Google auth may not allow you to login. This only matters if you have to sign-in to use (so, YouTube works (but it is anonymous), YouTubeTV will not.) The user agent spoofing is tempremental.\
    Some possible workarounds:
    - If you have YouTubeTV you can try to sign into YouTube and that should sign you in to YouTubeTV (YMMV)
-   - Conversely, if you have ABC (through YouTubeTV), signing into that seems to sign you into YouTube and YouTubeTV as well as ABC looks to be using an older login paradigm
-   - Prior to being signed in, you can update the user agent to just 'Chrome' (under Preferences > Advanced Settings) then login. You then must put it back to the default agent or some other valid one to get the service to actually work.\
+   - Conversely, if you have ABC (through YouTubeTV), signing into that seems to also sign you into YouTube and YouTubeTV as ABC looks to be using an older login paradigm
+   - Prior to being signed in, you can update the user agent to just 'Chrome' (under Preferences > Advanced Settings) then login. You then must put it back to the default agent or some other valid one to get the service to actually work.
    
    Peacock is set to off by default as the login is not working at all...
 
@@ -61,7 +61,7 @@
    - You can open a link from clipboard via the 'View' menu (or in the header)
    - You can scale the video to 16:9 (or 4:3, 2:1, 2.4:1) either vertically or horizontally also in the view menu (or in the header for 16:9 only)
    - You can bookmark streams via the bookmark button in the header or via the 'View' menu
-   - Toggle bookmarks via the far-left quick access button
+   - Toggle bookmarks via the far-left quick access button (or in the view menu)
 
 ## Service Specific Features
    You can view the extended Netflix genres via 'Show Genres' button or alternatively in the 'View' menu.\
@@ -72,7 +72,7 @@
    - Netflix, Hulu, Disney+ and Prime 'Binge Mode' that will automatically start the next episode in a series (skipping delay)
    - You can also skip YouTube ads and dismiss ad overlays when possible (while not all ads are skippable, if turned on it will even skip ads before the skip button even appears)
 
-   One note: On some services there are scenarios where an option to skip something doesn't show up. For instance, on Prime, sometimes the episode recap is not skippable. There doesn't appear to be any rhyme or reason as to why sometimes you can't skip a recap or intro for certain shows on certain services but if you notice that something is playing that you chose to skip and there is no UI element that would allow a user to skip that content, the app is working as intended as there is nothing to key off of for that show/service combo. I have even seen scenarios where for a specific episode, there is no option to skip a recap, but you can on other episodes of the same show/service combo.
+   One note: On some services there are scenarios where an option to skip something doesn't show up. For instance, on Prime, sometimes the episode recap is not skippable. There doesn't appear to be any rhyme or reason as to why sometimes you can't skip a recap or intro for certain shows on certain services, but if you notice that something is playing that you chose to skip and there is no UI element that would allow a user to skip that content, the app is working as intended as there is nothing to key off of for that show/service combo. I have even seen scenarios where for a specific episode, there is no option to skip a recap, but you can on other episodes of the same show/service combo.
 
 ## TODO
    - I haven't given up yet but HBO Max is pretty much impossible to work with around recap/intro/preview/next episode skipping
