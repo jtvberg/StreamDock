@@ -24,9 +24,18 @@
     </div>
   </header>
   <div class="logo"></div>
-  <div class="bookmark-host">
-    <h3 class="bookmark-host-title">Bookmarked Streams</h3>
-    <div class="bookmark-stream-host"></div>
+  <div class="home-screen">
+    <div class="bookmark-host">
+      <h3 class="bookmark-host-title">Bookmarked Streams</h3>
+      <div class="bookmark-stream-host"></div>
+    </div>
+    <div class="search-host">
+      <div>
+        <button type="button" id="get-media" class="btn btn-primary">GET</button>
+        <input id="search-input" value="Star Wars"></input>
+      </div>
+      <div id="search-result-host"></div>
+    </div>
   </div>
   <div class="loading">
     <div class="spinner-border text-primary" style="width: 5rem; height: 5rem;" role="status">
@@ -343,6 +352,21 @@
         <span class="fa fa-square serv-color-btn serv-bg-pick-btn"></span>
         <input type="color" class="serv-color-input serv-bg-pick-input">
         <label class="label-text serv-bg-pick-label">Background</label>
+      </div>
+    </div>
+  </template>
+  <template id="search-result-instance">
+    <div class="result-tile container-fluid">
+      <div class="row">
+        <div class="result-image-host col-md-auto">
+          <img class="result-image" style="width: 100px"></img>
+        </div>
+        <div class="result-details col">
+          <div class="result-title"></div>
+          <div class="result-overview"></div>
+          <div class="result-cast"></div>
+          <div class="result-providers"></div>
+        </div>
       </div>
     </div>
   </template>

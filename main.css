@@ -73,11 +73,21 @@ body {
   bottom: 5px;
 }
 
+.search-host {
+  position: absolute;
+  top: 50%;
+  margin: 10px;
+  width: 100%;
+  height: 50%;
+  overflow-y: hidden;
+  color: var(--color-fg);
+}
+
 .bookmark-host {
   position: absolute;
   margin: 10px;
   width: 100%;
-  height: 100%;
+  height: 50%;
   overflow-y: hidden;
   color: var(--color-fg);
 }
@@ -94,6 +104,7 @@ body {
 }
 
 .bookmark-host-title {
+  margin-top: 50px;
   margin-left: 5px;
   margin-bottom: -5px;
 }
@@ -552,4 +563,28 @@ input[type=color] {
   width: 0px;
   height: 0px;
   visibility: hidden;
+}
+
+.result-tile {
+  margin: 5px;
+  width: 98%;
+  padding: 5px;
+  border-radius: 5px;
+}
+
+.result-tile:hover {
+  background-color: var(--color-neutral);
+}
+
+.result-title {
+  font-size: larger;
+  font-weight: 800;
+}
+
+.result-details {
+  padding-left: 5px;
+}
+
+.result-image-host {
+  padding-right: 0px;
 }
