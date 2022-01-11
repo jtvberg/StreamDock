@@ -99,7 +99,7 @@ const createWindow = () => {
   // Show browserView when loaded
   view.webContents.on('did-finish-load', () => {
     // Open DevTools (view, dev only)
-    isDev && view.webContents.openDevTools('detach')
+    // isDev && view.webContents.openDevTools('detach')
     sendCurrentStream()
     setView()
     streamLoaded()

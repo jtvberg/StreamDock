@@ -8,6 +8,7 @@
 const { ipcRenderer, nativeImage, clipboard } = require('electron')
 const $ = require('jquery')
 const _ = require('lodash')
+const fs = require('fs')
 const isMac = process.platform === 'darwin'
 const isLinux = process.platform === 'linux'
 const isWindows = process.platform === 'win32'
@@ -826,10 +827,15 @@ $('#get-media').on('click', () => {
   getSearchResults()
 })
 
-
+// Get API key
+// TODO move into setting
+function getApiKey() {
+  return fs.readFileSync('./private/search_api_key.txt')
+}
 
 // Call API to get search results
 function getSearchResults() {
+  const api_key = getApiKey()
   $('#search-result-host').empty()
   var getMedia = $.getJSON(`https://api.themoviedb.org/3/search/multi?api_key=${api_key}&language=en-US&query=${$('#search-input').val()}&include_adult=false`)
     .always(function() {
