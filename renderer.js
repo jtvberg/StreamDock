@@ -202,7 +202,6 @@ function loadServices() {
   }
   ipcRenderer.send('reset-menu')
   $('.service-btn-host').empty()
-  $('.service-btn-host').append('<div class="far fa-bookmark fa-xs bookmarks-btn" title="Toggle Bookmarks"></div>')
   const template = document.getElementById('service-btn-instance')
   streamList.forEach(function (serv) {
     if (serv.active) {
@@ -640,18 +639,13 @@ function facetFilter(filter) {
 
 // Flash the bookmarks toggle when adding bookmark
 function addBookmarkFlash() {
-  $('.bookmarks-btn').addClass('bookmarks-btn-add')
+  $('#home-btn').addClass('bookmarks-btn-add')
 }
 
 // Load NF facets from file
 $.getJSON('nffacets.json', function(json) { 
   nfFacets = json
 }).then(renderNfFacets)
-
-// Bookmarks toggle click handler
-$(document).on('click', '.bookmarks-btn', () => {
-  ipcRenderer.send('toggle-bookmarks')
-})
 
 // NF facet click handler
 $(document).on('click', '.nf-facet', function () {
@@ -713,6 +707,11 @@ $(document).on('click', '.bookmark-url-btn', function () {
   clipboard.writeText($(this).data('url'))
 })
 
+// Home Screen toggle click handler
+$('#home-btn').on('click', () => {
+  ipcRenderer.send('toggle-bookmarks')
+})
+
 // Stop button dblclick from bubbling up to header
 $('.service-btn-host, .control-btn-host').on('dblclick', (e) => {
   e.stopPropagation()
@@ -757,8 +756,8 @@ $('#facets-btn').on('click', () => {
 
 // Bookmark location
 $('#bookmark-btn').on('click', () => {
-  if ($('.bookmarks-btn').hasClass('bookmarks-btn-add')) {
-    $('.bookmarks-btn').removeClass('bookmarks-btn-add')
+  if ($('#home-btn').hasClass('bookmarks-btn-add')) {
+    $('#home-btn').removeClass('bookmarks-btn-add')
   }
   ipcRenderer.send('save-bookmark')
   setInterval(addBookmarkFlash, 10)
