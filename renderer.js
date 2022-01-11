@@ -50,16 +50,16 @@ ipcRenderer.on('stream-changed', (e, url) => {
   toggleFacetsButton(url)
 })
 
-// Show bookmarks
-ipcRenderer.on('show-bookmarks', () => {
+// Show home screen
+ipcRenderer.on('show-homescreen', () => {
   $('.facet-host').hide()
   $('.loading').hide()
-  $('.bookmark-host').show()
+  $('.home-screen').show()
 })
 
-// Hide bookmarks
-ipcRenderer.on('hide-bookmarks', () => {
-  $('.bookmark-host').hide()
+// Hide home screen
+ipcRenderer.on('hide-homescreen', () => {
+  $('.home-screen').hide()
 })
 
 // Stream loaded
@@ -117,7 +117,7 @@ function applyInitialSettings() {
     ipcRenderer.send('set-window', settings.windowSizeLocation)
   }
 
-  $('.bookmark-host').hide()
+  $('.home-screen').hide()
   $('.facet-host').hide()
   $('#facets-btn').hide()
 
@@ -400,7 +400,7 @@ function maxRestoreWindow() {
 // Load stored values into settings modal
 function loadSettingsModal() {
   $('.facet-host').css('opacity', '0')
-  $('.bookmark-host').css('opacity', '0')
+  $('.home-screen').css('opacity', '0')
   ipcRenderer.send('view-hide')
   $('#collapse-general, #collapse-services, #collapse-service-specific, #collapse-advanced').collapse('hide')
   $('#ontop-check').prop('checked', settings.onTop)
@@ -711,7 +711,7 @@ $(document).on('click', '.bookmark-url-btn', function () {
 
 // Home Screen toggle click handler
 $('#home-btn').on('click', () => {
-  ipcRenderer.send('toggle-bookmarks')
+  ipcRenderer.send('toggle-homescreen')
 })
 
 // Stop button dblclick from bubbling up to header
@@ -798,7 +798,7 @@ $('.header-bar').on('contextmenu', () => {
 // Settings close restore View
 $('#settings-modal').on('hidden.bs.modal', () => {
   $('.facet-host').css('opacity', '1')
-  $('.bookmark-host').css('opacity', '1')
+  $('.home-screen').css('opacity', '1')
   ipcRenderer.send('view-show')
 })
 

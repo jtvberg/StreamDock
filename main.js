@@ -17,7 +17,6 @@ const baseHeaderSize = 22
 const baseMenuHeight = isLinux ? 25 : 57
 const baseAdjustWidth = isWindows ? 16 : 0
 const facetAdjustWidth = isWindows ? 265 : 250
-// const bookmarkAdjustWidth = 230
 let headerSize = baseHeaderSize
 let winAdjustHeight = isMac ? headerSize : baseMenuHeight + headerSize
 let wb = { x: 0, y: 0, height: 0, width: 0 }
@@ -38,7 +37,7 @@ let dpNextEpisode = false
 let dpSkipRecap = false
 // let hmNextEpisode = false
 // let hmSkipRecap = false
-let showBookmarks = false
+let showHomescreen = false
 let userAgent = ''
 let currentStream = ''
 let touchBarItems = []
@@ -263,7 +262,7 @@ function defaultPause() {
 
 // Play stream
 function play() {
-  if (!showBookmarks) {
+  if (!showHomescreen) {
     switch (currentStream) {
       case 'at':
         view.webContents.executeJavaScript(`(${atPlay.toString()})()`)
@@ -324,7 +323,7 @@ function setView() {
 
 // Adjust view bounds to window
 function setViewBounds() {
-  if (!showBookmarks && !showPrefs) {
+  if (!showHomescreen && !showPrefs) {
   // if (!showPrefs) {
     updateShowFacets()
     let waw = showFacets ? facetAdjustWidth : baseAdjustWidth
@@ -341,10 +340,10 @@ function setViewBounds() {
 function streamChange(stream) {
   isPlaying ? pause() : null
   view.setBounds({ x: 0, y: 0, width: 0, height: 0 })
-  showBookmarks = false
+  showHomescreen = false
   currentStream = stream.id
   view.webContents.loadURL(stream.url, { userAgent: userAgent })
-  win.webContents.send('hide-bookmarks')
+  win.webContents.send('hide-homescreen')
   win.webContents.send('stream-changed', stream.url)
 }
 
@@ -386,8 +385,8 @@ function openLink(url) {
 // Navigate view backwards
 function navBack() {
   if (view.getBounds().width === 0) {
-    showBookmarks = false
-    win.webContents.send('hide-bookmarks')
+    showHomescreen = false
+    win.webContents.send('hide-homescreen')
     setViewBounds()
   } else if (view.webContents.canGoBack()) {
     navChange()
@@ -464,19 +463,17 @@ function captureStream() {
   setTimeout(sendBookmark, 1000)
 }
 
-// TODO: Make docked on left of video
-// Toggle bookmarks page
-function toggleBookmarks() {
-  if (showBookmarks) {
-    showBookmarks = false
-    win.webContents.send('hide-bookmarks')
+// Toggle home screen page
+function toggleHomescreen() {
+  if (showHomescreen) {
+    showHomescreen = false
+    win.webContents.send('hide-homescreen')
     setViewBounds()
   } else {
     isPlaying ? pause() : null
-    showBookmarks = true
-    win.webContents.send('show-bookmarks')
+    showHomescreen = true
+    win.webContents.send('show-homescreen')
     view.setBounds({ x: 0, y: 0, width: 0, height: 0})
-    // view.setBounds({ x: bookmarkAdjustWidth, y: baseHeaderSize, width: wb.width - bookmarkAdjustWidth, height: wb.height - baseHeaderSize })
   }
 }
 
@@ -1470,8 +1467,8 @@ ipcMain.on('save-bookmark', () => {
 })
 
 // IPC channel to toggle bookmarks
-ipcMain.on('toggle-bookmarks', () => {
-  toggleBookmarks()
+ipcMain.on('toggle-homescreen', () => {
+  toggleHomescreen()
 })
 
 // IPC channel to skip YouTube ads
@@ -1655,9 +1652,9 @@ const template = [
     label: 'View',
     submenu: [
       {
-        label: 'Toggle Bookmarks',
+        label: 'Toggle Home Screen',
         click() {
-          toggleBookmarks()
+          toggleHomescreen()
         }
       },
       {
