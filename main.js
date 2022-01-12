@@ -62,8 +62,8 @@ const createWindow = () => {
   win = new BrowserWindow({
     height: 600,
     width: 800,
-    minHeight: 348,
-    minWidth: 580,
+    minHeight: 400,
+    minWidth: 672,
     transparent: isMac,
     hasShadow: false,
     frame: !isMac,

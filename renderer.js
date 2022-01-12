@@ -829,6 +829,7 @@ $('#search-input').on('keypress', (e) => {
   }
 })
 
+// Clear search input box
 $('.search-clear').on('click', () => {
   $('#search-input').val('')
 })
