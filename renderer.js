@@ -823,8 +823,14 @@ $('#agent-default-btn').on('click', () => {
 })
 
 // Get serach results click handler
-$('#get-media').on('click', () => {
-  getSearchResults()
+$('#search-input').on('keypress', (e) => {
+  if (e.key === 'Enter' && $('#search-input').val().length > 0) {
+    getSearchResults()
+  }
+})
+
+$('.search-clear').on('click', () => {
+  $('#search-input').val('')
 })
 
 // Get API key
@@ -836,7 +842,7 @@ function getApiKey() {
 // Call API to get search results
 function getSearchResults() {
   const api_key = getApiKey()
-  $('#search-result-host').empty()
+  $('.search-result-host').empty()
   var getMedia = $.getJSON(`https://api.themoviedb.org/3/search/multi?api_key=${api_key}&language=en-US&query=${$('#search-input').val()}&include_adult=false`)
     .always(function() {
       const results = _.orderBy(_.filter(getMedia.responseJSON.results, o => o.media_type !== 'person'), 'popularity', 'desc')
