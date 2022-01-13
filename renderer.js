@@ -644,6 +644,87 @@ function addBookmarkFlash() {
   $('#home-btn').addClass('bookmarks-btn-add')
 }
 
+// Get API key
+// TODO move into setting
+function getApiKey() {
+  return fs.readFileSync('./private/search_api_key.txt')
+}
+
+// Call API to get search results
+function getSearchResults() {
+  const api_key = getApiKey()
+  $('#search-result-host').empty()
+  var getMedia = $.getJSON(`https://api.themoviedb.org/3/search/multi?api_key=${api_key}&language=en-US&query=${$('#search-input').val()}&include_adult=false`)
+    .always(function() {
+      const results = _.orderBy(_.filter(getMedia.responseJSON.results, o => o.media_type !== 'person'), 'popularity', 'desc')
+      $.each(results, function(i, item) {
+        let gotCast = false
+        let gotProviders = false
+        let providers = []
+        var getCast = $.getJSON(`https://api.themoviedb.org/3/${item.media_type}/${item.id}/credits?api_key=${api_key}&language=en-US`)
+          .always(function() {
+            gotCast = true
+            if (gotCast && gotProviders) {
+              addSearchResult(item, getCast.responseJSON.cast, providers)
+            }
+          })
+        var getProviders = $.getJSON(`https://api.themoviedb.org/3/${item.media_type}/${item.id}/watch/providers?api_key=${api_key}`)
+          .always(function() {
+            gotProviders = true
+            if(getProviders.responseJSON.results !== undefined && getProviders.responseJSON.results.US !== undefined && getProviders.responseJSON.results.US.flatrate !== undefined) {
+              providers = getProviders.responseJSON.results.US.flatrate
+            }
+            if (gotCast && gotProviders) {
+              addSearchResult(item, getCast.responseJSON.cast, providers)
+            }
+          })
+      })
+    })
+}
+
+// Convert date string to year
+function getYear(input) {
+  const year = new Date(input).getFullYear()
+  return isNaN(year) ? 'NA' : year
+}
+
+// Add search result to UI
+function addSearchResult(result, cast, providers) {
+  let txtCast = 'Top Billed Cast: '
+  let txtProviders = 'Streaming Providers: '
+
+  if (cast && cast.length > 0) {
+    $.each(cast, function(i, item) {
+      if (i < 3) {
+        txtCast += `${item.name}, `
+      }
+    })
+  } else {
+    txtCast += 'NA  '
+  }
+
+  if (providers && providers.length > 0) {
+    $.each(providers, function(i, item) {
+      txtProviders += `${item.provider_name}, `
+    })
+  } else {
+    txtProviders += 'NA  '
+  }
+
+  let title = result.title === undefined ? result.name : result.title
+  let first_date = result.release_date === undefined ? result.first_air_date : result.release_date
+
+  const instance = $($('#search\\-result\\-instance').html())
+  if (result.poster_path) {
+    $('.result-image', instance).prop('src', `https://image.tmdb.org/t/p/original${result.poster_path}`)
+  }
+  $('.result-title', instance).text(`${title} (${getYear(first_date)})`)
+  $('.result-overview', instance).text(result.overview)
+  $('.result-cast', instance).text(txtCast.slice(0, -2))
+  $('.result-providers', instance).text(txtProviders.slice(0, -2))
+  $('#search-result-host').append(instance)
+}
+
 // Load NF facets from file
 $.getJSON('nffacets.json', function(json) { 
   nfFacets = json
@@ -834,84 +915,3 @@ $('.search-clear').on('click', () => {
   $('#search-input').val('')
   $('#search-result-host').empty()
 })
-
-// Get API key
-// TODO move into setting
-function getApiKey() {
-  return fs.readFileSync('./private/search_api_key.txt')
-}
-
-// Call API to get search results
-function getSearchResults() {
-  const api_key = getApiKey()
-  $('#search-result-host').empty()
-  var getMedia = $.getJSON(`https://api.themoviedb.org/3/search/multi?api_key=${api_key}&language=en-US&query=${$('#search-input').val()}&include_adult=false`)
-    .always(function() {
-      const results = _.orderBy(_.filter(getMedia.responseJSON.results, o => o.media_type !== 'person'), 'popularity', 'desc')
-      $.each(results, function(i, item) {
-        let gotCast = false
-        let gotProviders = false
-        let providers = []
-        var getCast = $.getJSON(`https://api.themoviedb.org/3/${item.media_type}/${item.id}/credits?api_key=${api_key}&language=en-US`)
-          .always(function() {
-            gotCast = true
-            if (gotCast && gotProviders) {
-              addSearchResult(item, getCast.responseJSON.cast, providers)
-            }
-          })
-        var getProviders = $.getJSON(`https://api.themoviedb.org/3/${item.media_type}/${item.id}/watch/providers?api_key=${api_key}`)
-          .always(function() {
-            gotProviders = true
-            if(getProviders.responseJSON.results !== undefined && getProviders.responseJSON.results.US !== undefined && getProviders.responseJSON.results.US.flatrate !== undefined) {
-              providers = getProviders.responseJSON.results.US.flatrate
-            }
-            if (gotCast && gotProviders) {
-              addSearchResult(item, getCast.responseJSON.cast, providers)
-            }
-          })
-      })
-    })
-}
-
-// Convert date string to year
-function getYear(input) {
-  const year = new Date(input).getFullYear()
-  return isNaN(year) ? 'NA' : year
-}
-
-// Add search result to UI
-function addSearchResult(result, cast, providers) {
-  let txtCast = 'Top Billed Cast: '
-  let txtProviders = 'Streaming Providers: '
-
-  if (cast && cast.length > 0) {
-    $.each(cast, function(i, item) {
-      if (i < 3) {
-        txtCast += `${item.name}, `
-      }
-    })
-  } else {
-    txtCast += 'NA  '
-  }
-
-  if (providers && providers.length > 0) {
-    $.each(providers, function(i, item) {
-      txtProviders += `${item.provider_name}, `
-    })
-  } else {
-    txtProviders += 'NA  '
-  }
-
-  let title = result.title === undefined ? result.name : result.title
-  let first_date = result.release_date === undefined ? result.first_air_date : result.release_date
-
-  const instance = $($('#search\\-result\\-instance').html())
-  if (result.poster_path) {
-    $('.result-image', instance).prop('src', `https://image.tmdb.org/t/p/original${result.poster_path}`)
-  }
-  $('.result-title', instance).text(`${title} (${getYear(first_date)})`)
-  $('.result-overview', instance).text(result.overview)
-  $('.result-cast', instance).text(txtCast.slice(0, -2))
-  $('.result-providers', instance).text(txtProviders.slice(0, -2))
-  $('#search-result-host').append(instance)
-}

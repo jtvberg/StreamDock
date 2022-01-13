@@ -74,6 +74,11 @@ body {
   bottom: 5px;
 }
 
+.spinner-border {
+  width: 5rem;
+  height: 5rem;
+}
+
 .home-screen {
   display: grid;
   grid-template-rows: 1fr minmax(0, 1fr);
@@ -109,6 +114,10 @@ body {
   margin: 5px;
   width: 200px;
   font-size: .80em;
+}
+
+.bookmark-image {
+  width: 100%;
 }
 
 .bookmark-delete-btn {
@@ -370,10 +379,13 @@ body {
 }
 
 .modal-header {
+  padding-bottom: 5px;
   border-bottom: none;
 }
 
 .modal-body {
+  padding-top: 5px;
+  padding-bottom: 5px;
   overflow-y: auto;
 }
 
@@ -452,6 +464,7 @@ body {
   margin-bottom: 5px;
 }
 
+.text-search-api-key,
 .text-agent,
 .text-glyph,
 .text-url {
@@ -514,6 +527,10 @@ body {
   padding: 0;
 }
 
+.serv-check-label {
+  width: 0px;
+}
+
 .serv-check-label::before,
 .serv-check-label::after {
   left: 0px;
@@ -549,8 +566,13 @@ body {
   margin-top: 1px;
 }
 
+.search-api-key,
 .agent-string {
   margin-top: 4px;
+  margin-bottom: 3px;
+}
+
+.group-title {
   margin-bottom: 3px;
 }
 

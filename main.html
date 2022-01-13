@@ -41,7 +41,7 @@
     </div>
   </div>
   <div class="loading">
-    <div class="spinner-border text-primary" style="width: 5rem; height: 5rem;" role="status">
+    <div class="spinner-border text-primary" role="status">
       <span class="sr-only">Loading...</span>
     </div>
   </div>
@@ -57,13 +57,13 @@
   <div id="settings-modal" class="modal fade" tabindex="-1" role="dialog">
     <div class="modal-dialog" role="document">
       <div class="modal-content">
-        <div class="modal-header" style="padding-bottom: 5px;">
+        <div class="modal-header">
           <h5 class="modal-title">Preferences</h5>
           <button type="button" class="close modal-close-btn" data-dismiss="modal">
             <span>&times;</span>
           </button>
         </div>
-        <div class="modal-body" style="padding-top: 5px; padding-bottom: 5px;">
+        <div class="modal-body">
           <form id="settings-form">
             <div class="form-group">
               <div class="panel-group" id="panel-general">
@@ -135,7 +135,7 @@
                         </div>
                       </div>
                       <div class="form-group">
-                        <div style="margin-bottom: 3px;">Theme Mode</div>
+                        <div class="group-title">Theme Mode</div>
                         <div class="btn-group btn-group-toggle settings-shift" data-toggle="buttons" id="choose-theme">
                           <label class="btn btn-secondary btn-sm">
                               <input type="radio" name="radio-theme" value="system">System
@@ -284,7 +284,7 @@
                   </div>
                   <div class="panel-body">
                     <div id="collapse-advanced" class="collapse settings-group" data-parent="#panel-advanced">
-                      <div style="margin-bottom: 3px;">User Agent String</div>
+                      <div class="group-title">User Agent String</div>
                       <div class="input-group input-group-sm agent-string">
                         <input type="text" class="form-control text-agent" id="agent-string-input"/>
                         <div class="input-group-append">
@@ -294,6 +294,16 @@
                       </div>
                       <div class="helper-text">
                         <small class="text-muted">Update your user agent here but be careful!</small>
+                      </div>
+                      <div class="group-title"">Search API Key</div>
+                      <div class="input-group input-group-sm search-api-key">
+                        <input type="text" class="form-control text-search-api-key" id="search-api-key-input"/>
+                        <div class="input-group-append">
+                          <button class="btn btn-outline-secondary" id="search-api-key-undo-btn" type="button" title="Revert to previous">Undo</button>
+                        </div>
+                      </div>
+                      <div class="helper-text">
+                        <small class="text-muted">Enter the search API key here</small>
                       </div>
                     </div>
                   </div>
@@ -315,7 +325,7 @@
 
   <template id="boomark-instance">
     <div class="bookmark-tile">
-      <img class="bookmark-image" style="width: 100%">
+      <img class="bookmark-image">
       <div class="fas fa-link bookmark-url-btn fa-2x" title="Copy URL"></div>
       <div class="fas fa-times-circle bookmark-delete-btn fa-2x" title="Delete Bookmark"></div>
       <div class="fas fa-circle fa-3x bookmark-play-btn-bg"></div>
@@ -332,7 +342,7 @@
     <div class="service-host">
       <div class="custom-control custom-checkbox serv-check-host">
         <input type="checkbox" class="custom-control-input serv-check" ${checked}>
-        <label class="custom-control-label serv-check-label" style="width:0px"></label>
+        <label class="custom-control-label serv-check-label"></label>
       </div>
       <img class="serv-check-img"></img>
       <div class="input-group input-group-sm serv-url">
