@@ -605,6 +605,8 @@ input[type=color] {
 }
 
 .result-tile {
+  display: grid;
+  grid-template-columns: 100px 1fr;
   margin: 5px;
   width: calc(100% - 15px);
   padding: 5px;
@@ -621,9 +623,15 @@ input[type=color] {
 }
 
 .result-details {
+  grid-column: 2;
   padding-left: 5px;
 }
 
 .result-image-host {
+  grid-column: 1;
   padding-right: 0px;
+}
+
+.result-image {
+  width: 100px;
 }
