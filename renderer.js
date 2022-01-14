@@ -8,7 +8,6 @@
 const { ipcRenderer, nativeImage, clipboard } = require('electron')
 const $ = require('jquery')
 const _ = require('lodash')
-const fs = require('fs')
 const isMac = process.platform === 'darwin'
 const isLinux = process.platform === 'linux'
 const isWindows = process.platform === 'win32'
@@ -377,6 +376,7 @@ function getDefaultSettings() {
     dpNextEpisode: false,
     hmSkipRecap: false,
     hmNextEpisode: false,
+    searchApiKey: '',
     userAgent: {
       macos: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/96.0.4664.110 Safari/537.36',
       win: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/96.0.4664.110 Safari/537.36',
@@ -447,6 +447,7 @@ function loadSettingsModal() {
     $('#settings-services-available').append(instance)
   })
   $('#agent-string-input').val(userAgent)
+  $('#search-api-key-input').val(settings.searchApiKey)
   $('#settings-modal').modal('show')
 }
 
@@ -477,6 +478,7 @@ function saveSettings() {
     themeMode: $('#choose-theme input:radio:checked').val(),
     lastStream: settings.lastStream,
     userAgent: userAgent,
+    searchApiKey: $('#search-api-key-input').val(),
     windowSizeLocation: settings.windowSizeLocation
   }
   localStorage.setItem('settings', JSON.stringify(settings))
@@ -522,6 +524,7 @@ function loadDefaultSettings() {
   $('#hm-next-check').prop('checked', defaultSettings.hmNextEpisode)
   $('.serv-check').prop('checked', false)
   $('#agent-string-input').val(defaultAgent)
+  $('#search-api-key-input').val(settings.searchApiKey)
   getDefaultStreams().forEach((serv) => {
     $(`#check-${serv.id}`).prop('checked', serv.active ? 'checked' : '')
   })
@@ -644,15 +647,13 @@ function addBookmarkFlash() {
   $('#home-btn').addClass('bookmarks-btn-add')
 }
 
-// Get API key
-// TODO move into setting
-function getApiKey() {
-  return fs.readFileSync('./private/search_api_key.txt')
-}
-
 // Call API to get search results
 function getSearchResults() {
-  const api_key = getApiKey()
+  if(!settings.searchApiKey || settings.searchApiKey.length === 0) {
+    alert('You must enter a valid API key for search to work')
+    return
+  }
+  const api_key = settings.searchApiKey
   $('#search-result-host').empty()
   var getMedia = $.getJSON(`https://api.themoviedb.org/3/search/multi?api_key=${api_key}&language=en-US&query=${$('#search-input').val()}&include_adult=false`)
     .always(function() {
@@ -901,6 +902,11 @@ $('#agent-undo-btn').on('click', () => {
 // Settings set user agent to default
 $('#agent-default-btn').on('click', () => {
   $('#agent-string-input').val(defaultAgent)
+})
+
+// Settings undo user agent change
+$('#search-api-key-undo-btn').on('click', () => {
+  $('#search-api-key-input').val(settings.searchApiKey)
 })
 
 // Get serach results click handler
