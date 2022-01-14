@@ -58,11 +58,6 @@ body {
   width: 12px;
 }
 
-::-webkit-scrollbar-track {
-  /* box-shadow: inset 0 0 6px var(--color-scroll);
-  border-radius: 10px; */
-}
-
 ::-webkit-scrollbar-thumb {
   box-shadow: inset 0 0 6px var(--color-thumb);
   border-radius: 10px;
