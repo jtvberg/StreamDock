@@ -32,7 +32,8 @@
     "@fortawesome/fontawesome-free": "^5.15.4",
     "bootstrap": "^4.6.1",
     "electron-updater": "^4.6.1",
-    "jquery": "^3.6.0"
+    "jquery": "^3.6.0",
+    "lodash": "^4.17.21"
   },
   "build": {
     "appId": "com.jtvberg.streamdock",
