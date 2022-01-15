@@ -1568,7 +1568,7 @@ const template = [
           dialog.showMessageBox({
             title: `About ${app.name}`,
             message: `StreamDock\nVersion ${app.getVersion()}`,
-            detail: 'Copyright \u00A9 jtvberg 2020-2021',
+            detail: 'Copyright \u00A9 jtvberg 2020-2022',
             buttons: []
           })
         } 
