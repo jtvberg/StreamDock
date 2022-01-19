@@ -98,7 +98,7 @@ const createWindow = () => {
   // Show browserView when loaded
   view.webContents.on('did-finish-load', () => {
     // Open DevTools (view, dev only)
-    // isDev && view.webContents.openDevTools('detach')
+    isDev && view.webContents.openDevTools('detach')
     sendCurrentStream()
     setView()
     streamLoaded()
@@ -233,6 +233,15 @@ function pause() {
     case 'hl':
       view.webContents.executeJavaScript(`(${hlPause.toString()})()`)
       break
+    case 'cr':
+      view.webContents.mainFrame.frames.forEach(frame => {
+        const url = new URL(frame.url)
+        if (url.host === 'static.crunchyroll.com') {
+          frame.executeJavaScript(`(${defaultPause.toString()})()`)
+          return
+        }
+      })
+      break
     default:
       view.webContents.executeJavaScript(`(${defaultPause.toString()})()`)
       break
@@ -272,6 +281,15 @@ function play() {
         break
       case 'hl':
         view.webContents.executeJavaScript(`(${hlPlay.toString()})()`)
+        break
+      case 'cr':
+        view.webContents.mainFrame.frames.forEach(frame => {
+          const url = new URL(frame.url)
+          if (url.host === 'static.crunchyroll.com') {
+            frame.executeJavaScript(`(${defaultPlay.toString()})()`)
+            return
+          }
+        })
         break
       default:
         view.webContents.executeJavaScript(`(${defaultPlay.toString()})()`)
@@ -1553,6 +1571,7 @@ ipcMain.on('hide-header-bar', (e, bool) => {
   winAdjustHeight = isMac ? headerSize : baseMenuHeight + headerSize
 })
 
+// IPC channel to set user agent
 ipcMain.on('set-user-agent', (e, data) => {
   userAgent = data
 })
