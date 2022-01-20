@@ -94,16 +94,14 @@
                         <input type="checkbox" class="custom-control-input settings-check" id="window-check">
                         <label class="custom-control-label" for="window-check">Remember Window Size and Location</label>
                         <div class="helper-text">
-                          <small class="text-muted">Check to maintain last window size and location from previous
-                            session</small>
+                          <small class="text-muted">Check to maintain last window size and location from previous session</small>
                         </div>
                       </div>
                       <div class="custom-control custom-checkbox">
                         <input type="checkbox" class="custom-control-input settings-check" id="fullscreen-check">
                         <label class="custom-control-label" for="fullscreen-check">Full-Screen</label>
                         <div class="helper-text">
-                          <small class="text-muted">Check to allow full-screen (this may allow invocation from within
-                            the stream)</small>
+                          <small class="text-muted">Check to allow full-screen (this may allow invocation from within the stream)</small>
                         </div>
                       </div>
                       <div class="custom-control custom-checkbox">
@@ -274,6 +272,39 @@
               </div>
             </div>
             <div class="form-group">
+              <div class="panel-group" id="panel-search">
+                <div class="panel">
+                  <div class="panel-header">
+                    <a class="collapsed" data-toggle="collapse" data-target="#collapse-search">
+                      <i class="fa fa-chevron-down"></i>
+                      Search Settings
+                    </a>
+                  </div>
+                  <div class="panel-body">
+                    <div id="collapse-search" class="collapse settings-group" data-parent="#panel-search">
+                      <div class="custom-control custom-checkbox">
+                        <input type="checkbox" class="custom-control-input settings-check" id="search-check">
+                        <label class="custom-control-label" for="window-check">Enable Search</label>
+                        <div class="helper-text">
+                          <small class="text-muted">Check to show stream search on the home screen</small>
+                        </div>
+                      </div>
+                      <div class="group-title"">API Key</div>
+                      <div class="input-group input-group-sm search-api-key">
+                        <input type="text" class="form-control text-search-api-key" id="search-api-key-input"/>
+                        <div class="input-group-append">
+                          <button class="btn btn-outline-secondary" id="search-api-key-undo-btn" type="button" title="Revert to previous">Undo</button>
+                        </div>
+                      </div>
+                      <div class="helper-text">
+                        <small class="text-muted">Enter the search API key here</small>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="form-group">
               <div class="panel-group" id="panel-advanced">
                 <div class="panel">
                   <div class="panel-header">
@@ -294,16 +325,6 @@
                       </div>
                       <div class="helper-text">
                         <small class="text-muted">Update your user agent here but be careful!</small>
-                      </div>
-                      <div class="group-title"">Search API Key</div>
-                      <div class="input-group input-group-sm search-api-key">
-                        <input type="text" class="form-control text-search-api-key" id="search-api-key-input"/>
-                        <div class="input-group-append">
-                          <button class="btn btn-outline-secondary" id="search-api-key-undo-btn" type="button" title="Revert to previous">Undo</button>
-                        </div>
-                      </div>
-                      <div class="helper-text">
-                        <small class="text-muted">Enter the search API key here</small>
                       </div>
                     </div>
                   </div>
