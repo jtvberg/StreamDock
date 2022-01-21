@@ -679,11 +679,12 @@ function getSearchResults() {
         let gotCast = false
         let gotProviders = false
         let providers = []
+        let link = ''
         var getCast = $.getJSON(`https://api.themoviedb.org/3/${item.media_type}/${item.id}/credits?api_key=${api_key}&language=en-US`)
           .always(function() {
             gotCast = true
             if (gotCast && gotProviders) {
-              addSearchResult(item, getCast.responseJSON.cast, providers)
+              addSearchResult(item, getCast.responseJSON.cast, providers, link)
             }
           })
         var getProviders = $.getJSON(`https://api.themoviedb.org/3/${item.media_type}/${item.id}/watch/providers?api_key=${api_key}`)
@@ -691,9 +692,10 @@ function getSearchResults() {
             gotProviders = true
             if(getProviders.responseJSON.results !== undefined && getProviders.responseJSON.results.US !== undefined && getProviders.responseJSON.results.US.flatrate !== undefined) {
               providers = getProviders.responseJSON.results.US.flatrate
+              link = getProviders.responseJSON.results.US.link
             }
             if (gotCast && gotProviders) {
-              addSearchResult(item, getCast.responseJSON.cast, providers)
+              addSearchResult(item, getCast.responseJSON.cast, providers, link)
             }
           })
       })
@@ -707,7 +709,7 @@ function getYear(input) {
 }
 
 // Add search result to UI
-function addSearchResult(result, cast, providers) {
+function addSearchResult(result, cast, providers, link) {
   let txtCast = 'Top Billed Cast: '
   let txtProviders = 'Streaming Providers: '
 
@@ -740,6 +742,7 @@ function addSearchResult(result, cast, providers) {
   $('.result-overview', instance).text(result.overview)
   $('.result-cast', instance).text(txtCast.slice(0, -2))
   $('.result-providers', instance).text(txtProviders.slice(0, -2))
+  $(instance).data('tmdb-url', link)
   $('#search-result-host').append(instance)
 }
 
@@ -817,6 +820,11 @@ $(document).on('click', '.bookmark-delete-btn', function () {
 // Copy bookmark link to clipboard
 $(document).on('click', '.bookmark-url-btn', function () {
   clipboard.writeText($(this).data('url'))
+})
+
+// Open TMDB link
+$(document).on('click', '.result-tile', function() {
+  openStream('ot', $(this).data('tmdb-url'))
 })
 
 // Home Screen toggle click handler
