@@ -133,6 +133,9 @@ function applyUpdateSettings() {
   // Auto-hide navbar buttons
   settings.hideNav ? $('.header-bar').children().addClass('nav-hide') : $('.header-bar').children().removeClass('nav-hide')
 
+  // Toggle search pane on home screen
+  toggleSearch()
+
   // Hide the dock icon
   ipcRenderer.send('hide-dock-icon', settings.hideDock)
 
@@ -386,6 +389,7 @@ function getDefaultSettings() {
     dpNextEpisode: false,
     hmSkipRecap: false,
     hmNextEpisode: false,
+    showSearch: false,
     searchApiKey: '',
     userAgent: {
       macos: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/96.0.4664.110 Safari/537.36',
@@ -457,6 +461,7 @@ function loadSettingsModal() {
     $('#settings-services-available').append(instance)
   })
   $('#agent-string-input').val(userAgent)
+  $('#search-check').prop('checked', settings.showSearch)
   $('#search-api-key-input').val(settings.searchApiKey)
   $('#settings-modal').modal('show')
 }
@@ -488,6 +493,7 @@ function saveSettings() {
     themeMode: $('#choose-theme input:radio:checked').val(),
     lastStream: settings.lastStream,
     userAgent: userAgent,
+    showSearch: $('#search-check').is(':checked'),
     searchApiKey: $('#search-api-key-input').val(),
     windowSizeLocation: settings.windowSizeLocation
   }
@@ -534,6 +540,7 @@ function loadDefaultSettings() {
   $('#hm-next-check').prop('checked', defaultSettings.hmNextEpisode)
   $('.serv-check').prop('checked', false)
   $('#agent-string-input').val(defaultAgent)
+  $('#search-check').prop('checked', defaultSettings.showSearch)
   $('#search-api-key-input').val(settings.searchApiKey)
   getDefaultStreams().forEach((serv) => {
     $(`#check-${serv.id}`).prop('checked', serv.active ? 'checked' : '')
@@ -736,6 +743,17 @@ function addSearchResult(result, cast, providers) {
   $('#search-result-host').append(instance)
 }
 
+// Toggle search pane on home screen
+function toggleSearch() {
+  if(settings.showSearch) {
+    $('.home-screen').css('grid-template-rows', '1fr minmax(0, 1fr)')
+    $('.search-host').show()
+  } else {
+    $('.home-screen').css('grid-template-rows', '1fr 0')
+    $('.search-host').hide()
+  }
+}
+
 // Load NF facets from file
 $.getJSON('nffacets.json', function(json) { 
   nfFacets = json
@@ -919,7 +937,7 @@ $('#search-api-key-undo-btn').on('click', () => {
   $('#search-api-key-input').val(settings.searchApiKey)
 })
 
-// Get serach results click handler
+// Get search results click handler
 $('#search-input').on('keypress', (e) => {
   if (e.key === 'Enter' && $('#search-input').val().length > 0) {
     getSearchResults()
