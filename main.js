@@ -365,7 +365,7 @@ function streamChange(stream) {
   isPlaying ? pause() : null
   view.setBounds({ x: 0, y: 0, width: 0, height: 0 })
   showHomescreen = false
-  currentStream = stream.id
+  currentStream = stream.id === 'ot' ? setStreamId(stream.url) : stream.id
   view.webContents.loadURL(stream.url, { userAgent: userAgent })
   win.webContents.send('hide-homescreen')
   win.webContents.send('stream-changed', stream.url)
@@ -399,7 +399,7 @@ function openLink(url) {
   if (validateLink(url)) {
     currentStream = 'ot'
     const stream = {
-      id: setStreamId(url),
+      id: currentStream,
       url: url
     }
     streamChange(stream)
@@ -439,13 +439,37 @@ function navChange() {
 // Set the stream ID if it needs to be derived
 function setStreamId(url) {
   const host = new URL(url).hostname
-  if (host === 'www.youtube.com' || host === 'youtu.be') {
-    return 'yt'
+  switch (host) {
+    case 'www.youtube.com':
+    case 'youtu.be':
+      return 'yt'
+    case 'tv.youtube.com':
+      return 'tv'
+    case 'www.netflix.com':
+      return 'nf'
+    case 'www.hulu.com':
+      return 'hl'
+    case 'www.amazon.com':
+      return 'ap'
+    case 'www.disneyplus.com':
+      return 'dp'
+    case 'tv.apple.com':
+      return 'at'
+    case 'www.peacocktv.com':
+      return 'pc'
+    case 'abc.com':
+      return 'ab'
+    case 'www.paramountplus.com':
+      return 'cb'
+    case 'play.hbomax.com':
+      return 'hm'
+    case 'plus.espn.com':
+      return 'ep'
+    case 'beta.crunchyroll.com':
+      return 'cr'
+    default:
+      return currentStream
   }
-  if (host === 'www.netflix.com') {
-    return 'nf'
-  }
-  return currentStream
 }
 
 // Scale height to supplied aspect ratio
@@ -522,7 +546,8 @@ async function sendBookmark() {
 // Send current stream object
 async function sendCurrentStream() {
   await getCurrentUrl().then((currentUrl) => {
-    win.webContents.send('stream-loaded', { id: setStreamId(currentUrl), url: currentUrl })
+    currentStream = setStreamId(currentUrl)
+    win.webContents.send('stream-loaded', { id: currentStream, url: currentUrl })
   }).catch((err) => { console.error('SCS:'+err) })
 }
 
