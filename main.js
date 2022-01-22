@@ -5,7 +5,7 @@
 // TODO: Hide bar on fullscreen
 
 // Imports and variable declarations
-const { app, BrowserWindow, ipcMain, BrowserView, Tray, TouchBar, session, Menu, MenuItem, systemPreferences, clipboard, nativeTheme, dialog } = require('electron')
+const { app, BrowserWindow, ipcMain, BrowserView, Tray, TouchBar, session, Menu, MenuItem, systemPreferences, clipboard, nativeTheme, dialog, shell } = require('electron')
 const { TouchBarButton } = TouchBar
 const path = require('path')
 const isDev = !app.isPackaged
@@ -161,6 +161,12 @@ const createWindow = () => {
         getAccent()
       })
     }
+  })
+
+  // Open any window links in external browser
+  win.webContents.on('will-navigate', function (e, url) {
+    e.preventDefault()
+    shell.openExternal(url)
   })
 
   // Set vibrancy to match theme on update

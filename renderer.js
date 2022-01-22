@@ -667,12 +667,15 @@ function addBookmarkFlash() {
 // Call API to get search results
 function getSearchResults() {
   if(!settings.searchApiKey || settings.searchApiKey.length === 0) {
-    alert('You must enter a valid API key for search to work')
+    alert('You must enter a valid API key in Preferences > Search Settings for search to work')
     return
   }
   const api_key = settings.searchApiKey
   $('#search-result-host').empty()
-  var getMedia = $.getJSON(`https://api.themoviedb.org/3/search/multi?api_key=${api_key}&language=en-US&query=${$('#search-input').val()}&include_adult=false`)
+  var getMedia = $.getJSON(`https://api.themoviedb.org/3/search/multi?api_key=${api_key}&language=en-US&query=${$('#search-input').val()}&include_adult=false`)  
+    .fail(function() {
+      alert('Search query failed. Do you have a valid API key?')
+    })
     .always(function() {
       const results = _.orderBy(_.filter(getMedia.responseJSON.results, o => o.media_type !== 'person'), 'popularity', 'desc')
       $.each(results, function(i, item) {

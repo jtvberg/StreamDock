@@ -99,7 +99,7 @@ body {
 
 .search-host-title,
 .bookmark-host-title {
-  margin-top: 5px;
+  margin-top: 4px;
   margin-left: 15px;
   margin-bottom: -5px;
 }
@@ -637,6 +637,7 @@ input[type=color] {
   width: calc(100% - 15px);
   padding: 5px;
   border-radius: 5px;
+  cursor: pointer;
 }
 
 .result-tile:hover {
