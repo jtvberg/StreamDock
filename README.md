@@ -76,7 +76,7 @@
 
 ## Stream Search
    Just added in 0.7.0 you can now search for a stream from the home screen
-   - The search uses the TMDB* API to find titles and show you were you can stream them
+   - The search uses the TMDB API to find titles and show you were you can stream them
    - TMDB is a community driven movie and TV database. You can check it out [here](https://www.themoviedb.org/).
    - Clicking on a search result entry will take you to the TMDB page where you can see the various ways to get the content
    - The search result will only list subscription services but if you go to the TMDB page, you can also see purchase and rental options
@@ -85,6 +85,7 @@
 
 ## TODO
    - Looking to add a watch queue to the home screen
+   - Need to add some of the skipping features to other services
    - I haven't given up yet but HBO Max is pretty much impossible to work with around recap/intro/preview/next episode skipping
    - I need to investigate adding Google OAuth to allow more reliable logins for YouTube TV and other services
    - Contemplating multiple windows but in general, this seems silly (leave a comment if you think there is a good reason to do this!)
