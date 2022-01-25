@@ -438,6 +438,8 @@ function navChange() {
 
 // Set the stream ID if it needs to be derived
 function setStreamId(url) {
+  console.log(url)
+  if(!validateLink(url)) return
   const host = new URL(url).hostname
   switch (host) {
     case 'www.youtube.com':

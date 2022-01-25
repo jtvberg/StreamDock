@@ -679,27 +679,10 @@ function getSearchResults() {
     .always(function() {
       const results = _.orderBy(_.filter(getMedia.responseJSON.results, o => o.media_type !== 'person'), 'popularity', 'desc')
       $.each(results, function(i, item) {
-        let gotCast = false
-        let gotProviders = false
-        let providers = []
-        let link = ''
-        var getCast = $.getJSON(`https://api.themoviedb.org/3/${item.media_type}/${item.id}/credits?api_key=${api_key}&language=en-US`)
+        var getDetails = $.getJSON(`https://api.themoviedb.org/3/${item.media_type}/${item.id}?api_key=${api_key}&append_to_response=credits,watch/providers`)
           .always(function() {
-            gotCast = true
-            if (gotCast && gotProviders) {
-              addSearchResult(item, getCast.responseJSON.cast, providers, link)
-            }
-          })
-        var getProviders = $.getJSON(`https://api.themoviedb.org/3/${item.media_type}/${item.id}/watch/providers?api_key=${api_key}`)
-          .always(function() {
-            gotProviders = true
-            if(getProviders.responseJSON.results !== undefined && getProviders.responseJSON.results.US !== undefined && getProviders.responseJSON.results.US.flatrate !== undefined) {
-              providers = getProviders.responseJSON.results.US.flatrate
-              link = getProviders.responseJSON.results.US.link
-            }
-            if (gotCast && gotProviders) {
-              addSearchResult(item, getCast.responseJSON.cast, providers, link)
-            }
+            console.log(getDetails)
+            addSearchResult(item, getDetails.responseJSON.credits.cast, getDetails.responseJSON['watch/providers'].results.US.flaterate, getDetails.responseJSON['watch/providers'].results.US.link)
           })
       })
     })
