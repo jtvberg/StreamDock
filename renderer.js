@@ -679,10 +679,18 @@ function getSearchResults() {
     .always(function() {
       const results = _.orderBy(_.filter(getMedia.responseJSON.results, o => o.media_type !== 'person'), 'popularity', 'desc')
       $.each(results, function(i, item) {
-        var getDetails = $.getJSON(`https://api.themoviedb.org/3/${item.media_type}/${item.id}?api_key=${api_key}&append_to_response=credits,watch/providers`)
+        var getDetails = $.getJSON(`https://api.themoviedb.org/3/${item.media_type}/${item.id}?api_key=${api_key}&append_to_response=credits,watch/providers,genres`)
           .always(function() {
-            console.log(getDetails)
-            addSearchResult(item, getDetails.responseJSON.credits.cast, getDetails.responseJSON['watch/providers'].results.US.flaterate, getDetails.responseJSON['watch/providers'].results.US.link)
+            let cast = []
+            try { cast = getDetails.responseJSON.credits.cast } catch(err) { console.log(err) }
+            let providers = []
+            try { providers = getDetails.responseJSON['watch/providers'].results.US.flaterate } catch(err) { console.log(err) }
+            let link = ''
+            try { link = getDetails.responseJSON['watch/providers'].results.US.link } catch(err) { console.error(err) }
+            let genres = []
+            try { genres = getDetails.responseJSON.genres } catch(err) { console.log(err) }
+
+            addSearchResult(item, cast, providers, link, genres)
           })
       })
     })
@@ -695,9 +703,10 @@ function getYear(input) {
 }
 
 // Add search result to UI
-function addSearchResult(result, cast, providers, link) {
+function addSearchResult(result, cast, providers, link, genres) {
   let txtCast = 'Top Billed Cast: '
   let txtProviders = 'Streaming Providers: '
+  let txtGenres  = ''
 
   if (cast && cast.length > 0) {
     $.each(cast, function(i, item) {
@@ -717,6 +726,12 @@ function addSearchResult(result, cast, providers, link) {
     txtProviders += 'NA  '
   }
 
+  if (genres && genres.length > 0) {
+    $.each(genres, function(i, item) {
+      txtGenres += `${item.name}, `
+    })
+  }
+
   let title = result.title === undefined ? result.name : result.title
   let first_date = result.release_date === undefined ? result.first_air_date : result.release_date
 
@@ -728,6 +743,7 @@ function addSearchResult(result, cast, providers, link) {
   $('.result-overview', instance).text(result.overview)
   $('.result-cast', instance).text(txtCast.slice(0, -2))
   $('.result-providers', instance).text(txtProviders.slice(0, -2))
+  $('.result-genres', instance).text(txtGenres.slice(0, -2))
   $(instance).data('tmdb-url', link)
   $('#search-result-host').append(instance)
 }
