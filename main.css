@@ -7,7 +7,6 @@
   --color-trans: #00000000;
   --color-neutral: #808080;
   --color-neutral-light: #c7c7c7b2;
-  --color-scroll: #80808080;
   --color-thumb: #808080;
   --color-link: #1410ff;
   --color-warning: #c43410;
@@ -59,8 +58,8 @@ body {
 }
 
 ::-webkit-scrollbar-thumb {
-  box-shadow: inset 0 0 6px var(--color-thumb);
   border-radius: 10px;
+  background-color: var(--color-thumb);
 }
 
 .logo {
@@ -259,6 +258,7 @@ body {
   color: var(--color-fg);
   cursor: pointer;
   padding: 2px;
+  margin-right: 3px;
 }
 
 .nf-facet:hover {
@@ -620,10 +620,15 @@ input[type=color] {
 }
 
 #search-result-host {
+  display: flex;
+  flex-wrap: wrap;
+  align-content: flex-start;
   overflow-y: auto;
-  max-height: calc(100% - 40px);
+  max-height: calc(100% - 50px);
   margin-left: 8px;
   margin-top: 8px;
+  margin-right: 5px;
+  padding-bottom: 5px;
 }
 
 .search-clear {
@@ -632,13 +637,13 @@ input[type=color] {
 }
 
 .result-tile {
-  display: grid;
-  grid-template-columns: 100px 1fr;
+  width: 150px;
+  height: 225px;
   margin: 5px;
-  width: calc(100% - 15px);
-  padding: 5px;
   border-radius: 5px;
   cursor: pointer;
+  position: relative;
+  font-size: small;
 }
 
 .result-tile:hover {
@@ -646,24 +651,57 @@ input[type=color] {
 }
 
 .result-title {
-  font-size: larger;
-  font-weight: 800;
+  font-weight: 700;
+  font-size: large;
+  line-height: 1.2em;
+}
+
+.result-genres {
+  font-style: italic;
+}
+
+.result-providers {
+  margin-top: 3px;
+}
+
+.result-year {
+  font-size: large;
+  line-height: 1.2em;
 }
 
 .result-details {
-  grid-column: 2;
-  padding-left: 5px;
+  position: absolute;
+  padding: 3px;
+  top: 0px;
+  width: 100%;
+  height: 100%;
 }
 
 .result-image-host {
-  grid-column: 1;
-  padding-right: 0px;
+  opacity: 1;
+  transition: 0.5s opacity;
+}
+
+.result-image-host:hover {
+  opacity: 0;
 }
 
 .result-image {
-  width: 100px;
+  position: absolute;
+  top: 0px;
+  width: 100%;
+  height: 100%;
+  border-radius: 5px;
 }
 
 .search-title {
   margin-bottom: -10px;
+}
+
+img {
+  display: none;
+}
+
+img[src] {
+ display: block;
 }

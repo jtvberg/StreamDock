@@ -684,12 +684,12 @@ function getSearchResults() {
             let cast = []
             try { cast = getDetails.responseJSON.credits.cast } catch(err) { console.log(err) }
             let providers = []
-            try { providers = getDetails.responseJSON['watch/providers'].results.US.flaterate } catch(err) { console.log(err) }
+            try { providers = getDetails.responseJSON['watch/providers'].results.US.flatrate } catch(err) {  }
             let link = ''
-            try { link = getDetails.responseJSON['watch/providers'].results.US.link } catch(err) { console.error(err) }
+            try { link = getDetails.responseJSON['watch/providers'].results.US.link } catch(err) {  }
             let genres = []
             try { genres = getDetails.responseJSON.genres } catch(err) { console.log(err) }
-
+            // console.log(providers)
             addSearchResult(item, cast, providers, link, genres)
           })
       })
@@ -705,7 +705,7 @@ function getYear(input) {
 // Add search result to UI
 function addSearchResult(result, cast, providers, link, genres) {
   let txtCast = 'Top Billed Cast: '
-  let txtProviders = 'Streaming Providers: '
+  let txtProviders = 'Streaming on: '
   let txtGenres  = ''
 
   if (cast && cast.length > 0) {
@@ -723,7 +723,7 @@ function addSearchResult(result, cast, providers, link, genres) {
       txtProviders += `${item.provider_name}, `
     })
   } else {
-    txtProviders += 'NA  '
+    txtProviders = '  '
   }
 
   if (genres && genres.length > 0) {
@@ -739,9 +739,10 @@ function addSearchResult(result, cast, providers, link, genres) {
   if (result.poster_path) {
     $('.result-image', instance).prop('src', `https://image.tmdb.org/t/p/original${result.poster_path}`)
   }
-  $('.result-title', instance).text(`${title} (${getYear(first_date)})`)
-  $('.result-overview', instance).text(result.overview)
-  $('.result-cast', instance).text(txtCast.slice(0, -2))
+  $('.result-title', instance).text(`${title}`)
+  $('.result-year', instance).text(`(${getYear(first_date)})`)
+  // $('.result-overview', instance).text(result.overview)
+  // $('.result-cast', instance).text(txtCast.slice(0, -2))
   $('.result-providers', instance).text(txtProviders.slice(0, -2))
   $('.result-genres', instance).text(txtGenres.slice(0, -2))
   $(instance).data('tmdb-url', link)
