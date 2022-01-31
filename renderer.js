@@ -684,15 +684,13 @@ function getSearchResults(page) {
       alert('Search query failed. Do you have a valid API key?')
     })
     .always(function() {
-      console.log(getMedia.responseJSON)
       if (getMedia.responseJSON.total_results === 0) alert('No results found')
       pages = getMedia.responseJSON.total_pages
-      console.log(page+'/'+pages)
-      // const results = _.orderBy(_.filter(getMedia.responseJSON.results, o => o.media_type !== 'person'), 'popularity', 'desc')
-      const results = _.filter(getMedia.responseJSON.results, o => o.media_type !== 'person')
+      const results = _.orderBy(_.filter(getMedia.responseJSON.results, o => o.media_type !== 'person'), 'popularity', 'desc')
       $.each(results, function(i, item) {
         var getDetails = $.getJSON(`https://api.themoviedb.org/3/${item.media_type}/${item.id}?api_key=${api_key}&append_to_response=credits,watch/providers,genres`)
           .always(function() {
+            let media = item.media_type
             let cast = []
             try { cast = getDetails.responseJSON.credits.cast } catch(err) { console.log(err) }
             let providers = []
@@ -701,10 +699,10 @@ function getSearchResults(page) {
             try { link = getDetails.responseJSON['watch/providers'].results.US.link } catch(err) {  }
             let genres = []
             try { genres = getDetails.responseJSON.genres } catch(err) { console.log(err) }
-            addSearchResult(item, cast, providers, link, genres)
+            addSearchResult(item, media, cast, providers, link, genres)
           })
       })
-      if (page < 3) {
+      if (page < 3 && page < pages) {
         getSearchResults(++page)
       }
     })
@@ -717,28 +715,28 @@ function getYear(input) {
 }
 
 // Add search result to UI
-function addSearchResult(result, cast, providers, link, genres) {
-  let txtCast = 'Starring: '
-  let txtGenres  = ''
+function addSearchResult(result, media, cast, providers, link, genres) {
+  const title = result.title === undefined ? result.name : result.title
+  const first_date = result.release_date === undefined ? result.first_air_date : result.release_date
+  link = link === '' ? `https://www.themoviedb.org/${media}/${result.id}/` : link
 
-  if (cast && cast.length > 0) {
-    $.each(cast, function(i, item) {
-      if (i < 3) {
-        txtCast += `${item.name}, `
-      }
-    })
-  } else {
-    txtCast += '  '
-  }
+  // let txtCast = 'Starring: '
+  // if (cast && cast.length > 0) {
+  //   $.each(cast, function(i, item) {
+  //     if (i < 3) {
+  //       txtCast += `${item.name}, `
+  //     }
+  //   })
+  // } else {
+  //   txtCast += '  '
+  // }
 
+  let txtGenres  = ''  
   if (genres && genres.length > 0) {
     $.each(genres, function(i, item) {
       txtGenres += `${item.name}, `
     })
   }
-
-  let title = result.title === undefined ? result.name : result.title
-  let first_date = result.release_date === undefined ? result.first_air_date : result.release_date
 
   const detailIns = $($('#search\\-result\\-instance').html())
   if (result.poster_path) {
@@ -750,7 +748,6 @@ function addSearchResult(result, cast, providers, link, genres) {
         const providerIns = $($('#provider\\-image\\-instance').html())
         $('.provider-image', providerIns).prop('src', `https://image.tmdb.org/t/p/original${item.logo_path}`)
         $('.provider-image', providerIns).prop('title', `${item.provider_name}`)
-        // $('.provider-name', providerIns).text(`${item.provider_name}`)
         $('.result-provider-host', detailIns).append(providerIns)
       }
     })
