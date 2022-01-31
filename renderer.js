@@ -674,9 +674,11 @@ function getSearchResults(page) {
     alert('You must enter a valid API key in Preferences > Search Settings for search to work')
     return
   }
-  // page = page ? page : 1
+  page = page ? page : 1
+  if (page === 1) {
+    $('#search-result-host').empty()
+  }
   const api_key = settings.searchApiKey
-  $('#search-result-host').empty()
   var getMedia = $.getJSON(`https://api.themoviedb.org/3/search/multi?api_key=${api_key}&language=en-US&query=${$('#search-input').val()}&page=${page}&include_adult=false`)  
     .fail(function() {
       alert('Search query failed. Do you have a valid API key?')
@@ -702,7 +704,9 @@ function getSearchResults(page) {
             addSearchResult(item, cast, providers, link, genres)
           })
       })
-      // if (page < pages) getSearchResults(page++)
+      if (page < 3) {
+        getSearchResults(++page)
+      }
     })
 }
 
@@ -967,7 +971,7 @@ $('#search-api-key-undo-btn').on('click', () => {
 // Get search results click handler
 $('#search-input').on('keypress', (e) => {
   if (e.key === 'Enter' && $('#search-input').val().length > 0) {
-    getSearchResults(2)
+    getSearchResults()
   }
 })
 

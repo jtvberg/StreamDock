@@ -77,6 +77,7 @@ body {
   display: grid;
   grid-template-rows: 1fr minmax(0, 1fr);
   height: calc(100vh - 33px);
+  user-select: none;
 }
 
 .bookmark-host {
@@ -653,6 +654,11 @@ input[type=color] {
   font-weight: 700;
   font-size: large;
   line-height: 1.2em;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 4;
+  -webkit-box-orient: vertical;
 }
 
 .result-genres {
