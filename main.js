@@ -348,7 +348,6 @@ function setView() {
 // Adjust view bounds to window
 function setViewBounds() {
   if (!showHomescreen && !showPrefs) {
-  // if (!showPrefs) {
     updateShowFacets()
     let waw = showFacets ? facetAdjustWidth : baseAdjustWidth
     view.setBounds({
@@ -362,13 +361,18 @@ function setViewBounds() {
 
 // Change stream service
 function streamChange(stream) {
-  isPlaying ? pause() : null
-  view.setBounds({ x: 0, y: 0, width: 0, height: 0 })
-  showHomescreen = false
-  currentStream = stream.id === 'ot' ? setStreamId(stream.url) : stream.id
-  view.webContents.loadURL(stream.url, { userAgent: userAgent })
-  win.webContents.send('hide-homescreen')
-  win.webContents.send('stream-changed', stream.url)
+  if (validateLink(stream.url)) {
+    const currentHost = new URL(stream.url).hostname
+    isPlaying ? pause() : null
+    view.setBounds({ x: 0, y: 0, width: 0, height: 0 })
+    showHomescreen = false
+    currentStream = stream.id === 'ot' ? setStreamId(currentHost) : stream.id
+    view.webContents.loadURL(stream.url, { userAgent: userAgent })
+    win.webContents.send('hide-homescreen')
+    win.webContents.send('stream-changed', currentHost)
+  } else {
+    win.webContents.send('invalid-url')
+  }
 }
 
 // Stream loaded
@@ -396,14 +400,12 @@ function updateShowFacets() {
 
 // Open copied link in new BrowserView
 function openLink(url) {
-  if (validateLink(url)) {
-    currentStream = 'ot'
-    const stream = {
-      id: currentStream,
-      url: url
-    }
-    streamChange(stream)
+  currentStream = 'ot'
+  const stream = {
+    id: currentStream,
+    url: url
   }
+  streamChange(stream)
 }
 
 // Navigate view backwards
@@ -437,10 +439,7 @@ function navChange() {
 }
 
 // Set the stream ID if it needs to be derived
-function setStreamId(url) {
-  console.log(url)
-  if(!validateLink(url)) return
-  const host = new URL(url).hostname
+function setStreamId(host) {
   switch (host) {
     case 'www.youtube.com':
     case 'youtu.be':
@@ -548,8 +547,10 @@ async function sendBookmark() {
 // Send current stream object
 async function sendCurrentStream() {
   await getCurrentUrl().then((currentUrl) => {
-    currentStream = setStreamId(currentUrl)
-    win.webContents.send('stream-loaded', { id: currentStream, url: currentUrl })
+    if (validateLink(currentUrl)) {
+      currentStream = setStreamId(new URL(currentUrl).hostname)
+      win.webContents.send('stream-loaded', { id: currentStream, url: currentUrl })
+    }
   }).catch((err) => { console.error('SCS:'+err) })
 }
 

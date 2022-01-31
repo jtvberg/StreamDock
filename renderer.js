@@ -44,9 +44,9 @@ ipcRenderer.on('save-settings', (e, data) => {
 })
 
 // Stream changed
-ipcRenderer.on('stream-changed', (e, url) => {
+ipcRenderer.on('stream-changed', (e, host) => {
   $('.loading').show()
-  toggleFacetsButton(url)
+  toggleFacetsButton(host)
 })
 
 // Show home screen
@@ -61,9 +61,16 @@ ipcRenderer.on('hide-homescreen', () => {
   $('.home-screen').hide()
 })
 
+// Invalid url
+ipcRenderer.on('invalid-url', () => {
+  alert('Invalid Link')
+})
+
 // Stream loaded
 ipcRenderer.on('stream-loaded', (e, stream) => {
-  settings.lastStream = stream
+  if (stream) {
+    settings.lastStream = stream
+  }
   $('.loading').hide()
 })
 
@@ -631,15 +638,11 @@ function toggleFacets() {
   ipcRenderer.send('toggle-facets')
 }
 
-// Toggle the NF facets button based on url
-function toggleFacetsButton(url) {
+// Toggle the NF facets button based on host
+function toggleFacetsButton(host) {
   $('#facets-btn').hide()
-  try {
-    if (new URL(url).hostname === 'www.netflix.com') {
-      $('#facets-btn').show()
-    }
-  } catch (err) {
-    console.log('invalid URL')
+  if (host === 'www.netflix.com') {
+    $('#facets-btn').show()
   }
 }
 
@@ -964,7 +967,7 @@ $('#search-api-key-undo-btn').on('click', () => {
 // Get search results click handler
 $('#search-input').on('keypress', (e) => {
   if (e.key === 'Enter' && $('#search-input').val().length > 0) {
-    getSearchResults(1)
+    getSearchResults(2)
   }
 })
 
