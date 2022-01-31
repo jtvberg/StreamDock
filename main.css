@@ -76,7 +76,7 @@ body {
 .home-screen {
   display: grid;
   grid-template-rows: 1fr minmax(0, 1fr);
-  height: calc(100vh - 35px);
+  height: calc(100vh - 33px);
 }
 
 .bookmark-host {
@@ -588,6 +588,7 @@ input[type=color] {
 .search-host {
   grid-row: 2;
   color: var(--color-fg);
+  display: grid;
 }
 
 .search-input-host {
@@ -624,11 +625,9 @@ input[type=color] {
   flex-wrap: wrap;
   align-content: flex-start;
   overflow-y: auto;
-  max-height: calc(100% - 50px);
   margin-left: 8px;
   margin-top: 8px;
   margin-right: 5px;
-  padding-bottom: 5px;
 }
 
 .search-clear {
@@ -679,11 +678,18 @@ input[type=color] {
 
 .result-image-host {
   opacity: 1;
-  transition: 0.5s opacity;
+  transition: opacity 0.5s;
 }
 
-.result-image-host:hover {
+.result-tile:hover > .result-image-host {
   opacity: 0;
+  transition: opacity 0.5s;
+}
+
+.result-tile:hover .result-image {
+  width: 0%;
+  transition: width 0.0s;
+  transition-delay: 0.5s;
 }
 
 .result-image {
@@ -692,6 +698,8 @@ input[type=color] {
   width: 100%;
   height: 100%;
   border-radius: 5px;
+  transition: width 0.0s;
+  transition-delay: 0.0s;
 }
 
 .search-title {
@@ -704,4 +712,17 @@ img {
 
 img[src] {
  display: block;
+}
+
+.result-provider-host {
+  display: flex;
+  flex-wrap: wrap;
+  align-content: flex-start;
+}
+
+.provider-image {
+  width: 34px;
+  height: 34px;
+  border-radius: 3px;
+  margin: 1px;
 }

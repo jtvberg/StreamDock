@@ -665,19 +665,26 @@ function addBookmarkFlash() {
 }
 
 // Call API to get search results
-function getSearchResults() {
+function getSearchResults(page) {
+  let pages = 1
   if(!settings.searchApiKey || settings.searchApiKey.length === 0) {
     alert('You must enter a valid API key in Preferences > Search Settings for search to work')
     return
   }
+  // page = page ? page : 1
   const api_key = settings.searchApiKey
   $('#search-result-host').empty()
-  var getMedia = $.getJSON(`https://api.themoviedb.org/3/search/multi?api_key=${api_key}&language=en-US&query=${$('#search-input').val()}&include_adult=false`)  
+  var getMedia = $.getJSON(`https://api.themoviedb.org/3/search/multi?api_key=${api_key}&language=en-US&query=${$('#search-input').val()}&page=${page}&include_adult=false`)  
     .fail(function() {
       alert('Search query failed. Do you have a valid API key?')
     })
     .always(function() {
-      const results = _.orderBy(_.filter(getMedia.responseJSON.results, o => o.media_type !== 'person'), 'popularity', 'desc')
+      console.log(getMedia.responseJSON)
+      if (getMedia.responseJSON.total_results === 0) alert('No results found')
+      pages = getMedia.responseJSON.total_pages
+      console.log(page+'/'+pages)
+      // const results = _.orderBy(_.filter(getMedia.responseJSON.results, o => o.media_type !== 'person'), 'popularity', 'desc')
+      const results = _.filter(getMedia.responseJSON.results, o => o.media_type !== 'person')
       $.each(results, function(i, item) {
         var getDetails = $.getJSON(`https://api.themoviedb.org/3/${item.media_type}/${item.id}?api_key=${api_key}&append_to_response=credits,watch/providers,genres`)
           .always(function() {
@@ -689,10 +696,10 @@ function getSearchResults() {
             try { link = getDetails.responseJSON['watch/providers'].results.US.link } catch(err) {  }
             let genres = []
             try { genres = getDetails.responseJSON.genres } catch(err) { console.log(err) }
-            // console.log(providers)
             addSearchResult(item, cast, providers, link, genres)
           })
       })
+      // if (page < pages) getSearchResults(page++)
     })
 }
 
@@ -704,8 +711,7 @@ function getYear(input) {
 
 // Add search result to UI
 function addSearchResult(result, cast, providers, link, genres) {
-  let txtCast = 'Top Billed Cast: '
-  let txtProviders = 'Streaming on: '
+  let txtCast = 'Starring: '
   let txtGenres  = ''
 
   if (cast && cast.length > 0) {
@@ -715,15 +721,7 @@ function addSearchResult(result, cast, providers, link, genres) {
       }
     })
   } else {
-    txtCast += 'NA  '
-  }
-
-  if (providers && providers.length > 0) {
-    $.each(providers, function(i, item) {
-      txtProviders += `${item.provider_name}, `
-    })
-  } else {
-    txtProviders = '  '
+    txtCast += '  '
   }
 
   if (genres && genres.length > 0) {
@@ -735,18 +733,28 @@ function addSearchResult(result, cast, providers, link, genres) {
   let title = result.title === undefined ? result.name : result.title
   let first_date = result.release_date === undefined ? result.first_air_date : result.release_date
 
-  const instance = $($('#search\\-result\\-instance').html())
+  const detailIns = $($('#search\\-result\\-instance').html())
   if (result.poster_path) {
-    $('.result-image', instance).prop('src', `https://image.tmdb.org/t/p/original${result.poster_path}`)
+    $('.result-image', detailIns).prop('src', `https://image.tmdb.org/t/p/original${result.poster_path}`)
   }
-  $('.result-title', instance).text(`${title}`)
-  $('.result-year', instance).text(`(${getYear(first_date)})`)
+  if (providers && providers.length > 0) {
+    $.each(providers, function(i, item) {
+      if (i < 8) {
+        const providerIns = $($('#provider\\-image\\-instance').html())
+        $('.provider-image', providerIns).prop('src', `https://image.tmdb.org/t/p/original${item.logo_path}`)
+        $('.provider-image', providerIns).prop('title', `${item.provider_name}`)
+        // $('.provider-name', providerIns).text(`${item.provider_name}`)
+        $('.result-provider-host', detailIns).append(providerIns)
+      }
+    })
+  }
+  $('.result-title', detailIns).text(`${title}`)
+  $('.result-year', detailIns).text(`(${getYear(first_date)})`)
   // $('.result-overview', instance).text(result.overview)
   // $('.result-cast', instance).text(txtCast.slice(0, -2))
-  $('.result-providers', instance).text(txtProviders.slice(0, -2))
-  $('.result-genres', instance).text(txtGenres.slice(0, -2))
-  $(instance).data('tmdb-url', link)
-  $('#search-result-host').append(instance)
+  $('.result-genres', detailIns).text(txtGenres.slice(0, -2))
+  $(detailIns).data('tmdb-url', link)
+  $('#search-result-host').append(detailIns)
 }
 
 // Toggle search pane on home screen
@@ -906,6 +914,11 @@ $('#scalev-btn').on('click', () => {
   ipcRenderer.send('scale-height')
 })
 
+// Open prefs click handler
+$('#prefs-btn').on('click', () => {
+  loadSettingsModal()
+})
+
 // Header double-click handler
 $('.header-bar').on('dblclick', () => {
   maxRestoreWindow()
@@ -951,7 +964,7 @@ $('#search-api-key-undo-btn').on('click', () => {
 // Get search results click handler
 $('#search-input').on('keypress', (e) => {
   if (e.key === 'Enter' && $('#search-input').val().length > 0) {
-    getSearchResults()
+    getSearchResults(1)
   }
 })
 

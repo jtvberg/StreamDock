@@ -20,6 +20,7 @@
       <div class="fas fa-link control-btn" id="link-btn" title="Navigate to Link from Clipboard"></div>
       <div class="fas fa-arrows-alt-v control-btn" id="scalev-btn" title="Scale Height to 16:9"></div>
       <div class="fas fa-arrows-alt-h control-btn" id="scaleh-btn" title="Scale Width to 16:9"></div>
+      <div class="fas fa-cog control-btn" id="prefs-btn" title="Open Preferences"></div>
       <div class="fas ontop-locked control-btn" id="ontop-btn" title="Toggle Window On Top"></div>
     </div>
   </header>
@@ -36,7 +37,7 @@
           <small class="text-muted">This product uses the TMDB API but is not endorsed or certified by TMDB</small>
         </div>
         <div class="search-input-host">
-          <input class="form-control text-search" id="search-input" type="text" placeholder="Search" aria-label="Search">
+          <input class="form-control text-search" id="search-input" type="text" placeholder="Search for a movie or TV show" aria-label="Search">
           <div class="fas fa-times fa-lg search-clear" title="Clear Search"></div>
         </div>
       </div>
@@ -402,11 +403,17 @@
         <div class="result-genres"></div>
         <div class="result-overview"></div>
         <div class="result-cast"></div>
-        <div class="result-providers"></div>
+        <div class="result-provider-host"></div>
       </div>
       <div class="result-image-host">
         <img class="result-image"></img>
       </div>
+    </div>
+  </template>
+  <template id="provider-image-instance">
+    <div class="provider-info">
+      <div class="provider-name"></div>
+      <img class="provider-image"></img>
     </div>
   </template>
 
