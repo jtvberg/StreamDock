@@ -374,25 +374,14 @@
             <div id="result-detail-body">
               <div id="result-detail-tagline"></div>
               <div id="result-detail-overview-header" class="result-detail-header">Overview</div>
-              <div id="result-detail-overview"></div>
+              <div id="result-detail-overview" class="result-detail-text"></div>
               <div id="result-detail-cast-header" class="result-detail-header">Top Billed Cast</div>
-              <div id="result-detail-cast"></div>
+              <div id="result-detail-cast" class="result-detail-text"></div>
             </div>
           </div>
         </div>
         <div class="modal-footer">
           <div id="result-detail-provider-host" class="result-provider-host">
-            <div class="result-provider-host"><div class="provider-info">
-              <img class="provider-image" src="https://image.tmdb.org/t/p/original/aS2zvJWn9mwiCOeaaCkIh4wleZS.jpg" title="HBO Max">
-            </div><div class="provider-info">
-              <img class="provider-image" src="https://image.tmdb.org/t/p/original/pCmBqVbaYTpTactRXXDw5O8N1VZ.jpg" title="HBO Now">
-            </div><div class="provider-info">
-              <img class="provider-image" src="https://image.tmdb.org/t/p/original/rSCrkIuw1aooazOcj2mSoGnjHXk.jpg" title="Max Go">
-            </div><div class="provider-info">
-              <img class="provider-image" src="https://image.tmdb.org/t/p/original/qZdEeINwQotbr1Rq15dL5G2BaAh.jpg" title="DIRECTV">
-            </div><div class="provider-info">
-              <img class="provider-image" src="https://image.tmdb.org/t/p/original/xiUQmGI2bi8Rn6C5u2bArB4YHMp.jpg" title="Spectrum On Demand">
-            </div></div>
           </div>
         </div>
       </div>
@@ -463,8 +452,12 @@
   </template>
   <template id="provider-image-instance">
     <div class="provider-info">
-      <div class="provider-name"></div>
       <img class="provider-image"></img>
+    </div>
+  </template>
+  <template id="detail-provider-image-instance">
+    <div class="provider-info">
+      <img class="result-detail-provider-image"></img>
     </div>
   </template>
 
