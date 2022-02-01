@@ -470,6 +470,7 @@ function loadSettingsModal() {
   $('#agent-string-input').val(userAgent)
   $('#search-check').prop('checked', settings.showSearch)
   $('#search-api-key-input').val(settings.searchApiKey)
+  $('#search-detail-modal').modal('hide')
   $('#settings-modal').modal('show')
 }
 
@@ -761,6 +762,21 @@ function addSearchResult(result, media, cast, providers, link, genres) {
   $('#search-result-host').append(detailIns)
 }
 
+function loadSearchDetailModal() {
+  // openStream('ot', $(this).data('tmdb-url'))
+  $('#result-detail-title').text('Star Wars')
+  $('#result-detail-year').text('(1977)')
+  $('#result-detail-image').prop('src', 'https://www.themoviedb.org/t/p/w300_and_h450_bestv2/6FfCtAuVAW8XJjZ7eWeLibRLWTw.jpg')
+  $('#result-detail-tagline').text('"A long time ago in a galaxy far, far away..."')
+  $('#result-detail-media').text('Movie')
+  $('#result-detail-genres').text('Action Adventure, Sci-fi')
+  $('#result-detail-runtime').text('120m')
+  $('#result-detail-overview').text(`Princess Leia is captured and held hostage by the evil Imperial forces in their effort to take over the galactic Empire. Venturesome Luke Skywalker and dashing captain Han Solo team together with the loveable robot duo R2-D2 and C-3PO to rescue the beautiful princess and restore peace and justice in the Empire.`)
+  $('#result-detail-cast').text('Mark Hamill, Harrison Ford, Carrie Fisher')
+
+  $('#search-detail-modal').modal('show')
+}
+
 // Toggle search pane on home screen
 function toggleSearch() {
   if(settings.showSearch) {
@@ -837,9 +853,9 @@ $(document).on('click', '.bookmark-url-btn', function () {
   clipboard.writeText($(this).data('url'))
 })
 
-// Open TMDB link
+// Open TMDB detail modal
 $(document).on('click', '.result-tile', function() {
-  openStream('ot', $(this).data('tmdb-url'))
+  loadSearchDetailModal()
 })
 
 // Home Screen toggle click handler
@@ -920,7 +936,8 @@ $('#scalev-btn').on('click', () => {
 
 // Open prefs click handler
 $('#prefs-btn').on('click', () => {
-  loadSettingsModal()
+  // loadSettingsModal()
+  loadSearchDetailModal()
 })
 
 // Header double-click handler

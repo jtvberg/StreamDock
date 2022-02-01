@@ -34,7 +34,7 @@
       <div class="search-header">
         <div class="search-host-title">
           <h3 class="search-title">Find a Stream</h3>
-          <small class="text-muted">This product uses the TMDB API but is not endorsed or certified by TMDB</small>
+          <small class="text-muted text-box">This product uses the TMDB API but is not endorsed or certified by TMDB</small>
         </div>
         <div class="search-input-host">
           <input class="form-control text-search" id="search-input" type="text" placeholder="Search for a movie or TV show" aria-label="Search">
@@ -343,6 +343,57 @@
           <button type="button" class="btn btn-secondary" data-dismiss="modal"
             title="Dismisses settings without saving changes">Close</button>
           <button id="settings-save-btn" type="button" class="btn btn-primary">Save Changes</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div id="search-detail-modal" class="modal fade" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-lg" role="document">
+      <div class="modal-content modal-content-solid">
+        <div class="modal-header">
+          <div class="modal-title">
+            <div id="result-detail-header">
+              <span id="result-detail-title"></span>
+              <span id="result-detail-year"></span>
+            </div>
+            <div id="result-detail-attr">
+              <span id="result-detail-media"></span>
+              <span class="fas fa-circle fa-xs" style="font-size: 0.1rem; vertical-align: middle;"></span>
+              <span id="result-detail-genres"></span>
+              <span class="fas fa-circle fa-xs"style="font-size: 0.1rem; vertical-align: middle;"></span>
+              <span id="result-detail-runtime"></span>
+            </div>
+          </div>
+          <button type="button" class="close modal-close-btn" data-dismiss="modal">
+            <span>&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div id="result-detail-host">
+            <img id="result-detail-image"></img>
+            <div id="result-detail-body">
+              <div id="result-detail-tagline"></div>
+              <div id="result-detail-overview-header" class="result-detail-header">Overview</div>
+              <div id="result-detail-overview"></div>
+              <div id="result-detail-cast-header" class="result-detail-header">Top Billed Cast</div>
+              <div id="result-detail-cast"></div>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <div id="result-detail-provider-host" class="result-provider-host">
+            <div class="result-provider-host"><div class="provider-info">
+              <img class="provider-image" src="https://image.tmdb.org/t/p/original/aS2zvJWn9mwiCOeaaCkIh4wleZS.jpg" title="HBO Max">
+            </div><div class="provider-info">
+              <img class="provider-image" src="https://image.tmdb.org/t/p/original/pCmBqVbaYTpTactRXXDw5O8N1VZ.jpg" title="HBO Now">
+            </div><div class="provider-info">
+              <img class="provider-image" src="https://image.tmdb.org/t/p/original/rSCrkIuw1aooazOcj2mSoGnjHXk.jpg" title="Max Go">
+            </div><div class="provider-info">
+              <img class="provider-image" src="https://image.tmdb.org/t/p/original/qZdEeINwQotbr1Rq15dL5G2BaAh.jpg" title="DIRECTV">
+            </div><div class="provider-info">
+              <img class="provider-image" src="https://image.tmdb.org/t/p/original/xiUQmGI2bi8Rn6C5u2bArB4YHMp.jpg" title="Spectrum On Demand">
+            </div></div>
+          </div>
         </div>
       </div>
     </div>
