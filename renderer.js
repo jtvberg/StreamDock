@@ -17,6 +17,7 @@ let nfFacets = []
 let bookmarks = []
 let userAgent = ''
 let defaultAgent = ''
+let searchResults = []
 
 // Invoke services load and apply settings
 loadSettings()
@@ -678,6 +679,7 @@ function getSearchResults(page) {
   page = page ? page : 1
   if (page === 1) {
     $('#search-result-host').empty()
+    searchResults = []
   }
   const api_key = settings.searchApiKey
   var getMedia = $.getJSON(`https://api.themoviedb.org/3/search/multi?api_key=${api_key}&language=en-US&query=${$('#search-input').val()}&page=${page}&include_adult=false`)  
@@ -691,16 +693,37 @@ function getSearchResults(page) {
       $.each(results, function(i, item) {
         var getDetails = $.getJSON(`https://api.themoviedb.org/3/${item.media_type}/${item.id}?api_key=${api_key}&append_to_response=credits,watch/providers,genres`)
           .always(function() {
-            let media = item.media_type
+            const media = item.media_type
             let cast = []
             try { cast = getDetails.responseJSON.credits.cast } catch(err) { console.log(err) }
             let providers = []
             try { providers = getDetails.responseJSON['watch/providers'].results.US.flatrate } catch(err) {  }
             let link = ''
             try { link = getDetails.responseJSON['watch/providers'].results.US.link } catch(err) {  }
+            link = link === '' ? `https://www.themoviedb.org/${media}/${item.id}/` : link
             let genres = []
             try { genres = getDetails.responseJSON.genres } catch(err) { console.log(err) }
-            addSearchResult(item, media, cast, providers, link, genres)
+            const title = item.title === undefined ? item.name : item.title
+            const first_date = item.release_date === undefined ? item.first_air_date : item.release_date
+            const poster = `https://image.tmdb.org/t/p/original${item.poster_path}`
+            const year = getYear(first_date)
+            const runtime = getDetails.responseJSON.runtime === undefined ? getDetails.responseJSON.episode_run_time[0] : getDetails.responseJSON.runtime
+            const searchResult = {
+              id: item.id,
+              poster,
+              title,
+              year,
+              media,
+              genres,
+              runtime,
+              tagline: getDetails.responseJSON.tagline,
+              overview: item.overview,
+              cast,
+              providers,
+              link
+            }
+            searchResults.push(searchResult)
+            addSearchResult(searchResult)
           })
       })
       if (page < 3 && page < pages) {
@@ -716,64 +739,74 @@ function getYear(input) {
 }
 
 // Add search result to UI
-function addSearchResult(result, media, cast, providers, link, genres) {
-  const title = result.title === undefined ? result.name : result.title
-  const first_date = result.release_date === undefined ? result.first_air_date : result.release_date
-  link = link === '' ? `https://www.themoviedb.org/${media}/${result.id}/` : link
-
-  // let txtCast = 'Starring: '
-  // if (cast && cast.length > 0) {
-  //   $.each(cast, function(i, item) {
-  //     if (i < 3) {
-  //       txtCast += `${item.name}, `
-  //     }
-  //   })
-  // } else {
-  //   txtCast += '  '
-  // }
-
+function addSearchResult(result) {
   let txtGenres  = ''  
-  if (genres && genres.length > 0) {
-    $.each(genres, function(i, item) {
+  if (result.genres && result.genres.length > 0) {
+    $.each(result.genres, function(i, item) {
       txtGenres += `${item.name}, `
     })
   }
 
   const detailIns = $($('#search\\-result\\-instance').html())
-  if (result.poster_path) {
-    $('.result-image', detailIns).prop('src', `https://image.tmdb.org/t/p/original${result.poster_path}`)
+  if (result.poster) {
+    $('.result-image', detailIns).prop('src', `${result.poster}`)
   }
-  if (providers && providers.length > 0) {
-    $.each(providers, function(i, item) {
+  if (result.providers && result.providers.length > 0) {
+    $.each(result.providers, function(i, item) {
       if (i < 8) {
         const providerIns = $($('#provider\\-image\\-instance').html())
         $('.provider-image', providerIns).prop('src', `https://image.tmdb.org/t/p/original${item.logo_path}`)
-        $('.provider-image', providerIns).prop('title', `${item.provider_name}`)
         $('.result-provider-host', detailIns).append(providerIns)
       }
     })
   }
-  $('.result-title', detailIns).text(`${title}`)
-  $('.result-year', detailIns).text(`(${getYear(first_date)})`)
-  // $('.result-overview', instance).text(result.overview)
-  // $('.result-cast', instance).text(txtCast.slice(0, -2))
+  $('.result-title', detailIns).text(`${result.title}`)
+  $('.result-year', detailIns).text(`(${result.year})`)
   $('.result-genres', detailIns).text(txtGenres.slice(0, -2))
-  $(detailIns).data('tmdb-url', link)
+  $(detailIns).data('id', result.id).data('media', result.media)
   $('#search-result-host').append(detailIns)
 }
 
-function loadSearchDetailModal() {
-  // openStream('ot', $(this).data('tmdb-url'))
-  $('#result-detail-title').text('Star Wars')
-  $('#result-detail-year').text('(1977)')
-  $('#result-detail-image').prop('src', 'https://www.themoviedb.org/t/p/w300_and_h450_bestv2/6FfCtAuVAW8XJjZ7eWeLibRLWTw.jpg')
-  $('#result-detail-tagline').text('"A long time ago in a galaxy far, far away..."')
-  $('#result-detail-media').text('Movie')
-  $('#result-detail-genres').text('Action Adventure, Sci-fi')
-  $('#result-detail-runtime').text('120m')
-  $('#result-detail-overview').text(`Princess Leia is captured and held hostage by the evil Imperial forces in their effort to take over the galactic Empire. Venturesome Luke Skywalker and dashing captain Han Solo team together with the loveable robot duo R2-D2 and C-3PO to rescue the beautiful princess and restore peace and justice in the Empire.`)
-  $('#result-detail-cast').text('Mark Hamill, Harrison Ford, Carrie Fisher')
-
+// Load the search result detail modal from the searchResult array
+function loadSearchDetailModal(media, id) {
+  const resultDetail = searchResults.find(item => item.media === media && item.id === id)
+  let txtGenres  = ''  
+  if (resultDetail.genres && resultDetail.genres.length > 0) {
+    $.each(resultDetail.genres, function(i, item) {
+      txtGenres += `${item.name}, `
+    })
+  } else {
+    txtGenres = 'NA  '
+  }
+  let txtCast = ''
+  if (resultDetail.cast && resultDetail.cast.length > 0) {
+    $.each(resultDetail.cast, function(i, item) {
+      if (i < 5) {
+        txtCast += `${item.name}, `
+      }
+    })
+  } else {
+    txtCast = 'NA  '
+  }
+  $('#result-detail-title').text(`${resultDetail.title}`)
+  $('#result-detail-year').text(`(${resultDetail.year})`)
+  $('#result-detail-image').prop('src', `${resultDetail.poster}`)
+  $('#result-detail-tagline').text(`${resultDetail.tagline}`)
+  $('#result-detail-media').text(resultDetail.media === 'movie' ? 'Film' : 'TV')
+  $('#result-detail-genres').text(txtGenres.slice(0, -2))
+  $('#result-detail-runtime').text(`${resultDetail.runtime}m`)
+  $('#result-detail-overview').text(`${resultDetail.overview}`)
+  $('#result-detail-cast').text(txtCast.slice(0, -2))
+  $('#result-detail-provider-host').empty()
+  if (resultDetail.providers && resultDetail.providers.length > 0) {
+    $.each(resultDetail.providers, function(i, item) {
+      if (i < 14) {
+        const providerIns = $($('#detail\\-provider\\-image\\-instance').html())
+        $('.result-detail-provider-image', providerIns).prop('src', `https://image.tmdb.org/t/p/original${item.logo_path}`)
+        $('#result-detail-provider-host').append(providerIns)
+      }
+    })
+  }
   $('#search-detail-modal').modal('show')
 }
 
@@ -855,7 +888,7 @@ $(document).on('click', '.bookmark-url-btn', function () {
 
 // Open TMDB detail modal
 $(document).on('click', '.result-tile', function() {
-  loadSearchDetailModal()
+  loadSearchDetailModal($(this).data('media'), $(this).data('id'))
 })
 
 // Home Screen toggle click handler
@@ -936,8 +969,7 @@ $('#scalev-btn').on('click', () => {
 
 // Open prefs click handler
 $('#prefs-btn').on('click', () => {
-  // loadSettingsModal()
-  loadSearchDetailModal()
+  loadSettingsModal()
 })
 
 // Header double-click handler
