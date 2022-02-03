@@ -78,7 +78,8 @@
    Just added in 0.7.0 you can now search for a stream from the home screen
    - The search uses the TMDB API to find titles and show you were you can stream them
    - TMDB is a community driven movie and TV database. You can check it out [here](https://www.themoviedb.org/).
-   - Clicking on a search result entry will take you to the TMDB page where you can see the various ways to get the content
+   - Clicking on a search result entry will show you details about the title
+   - Within the detail view there is a link to the TMDB page where you can see the various ways to get the content
    - The search result will only list subscription services but if you go to the TMDB page, you can also see purchase and rental options
    - The primary search results are currently US only
    - Some price of admission: you will need to enable the search pane it in the settings and provide an API key. This requires you create a free account on TMDB and generate the v3 key

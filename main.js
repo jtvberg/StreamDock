@@ -367,9 +367,10 @@ function streamChange(stream) {
     view.setBounds({ x: 0, y: 0, width: 0, height: 0 })
     showHomescreen = false
     currentStream = stream.id === 'ot' ? setStreamId(currentHost) : stream.id
+    updateShowFacets()
     view.webContents.loadURL(stream.url, { userAgent: userAgent })
     win.webContents.send('hide-homescreen')
-    win.webContents.send('stream-changed', currentHost)
+    win.webContents.send('stream-changed')
   } else {
     win.webContents.send('invalid-url')
   }
@@ -395,6 +396,7 @@ function streamLoaded() {
 // Toggle facets if Netflix
 function updateShowFacets() {
   showFacets = showFacets && currentStream === 'nf'
+  console.log(showFacets)
   win.webContents.send('show-facets', showFacets)
 }
 
@@ -434,7 +436,7 @@ function navChange() {
   currentStream = 'ot'
   updateShowFacets()
   view.setBounds({ x: 0, y: 0, width: 0, height: 0 })
-  win.webContents.send('stream-changed', null)
+  win.webContents.send('stream-changed')
   setTimeout(setViewBounds, 1000)
 }
 

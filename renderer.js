@@ -45,9 +45,8 @@ ipcRenderer.on('save-settings', (e, data) => {
 })
 
 // Stream changed
-ipcRenderer.on('stream-changed', (e, host) => {
+ipcRenderer.on('stream-changed', () => {
   $('.loading').show()
-  toggleFacetsButton(host)
 })
 
 // Show home screen
@@ -73,6 +72,7 @@ ipcRenderer.on('stream-loaded', (e, stream) => {
     settings.lastStream = stream
   }
   $('.loading').hide()
+  toggleFacetsButton(new URL(stream.url).hostname)
 })
 
 // Save bookmark
