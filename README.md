@@ -81,6 +81,7 @@
    - Clicking on a search result entry will show you details about the title
    - Within the detail view there is a link to the TMDB page where you can see the various ways to get the content
    - The search result will only list subscription services but if you go to the TMDB page, you can also see purchase and rental options
+   - Clicking on one of the streaming options will open the link in the app however, some services, like HBO, will ask who is watching and then lose it's way to the content
    - The primary search results are currently US only
    - Some price of admission: you will need to enable the search pane it in the settings and provide an API key. This requires you create a free account on TMDB and generate the v3 key
 

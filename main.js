@@ -396,7 +396,6 @@ function streamLoaded() {
 // Toggle facets if Netflix
 function updateShowFacets() {
   showFacets = showFacets && currentStream === 'nf'
-  console.log(showFacets)
   win.webContents.send('show-facets', showFacets)
 }
 

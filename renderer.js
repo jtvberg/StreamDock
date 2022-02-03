@@ -705,7 +705,7 @@ function getSearchResults(page) {
             try { genres = getDetails.responseJSON.genres } catch(err) { console.log(err) }
             const title = item.title === undefined ? item.name : item.title
             const first_date = item.release_date === undefined ? item.first_air_date : item.release_date
-            const poster = `https://image.tmdb.org/t/p/original${item.poster_path}`
+            const poster = item.poster_path ? `https://image.tmdb.org/t/p/original${item.poster_path}` : ''
             const year = getYear(first_date)
             const runtime = getDetails.responseJSON.runtime === undefined ? getDetails.responseJSON.episode_run_time[0] : getDetails.responseJSON.runtime
             const searchResult = {
@@ -755,7 +755,7 @@ function addSearchResult(result) {
     $.each(result.providers, function(i, item) {
       if (i < 8) {
         const providerIns = $($('#provider\\-image\\-instance').html())
-        $('.provider-image', providerIns).prop('src', `https://image.tmdb.org/t/p/original${item.logo_path}`)
+        $('.provider-image', providerIns).prop('src', `https://image.tmdb.org/t/p/original${item.logo_path}`).prop('title', `${item.provider_name}`)
         $('.result-provider-host', detailIns).append(providerIns)
       }
     })
@@ -797,12 +797,13 @@ function loadSearchDetailModal(media, id) {
   $('#result-detail-runtime').text(`${resultDetail.runtime}m`)
   $('#result-detail-overview').text(`${resultDetail.overview}`)
   $('#result-detail-cast').text(txtCast.slice(0, -2))
+  $('#result-detail-tmdb-logo').prop('src', './res/serv_logos/small/tmdb.png').data('link', resultDetail.link)
   $('#result-detail-provider-host').empty()
   if (resultDetail.providers && resultDetail.providers.length > 0) {
     $.each(resultDetail.providers, function(i, item) {
-      if (i < 14) {
+      if (i < 12) {
         const providerIns = $($('#detail\\-provider\\-image\\-instance').html())
-        $('.result-detail-provider-image', providerIns).prop('src', `https://image.tmdb.org/t/p/original${item.logo_path}`)
+        $('.result-detail-provider-image', providerIns).prop('src', `https://image.tmdb.org/t/p/original${item.logo_path}`).prop('title', `${item.provider_name}`)
         $('#result-detail-provider-host').append(providerIns)
       }
     })
@@ -889,6 +890,11 @@ $(document).on('click', '.bookmark-url-btn', function () {
 // Open TMDB detail modal
 $(document).on('click', '.result-tile', function() {
   loadSearchDetailModal($(this).data('media'), $(this).data('id'))
+})
+
+// Open TMDB link
+$('#result-detail-tmdb-logo').on('click', function() {
+  openStream('ot', $(this).data('link'))
 })
 
 // Home Screen toggle click handler
