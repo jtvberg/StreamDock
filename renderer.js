@@ -755,7 +755,7 @@ function addSearchResult(result) {
     $.each(result.providers, function(i, item) {
       if (i < 8) {
         const providerIns = $($('#provider\\-image\\-instance').html())
-        $('.provider-image', providerIns).prop('src', `https://image.tmdb.org/t/p/original${item.logo_path}`).prop('title', `${item.provider_name}`)
+        $('.provider-image', providerIns).prop('src', `https://image.tmdb.org/t/p/original${item.logo_path}`).prop('title', `${item.provider_name}`).data('link', `${result.link}`)
         $('.result-provider-host', detailIns).append(providerIns)
       }
     })
@@ -803,7 +803,7 @@ function loadSearchDetailModal(media, id) {
     $.each(resultDetail.providers, function(i, item) {
       if (i < 12) {
         const providerIns = $($('#detail\\-provider\\-image\\-instance').html())
-        $('.result-detail-provider-image', providerIns).prop('src', `https://image.tmdb.org/t/p/original${item.logo_path}`).prop('title', `${item.provider_name}`)
+        $('.result-detail-provider-image', providerIns).prop('src', `https://image.tmdb.org/t/p/original${item.logo_path}`).prop('title', `${item.provider_name}`).data('link', resultDetail.link)
         $('#result-detail-provider-host').append(providerIns)
       }
     })
@@ -826,6 +826,11 @@ function toggleSearch() {
 $.getJSON('nffacets.json', function(json) { 
   nfFacets = json
 }).then(renderNfFacets)
+
+$(document).on('click', '.result-detail-provider-image, .provider-image', function (e) {
+  e.stopPropagation()
+  openStream('ot', $(this).data('link'))
+})
 
 // NF facet click handler
 $(document).on('click', '.nf-facet', function () {

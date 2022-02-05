@@ -470,7 +470,7 @@ function setStreamId(host) {
     case 'beta.crunchyroll.com':
       return 'cr'
     default:
-      return currentStream
+      return 'ot'
   }
 }
 

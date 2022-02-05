@@ -808,6 +808,7 @@ img[src] {
   height: 50px;
   border-radius: 4px;
   margin: 2px;
+  cursor: pointer;
 }
 
 #result-detail-tmdb-logo {
