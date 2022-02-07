@@ -583,6 +583,7 @@ function renderNfFacets() {
 
 // Sent IPC message to open stream
 function openStream(id, url) {
+  $('#search-detail-modal').modal('hide')
   ipcRenderer.send('service-change', {
     id: id,
     url: url
