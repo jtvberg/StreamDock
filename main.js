@@ -440,6 +440,8 @@ function navChange() {
 }
 
 // Set the stream ID if it needs to be derived
+// this sort of sucks but there are cases where this is necessary
+// Will look to pull this out of the default streams instead to at least keep it all in one place
 function setStreamId(host) {
   switch (host) {
     case 'www.youtube.com':

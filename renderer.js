@@ -682,8 +682,10 @@ function getSearchResults(page) {
     $('#search-result-host').empty()
     searchResults = []
   }
+  const loc = 'US'
+  const lang = `en-${loc}`
   const api_key = settings.searchApiKey
-  var getMedia = $.getJSON(`https://api.themoviedb.org/3/search/multi?api_key=${api_key}&language=en-US&query=${$('#search-input').val()}&page=${page}&include_adult=false`)  
+  var getMedia = $.getJSON(`https://api.themoviedb.org/3/search/multi?api_key=${api_key}&language=${lang}&query=${$('#search-input').val()}&page=${page}&include_adult=false`)  
     .fail(function() {
       alert('Search query failed. Do you have a valid API key?')
     })
@@ -698,9 +700,9 @@ function getSearchResults(page) {
             let cast = []
             try { cast = getDetails.responseJSON.credits.cast } catch(err) { console.log(err) }
             let providers = []
-            try { providers = getDetails.responseJSON['watch/providers'].results.US.flatrate } catch(err) {  }
+            try { providers = _.get(getDetails.responseJSON['watch/providers'].results, loc).flatrate } catch(err) {  }
             let link = ''
-            try { link = getDetails.responseJSON['watch/providers'].results.US.link } catch(err) {  }
+            try { link = _.get(getDetails.responseJSON['watch/providers'].results, loc).link } catch(err) {  }
             link = link === '' ? `https://www.themoviedb.org/${media}/${item.id}/` : link
             let genres = []
             try { genres = getDetails.responseJSON.genres } catch(err) { console.log(err) }
