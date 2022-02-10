@@ -647,7 +647,7 @@ input[type=color] {
   border-radius: 5px;
   cursor: pointer;
   position: relative;
-  font-size: small;
+  background-color: var(--color-bg-trans);
 }
 
 .result-tile:hover {
@@ -684,6 +684,7 @@ input[type=color] {
   top: 0px;
   width: 100%;
   height: 100%;
+  font-size: small;
 }
 
 .result-image-host {
@@ -815,4 +816,19 @@ img[src] {
   cursor: pointer;
   width: 114px;
   height: 50px;
+}
+
+#results-more {
+  width: 150px;
+  height: 225px;
+  cursor: pointer;
+  position: relative;
+  text-align: center;
+  background: none;
+  color: var(--color-neutral-light);
+  line-height: 225px;
+}
+
+#results-more:hover {
+  color: var(--color-fg);
 }

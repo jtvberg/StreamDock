@@ -18,6 +18,7 @@ let bookmarks = []
 let userAgent = ''
 let defaultAgent = ''
 let searchResults = []
+let searchInput = ''
 
 // Invoke services load and apply settings
 loadSettings()
@@ -679,13 +680,17 @@ function getSearchResults(page) {
   }
   page = page ? page : 1
   if (page === 1) {
+    searchInput = $('#search-input').val()
     $('#search-result-host').empty()
     searchResults = []
+  } else {
+    $('#results-more').remove()
   }
   const loc = 'US'
-  const lang = `en-${loc}`
+  const lang = 'en'
+  const langLoc = `${lang}-${loc}`
   const api_key = settings.searchApiKey
-  var getMedia = $.getJSON(`https://api.themoviedb.org/3/search/multi?api_key=${api_key}&language=${lang}&query=${$('#search-input').val()}&page=${page}&include_adult=false`)  
+  var getMedia = $.getJSON(`https://api.themoviedb.org/3/search/multi?api_key=${api_key}&language=${langLoc}&query=${searchInput}&page=${page}&include_adult=false`)  
     .fail(function() {
       alert('Search query failed. Do you have a valid API key?')
     })
@@ -693,6 +698,7 @@ function getSearchResults(page) {
       if (getMedia.responseJSON.total_results === 0) alert('No results found')
       pages = getMedia.responseJSON.total_pages
       const results = _.orderBy(_.filter(getMedia.responseJSON.results, o => o.media_type !== 'person'), 'popularity', 'desc')
+      let records = results.length
       $.each(results, function(i, item) {
         var getDetails = $.getJSON(`https://api.themoviedb.org/3/${item.media_type}/${item.id}?api_key=${api_key}&append_to_response=credits,watch/providers,genres`)
           .always(function() {
@@ -723,15 +729,22 @@ function getSearchResults(page) {
               overview: item.overview,
               cast,
               providers,
-              link
+              link,
+              popularity: item.popularity,
+              loaded: false,
+              page
             }
             searchResults.push(searchResult)
-            addSearchResult(searchResult)
+            --records
+            if (records === 0) {
+              searchResults = _.orderBy(searchResults, 'popularity', 'desc')
+              addSearchResults()
+              if (page < pages) {
+                addMoreTile(page + 1)
+              }
+            }
           })
       })
-      if (page < 3 && page < pages) {
-        getSearchResults(++page)
-      }
     })
 }
 
@@ -739,6 +752,25 @@ function getSearchResults(page) {
 function getYear(input) {
   const year = new Date(input).getFullYear()
   return isNaN(year) ? 'NA' : year
+}
+
+// Add a get more results tile to the end of the results
+function addMoreTile(page) {
+  $('<div>', {
+    id: 'results-more',
+    class: 'fa fa-plus-circle fa-4x',
+    title: 'Load More Results'
+  }).data('page', page).appendTo('#search-result-host')
+}
+
+// Loop through search results and call addSearchResult
+function addSearchResults() {
+  $.each(searchResults, function(i, item) {
+    if (!item.loaded) {
+      addSearchResult(item)
+      item.loaded = true
+    }
+  })
 }
 
 // Add search result to UI
@@ -830,6 +862,12 @@ $.getJSON('nffacets.json', function(json) {
   nfFacets = json
 }).then(renderNfFacets)
 
+// Load more results on click of more tile
+$(document).on('click', '#results-more', () => {
+  getSearchResults($('#results-more').data('page'))
+})
+
+// Open TMDB page on click of provider image
 $(document).on('click', '.result-detail-provider-image, .provider-image', function (e) {
   e.stopPropagation()
   openStream('ot', $(this).data('link'))
