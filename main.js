@@ -41,6 +41,7 @@ let showHomescreen = false
 let userAgent = ''
 let currentStream = ''
 let touchBarItems = []
+let defaultStreams = []
 
 // OS variables
 if (isMac) {
@@ -440,40 +441,9 @@ function navChange() {
 }
 
 // Set the stream ID if it needs to be derived
-// this sort of sucks but there are cases where this is necessary
-// Will look to pull this out of the default streams instead to at least keep it all in one place
 function setStreamId(host) {
-  switch (host) {
-    case 'www.youtube.com':
-    case 'youtu.be':
-      return 'yt'
-    case 'tv.youtube.com':
-      return 'tv'
-    case 'www.netflix.com':
-      return 'nf'
-    case 'www.hulu.com':
-      return 'hl'
-    case 'www.amazon.com':
-      return 'ap'
-    case 'www.disneyplus.com':
-      return 'dp'
-    case 'tv.apple.com':
-      return 'at'
-    case 'www.peacocktv.com':
-      return 'pc'
-    case 'abc.com':
-      return 'ab'
-    case 'www.paramountplus.com':
-      return 'cb'
-    case 'play.hbomax.com':
-      return 'hm'
-    case 'plus.espn.com':
-      return 'ep'
-    case 'beta.crunchyroll.com':
-      return 'cr'
-    default:
-      return 'ot'
-  }
+  let serv = defaultStreams.find(item => new URL(item.url).hostname === host)
+  return serv ? serv.id : 'ot'
 }
 
 // Scale height to supplied aspect ratio
@@ -1611,6 +1581,11 @@ ipcMain.on('hide-header-bar', (e, bool) => {
 // IPC channel to set user agent
 ipcMain.on('set-user-agent', (e, data) => {
   userAgent = data
+})
+
+// IPC channel to set defualt streams
+ipcMain.on('set-defaultstreams', (e, data) => {
+  defaultStreams = data
 })
 
 // Build menu template

@@ -197,6 +197,7 @@ function applyUpdateSettings() {
 // Iterate through stored services and create buttons/menu entries
 function loadServices() {
   const defaultList = getDefaultStreams()
+  ipcRenderer.send('set-defaultstreams', defaultList)
   streamList = localStorage.getItem('streamList') ? JSON.parse(localStorage.getItem('streamList')) : defaultList
 
   // Add new default streams to stream list
