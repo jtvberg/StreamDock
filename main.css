@@ -77,16 +77,33 @@ body {
 }
 
 .home-screen {
-  display: grid;
-  grid-template-rows: 1fr minmax(0, 1fr);
+  display: flex;
+  flex-direction: column;
+  width: 100%;
   height: calc(100vh - 33px);
   user-select: none;
 }
 
+.home-resize {
+  flex-grow: 0;
+  flex-shrink: 0;
+  height: 5px;
+  background-color: var(--color-neutral-light);
+  cursor: row-resize;
+  text-align: center;
+  color: var(--color-fg);
+  line-height: 0;
+  font-size: 9px;
+  font-weight: 900;
+}
+
 .bookmark-host {
-  grid-row: 1;
+  flex-grow: 0;
+  flex-shrink: 0;
+  flex-basis: 50%;
   overflow-y: hidden;
   color: var(--color-fg);
+  min-height: 45px;
 }
 
 .bookmark-stream-host {
@@ -590,17 +607,19 @@ input[type=color] {
 }
 
 .search-host {
-  grid-row: 2;
+  flex-grow: 0;
+  flex-shrink: 1;
   color: var(--color-fg);
   display: grid;
   grid-template-rows: 50px 1fr;
+  overflow: hidden;
 }
 
 .search-input-host {
   grid-column: 2;
   margin-left: auto;
   margin-right: 10px;
-  margin-top: 6px;
+  margin-top: 8px;
   position: relative;
   width: calc(100% - 10px);
   max-width: 500px;
@@ -744,6 +763,7 @@ img[src] {
   -webkit-line-clamp: 1;
   -webkit-box-orient: vertical;
   margin-top: 5px;
+  padding-right: 5px;
 }
 
 .modal-content-solid {

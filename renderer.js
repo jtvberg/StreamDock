@@ -686,6 +686,7 @@ function getSearchResults(page) {
   } else {
     $('#results-more').remove()
   }
+  // TODO: make this a setting
   const loc = 'US'
   const lang = 'en'
   const langLoc = `${lang}-${loc}`
@@ -704,14 +705,14 @@ function getSearchResults(page) {
           .always(function() {
             const media = item.media_type
             let cast = []
-            try { cast = getDetails.responseJSON.credits.cast } catch(err) { console.log(err) }
+            try { cast = getDetails.responseJSON.credits.cast } catch(err) { console.log(`No cast found for id ${item.id}`) }
             let providers = []
-            try { providers = _.get(getDetails.responseJSON['watch/providers'].results, loc).flatrate } catch(err) {  }
+            try { providers = _.get(getDetails.responseJSON['watch/providers'].results, loc).flatrate } catch(err) { console.log(`No ${loc} stream providers found for id ${item.id}`) }
             let link = ''
-            try { link = _.get(getDetails.responseJSON['watch/providers'].results, loc).link } catch(err) {  }
+            try { link = _.get(getDetails.responseJSON['watch/providers'].results, loc).link } catch(err) { console.log(`No stream link found for id ${item.id}`) }
             link = link === '' ? `https://www.themoviedb.org/${media}/${item.id}/` : link
             let genres = []
-            try { genres = getDetails.responseJSON.genres } catch(err) { console.log(err) }
+            try { genres = getDetails.responseJSON.genres } catch(err) { console.log(`No genres found for id ${item.id}`) }
             const title = item.title === undefined ? item.name : item.title
             const first_date = item.release_date === undefined ? item.first_air_date : item.release_date
             const poster = item.poster_path ? `https://image.tmdb.org/t/p/original${item.poster_path}` : ''
@@ -849,11 +850,11 @@ function loadSearchDetailModal(media, id) {
 // Toggle search pane on home screen
 function toggleSearch() {
   if(settings.showSearch) {
-    $('.home-screen').css('grid-template-rows', '1fr minmax(0, 1fr)')
-    $('.search-host').show()
+    $('.home-resize, .search-host').show()
+    $('.bookmark-host').css('flex-basis', '50%')
   } else {
-    $('.home-screen').css('grid-template-rows', '1fr 0')
-    $('.search-host').hide()
+    $('.home-resize, .search-host').hide()
+    $('.bookmark-host').css('flex-basis', '100%')
   }
 }
 
@@ -1077,4 +1078,32 @@ $('#search-input').on('keypress', (e) => {
 $('.search-clear').on('click', () => {
   $('#search-input').val('')
   $('#search-result-host').empty()
+})
+
+// Reset home screen seperator on screen height change
+let ih = innerHeight
+$(window).on('resize', function() {
+  if(ih !== innerHeight) {
+    $('.bookmark-host').css('flexBasis', '50%')
+    ih = innerHeight
+  }
+})
+
+// Home screen seperator functions
+let isSepMouseDown = 0
+$('.home-resize').on('mousedown', () => {
+  isSepMouseDown = 1
+})
+
+$('body').on('mouseup', () => {
+  isSepMouseDown = 0
+})
+
+$('body').on('mousemove', (e) => {
+  const fb = e.clientY - 20
+  if (isSepMouseDown === 1 && fb < innerHeight - 85) {
+    $('.bookmark-host').css('flexBasis', fb + 'px')
+  } else {
+    isSepMouseDown = 0
+  }
 })
