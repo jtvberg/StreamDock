@@ -673,7 +673,7 @@ function addBookmarkFlash() {
 }
 
 // Call API to get search results
-function getSearchResults(page) {
+function getSearchResults(api, page, media) {
   let pages = 1
   if(!settings.searchApiKey || settings.searchApiKey.length === 0) {
     alert('You must enter a valid API key in Preferences > Search Settings for search to work')
@@ -691,8 +691,13 @@ function getSearchResults(page) {
   const loc = 'US'
   const lang = 'en'
   const langLoc = `${lang}-${loc}`
-  const api_key = settings.searchApiKey
-  var getMedia = $.getJSON(`https://api.themoviedb.org/3/search/multi?api_key=${api_key}&language=${langLoc}&query=${searchInput}&page=${page}&include_adult=false`)  
+  const apiKey = settings.searchApiKey
+  const mediaType = media
+  const searchApi = `https://api.themoviedb.org/3/search/multi?api_key=${apiKey}&language=${langLoc}&query=${searchInput}&page=${page}&include_adult=false`
+  const trendApi = `https://api.themoviedb.org/3/trending/all/week?api_key=${apiKey}&page=${page}&include_adult=false`
+  const discApi = `https://api.themoviedb.org/3/discover/${mediaType}?api_key=${apiKey}&language=${lang}&sort_by=popularity.desc&include_adult=false&include_video=false&page=${page}&watch_region=${loc}&with_watch_monetization_types=flatrate`
+  const apiCall = api === 0 ? searchApi : api === 1 ? trendApi : discApi
+  var getMedia = $.getJSON(apiCall)  
     .fail(function() {
       alert('Search query failed. Do you have a valid API key?')
     })
@@ -700,11 +705,12 @@ function getSearchResults(page) {
       if (getMedia.responseJSON.total_results === 0) alert('No results found')
       pages = getMedia.responseJSON.total_pages
       const results = _.orderBy(_.filter(getMedia.responseJSON.results, o => o.media_type !== 'person'), 'popularity', 'desc')
+      console.log(results)
       let records = results.length
       $.each(results, function(i, item) {
-        var getDetails = $.getJSON(`https://api.themoviedb.org/3/${item.media_type}/${item.id}?api_key=${api_key}&append_to_response=credits,watch/providers,genres`)
+        const media = item.media_type ? item.media_type : mediaType
+        var getDetails = $.getJSON(`https://api.themoviedb.org/3/${media}/${item.id}?api_key=${apiKey}&append_to_response=credits,watch/providers,genres`)
           .always(function() {
-            const media = item.media_type
             let cast = []
             try { cast = getDetails.responseJSON.credits.cast } catch(err) { console.log(`No cast found for id ${item.id}`) }
             let providers = []
@@ -742,7 +748,7 @@ function getSearchResults(page) {
               searchResults = _.orderBy(searchResults, 'popularity', 'desc')
               addSearchResults()
               if (page < pages) {
-                addMoreTile(page + 1)
+                addMoreTile(api, page + 1, media)
               }
             }
           })
@@ -757,12 +763,12 @@ function getYear(input) {
 }
 
 // Add a get more results tile to the end of the results
-function addMoreTile(page) {
+function addMoreTile(api, page, media) {
   $('<div>', {
     id: 'results-more',
     class: 'fa fa-plus-circle fa-4x',
     title: 'Load More Results'
-  }).data('page', page).appendTo('#search-result-host')
+  }).data('page', page).data('api', api).data('media', media).appendTo('#search-result-host')
 }
 
 // Loop through search results and call addSearchResult
@@ -866,7 +872,7 @@ $.getJSON('nffacets.json', function(json) {
 
 // Load more results on click of more tile
 $(document).on('click', '#results-more', () => {
-  getSearchResults($('#results-more').data('page'))
+  getSearchResults($('#results-more').data('api'), $('#results-more').data('page'), $('#results-more').data('media'))
 })
 
 // Open TMDB page on click of provider image
@@ -1071,7 +1077,7 @@ $('#search-api-key-undo-btn').on('click', () => {
 // Get search results click handler
 $('#search-input').on('keypress', (e) => {
   if (e.key === 'Enter' && $('#search-input').val().length > 0) {
-    getSearchResults()
+    getSearchResults(0, 1)
   }
 })
 
@@ -1079,6 +1085,21 @@ $('#search-input').on('keypress', (e) => {
 $('.search-clear').on('click', () => {
   $('#search-input').val('')
   $('#search-result-host').empty()
+})
+
+// Get trending titles
+$('#search-trend').on('click', () => {
+  getSearchResults(1, 1)
+})
+
+// Get popular movie streams
+$('#search-pop-movie').on('click', () => {
+  getSearchResults(3, 1, 'movie')
+})
+
+// Get popular tv streams
+$('#search-pop-tv').on('click', () => {
+  getSearchResults(3, 1, 'tv')
 })
 
 // Reset home screen seperator on screen height change
