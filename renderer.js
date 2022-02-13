@@ -705,7 +705,6 @@ function getSearchResults(api, page, media) {
       if (getMedia.responseJSON.total_results === 0) alert('No results found')
       pages = getMedia.responseJSON.total_pages
       const results = _.orderBy(_.filter(getMedia.responseJSON.results, o => o.media_type !== 'person'), 'popularity', 'desc')
-      console.log(results)
       let records = results.length
       $.each(results, function(i, item) {
         const media = item.media_type ? item.media_type : mediaType
