@@ -11,9 +11,8 @@
   --color-thumb: #808080;
   --color-link: #1410ff;
   --color-warning: #c43410;
-  --color-highlight: #0095f7;
-  --color-highlight-trans: #0094f779;
   --color-system-accent: blue;
+  --color-system-accent-trans: blue;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -63,6 +62,32 @@ body {
 ::-webkit-scrollbar-thumb {
   border-radius: 10px;
   background-color: var(--color-thumb);
+}
+
+.btn {
+  color: var(--color-white);
+}
+
+.btn-primary {
+  background-color: var(--color-system-accent-trans);
+  border-color: var(--color-system-accent-trans);
+}
+
+.btn-primary:hover,
+.btn-primary:active,
+.btn-primary:focus {
+  background-color: var(--color-system-accent) !important;
+  border-color: var(--color-system-accent) !important;
+  outline-color: var(--color-system-accent) !important;
+}
+
+.btn-outline-secondary,
+.btn-primary {
+  color: var(--color-fg)
+}
+
+.form-control:focus {
+  border-color: var(--color-system-accent) !important;
 }
 
 .logo {
@@ -180,7 +205,7 @@ body {
 }
 
 .bookmark-url-btn:hover {
-  color: var(--color-highlight);
+  color: var(--color-system-accent);
 }
 
 .bookmark-title {
@@ -285,7 +310,7 @@ body {
 .nf-facet:hover {
   color: var(--color-white);
   border-radius: 3px;
-  background-color: var(--color-system-accent);
+  background-color: var(--color-system-accent-trans);
 }
 
 .loading {
@@ -352,11 +377,11 @@ body {
 }
 
 @keyframes bm-added {
-  10% { color: var(--color-highlight); }
+  10% { color: var(--color-system-accent); }
   30% { color: var(--color-white); }
-  50% { color: var(--color-highlight); }
+  50% { color: var(--color-system-accent); }
   70% { color: var(--color-white); }
-  90% { color: var(--color-highlight); }
+  90% { color: var(--color-system-accent); }
 }
 
 .control-btn {
@@ -448,7 +473,7 @@ body {
 
 .panel-header>a:hover,
 .panel-header:hover {
-  color: var(--color-highlight);
+  color: var(--color-system-accent);
 }
 
 .panel-header .fa {
@@ -628,7 +653,7 @@ input[type=color] {
 }
 
 .search-quick-btn:hover {
-  background-color: var(--color-highlight-trans);
+  background-color: var(--color-system-accent) !important;
 }
 
 .search-host {
@@ -693,7 +718,7 @@ input[type=color] {
 }
 
 .result-tile:hover {
-  background-color: var(--color-highlight-trans);
+  background-color: var(--color-system-accent-trans);
 }
 
 .result-title {
@@ -792,7 +817,7 @@ img[src] {
 .modal-content-solid {
   color: var(--color-fg); 
   background-color: var(--color-modal-bg);
-  box-shadow: 0 0 6px 0 var(--color-highlight-trans);
+  box-shadow: 0 0 6px 0 var(--color-system-accent-trans);
   backdrop-filter: blur( 20px );
 }
 

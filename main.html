@@ -301,7 +301,7 @@
                       </div>
                       <div class="group-title"">API Key</div>
                       <div class="input-group input-group-sm search-api-key">
-                        <input type="text" class="form-control text-search-api-key" id="search-api-key-input"/>
+                        <input type="text" class="form-control text-search-api-key shadow-none" id="search-api-key-input"/>
                         <div class="input-group-append">
                           <button class="btn btn-outline-secondary" id="search-api-key-undo-btn" type="button" title="Revert to previous">Undo</button>
                         </div>
@@ -327,7 +327,7 @@
                     <div id="collapse-advanced" class="collapse settings-group" data-parent="#panel-advanced">
                       <div class="group-title">User Agent String</div>
                       <div class="input-group input-group-sm agent-string">
-                        <input type="text" class="form-control text-agent" id="agent-string-input"/>
+                        <input type="text" class="form-control text-agent shadow-none" id="agent-string-input"/>
                         <div class="input-group-append">
                           <button class="btn btn-outline-secondary" id="agent-undo-btn" type="button" title="Revert to previous">Undo</button>
                           <button class="btn btn-outline-secondary" id="agent-default-btn" type="button" title="Load default agent">Default</button>
@@ -344,11 +344,9 @@
           </form>
         </div>
         <div class="modal-footer">
-          <button id="settings-default-btn" type="button" class="btn btn-secondary mr-auto"
-            title="Restores all settings except URLs to defaults">Defaults</button>
-          <button type="button" class="btn btn-secondary" data-dismiss="modal"
-            title="Dismisses settings without saving changes">Close</button>
-          <button id="settings-save-btn" type="button" class="btn btn-primary">Save Changes</button>
+          <button id="settings-default-btn" type="button" class="btn btn-secondary mr-auto shadow-none" title="Restores all settings except URLs to defaults">Defaults</button>
+          <button type="button" class="btn btn-secondary shadow-none" data-dismiss="modal" title="Dismisses settings without saving changes">Close</button>
+          <button id="settings-save-btn" type="button" class="btn btn-primary shadow-none">Save Changes</button>
         </div>
       </div>
     </div>
@@ -418,7 +416,7 @@
       </div>
       <img class="serv-check-img"></img>
       <div class="input-group input-group-sm serv-url">
-        <input type="url" class="form-control text-url serv-url-input"/>
+        <input type="url" class="form-control text-url serv-url-input shadow-none"/>
         <div class="input-group-append">
           <button class="btn btn-outline-secondary url-undo-btn" type="button" title="Revert to previous">Undo</button>
           <button class="btn btn-outline-secondary url-default-btn" type="button" title="Load default URL">Default</button>
@@ -426,7 +424,7 @@
       </div>
       <div class="input-group input-group-sm serv-glyph-pick">
         <label class="label-text">Quick Access Glyph:</label>
-        <input type="text" class="form-control text-glyph" maxlength="1"/>
+        <input type="text" class="form-control text-glyph shadow-none" maxlength="1"/>
       </div>
       <div class="serv-color-pick">
         <span class="fa fa-square serv-color-btn serv-color-pick-btn"></span>  

@@ -28,10 +28,11 @@ applyInitialSettings()
 loadBookmarks()
 openLastStream()
 
-// Set system accent color css variable
+// Set system accent colors css variable
 ipcRenderer.on('set-accent', (e, color) => {
   let root = document.documentElement
   root.style.setProperty('--color-system-accent', color)
+  root.style.setProperty('--color-system-accent-trans', color.substring(0,7) + '80')
 })
 
 // Settings modal invoke main
@@ -864,6 +865,11 @@ function toggleSearch() {
   }
 }
 
+// Clear toggled state of quick search buttons
+function clearSearchBtns() {
+  $('.search-quick-btn').css('background-color', 'var(--color-neutral-light)')
+}
+
 // Load NF facets from file
 $.getJSON('nffacets.json', function(json) { 
   nfFacets = json
@@ -1076,6 +1082,7 @@ $('#search-api-key-undo-btn').on('click', () => {
 // Get search results click handler
 $('#search-input').on('keypress', (e) => {
   if (e.key === 'Enter' && $('#search-input').val().length > 0) {
+    clearSearchBtns()
     getSearchResults(0, 1)
   }
 })
@@ -1084,20 +1091,27 @@ $('#search-input').on('keypress', (e) => {
 $('.search-clear').on('click', () => {
   $('#search-input').val('')
   $('#search-result-host').empty()
+  clearSearchBtns()
 })
 
 // Get trending titles
 $('#search-trend').on('click', () => {
+  clearSearchBtns()
+  $('#search-trend').css('background-color', 'var(--color-system-accent-trans)')
   getSearchResults(1, 1)
 })
 
 // Get popular movie streams
 $('#search-pop-movie').on('click', () => {
+  clearSearchBtns()
+  $('#search-pop-movie').css('background-color', 'var(--color-system-accent-trans)')
   getSearchResults(3, 1, 'movie')
 })
 
 // Get popular tv streams
 $('#search-pop-tv').on('click', () => {
+  clearSearchBtns()
+  $('#search-pop-tv').css('background-color', 'var(--color-system-accent-trans)')
   getSearchResults(3, 1, 'tv')
 })
 
