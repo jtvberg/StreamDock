@@ -83,6 +83,7 @@
    - The search result will only list subscription services but if you go to the TMDB page, you can also see purchase and rental options
    - Clicking on one of the streaming options at TMDB will open the link in the app however, some services, like HBO, will ask who is watching and then lose it's way to the content
    - The primary search results are currently US only
+   - There are also 3 quick search buttons: Popular films and TV shows that can be streamed and then 1 more for trending titles over the last week (but may not be on a stream service yet)
    - Some price of admission: you will need to enable the search pane it in the settings and provide an API key. This requires you create a free account on TMDB and generate the v3 key
 
 ## TODO
