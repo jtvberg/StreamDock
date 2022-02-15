@@ -1150,6 +1150,9 @@ $('body').on('mousemove', (e) => {
   const fb = e.clientY - 20
   if (isSepMouseDown === 1 && fb < innerHeight - 85) {
     $('.bookmark-host').css('flexBasis', fb + 'px')
+  } else if (isSepMouseDown === 1) {
+    $('.bookmark-host').css('flexBasis', (innerHeight - 85) + 'px')
+    isSepMouseDown = 0
   } else {
     isSepMouseDown = 0
   }
