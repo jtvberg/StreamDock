@@ -698,6 +698,7 @@ function getSearchResults(api, page, media) {
   const trendApi = `https://api.themoviedb.org/3/trending/all/week?api_key=${apiKey}&page=${page}&include_adult=false`
   const discApi = `https://api.themoviedb.org/3/discover/${mediaType}?api_key=${apiKey}&language=${lang}&sort_by=popularity.desc&include_adult=false&include_video=false&page=${page}&watch_region=${loc}&with_watch_monetization_types=flatrate`
   const apiCall = api === 0 ? searchApi : api === 1 ? trendApi : discApi
+  const formatTime = (n) => `${n / 60 ^ 0}:` + ('0' + n % 60).slice(-2)
   var getMedia = $.getJSON(apiCall)  
     .fail(function() {
       alert('Search query failed. Do you have a valid API key?')
@@ -740,7 +741,7 @@ function getSearchResults(api, page, media) {
               year,
               media,
               genres,
-              runtime,
+              runtime: formatTime(runtime),
               rating,
               tagline: getDetails.responseJSON.tagline,
               overview: item.overview,
@@ -848,7 +849,7 @@ function loadSearchDetailModal(media, id) {
   $('#result-rating').text(`${resultDetail.rating}`)
   $('#result-detail-media').text(resultDetail.media === 'movie' ? 'Film' : 'TV')
   $('#result-detail-genres').text(txtGenres.slice(0, -2))
-  $('#result-detail-runtime').text(`${resultDetail.runtime}m`)
+  $('#result-detail-runtime').text(`${resultDetail.runtime}`)
   $('#result-detail-overview').text(`${resultDetail.overview}`)
   $('#result-detail-cast').text(txtCast.slice(0, -2))
   $('#result-detail-tmdb-logo').prop('src', './res/serv_logos/small/tmdb.png').data('link', resultDetail.link)
