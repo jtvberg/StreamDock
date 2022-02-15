@@ -709,7 +709,7 @@ function getSearchResults(api, page, media) {
       let records = results.length
       $.each(results, function(i, item) {
         const media = item.media_type ? item.media_type : mediaType
-        var getDetails = $.getJSON(`https://api.themoviedb.org/3/${media}/${item.id}?api_key=${apiKey}&append_to_response=credits,watch/providers,genres`)
+        var getDetails = $.getJSON(`https://api.themoviedb.org/3/${media}/${item.id}?api_key=${apiKey}&append_to_response=credits,watch/providers,genres,release_dates,content_ratings`)
           .always(function() {
             let cast = []
             try { cast = getDetails.responseJSON.credits.cast } catch(err) { console.log(`No cast found for id ${item.id}`) }
@@ -720,6 +720,14 @@ function getSearchResults(api, page, media) {
             link = link === '' ? `https://www.themoviedb.org/${media}/${item.id}/` : link
             let genres = []
             try { genres = getDetails.responseJSON.genres } catch(err) { console.log(`No genres found for id ${item.id}`) }
+            let rating = 'NA'
+            try {
+              if (media === 'movie') {
+                rating = _.find(_.find(getDetails.responseJSON.release_dates.results, (o) => { return o.iso_3166_1 === loc}).release_dates, (r) => { return r.certification !== '' }).certification
+              } else {
+                rating = _.find(getDetails.responseJSON.content_ratings.results, (o) => { return o.iso_3166_1 === loc}).rating
+              }
+            } catch(err) { console.log(`No rating found for id ${item.id}`) }
             const title = item.title === undefined ? item.name : item.title
             const first_date = item.release_date === undefined ? item.first_air_date : item.release_date
             const poster = item.poster_path ? `https://image.tmdb.org/t/p/original${item.poster_path}` : ''
@@ -733,6 +741,7 @@ function getSearchResults(api, page, media) {
               media,
               genres,
               runtime,
+              rating,
               tagline: getDetails.responseJSON.tagline,
               overview: item.overview,
               cast,
@@ -805,6 +814,7 @@ function addSearchResult(result) {
   }
   $('.result-title', detailIns).text(`${result.title}`)
   $('.result-year', detailIns).text(`(${result.year})`)
+  $('.result-rating', detailIns).text(`${result.rating}`)
   $('.result-genres', detailIns).text(txtGenres.slice(0, -2))
   $(detailIns).data('id', result.id).data('media', result.media)
   $('#search-result-host').append(detailIns)
@@ -835,6 +845,7 @@ function loadSearchDetailModal(media, id) {
   $('#result-detail-year').text(`(${resultDetail.year})`)
   $('#result-detail-image').prop('src', `${resultDetail.poster}`)
   $('#result-detail-tagline').text(`${resultDetail.tagline}`)
+  $('#result-rating').text(`${resultDetail.rating}`)
   $('#result-detail-media').text(resultDetail.media === 'movie' ? 'Film' : 'TV')
   $('#result-detail-genres').text(txtGenres.slice(0, -2))
   $('#result-detail-runtime').text(`${resultDetail.runtime}m`)

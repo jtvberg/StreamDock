@@ -728,8 +728,24 @@ input[type=color] {
   text-overflow: ellipsis;
   overflow: hidden;
   display: -webkit-box;
-  -webkit-line-clamp: 4;
+  -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
+}
+
+#result-rating,
+.result-rating {
+  width: fit-content;
+  border: var(--color-fg) 1px solid;
+  border-radius: 2px;
+  padding: 0px 3px 1px 3px;
+  margin-right: 2px;
+  font-weight: 600;
+  font-size: .9em;
+}
+
+.result-rating {
+  float: right;
+  margin-top: 2px;
 }
 
 .result-genres {
