@@ -9,7 +9,7 @@
   --color-neutral: #808080;
   --color-neutral-light: #c7c7c7b2;
   --color-thumb: #808080;
-  --color-link: #1410ff;
+  --color-link: #185ae7;
   --color-warning: #c43410;
   --color-system-accent: blue;
   --color-system-accent-trans: blue;
@@ -205,7 +205,7 @@ body {
 }
 
 .bookmark-url-btn:hover {
-  color: var(--color-system-accent);
+  color: var(--color-link);
 }
 
 .bookmark-title {
