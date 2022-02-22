@@ -4,7 +4,7 @@
 #### Main View
 <img src="/res/screenshots/main.png" width="600"/>
 
-#### Supported Services
+#### Supported Services (+others)
 <img src="/res/screenshots/services.png" width="600"/>
 
 ## Using the code
@@ -61,7 +61,7 @@
    - You can open a link from clipboard via the 'View' menu (or in the header)
    - You can scale the video to 16:9 (or 4:3, 2:1, 2.4:1) either vertically or horizontally also in the view menu (or in the header for 16:9 only)
    - You can bookmark streams via the bookmark button in the header or via the 'View' menu
-   - Toggle bookmarks via the far-left quick access button (or in the view menu)
+   - Bookmarks are located in the home screen via the home button or via the 'View' menu
 
 ## Service Specific Features
    You can view the extended Netflix genres via 'Show Genres' button or alternatively in the 'View' menu.\
@@ -74,7 +74,21 @@
 
    One note: On some services there are scenarios where an option to skip something doesn't show up. For instance, on Prime, sometimes the episode recap is not skippable. There doesn't appear to be any rhyme or reason as to why sometimes you can't skip a recap or intro for certain shows on certain services, but if you notice that something is playing that you chose to skip and there is no UI element that would allow a user to skip that content, the app is working as intended as there is nothing to key off of for that show/service combo. I have even seen scenarios where for a specific episode, there is no option to skip a recap, but you can on other episodes of the same show/service combo.
 
+## Stream Search
+   Just added in 0.7.0 you can now search for a stream from the home screen
+   - The search uses the TMDB API to find titles and show you were you can stream them (but the API does not supply deep links!)
+   - TMDB is a community driven movie and TV database. You can check it out [here](https://www.themoviedb.org/)
+   - Clicking on a search result entry will show you details about the title (clicking on a provider icon will take you to the TMDB page that has the deep link)
+   - Within the detail view there is a link to the TMDB page (logo, bottom left) where you can see the various ways to get the content
+   - The search result will only list subscription services but if you go to the TMDB page, you can also see purchase and rental options
+   - Clicking on one of the streaming options at TMDB will open the link in the app however, some services, like HBO, will ask who is watching and then lose it's way to the content
+   - The primary search results are currently US only
+   - There are also 3 quick search buttons: Popular films and TV shows that can be streamed and then 1 more for trending titles over the last week (but may not be on a stream service yet)
+   - Some price of admission: you will need to enable the search pane it in the settings and provide an API key. This requires you create a free account on TMDB and generate the v3 key
+
 ## TODO
+   - Looking to add a watch queue to the home screen
+   - Need to add some of the skipping features to other services
    - I haven't given up yet but HBO Max is pretty much impossible to work with around recap/intro/preview/next episode skipping
    - I need to investigate adding Google OAuth to allow more reliable logins for YouTube TV and other services
    - Contemplating multiple windows but in general, this seems silly (leave a comment if you think there is a good reason to do this!)

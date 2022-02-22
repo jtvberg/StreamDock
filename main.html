@@ -20,23 +20,45 @@
       <div class="fas fa-link control-btn" id="link-btn" title="Navigate to Link from Clipboard"></div>
       <div class="fas fa-arrows-alt-v control-btn" id="scalev-btn" title="Scale Height to 16:9"></div>
       <div class="fas fa-arrows-alt-h control-btn" id="scaleh-btn" title="Scale Width to 16:9"></div>
+      <div class="fas fa-cog control-btn" id="prefs-btn" title="Open Preferences"></div>
       <div class="fas ontop-locked control-btn" id="ontop-btn" title="Toggle Window On Top"></div>
     </div>
   </header>
-  <div class="logo"></div>
-  <div class="bookmark-host">
-    <h3 class="bookmark-host-title">Bookmarked Streams</h3>
-    <div class="bookmark-stream-host"></div>
+  <!-- <div class="logo"></div> -->
+  <div class="home-screen">
+    <div class="bookmark-host">
+      <h3 class="bookmark-host-title">Bookmarked Streams</h3>
+      <div class="bookmark-stream-host"></div>
+    </div>
+    <div class="home-resize">...</div>
+    <div class="search-host">
+      <div class="search-header">
+        <div class="search-host-title">
+          <h3 class="search-title">Find a Stream</h3>
+          <small class="text-muted text-box">This product uses the TMDB API but is not endorsed or certified by TMDB</small>
+        </div>
+        <div class="search-quick-host">
+          <div id="search-trend" class="search-quick-btn fas fa-fire fa-2x" title="All Trending Titles"></div>
+          <div id="search-pop-tv" class="search-quick-btn fas fa-tv fa-2x" title="Popular TV Streams"></div>
+          <div id="search-pop-movie" class="search-quick-btn fas fa-film fa-2x" title="Popular Movie Streams"></div>
+        </div>
+        <div class="search-input-host">
+          <input class="form-control text-search" id="search-input" type="text" placeholder="Search for a movie or TV show" aria-label="Search">
+          <div class="fas fa-times fa-lg search-clear" title="Clear Search"></div>
+        </div>
+      </div>
+      <div id="search-result-host"></div>
+    </div>
   </div>
   <div class="loading">
-    <div class="spinner-border text-primary" style="width: 5rem; height: 5rem;" role="status">
+    <div class="spinner-border text-primary" role="status">
       <span class="sr-only">Loading...</span>
     </div>
   </div>
   <div class="facet-host">
     <h3>Genres</h3>
     <div class="facet-filter-host">
-      <input class="form-control facet-filter" type="text" placeholder="Filter" aria-label="Search">
+      <input class="form-control facet-filter" type="text" placeholder="Filter" aria-label="Filter">
       <div class="fas fa-times filter-clear" title="Clear Filter"></div>
       <div class="fas fa-filter fa-xs filter-all toggled" title="Toggle Show All"></div>
     </div>
@@ -44,14 +66,14 @@
   </div>
   <div id="settings-modal" class="modal fade" tabindex="-1" role="dialog">
     <div class="modal-dialog" role="document">
-      <div class="modal-content">
-        <div class="modal-header" style="padding-bottom: 5px;">
+      <div class="modal-content modal-content-solid">
+        <div class="modal-header">
           <h5 class="modal-title">Preferences</h5>
           <button type="button" class="close modal-close-btn" data-dismiss="modal">
             <span>&times;</span>
           </button>
         </div>
-        <div class="modal-body" style="padding-top: 5px; padding-bottom: 5px;">
+        <div class="modal-body">
           <form id="settings-form">
             <div class="form-group">
               <div class="panel-group" id="panel-general">
@@ -82,16 +104,14 @@
                         <input type="checkbox" class="custom-control-input settings-check" id="window-check">
                         <label class="custom-control-label" for="window-check">Remember Window Size and Location</label>
                         <div class="helper-text">
-                          <small class="text-muted">Check to maintain last window size and location from previous
-                            session</small>
+                          <small class="text-muted">Check to maintain last window size and location from previous session</small>
                         </div>
                       </div>
                       <div class="custom-control custom-checkbox">
                         <input type="checkbox" class="custom-control-input settings-check" id="fullscreen-check">
                         <label class="custom-control-label" for="fullscreen-check">Full-Screen</label>
                         <div class="helper-text">
-                          <small class="text-muted">Check to allow full-screen (this may allow invocation from within
-                            the stream)</small>
+                          <small class="text-muted">Check to allow full-screen (this may allow invocation from within the stream)</small>
                         </div>
                       </div>
                       <div class="custom-control custom-checkbox">
@@ -123,7 +143,7 @@
                         </div>
                       </div>
                       <div class="form-group">
-                        <div style="margin-bottom: 3px;">Theme Mode</div>
+                        <div class="group-title">Theme Mode</div>
                         <div class="btn-group btn-group-toggle settings-shift" data-toggle="buttons" id="choose-theme">
                           <label class="btn btn-secondary btn-sm">
                               <input type="radio" name="radio-theme" value="system">System
@@ -262,6 +282,39 @@
               </div>
             </div>
             <div class="form-group">
+              <div class="panel-group" id="panel-search">
+                <div class="panel">
+                  <div class="panel-header">
+                    <a class="collapsed" data-toggle="collapse" data-target="#collapse-search">
+                      <i class="fa fa-chevron-down"></i>
+                      Search Settings
+                    </a>
+                  </div>
+                  <div class="panel-body">
+                    <div id="collapse-search" class="collapse settings-group" data-parent="#panel-search">
+                      <div class="custom-control custom-checkbox">
+                        <input type="checkbox" class="custom-control-input settings-check" id="search-check">
+                        <label class="custom-control-label" for="search-check">Enable Search</label>
+                        <div class="helper-text">
+                          <small class="text-muted">Check to show stream search on the home screen (US only)</small>
+                        </div>
+                      </div>
+                      <div class="group-title"">API Key</div>
+                      <div class="input-group input-group-sm search-api-key">
+                        <input type="text" class="form-control text-search-api-key shadow-none" id="search-api-key-input"/>
+                        <div class="input-group-append">
+                          <button class="btn btn-outline-secondary" id="search-api-key-undo-btn" type="button" title="Revert to previous">Undo</button>
+                        </div>
+                      </div>
+                      <div class="helper-text">
+                        <small class="text-muted">Enter the search v3 API key (obtain one <a href="https://www.themoviedb.org/login">here</a>)</small>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="form-group">
               <div class="panel-group" id="panel-advanced">
                 <div class="panel">
                   <div class="panel-header">
@@ -272,9 +325,9 @@
                   </div>
                   <div class="panel-body">
                     <div id="collapse-advanced" class="collapse settings-group" data-parent="#panel-advanced">
-                      <div style="margin-bottom: 3px;">User Agent String</div>
+                      <div class="group-title">User Agent String</div>
                       <div class="input-group input-group-sm agent-string">
-                        <input type="text" class="form-control text-agent" id="agent-string-input"/>
+                        <input type="text" class="form-control text-agent shadow-none" id="agent-string-input"/>
                         <div class="input-group-append">
                           <button class="btn btn-outline-secondary" id="agent-undo-btn" type="button" title="Revert to previous">Undo</button>
                           <button class="btn btn-outline-secondary" id="agent-default-btn" type="button" title="Load default agent">Default</button>
@@ -291,11 +344,52 @@
           </form>
         </div>
         <div class="modal-footer">
-          <button id="settings-default-btn" type="button" class="btn btn-secondary mr-auto"
-            title="Restores all settings except URLs to defaults">Defaults</button>
-          <button type="button" class="btn btn-secondary" data-dismiss="modal"
-            title="Dismisses settings without saving changes">Close</button>
-          <button id="settings-save-btn" type="button" class="btn btn-primary">Save Changes</button>
+          <button id="settings-default-btn" type="button" class="btn btn-secondary mr-auto shadow-none" title="Restores all settings except URLs to defaults">Defaults</button>
+          <button type="button" class="btn btn-secondary shadow-none" data-dismiss="modal" title="Dismisses settings without saving changes">Close</button>
+          <button id="settings-save-btn" type="button" class="btn btn-primary shadow-none">Save Changes</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div id="search-detail-modal" class="modal fade" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-lg" role="document">
+      <div class="modal-content modal-content-solid">
+        <div class="modal-header">
+          <div class="modal-title">
+            <div id="result-detail-header">
+              <span id="result-detail-title"></span>
+              <span id="result-detail-year"></span>
+            </div>
+            <div id="result-detail-attr">
+              <span id="result-rating"></span>
+              <span class="fas fa-circle fa-xs" style="font-size: 0.1rem; vertical-align: middle;"></span>
+              <span id="result-detail-media"></span>
+              <span class="fas fa-circle fa-xs" style="font-size: 0.1rem; vertical-align: middle;"></span>
+              <span id="result-detail-genres"></span>
+              <span class="fas fa-circle fa-xs"style="font-size: 0.1rem; vertical-align: middle;"></span>
+              <span id="result-detail-runtime"></span>
+            </div>
+          </div>
+          <button type="button" class="close modal-close-btn" data-dismiss="modal">
+            <span>&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div id="result-detail-host">
+            <img id="result-detail-image"></img>
+            <div id="result-detail-body">
+              <div id="result-detail-tagline"></div>
+              <div id="result-detail-overview-header" class="result-detail-header">Overview</div>
+              <div id="result-detail-overview" class="result-detail-text"></div>
+              <div id="result-detail-cast-header" class="result-detail-header">Top Billed Cast</div>
+              <div id="result-detail-cast" class="result-detail-text"></div>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <img id="result-detail-tmdb-logo" class="mr-auto"></img>
+          <div id="result-detail-provider-host" class="result-provider-host">
+          </div>
         </div>
       </div>
     </div>
@@ -303,7 +397,7 @@
 
   <template id="boomark-instance">
     <div class="bookmark-tile">
-      <img class="bookmark-image" style="width: 100%">
+      <img class="bookmark-image">
       <div class="fas fa-link bookmark-url-btn fa-2x" title="Copy URL"></div>
       <div class="fas fa-times-circle bookmark-delete-btn fa-2x" title="Delete Bookmark"></div>
       <div class="fas fa-circle fa-3x bookmark-play-btn-bg"></div>
@@ -320,11 +414,11 @@
     <div class="service-host">
       <div class="custom-control custom-checkbox serv-check-host">
         <input type="checkbox" class="custom-control-input serv-check" ${checked}>
-        <label class="custom-control-label serv-check-label" style="width:0px"></label>
+        <label class="custom-control-label serv-check-label"></label>
       </div>
       <img class="serv-check-img"></img>
       <div class="input-group input-group-sm serv-url">
-        <input type="url" class="form-control text-url serv-url-input"/>
+        <input type="url" class="form-control text-url serv-url-input shadow-none"/>
         <div class="input-group-append">
           <button class="btn btn-outline-secondary url-undo-btn" type="button" title="Revert to previous">Undo</button>
           <button class="btn btn-outline-secondary url-default-btn" type="button" title="Load default URL">Default</button>
@@ -332,7 +426,7 @@
       </div>
       <div class="input-group input-group-sm serv-glyph-pick">
         <label class="label-text">Quick Access Glyph:</label>
-        <input type="text" class="form-control text-glyph" maxlength="1"/>
+        <input type="text" class="form-control text-glyph shadow-none" maxlength="1"/>
       </div>
       <div class="serv-color-pick">
         <span class="fa fa-square serv-color-btn serv-color-pick-btn"></span>  
@@ -344,6 +438,32 @@
         <input type="color" class="serv-color-input serv-bg-pick-input">
         <label class="label-text serv-bg-pick-label">Background</label>
       </div>
+    </div>
+  </template>
+  <template id="search-result-instance">
+    <div class="result-tile">
+      <div class="result-details">
+        <div class="result-title"></div>
+        <div>
+          <span class="result-year"></span>
+          <span class="result-rating"></span>
+        </div>
+        <div class="result-genres"></div>
+        <div class="result-provider-host"></div>
+      </div>
+      <div class="result-image-host">
+        <img class="result-image"></img>
+      </div>
+    </div>
+  </template>
+  <template id="provider-image-instance">
+    <div class="provider-info">
+      <img class="provider-image"></img>
+    </div>
+  </template>
+  <template id="detail-provider-image-instance">
+    <div class="provider-info">
+      <img class="result-detail-provider-image"></img>
     </div>
   </template>
 

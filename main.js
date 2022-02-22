@@ -5,7 +5,7 @@
 // TODO: Hide bar on fullscreen
 
 // Imports and variable declarations
-const { app, BrowserWindow, ipcMain, BrowserView, Tray, TouchBar, session, Menu, MenuItem, systemPreferences, clipboard, nativeTheme, dialog } = require('electron')
+const { app, BrowserWindow, ipcMain, BrowserView, Tray, TouchBar, session, Menu, MenuItem, systemPreferences, clipboard, nativeTheme, dialog, shell } = require('electron')
 const { TouchBarButton } = TouchBar
 const path = require('path')
 const isDev = !app.isPackaged
@@ -17,7 +17,6 @@ const baseHeaderSize = 22
 const baseMenuHeight = isLinux ? 25 : 57
 const baseAdjustWidth = isWindows ? 16 : 0
 const facetAdjustWidth = isWindows ? 265 : 250
-// const bookmarkAdjustWidth = 230
 let headerSize = baseHeaderSize
 let winAdjustHeight = isMac ? headerSize : baseMenuHeight + headerSize
 let wb = { x: 0, y: 0, height: 0, width: 0 }
@@ -38,10 +37,11 @@ let dpNextEpisode = false
 let dpSkipRecap = false
 // let hmNextEpisode = false
 // let hmSkipRecap = false
-let showBookmarks = false
+let showHomescreen = false
 let userAgent = ''
 let currentStream = ''
 let touchBarItems = []
+let defaultStreams = []
 
 // OS variables
 if (isMac) {
@@ -63,8 +63,8 @@ const createWindow = () => {
   win = new BrowserWindow({
     height: 600,
     width: 800,
-    minHeight: 348,
-    minWidth: 580,
+    minHeight: 400,
+    minWidth: 672,
     transparent: isMac,
     hasShadow: false,
     frame: !isMac,
@@ -91,7 +91,7 @@ const createWindow = () => {
   })
 
   // Open DevTools (window, dev only)
-  isDev && win.webContents.openDevTools('detach')
+  // isDev && win.webContents.openDevTools('detach')
 
   // Create main browserView
   view = new BrowserView()
@@ -99,7 +99,7 @@ const createWindow = () => {
   // Show browserView when loaded
   view.webContents.on('did-finish-load', () => {
     // Open DevTools (view, dev only)
-    isDev && view.webContents.openDevTools('detach')
+    // isDev && view.webContents.openDevTools('detach')
     sendCurrentStream()
     setView()
     streamLoaded()
@@ -162,6 +162,12 @@ const createWindow = () => {
         getAccent()
       })
     }
+  })
+
+  // Open any window links in external browser
+  win.webContents.on('will-navigate', function (e, url) {
+    e.preventDefault()
+    shell.openExternal(url)
   })
 
   // Set vibrancy to match theme on update
@@ -234,6 +240,15 @@ function pause() {
     case 'hl':
       view.webContents.executeJavaScript(`(${hlPause.toString()})()`)
       break
+    case 'cr':
+      view.webContents.mainFrame.frames.forEach(frame => {
+        const url = new URL(frame.url)
+        if (url.host === 'static.crunchyroll.com') {
+          frame.executeJavaScript(`(${defaultPause.toString()})()`)
+          return
+        }
+      })
+      break
     default:
       view.webContents.executeJavaScript(`(${defaultPause.toString()})()`)
       break
@@ -263,7 +278,7 @@ function defaultPause() {
 
 // Play stream
 function play() {
-  if (!showBookmarks) {
+  if (!showHomescreen) {
     switch (currentStream) {
       case 'at':
         view.webContents.executeJavaScript(`(${atPlay.toString()})()`)
@@ -273,6 +288,15 @@ function play() {
         break
       case 'hl':
         view.webContents.executeJavaScript(`(${hlPlay.toString()})()`)
+        break
+      case 'cr':
+        view.webContents.mainFrame.frames.forEach(frame => {
+          const url = new URL(frame.url)
+          if (url.host === 'static.crunchyroll.com') {
+            frame.executeJavaScript(`(${defaultPlay.toString()})()`)
+            return
+          }
+        })
         break
       default:
         view.webContents.executeJavaScript(`(${defaultPlay.toString()})()`)
@@ -324,8 +348,7 @@ function setView() {
 
 // Adjust view bounds to window
 function setViewBounds() {
-  if (!showBookmarks && !showPrefs) {
-  // if (!showPrefs) {
+  if (!showHomescreen && !showPrefs) {
     updateShowFacets()
     let waw = showFacets ? facetAdjustWidth : baseAdjustWidth
     view.setBounds({
@@ -339,13 +362,19 @@ function setViewBounds() {
 
 // Change stream service
 function streamChange(stream) {
-  isPlaying ? pause() : null
-  view.setBounds({ x: 0, y: 0, width: 0, height: 0 })
-  showBookmarks = false
-  currentStream = stream.id
-  view.webContents.loadURL(stream.url, { userAgent: userAgent })
-  win.webContents.send('hide-bookmarks')
-  win.webContents.send('stream-changed', stream.url)
+  if (validateLink(stream.url)) {
+    const currentHost = new URL(stream.url).hostname
+    isPlaying ? pause() : null
+    view.setBounds({ x: 0, y: 0, width: 0, height: 0 })
+    showHomescreen = false
+    currentStream = stream.id === 'ot' ? setStreamId(currentHost) : stream.id
+    updateShowFacets()
+    view.webContents.loadURL(stream.url, { userAgent: userAgent })
+    win.webContents.send('hide-homescreen')
+    win.webContents.send('stream-changed')
+  } else {
+    win.webContents.send('invalid-url')
+  }
 }
 
 // Stream loaded
@@ -373,21 +402,19 @@ function updateShowFacets() {
 
 // Open copied link in new BrowserView
 function openLink(url) {
-  if (validateLink(url)) {
-    currentStream = 'ot'
-    const stream = {
-      id: setStreamId(url),
-      url: url
-    }
-    streamChange(stream)
+  currentStream = 'ot'
+  const stream = {
+    id: currentStream,
+    url: url
   }
+  streamChange(stream)
 }
 
 // Navigate view backwards
 function navBack() {
   if (view.getBounds().width === 0) {
-    showBookmarks = false
-    win.webContents.send('hide-bookmarks')
+    showHomescreen = false
+    win.webContents.send('hide-homescreen')
     setViewBounds()
   } else if (view.webContents.canGoBack()) {
     navChange()
@@ -409,20 +436,14 @@ function navChange() {
   currentStream = 'ot'
   updateShowFacets()
   view.setBounds({ x: 0, y: 0, width: 0, height: 0 })
-  win.webContents.send('stream-changed', null)
+  win.webContents.send('stream-changed')
   setTimeout(setViewBounds, 1000)
 }
 
 // Set the stream ID if it needs to be derived
-function setStreamId(url) {
-  const host = new URL(url).hostname
-  if (host === 'www.youtube.com' || host === 'youtu.be') {
-    return 'yt'
-  }
-  if (host === 'www.netflix.com') {
-    return 'nf'
-  }
-  return currentStream
+function setStreamId(host) {
+  let serv = defaultStreams.find(item => new URL(item.url).hostname === host)
+  return serv ? serv.id : 'ot'
 }
 
 // Scale height to supplied aspect ratio
@@ -464,19 +485,17 @@ function captureStream() {
   setTimeout(sendBookmark, 1000)
 }
 
-// TODO: Make docked on left of video
-// Toggle bookmarks page
-function toggleBookmarks() {
-  if (showBookmarks) {
-    showBookmarks = false
-    win.webContents.send('hide-bookmarks')
+// Toggle home screen page
+function toggleHomescreen() {
+  if (showHomescreen) {
+    showHomescreen = false
+    win.webContents.send('hide-homescreen')
     setViewBounds()
   } else {
     isPlaying ? pause() : null
-    showBookmarks = true
-    win.webContents.send('show-bookmarks')
+    showHomescreen = true
+    win.webContents.send('show-homescreen')
     view.setBounds({ x: 0, y: 0, width: 0, height: 0})
-    // view.setBounds({ x: bookmarkAdjustWidth, y: baseHeaderSize, width: wb.width - bookmarkAdjustWidth, height: wb.height - baseHeaderSize })
   }
 }
 
@@ -501,7 +520,10 @@ async function sendBookmark() {
 // Send current stream object
 async function sendCurrentStream() {
   await getCurrentUrl().then((currentUrl) => {
-    win.webContents.send('stream-loaded', { id: setStreamId(currentUrl), url: currentUrl })
+    if (validateLink(currentUrl)) {
+      currentStream = setStreamId(new URL(currentUrl).hostname)
+      win.webContents.send('stream-loaded', { id: currentStream, url: currentUrl })
+    }
   }).catch((err) => { console.error('SCS:'+err) })
 }
 
@@ -1470,8 +1492,8 @@ ipcMain.on('save-bookmark', () => {
 })
 
 // IPC channel to toggle bookmarks
-ipcMain.on('toggle-bookmarks', () => {
-  toggleBookmarks()
+ipcMain.on('toggle-homescreen', () => {
+  toggleHomescreen()
 })
 
 // IPC channel to skip YouTube ads
@@ -1556,8 +1578,14 @@ ipcMain.on('hide-header-bar', (e, bool) => {
   winAdjustHeight = isMac ? headerSize : baseMenuHeight + headerSize
 })
 
+// IPC channel to set user agent
 ipcMain.on('set-user-agent', (e, data) => {
   userAgent = data
+})
+
+// IPC channel to set defualt streams
+ipcMain.on('set-defaultstreams', (e, data) => {
+  defaultStreams = data
 })
 
 // Build menu template
@@ -1571,7 +1599,7 @@ const template = [
           dialog.showMessageBox({
             title: `About ${app.name}`,
             message: `StreamDock\nVersion ${app.getVersion()}`,
-            detail: 'Copyright \u00A9 jtvberg 2020-2021',
+            detail: 'Copyright \u00A9 jtvberg 2020-2022',
             buttons: []
           })
         } 
@@ -1655,9 +1683,9 @@ const template = [
     label: 'View',
     submenu: [
       {
-        label: 'Toggle Bookmarks',
+        label: 'Toggle Home Screen',
         click() {
-          toggleBookmarks()
+          toggleHomescreen()
         }
       },
       {

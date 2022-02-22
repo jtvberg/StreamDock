@@ -7,6 +7,7 @@
 // Imports and variable declarations
 const { ipcRenderer, nativeImage, clipboard } = require('electron')
 const $ = require('jquery')
+const _ = require('lodash')
 const isMac = process.platform === 'darwin'
 const isLinux = process.platform === 'linux'
 const isWindows = process.platform === 'win32'
@@ -16,6 +17,8 @@ let nfFacets = []
 let bookmarks = []
 let userAgent = ''
 let defaultAgent = ''
+let searchResults = []
+let searchInput = ''
 
 // Invoke services load and apply settings
 loadSettings()
@@ -25,10 +28,11 @@ applyInitialSettings()
 loadBookmarks()
 openLastStream()
 
-// Set system accent color css variable
+// Set system accent colors css variable
 ipcRenderer.on('set-accent', (e, color) => {
   let root = document.documentElement
   root.style.setProperty('--color-system-accent', color)
+  root.style.setProperty('--color-system-accent-trans', color.substring(0,7) + '80')
 })
 
 // Settings modal invoke main
@@ -43,27 +47,34 @@ ipcRenderer.on('save-settings', (e, data) => {
 })
 
 // Stream changed
-ipcRenderer.on('stream-changed', (e, url) => {
+ipcRenderer.on('stream-changed', () => {
   $('.loading').show()
-  toggleFacetsButton(url)
 })
 
-// Show bookmarks
-ipcRenderer.on('show-bookmarks', () => {
+// Show home screen
+ipcRenderer.on('show-homescreen', () => {
   $('.facet-host').hide()
   $('.loading').hide()
-  $('.bookmark-host').show()
+  $('.home-screen').show()
 })
 
-// Hide bookmarks
-ipcRenderer.on('hide-bookmarks', () => {
-  $('.bookmark-host').hide()
+// Hide home screen
+ipcRenderer.on('hide-homescreen', () => {
+  $('.home-screen').hide()
+})
+
+// Invalid url
+ipcRenderer.on('invalid-url', () => {
+  alert('Invalid Link')
 })
 
 // Stream loaded
 ipcRenderer.on('stream-loaded', (e, stream) => {
-  settings.lastStream = stream
+  if (stream) {
+    settings.lastStream = stream
+  }
   $('.loading').hide()
+  toggleFacetsButton(new URL(stream.url).hostname)
 })
 
 // Save bookmark
@@ -115,7 +126,7 @@ function applyInitialSettings() {
     ipcRenderer.send('set-window', settings.windowSizeLocation)
   }
 
-  $('.bookmark-host').hide()
+  $('.home-screen').hide()
   $('.facet-host').hide()
   $('#facets-btn').hide()
 
@@ -131,6 +142,9 @@ function applyUpdateSettings() {
 
   // Auto-hide navbar buttons
   settings.hideNav ? $('.header-bar').children().addClass('nav-hide') : $('.header-bar').children().removeClass('nav-hide')
+
+  // Toggle search pane on home screen
+  toggleSearch()
 
   // Hide the dock icon
   ipcRenderer.send('hide-dock-icon', settings.hideDock)
@@ -184,6 +198,7 @@ function applyUpdateSettings() {
 // Iterate through stored services and create buttons/menu entries
 function loadServices() {
   const defaultList = getDefaultStreams()
+  ipcRenderer.send('set-defaultstreams', defaultList)
   streamList = localStorage.getItem('streamList') ? JSON.parse(localStorage.getItem('streamList')) : defaultList
 
   // Add new default streams to stream list
@@ -238,114 +253,124 @@ function openLastStream() {
 
 // Return default streams
 function getDefaultStreams() {
-  const defaultStreams = [{
-    id: 'yt',
-    active: true,
-    glyph: 'Y',
-    title: 'YouTube',
-    url: 'https://www.youtube.com',
-    color: '#ff0000',
-    bgColor: '#ffffff'
-  },
-  {
-    id: 'tv',
-    active: true,
-    glyph: 'T',
-    title: 'YouTube TV',
-    url: 'https://tv.youtube.com',
-    color: '#ff0000',
-    bgColor: '#ffffff'
-  },
-  {
-    id: 'nf',
-    active: true,
-    glyph: 'N',
-    title: 'Netflix',
-    url: 'https://www.netflix.com',
-    color: '#ffffff',
-    bgColor: '#db272e'
-  },
-  {
-    id: 'hl',
-    active: true,
-    glyph: 'H',
-    title: 'Hulu',
-    url: 'https://www.hulu.com',
-    color: '#ffffff',
-    bgColor: '#1ce783'
-  },
-  {
-    id: 'ap',
-    active: true,
-    glyph: 'P',
-    title: 'Prime Video',
-    url: 'https://www.amazon.com/gp/video/storefront',
-    color: '#ffffff',
-    bgColor: '#00aee4'
-  },
-  {
-    id: 'dp',
-    active: true,
-    glyph: 'D',
-    title: 'Disney+',
-    url: 'https://www.disneyplus.com/home',
-    color: '#ffffff',
-    bgColor: '#1a3676'
-  },
-  {
-    id: 'at',
-    active: true,
-    glyph: 'T',
-    title: 'Apple TV+',
-    url: 'https://tv.apple.com/',
-    color: '#ffffff',
-    bgColor: '#000000'
-  },
-  {
-    id: 'pc',
-    active: false,
-    glyph: 'P',
-    title: 'Peacock',
-    url: 'https://www.peacocktv.com/watch/home',
-    color: '#000000',
-    bgColor: '#ffffff'
-  },
-  {
-    id: 'ab',
-    active: true,
-    glyph: 'A',
-    title: 'ABC',
-    url: 'https://abc.com',
-    color: '#ffffff',
-    bgColor: '#000000'
-  },
-  {
-    id: 'cb',
-    active: true,
-    glyph: 'P',
-    title: 'Paramount+',
-    url: 'https://www.paramountplus.com/',
-    color: '#0166a4',
-    bgColor: '#ffffff'
-  },
-  {
-    id: 'hm',
-    active: true,
-    glyph: 'H',
-    title: 'HBO Max',
-    url: 'https://play.hbomax.com',
-    color: '#ffffff',
-    bgColor: '#7e5ee4'
-  },
-  {
-    id: 'ep',
-    active: true,
-    glyph: 'E',
-    title: 'ESPN+',
-    url: 'https://plus.espn.com',
-    color: '#000000',
-    bgColor: '#ffaf00'
-  }
+  const defaultStreams = [
+    {
+      id: 'yt',
+      active: true,
+      glyph: 'Y',
+      title: 'YouTube',
+      url: 'https://www.youtube.com',
+      color: '#ff0000',
+      bgColor: '#ffffff'
+    },
+    {
+      id: 'tv',
+      active: true,
+      glyph: 'T',
+      title: 'YouTube TV',
+      url: 'https://tv.youtube.com',
+      color: '#ff0000',
+      bgColor: '#ffffff'
+    },
+    {
+      id: 'nf',
+      active: true,
+      glyph: 'N',
+      title: 'Netflix',
+      url: 'https://www.netflix.com',
+      color: '#ffffff',
+      bgColor: '#db272e'
+    },
+    {
+      id: 'hl',
+      active: true,
+      glyph: 'H',
+      title: 'Hulu',
+      url: 'https://www.hulu.com',
+      color: '#ffffff',
+      bgColor: '#1ce783'
+    },
+    {
+      id: 'ap',
+      active: true,
+      glyph: 'P',
+      title: 'Prime Video',
+      url: 'https://www.amazon.com/gp/video/storefront',
+      color: '#ffffff',
+      bgColor: '#00aee4'
+    },
+    {
+      id: 'dp',
+      active: true,
+      glyph: 'D',
+      title: 'Disney+',
+      url: 'https://www.disneyplus.com/home',
+      color: '#ffffff',
+      bgColor: '#1a3676'
+    },
+    {
+      id: 'at',
+      active: true,
+      glyph: 'T',
+      title: 'Apple TV+',
+      url: 'https://tv.apple.com/',
+      color: '#ffffff',
+      bgColor: '#000000'
+    },
+    {
+      id: 'pc',
+      active: false,
+      glyph: 'P',
+      title: 'Peacock',
+      url: 'https://www.peacocktv.com/watch/home',
+      color: '#000000',
+      bgColor: '#ffffff'
+    },
+    {
+      id: 'ab',
+      active: true,
+      glyph: 'A',
+      title: 'ABC',
+      url: 'https://abc.com',
+      color: '#ffffff',
+      bgColor: '#000000'
+    },
+    {
+      id: 'cb',
+      active: true,
+      glyph: 'P',
+      title: 'Paramount+',
+      url: 'https://www.paramountplus.com/',
+      color: '#0066ff',
+      bgColor: '#ffffff'
+    },
+    {
+      id: 'hm',
+      active: true,
+      glyph: 'H',
+      title: 'HBO Max',
+      url: 'https://play.hbomax.com',
+      color: '#ffffff',
+      bgColor: '#7e5ee4'
+    },
+    {
+      id: 'ep',
+      active: true,
+      glyph: 'E',
+      title: 'ESPN+',
+      url: 'https://plus.espn.com',
+      color: '#000000',
+      bgColor: '#ffaf00'
+    },
+    {
+      id: 'cr',
+      active: true,
+      glyph: 'C',
+      title: 'Crunchyroll',
+      url: 'https://beta.crunchyroll.com/',
+      color: '#ff5202',
+      bgColor: '#ffffff'
+    }
   ]
   return defaultStreams
 }
@@ -375,6 +400,8 @@ function getDefaultSettings() {
     dpNextEpisode: false,
     hmSkipRecap: false,
     hmNextEpisode: false,
+    showSearch: false,
+    searchApiKey: '',
     userAgent: {
       macos: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/96.0.4664.110 Safari/537.36',
       win: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/96.0.4664.110 Safari/537.36',
@@ -398,9 +425,9 @@ function maxRestoreWindow() {
 // Load stored values into settings modal
 function loadSettingsModal() {
   $('.facet-host').css('opacity', '0')
-  $('.bookmark-host').css('opacity', '0')
+  $('.home-screen').css('opacity', '0')
   ipcRenderer.send('view-hide')
-  $('#collapse-general, #collapse-services, #collapse-service-specific, #collapse-advanced').collapse('hide')
+  $('#collapse-general, #collapse-services, #collapse-service-specific, #collapse-advanced, #collapse-search').collapse('hide')
   $('#ontop-check').prop('checked', settings.onTop)
   $('#last-check').prop('checked', settings.openLast)
   $('#window-check').prop('checked', settings.saveWindow)
@@ -445,6 +472,9 @@ function loadSettingsModal() {
     $('#settings-services-available').append(instance)
   })
   $('#agent-string-input').val(userAgent)
+  $('#search-check').prop('checked', settings.showSearch)
+  $('#search-api-key-input').val(settings.searchApiKey)
+  $('#search-detail-modal').modal('hide')
   $('#settings-modal').modal('show')
 }
 
@@ -475,6 +505,8 @@ function saveSettings() {
     themeMode: $('#choose-theme input:radio:checked').val(),
     lastStream: settings.lastStream,
     userAgent: userAgent,
+    showSearch: $('#search-check').is(':checked'),
+    searchApiKey: $('#search-api-key-input').val(),
     windowSizeLocation: settings.windowSizeLocation
   }
   localStorage.setItem('settings', JSON.stringify(settings))
@@ -520,6 +552,8 @@ function loadDefaultSettings() {
   $('#hm-next-check').prop('checked', defaultSettings.hmNextEpisode)
   $('.serv-check').prop('checked', false)
   $('#agent-string-input').val(defaultAgent)
+  $('#search-check').prop('checked', defaultSettings.showSearch)
+  $('#search-api-key-input').val(settings.searchApiKey)
   getDefaultStreams().forEach((serv) => {
     $(`#check-${serv.id}`).prop('checked', serv.active ? 'checked' : '')
   })
@@ -552,6 +586,7 @@ function renderNfFacets() {
 
 // Sent IPC message to open stream
 function openStream(id, url) {
+  $('#search-detail-modal').modal('hide')
   ipcRenderer.send('service-change', {
     id: id,
     url: url
@@ -609,15 +644,11 @@ function toggleFacets() {
   ipcRenderer.send('toggle-facets')
 }
 
-// Toggle the NF facets button based on url
-function toggleFacetsButton(url) {
+// Toggle the NF facets button based on host
+function toggleFacetsButton(host) {
   $('#facets-btn').hide()
-  try {
-    if (new URL(url).hostname === 'www.netflix.com') {
-      $('#facets-btn').show()
-    }
-  } catch (err) {
-    console.log('invalid URL')
+  if (host === 'www.netflix.com') {
+    $('#facets-btn').show()
   }
 }
 
@@ -642,10 +673,230 @@ function addBookmarkFlash() {
   $('#home-btn').addClass('bookmarks-btn-add')
 }
 
+// Call API to get search results
+function getSearchResults(api, page, media) {
+  let pages = 1
+  if(!settings.searchApiKey || settings.searchApiKey.length === 0) {
+    alert('You must enter a valid API key in Preferences > Search Settings for search to work')
+    return
+  }
+  page = page ? page : 1
+  if (page === 1) {
+    searchInput = $('#search-input').val()
+    $('#search-result-host').empty()
+    searchResults = []
+  } else {
+    $('#results-more').remove()
+  }
+  // TODO: make this a setting
+  const loc = 'US'
+  const lang = 'en'
+  const langLoc = `${lang}-${loc}`
+  const apiKey = settings.searchApiKey
+  const mediaType = media
+  const searchApi = `https://api.themoviedb.org/3/search/multi?api_key=${apiKey}&language=${langLoc}&query=${searchInput}&page=${page}&include_adult=false`
+  const trendApi = `https://api.themoviedb.org/3/trending/all/week?api_key=${apiKey}&page=${page}&include_adult=false`
+  const discApi = `https://api.themoviedb.org/3/discover/${mediaType}?api_key=${apiKey}&language=${lang}&sort_by=popularity.desc&include_adult=false&include_video=false&page=${page}&watch_region=${loc}&with_watch_monetization_types=flatrate`
+  const apiCall = api === 0 ? searchApi : api === 1 ? trendApi : discApi
+  const formatTime = (n) => `${n / 60 ^ 0}:` + ('0' + n % 60).slice(-2)
+  var getMedia = $.getJSON(apiCall)  
+    .fail(function() {
+      alert('Search query failed. Do you have a valid API key?')
+    })
+    .always(function() {
+      if (getMedia.responseJSON.total_results === 0) alert('No results found')
+      pages = getMedia.responseJSON.total_pages
+      const results = _.orderBy(_.filter(getMedia.responseJSON.results, o => o.media_type !== 'person'), 'popularity', 'desc')
+      let records = results.length
+      $.each(results, function(i, item) {
+        const media = item.media_type ? item.media_type : mediaType
+        var getDetails = $.getJSON(`https://api.themoviedb.org/3/${media}/${item.id}?api_key=${apiKey}&append_to_response=credits,watch/providers,genres,release_dates,content_ratings`)
+          .always(function() {
+            let cast = []
+            try { cast = getDetails.responseJSON.credits.cast } catch(err) { console.log(`No cast found for id ${item.id}`) }
+            let providers = []
+            try { providers = _.get(getDetails.responseJSON['watch/providers'].results, loc).flatrate } catch(err) { console.log(`No ${loc} stream providers found for id ${item.id}`) }
+            let link = ''
+            try { link = _.get(getDetails.responseJSON['watch/providers'].results, loc).link } catch(err) { console.log(`No stream link found for id ${item.id}`) }
+            link = link === '' ? `https://www.themoviedb.org/${media}/${item.id}/` : link
+            let genres = []
+            try { genres = getDetails.responseJSON.genres } catch(err) { console.log(`No genres found for id ${item.id}`) }
+            let rating = 'NA'
+            try {
+              if (media === 'movie') {
+                rating = _.find(_.find(getDetails.responseJSON.release_dates.results, (o) => { return o.iso_3166_1 === loc}).release_dates, (r) => { return r.certification !== '' }).certification
+              } else {
+                rating = _.find(getDetails.responseJSON.content_ratings.results, (o) => { return o.iso_3166_1 === loc}).rating
+              }
+            } catch(err) { console.log(`No rating found for id ${item.id}`) }
+            const title = item.title === undefined ? item.name : item.title
+            const first_date = item.release_date === undefined ? item.first_air_date : item.release_date
+            const poster = item.poster_path ? `https://image.tmdb.org/t/p/original${item.poster_path}` : ''
+            const year = getYear(first_date)
+            const runtime = getDetails.responseJSON.runtime === undefined ? getDetails.responseJSON.episode_run_time[0] : getDetails.responseJSON.runtime
+            const searchResult = {
+              id: item.id,
+              poster,
+              title,
+              year,
+              media,
+              genres,
+              runtime: formatTime(runtime),
+              rating,
+              tagline: getDetails.responseJSON.tagline,
+              overview: item.overview,
+              cast,
+              providers,
+              link,
+              popularity: item.popularity,
+              loaded: false,
+              page
+            }
+            searchResults.push(searchResult)
+            --records
+            if (records === 0) {
+              searchResults = _.orderBy(searchResults, 'popularity', 'desc')
+              addSearchResults()
+              if (page < pages) {
+                addMoreTile(api, page + 1, media)
+              }
+            }
+          })
+      })
+    })
+}
+
+// Convert date string to year
+function getYear(input) {
+  const year = new Date(input).getFullYear()
+  return isNaN(year) ? 'NA' : year
+}
+
+// Add a get more results tile to the end of the results
+function addMoreTile(api, page, media) {
+  $('<div>', {
+    id: 'results-more',
+    class: 'fa fa-plus-circle fa-4x',
+    title: 'Load More Results'
+  }).data('page', page).data('api', api).data('media', media).appendTo('#search-result-host')
+}
+
+// Loop through search results and call addSearchResult
+function addSearchResults() {
+  $.each(searchResults, function(i, item) {
+    if (!item.loaded) {
+      addSearchResult(item)
+      item.loaded = true
+    }
+  })
+}
+
+// Add search result to UI
+function addSearchResult(result) {
+  let txtGenres  = ''  
+  if (result.genres && result.genres.length > 0) {
+    $.each(result.genres, function(i, item) {
+      txtGenres += `${item.name}, `
+    })
+  }
+
+  const detailIns = $($('#search\\-result\\-instance').html())
+  if (result.poster) {
+    $('.result-image', detailIns).prop('src', `${result.poster}`)
+  }
+  if (result.providers && result.providers.length > 0) {
+    $.each(result.providers, function(i, item) {
+      if (i < 8) {
+        const providerIns = $($('#provider\\-image\\-instance').html())
+        $('.provider-image', providerIns).prop('src', `https://image.tmdb.org/t/p/original${item.logo_path}`).prop('title', `${item.provider_name}`).data('link', `${result.link}`)
+        $('.result-provider-host', detailIns).append(providerIns)
+      }
+    })
+  }
+  $('.result-title', detailIns).text(`${result.title}`)
+  $('.result-year', detailIns).text(`(${result.year})`)
+  $('.result-rating', detailIns).text(`${result.rating}`)
+  $('.result-genres', detailIns).text(txtGenres.slice(0, -2))
+  $(detailIns).data('id', result.id).data('media', result.media)
+  $('#search-result-host').append(detailIns)
+}
+
+// Load the search result detail modal from the searchResult array
+function loadSearchDetailModal(media, id) {
+  const resultDetail = searchResults.find(item => item.media === media && item.id === id)
+  let txtGenres  = ''  
+  if (resultDetail.genres && resultDetail.genres.length > 0) {
+    $.each(resultDetail.genres, function(i, item) {
+      txtGenres += `${item.name}, `
+    })
+  } else {
+    txtGenres = 'NA  '
+  }
+  let txtCast = ''
+  if (resultDetail.cast && resultDetail.cast.length > 0) {
+    $.each(resultDetail.cast, function(i, item) {
+      if (i < 5) {
+        txtCast += `${item.name}, `
+      }
+    })
+  } else {
+    txtCast = 'NA  '
+  }
+  $('#result-detail-title').text(`${resultDetail.title}`)
+  $('#result-detail-year').text(`(${resultDetail.year})`)
+  $('#result-detail-image').prop('src', `${resultDetail.poster}`)
+  $('#result-detail-tagline').text(`${resultDetail.tagline}`)
+  $('#result-rating').text(`${resultDetail.rating}`)
+  $('#result-detail-media').text(resultDetail.media === 'movie' ? 'Film' : 'TV')
+  $('#result-detail-genres').text(txtGenres.slice(0, -2))
+  $('#result-detail-runtime').text(`${resultDetail.runtime}`)
+  $('#result-detail-overview').text(`${resultDetail.overview}`)
+  $('#result-detail-cast').text(txtCast.slice(0, -2))
+  $('#result-detail-tmdb-logo').prop('src', './res/serv_logos/small/tmdb.png').data('link', resultDetail.link)
+  $('#result-detail-provider-host').empty()
+  if (resultDetail.providers && resultDetail.providers.length > 0) {
+    $.each(resultDetail.providers, function(i, item) {
+      if (i < 12) {
+        const providerIns = $($('#detail\\-provider\\-image\\-instance').html())
+        $('.result-detail-provider-image', providerIns).prop('src', `https://image.tmdb.org/t/p/original${item.logo_path}`).prop('title', `${item.provider_name}`).data('link', resultDetail.link)
+        $('#result-detail-provider-host').append(providerIns)
+      }
+    })
+  }
+  $('#search-detail-modal').modal('show')
+}
+
+// Toggle search pane on home screen
+function toggleSearch() {
+  if(settings.showSearch) {
+    $('.home-resize, .search-host').show()
+    $('.bookmark-host').css('flex-basis', '50%')
+  } else {
+    $('.home-resize, .search-host').hide()
+    $('.bookmark-host').css('flex-basis', '100%')
+  }
+}
+
+// Clear toggled state of quick search buttons
+function clearSearchBtns() {
+  $('.search-quick-btn').css('background-color', 'var(--color-neutral-light)')
+}
+
 // Load NF facets from file
 $.getJSON('nffacets.json', function(json) { 
   nfFacets = json
 }).then(renderNfFacets)
+
+// Load more results on click of more tile
+$(document).on('click', '#results-more', () => {
+  getSearchResults($('#results-more').data('api'), $('#results-more').data('page'), $('#results-more').data('media'))
+})
+
+// Open TMDB page on click of provider image
+$(document).on('click', '.result-detail-provider-image, .provider-image', function (e) {
+  e.stopPropagation()
+  openStream('ot', $(this).data('link'))
+})
 
 // NF facet click handler
 $(document).on('click', '.nf-facet', function () {
@@ -707,9 +958,19 @@ $(document).on('click', '.bookmark-url-btn', function () {
   clipboard.writeText($(this).data('url'))
 })
 
+// Open TMDB detail modal
+$(document).on('click', '.result-tile', function() {
+  loadSearchDetailModal($(this).data('media'), $(this).data('id'))
+})
+
+// Open TMDB link
+$('#result-detail-tmdb-logo').on('click', function() {
+  openStream('ot', $(this).data('link'))
+})
+
 // Home Screen toggle click handler
 $('#home-btn').on('click', () => {
-  ipcRenderer.send('toggle-bookmarks')
+  ipcRenderer.send('toggle-homescreen')
 })
 
 // Stop button dblclick from bubbling up to header
@@ -783,6 +1044,11 @@ $('#scalev-btn').on('click', () => {
   ipcRenderer.send('scale-height')
 })
 
+// Open prefs click handler
+$('#prefs-btn').on('click', () => {
+  loadSettingsModal()
+})
+
 // Header double-click handler
 $('.header-bar').on('dblclick', () => {
   maxRestoreWindow()
@@ -796,7 +1062,7 @@ $('.header-bar').on('contextmenu', () => {
 // Settings close restore View
 $('#settings-modal').on('hidden.bs.modal', () => {
   $('.facet-host').css('opacity', '1')
-  $('.bookmark-host').css('opacity', '1')
+  $('.home-screen').css('opacity', '1')
   ipcRenderer.send('view-show')
 })
 
@@ -818,4 +1084,76 @@ $('#agent-undo-btn').on('click', () => {
 // Settings set user agent to default
 $('#agent-default-btn').on('click', () => {
   $('#agent-string-input').val(defaultAgent)
+})
+
+// Settings undo user agent change
+$('#search-api-key-undo-btn').on('click', () => {
+  $('#search-api-key-input').val(settings.searchApiKey)
+})
+
+// Get search results click handler
+$('#search-input').on('keypress', (e) => {
+  if (e.key === 'Enter' && $('#search-input').val().length > 0) {
+    clearSearchBtns()
+    getSearchResults(0, 1)
+  }
+})
+
+// Clear search input box
+$('.search-clear').on('click', () => {
+  $('#search-input').val('')
+  $('#search-result-host').empty()
+  clearSearchBtns()
+})
+
+// Get trending titles
+$('#search-trend').on('click', () => {
+  clearSearchBtns()
+  $('#search-trend').css('background-color', 'var(--color-system-accent-trans)')
+  getSearchResults(1, 1)
+})
+
+// Get popular movie streams
+$('#search-pop-movie').on('click', () => {
+  clearSearchBtns()
+  $('#search-pop-movie').css('background-color', 'var(--color-system-accent-trans)')
+  getSearchResults(3, 1, 'movie')
+})
+
+// Get popular tv streams
+$('#search-pop-tv').on('click', () => {
+  clearSearchBtns()
+  $('#search-pop-tv').css('background-color', 'var(--color-system-accent-trans)')
+  getSearchResults(3, 1, 'tv')
+})
+
+// Reset home screen seperator on screen height change
+let ih = innerHeight
+$(window).on('resize', function() {
+  if(ih !== innerHeight) {
+    $('.bookmark-host').css('flexBasis', '50%')
+    ih = innerHeight
+  }
+})
+
+// Home screen seperator functions
+let isSepMouseDown = 0
+$('.home-resize').on('mousedown', () => {
+  isSepMouseDown = 1
+})
+
+$('body').on('mouseup', () => {
+  isSepMouseDown = 0
+})
+
+$('body').on('mousemove', (e) => {
+  const fb = e.clientY - 20
+  if (isSepMouseDown === 1 && fb < innerHeight - 85) {
+    $('.bookmark-host').css('flexBasis', fb + 'px')
+  } else if (isSepMouseDown === 1) {
+    $('.bookmark-host').css('flexBasis', (innerHeight - 85) + 'px')
+    isSepMouseDown = 0
+  } else {
+    isSepMouseDown = 0
+  }
 })
