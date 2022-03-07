@@ -47,9 +47,9 @@ let defaultStreams = []
 if (isMac) {
   systemPreferences.setUserDefault('NSDisabledDictationMenuItem', 'boolean', true)
   systemPreferences.setUserDefault('NSDisabledCharacterPaletteMenuItem', 'boolean', true)
-} else if (isLinux) {
-  app.disableHardwareAcceleration()
 }
+
+app.disableHardwareAcceleration()
 
 // Main window and view
 let win = null
