@@ -1410,7 +1410,9 @@ ipcMain.on('ontop-unlock', () => {
 
 // IPC channel for hiding dock icon
 ipcMain.on('hide-dock-icon', (e, data) => {
-  data ? app.dock.hide() : app.dock.show()
+  if (app.dock !== undefined) {
+    data ? app.dock.hide() : app.dock.show()
+  }
 })
 
 // IPC channel for scaling horzizontally to 16:9
