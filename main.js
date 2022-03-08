@@ -1332,7 +1332,7 @@ function dpEpisodeNextDis() {
 
 //#endregion
 
-// Widvine DRM setup
+// Widevine DRM setup
 app.commandLine.appendSwitch('no-verify-widevine-cdm')
 const isOffline = false
 const widevineDir = app.getPath('userData')
@@ -1355,14 +1355,14 @@ app.on('ready', () => {
   !isDev && setTimeout(updater, 3000)
 })
 
-// Widvine DRM  ready
+// Widevine DRM  ready
 app.on('widevine-ready', () => {
   createWindow()
   createTray()
   setWinTrayTheme()
 })
 
-// Widvine DRM error handling
+// Widevine DRM error handling
 app.on('widevine-error', (err) => {
   win.webcontents.send('log', err)
   process.exit(1)
