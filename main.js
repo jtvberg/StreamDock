@@ -91,7 +91,7 @@ const createWindow = () => {
   })
 
   // Open DevTools (window, dev only)
-  // isDev && win.webContents.openDevTools('detach')
+  isDev && win.webContents.openDevTools('detach')
 
   // Create main browserView
   view = new BrowserView()

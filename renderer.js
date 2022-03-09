@@ -95,15 +95,14 @@ ipcRenderer.on('log', (e, info) => {
 // Load Settings
 function loadSettings() {
   const defaultList = getDefaultSettings()
-  settings = localStorage.getItem('settings') ? JSON.parse(localStorage.getItem('settings')) : defaultList
-  // Add new default settings to current settings
-  if (Object.keys(settings).length !== Object.keys(defaultList).length) {
-    for (var prop in defaultList) {
-      // TODO: the userAgent thing is stupid but it is simpler
-      if (!Object.prototype.hasOwnProperty.call(settings, prop) && prop !== 'userAgent') {
-        settings[prop] = defaultList[prop]
-      }
-    }
+  settings = localStorage.getItem('settings') ? JSON.parse(localStorage.getItem('settings')) : null
+  if (settings) {
+    // Prune old settings
+    settings = _.pick(settings, _.keys(defaultList))
+    // Add new settings with default values
+    settings = _.assign(_.pick(defaultList, _.difference(_.keys(defaultList), _.keys(settings))), settings)
+  } else {
+    settings = defaultList
   }
 }
 
@@ -239,7 +238,7 @@ function setUserAgent() {
   } else if (isWindows) {
     defaultAgent = defaultAgents.win
   }
-  userAgent = settings.userAgent ? settings.userAgent : defaultAgent
+  userAgent = settings.activeAgent ? settings.activeAgent : defaultAgent
 }
 
 // Open last stream or first service in list
@@ -407,6 +406,7 @@ function getDefaultSettings() {
       win: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/96.0.4664.110 Safari/537.36',
       linux: 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/96.0.4664.110 Safari/537.36'
     },
+    activeAgent: null,
     windowSizeLocation: {
       x: 0,
       y: 0,
@@ -504,7 +504,7 @@ function saveSettings() {
     hmNextEpisode: $('#hm-next-check').is(':checked'),
     themeMode: $('#choose-theme input:radio:checked').val(),
     lastStream: settings.lastStream,
-    userAgent: userAgent,
+    activeAgent: userAgent,
     showSearch: $('#search-check').is(':checked'),
     searchApiKey: $('#search-api-key-input').val(),
     windowSizeLocation: settings.windowSizeLocation
