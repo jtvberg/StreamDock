@@ -43,7 +43,7 @@ I say 'natively' as there are links built in already and in some cases, service 
 ## Releases / Known Issues
    The current release works on Mac (signed and notarized). There are previous versions for Windows (self-signed) and Linux.
    
-   The auto-update should prompt you as new releases come out and then, post download, prompt you to install/restart. Sometimes, it won't do the restart. If you wait a minute and exit the app completely, it should automatically restart the new version.
+   The auto-update should prompt you as new releases come out and then, post download, prompt you to install/restart. Sometimes, it won't do the restart. If you wait a minute and exit the app completely, it should automatically restart the new version (I think I have a fix for this coming in the next release.)
    
    At the moment, any service using Google auth may not allow you to login. This only matters if you have to sign-in to use (so, YouTube works (but it is anonymous), YouTubeTV will not.) The user agent spoofing is tempremental.\
    Some possible workarounds:
