@@ -545,6 +545,7 @@ async function beforeClose() {
   await saveSettings().catch((err) => { 
     console.error('BC:'+err) 
   }).finally(() => {
+    tray.destroy()
     win.destroy()
     app.quit()
   })
