@@ -701,7 +701,7 @@ function getSearchResults(api, page, media) {
   const formatTime = (n) => `${n / 60 ^ 0}:` + ('0' + n % 60).slice(-2)
   var getMedia = $.getJSON(apiCall)  
     .fail(function() {
-      alert('Search query failed. Do you have a valid API key?')
+      alert('Search query failed. Check that you have an internet connection and a valid API key.')
     })
     .always(function() {
       if (getMedia.responseJSON.total_results === 0) alert('No results found')
@@ -857,8 +857,8 @@ function loadSearchDetailModal(media, id) {
   if (resultDetail.providers && resultDetail.providers.length > 0) {
     $.each(resultDetail.providers, function(i, item) {
       if (i < 12) {
-        const providerIns = $($('#detail\\-provider\\-image\\-instance').html())
-        $('.result-detail-provider-image', providerIns).prop('src', `https://image.tmdb.org/t/p/original${item.logo_path}`).prop('title', `${item.provider_name}`).data('link', resultDetail.link)
+        const providerIns = $($('#provider\\-image\\-instance').html())
+        $('.provider-image', providerIns).addClass('result-detail-provider-image').prop('src', `https://image.tmdb.org/t/p/original${item.logo_path}`).prop('title', `${item.provider_name}`).data('link', resultDetail.link)
         $('#result-detail-provider-host').append(providerIns)
       }
     })
@@ -879,6 +879,7 @@ function toggleSearch() {
 
 // Clear toggled state of quick search buttons
 function clearSearchBtns() {
+  $('#search-input').val('')
   $('.search-quick-btn').css('background-color', 'var(--color-neutral-light)')
 }
 
