@@ -510,6 +510,11 @@ function enableFacets() {
   menu.getMenuItemById('toggleGenres').enabled = currentStream === 'nf'
 }
 
+// Toggle always on top
+function toggleOnTop() {
+  win.webContents.send('ontop')
+}
+
 // Send bookmark to renderer
 async function sendBookmark() {
   await getCurrentUrl().then((currentUrl) => {
@@ -1818,9 +1823,9 @@ const template = [
         role: 'zoom'
       },
       {
-        label: 'Lock On Top',
+        label: 'Toggle Always On Top',
         click() {
-          win.isAlwaysOnTop() ? win.setAlwaysOnTop(false) : win.setAlwaysOnTop(true, 'floating')
+          toggleOnTop()
         }
       },
       ...(isMac ? [

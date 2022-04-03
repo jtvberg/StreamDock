@@ -92,6 +92,11 @@ ipcRenderer.on('log', (e, info) => {
   console.log(info)
 })
 
+// Receive always on top toggle
+ipcRenderer.on('ontop', () => {
+  toggleOnTop()
+})
+
 // Load Settings
 function loadSettings() {
   const defaultList = getDefaultSettings()
@@ -883,6 +888,17 @@ function clearSearchBtns() {
   $('.search-quick-btn').css('background-color', 'var(--color-neutral-light)')
 }
 
+// Toggle always on top
+function toggleOnTop() {
+  if ($('#ontop-btn').hasClass('ontop-locked')) {
+    $('#ontop-btn').removeClass('ontop-locked').addClass('ontop-unlocked')
+    ipcRenderer.send('ontop-unlock')
+  } else {
+    $('#ontop-btn').removeClass('ontop-unlocked').addClass('ontop-locked')
+    ipcRenderer.send('ontop-lock')
+  }
+}
+
 // Load NF facets from file
 $.getJSON('nffacets.json', function(json) { 
   nfFacets = json
@@ -1001,14 +1017,8 @@ $('.facet-filter').on('input', function () {
 })
 
 // Toggle keep on top
-$('#ontop-btn').on('click', function () {
-  if ($(this).hasClass('ontop-locked')) {
-    $(this).removeClass('ontop-locked').addClass('ontop-unlocked')
-    ipcRenderer.send('ontop-unlock')
-  } else {
-    $(this).removeClass('ontop-unlocked').addClass('ontop-locked')
-    ipcRenderer.send('ontop-lock')
-  }
+$('#ontop-btn').on('click', () => {
+  toggleOnTop()
 })
 
 // Toggle genre facets
