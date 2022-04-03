@@ -147,9 +147,6 @@ function applyUpdateSettings() {
   // Auto-hide navbar buttons
   settings.hideNav ? $('.header-bar').children().addClass('nav-hide') : $('.header-bar').children().removeClass('nav-hide')
 
-  // Toggle search pane on home screen
-  toggleSearch()
-
   // Hide the dock icon
   ipcRenderer.send('hide-dock-icon', settings.hideDock)
 
@@ -197,6 +194,9 @@ function applyUpdateSettings() {
 
   // Set user agent
   ipcRenderer.send('set-user-agent', userAgent)
+
+  // Toggle search pane on home screen
+  toggleSearch()
 }
 
 // Iterate through stored services and create buttons/menu entries
@@ -884,7 +884,6 @@ function toggleSearch() {
 
 // Clear toggled state of quick search buttons
 function clearSearchBtns() {
-  $('#search-input').val('')
   $('.search-quick-btn').css('background-color', 'var(--color-neutral-light)')
 }
 
@@ -1119,6 +1118,7 @@ $('.search-clear').on('click', () => {
 
 // Get trending titles
 $('#search-trend').on('click', () => {
+  $('#search-input').val('')
   clearSearchBtns()
   $('#search-trend').css('background-color', 'var(--color-system-accent-trans)')
   getSearchResults(1, 1)
@@ -1126,6 +1126,7 @@ $('#search-trend').on('click', () => {
 
 // Get popular movie streams
 $('#search-pop-movie').on('click', () => {
+  $('#search-input').val('')
   clearSearchBtns()
   $('#search-pop-movie').css('background-color', 'var(--color-system-accent-trans)')
   getSearchResults(3, 1, 'movie')
@@ -1133,6 +1134,7 @@ $('#search-pop-movie').on('click', () => {
 
 // Get popular tv streams
 $('#search-pop-tv').on('click', () => {
+  $('#search-input').val('')
   clearSearchBtns()
   $('#search-pop-tv').css('background-color', 'var(--color-system-accent-trans)')
   getSearchResults(3, 1, 'tv')
@@ -1141,8 +1143,9 @@ $('#search-pop-tv').on('click', () => {
 // Reset home screen seperator on screen height change
 let ih = innerHeight
 $(window).on('resize', function() {
-  if(ih !== innerHeight) {
-    $('.bookmark-host').css('flexBasis', '50%')
+  if(ih !== innerHeight && $('.bookmark-host').height() > 0) {
+    let nh = $('.bookmark-host').height() / $('.home-screen').height() * 100
+    $('.bookmark-host').css('flexBasis', `${nh}%`)
     ih = innerHeight
   }
 })
