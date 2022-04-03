@@ -24,9 +24,9 @@
   "devDependencies": {
     "electron": "github:castlabs/electron-releases#v12.2.3-wvvmp",
     "electron-builder": "^22.14.13",
-    "electron-notarize": "^1.1.1",
+    "electron-notarize": "^1.2.1",
     "electron-reload": "^1.5.0",
-    "eslint": "^8.9.0"
+    "eslint": "^8.12.0"
   },
   "dependencies": {
     "@fortawesome/fontawesome-free": "^5.15.4",
