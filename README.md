@@ -44,14 +44,14 @@ I say 'natively' as there are links built in already and in some cases, service 
    The current release works on Mac (signed and notarized). There are previous versions for Windows (self-signed) and Linux.
    
    The auto-update should prompt you as new releases come out and then, post download, prompt you to install/restart. Sometimes, it won't do the restart. If you wait a minute and exit the app completely, it should automatically restart the new version (I think I have a fix for this coming in the next release.)
+
+   Peacock is working now. I don't know why. I have retured it to show by default.
    
-   At the moment, any service using Google auth may not allow you to login. This only matters if you have to sign-in to use (so, YouTube works (but it is anonymous), YouTubeTV will not.) The user agent spoofing is tempremental.\
-   Some possible workarounds:
-   - If you have YouTubeTV you can try to sign into YouTube and that should sign you in to YouTubeTV (YMMV)
-   - Conversely, if you have ABC (through YouTubeTV), signing into that seems to also sign you into YouTube and YouTubeTV as ABC looks to be using an older login paradigm
-   - Prior to being signed in, you can update the user agent to just 'Chrome' (under Preferences > Advanced Settings) then login. You then must put it back to the default agent or some other valid one to get the service to actually work.
+   At the moment, any service using Google auth may not allow you to login. This only matters if you have to sign-in to use (so, YouTube works (but it is anonymous), YouTubeTV will not.) The user agent spoofing is tempremental.
    
-   Peacock is set to off by default as the login is not working at all...
+   The previously suggested work-around to change the user agent to 'Chrome' for login and then back to a full user agent string to avoid the 'unsupport browser' issue is now just the way it works. You no longer need to do this manually. If it sees you navigate to a Google sign-on page it automatically sets the user agent for you. This appears to be working for the included services.
+
+   Other services you may want to add that use 'sign in with Google' may not work.
 
 ## App Control
    - Click on the quick-access buttons across the top to load streaming services as selected in the settings menu under preferences (or use the 'Streams' menu)
@@ -97,4 +97,3 @@ I say 'natively' as there are links built in already and in some cases, service 
    - Contemplating multiple windows but in general, this seems silly (leave a comment if you think there is a good reason to do this!)
    - I don't like how there is no z-order for the BrowserWindow vs. BrowserView. This means I can't render any UI elements above the view (and why video is hidden when using the preferences menu.) In general, this is not a big deal but there are some cool UI tricks I could implement if I moved portions of the UI to another BrowserView (for instance, I could use custom tooltips and auto-hide the header bar)
    - Would like to be able to allow the user to add services. As it is, you can do this by changing the URLs for existing services (which I don't recommend as there is service specific code associated with the service ID) or by adding bookmarks to other services
-   - Still looking into the Peacock thing (won't allow login)

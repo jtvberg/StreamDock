@@ -105,7 +105,7 @@ body {
   display: flex;
   flex-direction: column;
   width: 100%;
-  height: calc(100vh - 33px);
+  height: calc(100vh - 25px);
   user-select: none;
 }
 
@@ -665,6 +665,7 @@ input[type=color] {
   display: grid;
   grid-template-rows: 50px 1fr;
   overflow: hidden;
+  margin-bottom: 5px;
 }
 
 .search-input-host {

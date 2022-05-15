@@ -42,6 +42,7 @@ let userAgent = ''
 let currentStream = ''
 let touchBarItems = []
 let defaultStreams = []
+let googleAuthUrl = 'https://accounts.google.com/'
 
 // OS variables
 if (isMac) {
@@ -107,6 +108,11 @@ const createWindow = () => {
 
   // Set current stream URL (most reliable event)
   view.webContents.on('did-start-navigation', () => {
+    if (view.webContents.getURL().includes(googleAuthUrl)) {
+      view.webContents.userAgent = 'Chrome'
+    } else {
+      view.webContents.userAgent = userAgent
+    }
     sendCurrentStream()
   })
 
@@ -125,9 +131,12 @@ const createWindow = () => {
   })
 
   // Prevent new window open in current view
-  view.webContents.on('new-window', (e, url) => {
-    e.preventDefault()
+  view.webContents.setWindowOpenHandler(({ url }) => {
+    if (url.includes(googleAuthUrl)) {
+      return { action: 'allow' }
+    }
     view.webContents.loadURL(url)
+    return { action: 'deny' }
   })
 
   // Reset view on resize

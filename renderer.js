@@ -323,7 +323,7 @@ function getDefaultStreams() {
     },
     {
       id: 'pc',
-      active: false,
+      active: true,
       glyph: 'P',
       title: 'Peacock',
       url: 'https://www.peacocktv.com/watch/home',
