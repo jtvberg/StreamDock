@@ -1,7 +1,7 @@
 # StreamDock
  This thing was really born out of my desire to fill the damn window instead of going fullscreen. Seriously, I want a window with the video content only... why isn't there a button for that? Theater mode, miniplayer, fullscreen... WORTHLESS!
  
- StreamDock 'natively' supports YouTube, YouTube TV, Netflix, Hulu, Prime Video, Disney+, Apple TV+, Peacock(currently broken), ABC.com, Paramount+, HBO Max, ESPN+ and CrunchyRoll.
+ StreamDock 'natively' supports YouTube, YouTube TV, Netflix, Hulu, Prime Video, Disney+, Apple TV+, Peacock, ABC.com, Paramount+, HBO Max, ESPN+ and CrunchyRoll.
 I say 'natively' as there are links built in already and in some cases, service specfic functions available. That said, you can open any service via the link symbol in the corner and then bookmark it.
 
 #### Main View
