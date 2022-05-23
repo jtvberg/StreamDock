@@ -14,6 +14,7 @@ const isWindows = process.platform === 'win32'
 let streamList = []
 let settings = []
 let nfFacets = []
+let locs = []
 let bookmarks = []
 let userAgent = ''
 let defaultAgent = ''
@@ -476,6 +477,7 @@ function loadSettingsModal() {
     $('.serv-bg-pick-label', instance).prop('for', `serv-bg-${serv.id}`)
     $('#settings-services-available').append(instance)
   })
+  renderLocs('US')
   $('#agent-string-input').val(userAgent)
   $('#search-check').prop('checked', settings.showSearch)
   $('#search-api-key-input').val(settings.searchApiKey)
@@ -587,6 +589,15 @@ function renderNfFacets() {
   if (!showAll) {
     $('.nf-facet-host').children().last().remove()
   }
+}
+
+// Load locations into UI
+function renderLocs(locId) {
+  $('#dropdown-locs').empty()
+  $.each(locs, function(i, loc) {
+    const selected = loc.LocId === locId ? 'selected' : ''
+    $('#dropdown-locs').append(`<option ${selected} value="${loc.LocId}">${loc.LocName}</option>`)
+  })
 }
 
 // Sent IPC message to open stream
@@ -904,6 +915,11 @@ function toggleOnTop() {
 $.getJSON('nffacets.json', function(json) { 
   nfFacets = json
 }).then(renderNfFacets)
+
+// Load locs from file
+$.getJSON('loc.json', function(json) { 
+  locs = json
+})//.then(renderLocs)
 
 // Load more results on click of more tile
 $(document).on('click', '#results-more', () => {
