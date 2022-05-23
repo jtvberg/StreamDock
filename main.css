@@ -133,7 +133,7 @@ body {
 
 .bookmark-stream-host {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
   grid-auto-rows: max-content;
   gap: 7px;
   height: calc(100% - 48px);
@@ -630,7 +630,6 @@ input[type=color] {
 
 .search-header {
   display: grid;
-  grid-template-columns: 1fr auto minmax(1fr 200px);
 }
 
 .search-quick-host {
@@ -697,7 +696,7 @@ input[type=color] {
 
 #search-result-host {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
   gap: 7px;
   overflow-y: auto;
   margin-left: 8px;

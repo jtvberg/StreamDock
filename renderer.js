@@ -715,8 +715,10 @@ function getSearchResults(api, page, media) {
       let records = results.length
       $.each(results, function(i, item) {
         const media = item.media_type ? item.media_type : mediaType
-        var getDetails = $.getJSON(`https://api.themoviedb.org/3/${media}/${item.id}?api_key=${apiKey}&append_to_response=credits,watch/providers,genres,release_dates,content_ratings`)
+        const getDetails = $.getJSON(`https://api.themoviedb.org/3/${media}/${item.id}?api_key=${apiKey}&append_to_response=credits,watch/providers,genres,release_dates,content_ratings`)
           .always(function() {
+            // console.log(getDetails.responseJSON)
+            if (getDetails.statusText !== 'success') return
             let cast = []
             try { cast = getDetails.responseJSON.credits.cast } catch(err) { console.log(`No cast found for id ${item.id}`) }
             let providers = []

@@ -106,7 +106,7 @@ const createWindow = () => {
     streamLoaded()
   })
 
-  // Set current stream URL (most reliable event)
+  // Set current stream URL and switch user agent if google login (most reliable event)
   view.webContents.on('did-start-navigation', () => {
     if (view.webContents.getURL().includes(googleAuthUrl)) {
       view.webContents.userAgent = 'Chrome'
@@ -130,7 +130,7 @@ const createWindow = () => {
     isPlaying = false
   })
 
-  // Prevent new window open in current view
+  // Prevent new window open in current view except for Google Login
   view.webContents.setWindowOpenHandler(({ url }) => {
     if (url.includes(googleAuthUrl)) {
       return { action: 'allow' }
