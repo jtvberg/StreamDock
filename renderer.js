@@ -15,6 +15,7 @@ let streamList = []
 let settings = []
 let nfFacets = []
 let locs = []
+let locId = 'US'
 let bookmarks = []
 let userAgent = ''
 let defaultAgent = ''
@@ -144,6 +145,7 @@ function applyUpdateSettings() {
   settings.quickMenu ? $('.service-btn-host').show() : $('.service-btn-host').hide()
   !settings.quickMenu && !isMac ? $('.header-bar').hide() : $('.header-bar').show()
   ipcRenderer.send('hide-header-bar', settings.quickMenu)
+  locId = settings.locId ? settings.locId : getDefaultSettings().locId
 
   // Auto-hide navbar buttons
   settings.hideNav ? $('.header-bar').children().addClass('nav-hide') : $('.header-bar').children().removeClass('nav-hide')
@@ -406,6 +408,7 @@ function getDefaultSettings() {
     hmSkipRecap: false,
     hmNextEpisode: false,
     showSearch: false,
+    locId: 'US',
     searchApiKey: '',
     userAgent: {
       macos: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/96.0.4664.110 Safari/537.36',
@@ -477,7 +480,7 @@ function loadSettingsModal() {
     $('.serv-bg-pick-label', instance).prop('for', `serv-bg-${serv.id}`)
     $('#settings-services-available').append(instance)
   })
-  renderLocs('US')
+  renderLocs()
   $('#agent-string-input').val(userAgent)
   $('#search-check').prop('checked', settings.showSearch)
   $('#search-api-key-input').val(settings.searchApiKey)
@@ -513,6 +516,7 @@ function saveSettings() {
     lastStream: settings.lastStream,
     activeAgent: userAgent,
     showSearch: $('#search-check').is(':checked'),
+    locId: $('#dropdown-locs').val(),
     searchApiKey: $('#search-api-key-input').val(),
     windowSizeLocation: settings.windowSizeLocation
   }
@@ -560,6 +564,7 @@ function loadDefaultSettings() {
   $('.serv-check').prop('checked', false)
   $('#agent-string-input').val(defaultAgent)
   $('#search-check').prop('checked', defaultSettings.showSearch)
+  $('#dropdown-locs').val(defaultSettings.locId)
   $('#search-api-key-input').val(settings.searchApiKey)
   getDefaultStreams().forEach((serv) => {
     $(`#check-${serv.id}`).prop('checked', serv.active ? 'checked' : '')
@@ -592,8 +597,9 @@ function renderNfFacets() {
 }
 
 // Load locations into UI
-function renderLocs(locId) {
+function renderLocs() {
   $('#dropdown-locs').empty()
+  locs.sort((a, b) => a.LocName.localeCompare(b.LocName))
   $.each(locs, function(i, loc) {
     const selected = loc.LocId === locId ? 'selected' : ''
     $('#dropdown-locs').append(`<option ${selected} value="${loc.LocId}">${loc.LocName}</option>`)
@@ -705,7 +711,7 @@ function getSearchResults(api, page, media) {
     $('#results-more').remove()
   }
   // TODO: make this a setting
-  const loc = 'US'
+  const loc = locId
   const lang = 'en'
   const langLoc = `${lang}-${loc}`
   const apiKey = settings.searchApiKey
@@ -919,7 +925,7 @@ $.getJSON('nffacets.json', function(json) {
 // Load locs from file
 $.getJSON('loc.json', function(json) { 
   locs = json
-})//.then(renderLocs)
+})
 
 // Load more results on click of more tile
 $(document).on('click', '#results-more', () => {
