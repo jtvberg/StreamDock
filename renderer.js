@@ -226,7 +226,7 @@ function loadServices() {
   ipcRenderer.send('reset-menu')
   $('.service-btn-host').empty()
   const template = document.getElementById('service-btn-instance')
-  $.each(streamList, serv => {
+  $.each(streamList, (i, serv) => {
     if (serv.active) {
       const instance = document.importNode(template.content, true)
       $('.service-btn', instance).css({ 'color': serv.color, 'background-color': serv.bgColor }).data('color', serv.color).data('bgcolor', serv.bgColor).data('val', serv.id).data('url', serv.url).prop('title', serv.title).text(serv.glyph)
@@ -463,7 +463,7 @@ function loadSettingsModal() {
   $('#settings-services-available').empty()
   const defaultStreams = getDefaultStreams()
   const template = document.getElementById('service-host-instance')
-  $.each(streamList, serv => {
+  $.each(streamList, (i, serv) => {
     const defaultStream = defaultStreams.find(item => item.id === serv.id)
     const checked = serv.active ? 'checked' : ''
     const instance = document.importNode(template.content, true)
@@ -567,7 +567,7 @@ function loadDefaultSettings() {
   $('#search-check').prop('checked', defaultSettings.showSearch)
   $('#dropdown-locs').val(defaultSettings.locId)
   $('#search-api-key-input').val(settings.searchApiKey)
-  $.each(getDefaultStreams(), serv => {
+  $.each(getDefaultStreams(), (i, serv) => {
     $(`#check-${serv.id}`).prop('checked', serv.active ? 'checked' : '')
   })
   $('.serv-color-input').each(function () {
@@ -620,7 +620,7 @@ function openStream(id, url) {
 function loadBookmarks() {
   $('.bookmark-stream-host').empty()
   bookmarks = JSON.parse(localStorage.getItem('bookmarks')) || []
-  $.each(bookmarks, bm => {
+  $.each(bookmarks, (i, bm) => {
     addBookmark(bm)
   })
 }
