@@ -11,6 +11,7 @@ const _ = require('lodash')
 const isMac = process.platform === 'darwin'
 const isLinux = process.platform === 'linux'
 const isWindows = process.platform === 'win32'
+const tmdbImagePath = 'https://image.tmdb.org/t/p/original'
 let streamList = []
 let settings = []
 let nfFacets = []
@@ -225,7 +226,7 @@ function loadServices() {
   ipcRenderer.send('reset-menu')
   $('.service-btn-host').empty()
   const template = document.getElementById('service-btn-instance')
-  streamList.forEach(function (serv) {
+  $.each(streamList, serv => {
     if (serv.active) {
       const instance = document.importNode(template.content, true)
       $('.service-btn', instance).css({ 'color': serv.color, 'background-color': serv.bgColor }).data('color', serv.color).data('bgcolor', serv.bgColor).data('val', serv.id).data('url', serv.url).prop('title', serv.title).text(serv.glyph)
@@ -462,7 +463,7 @@ function loadSettingsModal() {
   $('#settings-services-available').empty()
   const defaultStreams = getDefaultStreams()
   const template = document.getElementById('service-host-instance')
-  streamList.forEach(function (serv) {
+  $.each(streamList, serv => {
     const defaultStream = defaultStreams.find(item => item.id === serv.id)
     const checked = serv.active ? 'checked' : ''
     const instance = document.importNode(template.content, true)
@@ -566,7 +567,7 @@ function loadDefaultSettings() {
   $('#search-check').prop('checked', defaultSettings.showSearch)
   $('#dropdown-locs').val(defaultSettings.locId)
   $('#search-api-key-input').val(settings.searchApiKey)
-  getDefaultStreams().forEach((serv) => {
+  $.each(getDefaultStreams(), serv => {
     $(`#check-${serv.id}`).prop('checked', serv.active ? 'checked' : '')
   })
   $('.serv-color-input').each(function () {
@@ -582,7 +583,7 @@ function loadDefaultSettings() {
 function renderNfFacets() {
   $('.nf-facet-host').empty()
   const showAll = !$('.filter-all').hasClass('toggled')
-  $.each(nfFacets, function(i, facet) {
+  $.each(nfFacets, (i, facet) => {
     if (facet.Category === 'Genre') {
       $('.nf-facet-host').append(`<div class="nf-facet" data-code="${facet.Code}" style="font-weight: 800">${facet.Genre}</div>`)
     } else if (facet.Category !== 'A-Z') {
@@ -600,7 +601,7 @@ function renderNfFacets() {
 function renderLocs() {
   $('#dropdown-locs').empty()
   locs.sort((a, b) => a.LocName.localeCompare(b.LocName))
-  $.each(locs, function(i, loc) {
+  $.each(locs, (i, loc) => {
     const selected = loc.LocId === locId ? 'selected' : ''
     $('#dropdown-locs').append(`<option ${selected} value="${loc.LocId}">${loc.LocName}</option>`)
   })
@@ -619,7 +620,7 @@ function openStream(id, url) {
 function loadBookmarks() {
   $('.bookmark-stream-host').empty()
   bookmarks = JSON.parse(localStorage.getItem('bookmarks')) || []
-  bookmarks.forEach(function (bm) {
+  $.each(bookmarks, bm => {
     addBookmark(bm)
   })
 }
@@ -678,7 +679,7 @@ function toggleFacetsButton(host) {
 function facetFilter(filter) {
   const showAll = !$('.filter-all').hasClass('toggled')
   $('.nf-facet-host').empty()
-  $.each(nfFacets, function(i, facet) {
+  $.each(nfFacets, (i, facet) => {
     if (showAll && facet.Code !== '0' && (facet.Genre.toLowerCase().includes(filter) || facet.Category.toLowerCase().includes(filter))) {
       $('.nf-facet-host').append(`<div class="nf-facet" data-code="${facet.Code}">${facet.Genre}</div>`)
     } else if (facet.Category !== 'A-Z' && facet.Code !== '0' && (facet.Genre.toLowerCase().includes(filter) || facet.Category.toLowerCase().includes(filter))) {
@@ -710,7 +711,6 @@ function getSearchResults(api, page, media) {
   } else {
     $('#results-more').remove()
   }
-  // TODO: make this a setting
   const loc = locId
   const lang = 'en'
   const langLoc = `${lang}-${loc}`
@@ -722,18 +722,18 @@ function getSearchResults(api, page, media) {
   const apiCall = api === 0 ? searchApi : api === 1 ? trendApi : discApi
   const formatTime = (n) => `${n / 60 ^ 0}:` + ('0' + n % 60).slice(-2)
   var getMedia = $.getJSON(apiCall)  
-    .fail(function() {
+    .fail(() => {
       alert('Search query failed. Check that you have an internet connection and a valid API key.')
     })
-    .always(function() {
+    .always(() => {
       if (getMedia.responseJSON.total_results === 0) alert('No results found')
       pages = getMedia.responseJSON.total_pages
       const results = _.orderBy(_.filter(getMedia.responseJSON.results, o => o.media_type !== 'person'), 'popularity', 'desc')
       let records = results.length
-      $.each(results, function(i, item) {
+      $.each(results, (i, item) => {
         const media = item.media_type ? item.media_type : mediaType
         const getDetails = $.getJSON(`https://api.themoviedb.org/3/${media}/${item.id}?api_key=${apiKey}&append_to_response=credits,watch/providers,genres,release_dates,content_ratings`)
-          .always(function() {
+          .always(() => {
             // console.log(getDetails.responseJSON)
             if (getDetails.statusText !== 'success') return
             let cast = []
@@ -807,7 +807,7 @@ function addMoreTile(api, page, media) {
 
 // Loop through search results and call addSearchResult
 function addSearchResults() {
-  $.each(searchResults, function(i, item) {
+  $.each(searchResults, (i, item) => {
     if (!item.loaded) {
       addSearchResult(item)
       item.loaded = true
@@ -819,7 +819,7 @@ function addSearchResults() {
 function addSearchResult(result) {
   let txtGenres  = ''  
   if (result.genres && result.genres.length > 0) {
-    $.each(result.genres, function(i, item) {
+    $.each(result.genres, (i, item) => {
       txtGenres += `${item.name}, `
     })
   }
@@ -829,7 +829,7 @@ function addSearchResult(result) {
     $('.result-image', detailIns).prop('src', `${result.poster}`)
   }
   if (result.providers && result.providers.length > 0) {
-    $.each(result.providers, function(i, item) {
+    $.each(result.providers, (i, item) => {
       if (i < 8) {
         const providerIns = $($('#provider\\-image\\-instance').html())
         $('.provider-image', providerIns).prop('src', `https://image.tmdb.org/t/p/original${item.logo_path}`).prop('title', `${item.provider_name}`).data('link', `${result.link}`)
@@ -850,7 +850,7 @@ function loadSearchDetailModal(media, id) {
   const resultDetail = searchResults.find(item => item.media === media && item.id === id)
   let txtGenres  = ''  
   if (resultDetail.genres && resultDetail.genres.length > 0) {
-    $.each(resultDetail.genres, function(i, item) {
+    $.each(resultDetail.genres, (i, item) => {
       txtGenres += `${item.name}, `
     })
   } else {
@@ -858,7 +858,7 @@ function loadSearchDetailModal(media, id) {
   }
   let txtCast = ''
   if (resultDetail.cast && resultDetail.cast.length > 0) {
-    $.each(resultDetail.cast, function(i, item) {
+    $.each(resultDetail.cast, (i, item) => {
       if (i < 5) {
         txtCast += `${item.name}, `
       }
@@ -879,10 +879,10 @@ function loadSearchDetailModal(media, id) {
   $('#result-detail-tmdb-logo').prop('src', './res/serv_logos/small/tmdb.png').data('link', resultDetail.link)
   $('#result-detail-provider-host').empty()
   if (resultDetail.providers && resultDetail.providers.length > 0) {
-    $.each(resultDetail.providers, function(i, item) {
+    $.each(resultDetail.providers, (i, item) => {
       if (i < 12) {
         const providerIns = $($('#provider\\-image\\-instance').html())
-        $('.provider-image', providerIns).addClass('result-detail-provider-image').prop('src', `https://image.tmdb.org/t/p/original${item.logo_path}`).prop('title', `${item.provider_name}`).data('link', resultDetail.link)
+        $('.provider-image', providerIns).addClass('result-detail-provider-image').prop('src', `${tmdbImagePath}${item.logo_path}`).prop('title', `${item.provider_name}`).data('link', resultDetail.link)
         $('#result-detail-provider-host').append(providerIns)
       }
     })
@@ -918,12 +918,12 @@ function toggleOnTop() {
 }
 
 // Load NF facets from file
-$.getJSON('nffacets.json', function(json) { 
+$.getJSON('nffacets.json', json => { 
   nfFacets = json
 }).then(renderNfFacets)
 
 // Load locs from file
-$.getJSON('loc.json', function(json) { 
+$.getJSON('loc.json', json => { 
   locs = json
 })
 
@@ -1166,7 +1166,7 @@ $('#search-pop-tv').on('click', () => {
 
 // Reset home screen seperator on screen height change
 let ih = innerHeight
-$(window).on('resize', function() {
+$(window).on('resize', () => {
   if(ih !== innerHeight && $('.bookmark-host').height() > 0) {
     let nh = $('.bookmark-host').height() / $('.home-screen').height() * 100
     $('.bookmark-host').css('flexBasis', `${nh}%`)

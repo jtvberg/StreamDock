@@ -174,7 +174,7 @@ const createWindow = () => {
   })
 
   // Open any window links in external browser
-  win.webContents.on('will-navigate', function (e, url) {
+  win.webContents.on('will-navigate', (e, url) => {
     e.preventDefault()
     shell.openExternal(url)
   })
