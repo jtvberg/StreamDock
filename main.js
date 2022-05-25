@@ -72,8 +72,8 @@ const createWindow = () => {
     visualEffectState: 'active',
     titleBarStyle: isMac ? 'hidden' : 'default',
     trafficLightPosition: {
-      x: 7,
-      y: 7
+      x: 6,
+      y: 3
     },
     webPreferences: {
       nodeIntegration: true,

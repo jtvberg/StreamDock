@@ -346,12 +346,11 @@ body {
 
 .service-btn {
   border-radius: 3px;
-  margin: 3px;
+  margin: 3px 2px;
   font-family: 'Gill Sans', Calibri, sans-serif;
   padding: 1px;
   width: 16px;
   height: 16px;
-  text-align: center;
   font-size: 14px;
   line-height: 1;
   user-select: none;
@@ -416,7 +415,7 @@ body {
 }
 
 .ontop-unlocked:before {
-  content: '\f3c1';
+  content: '\f09c';
 }
 
 .modal-backdrop {
