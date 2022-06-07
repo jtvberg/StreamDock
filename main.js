@@ -5,7 +5,7 @@
 // TODO: Hide bar on fullscreen
 
 // Imports and variable declarations
-const { app, BrowserWindow, ipcMain, BrowserView, Tray, TouchBar, session, Menu, MenuItem, systemPreferences, clipboard, nativeTheme, dialog, shell } = require('electron')
+const { app, BrowserWindow, ipcMain, BrowserView, Tray, TouchBar, Menu, MenuItem, components, systemPreferences, clipboard, nativeTheme, dialog, shell } = require('electron')
 const { TouchBarButton } = TouchBar
 const path = require('path')
 const isDev = !app.isPackaged
@@ -42,7 +42,7 @@ let userAgent = ''
 let currentStream = ''
 let touchBarItems = []
 let defaultStreams = []
-let googleAuthUrl = 'https://accounts.google.com/'
+let googleAuthHost = 'accounts.google.com'
 
 // OS variables
 if (isMac) {
@@ -108,7 +108,8 @@ const createWindow = () => {
 
   // Set current stream URL and switch user agent if google login (most reliable event)
   view.webContents.on('did-start-navigation', () => {
-    if (view.webContents.getURL().includes(googleAuthUrl)) {
+    const navUrl = validateLink(view.webContents.getURL()) ? new URL(view.webContents.getURL()) : null
+    if (navUrl && navUrl.host === googleAuthHost) {
       view.webContents.userAgent = 'Chrome'
     } else {
       view.webContents.userAgent = userAgent
@@ -132,7 +133,8 @@ const createWindow = () => {
 
   // Prevent new window open in current view except for Google Login
   view.webContents.setWindowOpenHandler(({ url }) => {
-    if (url.includes(googleAuthUrl)) {
+    const navUrl = validateLink(url) ? new URL(url) : null
+    if (navUrl && navUrl.host === googleAuthHost) {
       return { action: 'allow' }
     }
     view.webContents.loadURL(url)
@@ -1347,11 +1349,6 @@ function dpEpisodeNextDis() {
 
 //#endregion
 
-// Widevine DRM setup
-app.commandLine.appendSwitch('no-verify-widevine-cdm')
-const isOffline = false
-const widevineDir = app.getPath('userData')
-
 // Load electron-reload in dev
 if (isDev) {
   require('electron-reload')(__dirname, {
@@ -1359,28 +1356,14 @@ if (isDev) {
   })
 }
 
-// App ready
-app.on('ready', () => {
-  app.verifyWidevineCdm({
-    session: session.defaultSession,
-    disableUpdate: isOffline,
-    baseDir: widevineDir
-  })
-  // Check for updates
-  !isDev && setTimeout(updater, 3000)
-})
-
-// Widevine DRM  ready
-app.on('widevine-ready', () => {
+// Load Widevine component and instantiate UI
+app.whenReady().then(async () => {
+  await components.whenReady()
+  console.log('components ready:', components.status())
   createWindow()
   createTray()
   setWinTrayTheme()
-})
-
-// Widevine DRM error handling
-app.on('widevine-error', (err) => {
-  win.webcontents.send('log', err)
-  process.exit(1)
+  !isDev && setTimeout(updater, 3000)
 })
 
 // When closing set window size and location
