@@ -823,6 +823,10 @@ img[src] {
   margin: 1px;
 }
 
+.provider-image:hover {
+  border: 1px var(--color-system-accent) solid
+}
+
 .text-box {
   overflow: hidden;
   display: -webkit-box;
