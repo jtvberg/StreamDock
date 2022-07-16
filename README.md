@@ -10,6 +10,12 @@ I say 'natively' as there are links built in already and in some cases, service 
 #### Supported Services (+others)
 <img src="/res/screenshots/services.png" width="600"/>
 
+#### Stream Search
+<img src="/res/screenshots/search.png" width="600"/>
+
+#### Stream Search Detail
+<img src="/res/screenshots/search-detail.png" width="600"/>
+
 ## Using the code
    - Clone repo
    - Provided instructions assume you are using npm as your package manager
