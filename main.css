@@ -720,7 +720,7 @@ input[type=color] {
 }
 
 .result-tile:hover {
-  background-color: var(--color-system-accent-trans);
+  background-color: var(--color-bg);
 }
 
 .result-title {
@@ -820,11 +820,12 @@ img[src] {
   width: 34px;
   height: 34px;
   border-radius: 3px;
-  margin: 1px;
+  margin: 2px;
 }
 
 .provider-image:hover {
-  border: 1px var(--color-system-accent) solid
+  border: 1px var(--color-system-accent-trans) solid;
+  box-shadow: 0px 0px 4px 0px var(--color-system-accent);
 }
 
 .text-box {

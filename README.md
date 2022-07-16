@@ -4,6 +4,8 @@
  StreamDock 'natively' supports YouTube, YouTube TV, Netflix, Hulu, Prime Video, Disney+, Apple TV+, Peacock, ABC.com, Paramount+, HBO Max, ESPN+ and CrunchyRoll.
 I say 'natively' as there are links built in already and in some cases, service specfic functions available. That said, you can open any service via the link symbol in the corner and then bookmark it.
 
+I also wanted a way to find where something might be streaming. The search on the home page powered by TMDB will show you what services (now based on your region as of 0.7.3) are currently streaming a title.
+
 #### Main View
 <img src="/res/screenshots/main.png" width="600"/>
 
@@ -91,7 +93,7 @@ I say 'natively' as there are links built in already and in some cases, service 
    - Within the detail view there is a link to the TMDB page (logo, bottom left) where you can see the various ways to get the content
    - The search result will only list subscription services but if you go to the TMDB page, you can also see purchase and rental options
    - Clicking on one of the streaming options at TMDB will open the link in the app however, some services, like HBO, will ask who is watching and then lose it's way to the content
-   - The primary search results are currently US only
+   - The primary search defaults to US only but you can pick your region in the preferences (this effects search only!)
    - There are also 3 quick search buttons: Popular films and TV shows that can be streamed and then 1 more for trending titles over the last week (but may not be on a stream service yet)
    - Some price of admission: you will need to enable the search pane it in the settings and provide an API key. This requires you create a free account on TMDB and generate the v3 key
 
