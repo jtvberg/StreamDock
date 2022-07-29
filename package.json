@@ -23,15 +23,15 @@
   "license": "MIT",
   "devDependencies": {
     "electron": "github:castlabs/electron-releases#v18.3.5+wvcus",
-    "electron-builder": "^23.1.0",
+    "electron-builder": "^23.3.3",
     "electron-notarize": "^1.2.1",
     "electron-reload": "^1.5.0",
-    "eslint": "^8.19.0"
+    "eslint": "^8.20.0"
   },
   "dependencies": {
     "@fortawesome/fontawesome-free": "^5.15.4",
-    "bootstrap": "^4.6.1",
-    "electron-updater": "^5.0.5",
+    "bootstrap": "^4.6.2",
+    "electron-updater": "^5.2.1",
     "jquery": "^3.6.0",
     "lodash": "^4.17.21"
   },
