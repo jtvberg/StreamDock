@@ -444,6 +444,7 @@ body {
 
 .modal-footer {
   border-top: unset;
+  flex-wrap: nowrap;
 }
 
 .modal-close-btn:hover,
@@ -765,6 +766,8 @@ input[type=color] {
 
 .result-details {
   position: absolute;
+  display: flex;
+  flex-direction: column;
   padding: 3px;
   top: 0px;
   width: 100%;
@@ -810,17 +813,25 @@ img[src] {
  display: block;
 }
 
-.result-provider-host {
+.result-detail-provider-host {
   display: flex;
   flex-wrap: wrap;
   align-content: flex-start;
 }
 
-.provider-image {
-  width: 34px;
-  height: 34px;
-  border-radius: 5px;
+.result-provider-host {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  overflow-y: auto;
+}
+
+.provider-info {
   margin: 2px;
+}
+
+.provider-image {
+  width: 100%;
+  border-radius: 5px;
 }
 
 .provider-image:hover {
@@ -906,7 +917,6 @@ img[src] {
 }
 
 .result-detail-provider-image {
-  width: 50px;
   height: 50px;
   border-radius: 7px;
   margin: 2px;
@@ -915,7 +925,6 @@ img[src] {
 
 #result-detail-tmdb-logo {
   cursor: pointer;
-  width: 114px;
   height: 50px;
 }
 
