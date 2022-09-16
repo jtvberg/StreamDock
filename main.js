@@ -459,21 +459,23 @@ function setStreamId(host) {
 
 // Scale height to supplied aspect ratio
 function scaleHeight(width, height) {
+  height = Math.round((((wb.width - baseAdjustWidth) * height) / width) + winAdjustHeight)
   win.setBounds({
     x: wb.x,
     y: wb.y,
-    height: Math.round((((wb.width - baseAdjustWidth) * height) / width) + winAdjustHeight),
+    height: height,
     width: wb.width
   })
 }
 
 // Scale width to supplied aspect ratio
 function scaleWidth(width, height) {
+  width = Math.round(((wb.height - winAdjustHeight) * width) / height) + baseAdjustWidth
   win.setBounds({
     x: wb.x,
     y: wb.y,
     height: wb.height,
-    width: Math.round(((wb.height - winAdjustHeight) * width) / height) + baseAdjustWidth
+    width: width
   })
 }
 
@@ -1586,6 +1588,21 @@ ipcMain.on('set-user-agent', (e, data) => {
 // IPC channel to set defualt streams
 ipcMain.on('set-defaultstreams', (e, data) => {
   defaultStreams = data
+})
+
+// IPC channel to get url info from dropped link
+ipcMain.on('get-url-info', (e, url) => {
+  let ghostWin = new BrowserWindow({
+    show: false
+  })
+  ghostWin.loadURL(url)
+  ghostWin.webContents.on('did-finish-load', () => {
+    ghostWin.webContents.capturePage().then(image => {
+      clipboard.writeImage(image)
+      win.webContents.send('url-info', { url: ghostWin.webContents.getURL(), title: ghostWin.webContents.getTitle() })
+      ghostWin.destroy()
+    })
+  })
 })
 
 // Build menu template

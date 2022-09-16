@@ -100,6 +100,12 @@ ipcRenderer.on('ontop', () => {
   toggleOnTop()
 })
 
+// Reveive url info from drop
+ipcRenderer.on('url-info', (e, info) => {
+  setInterval(addBookmarkFlash, 10)
+  saveBookmark({serv: 'ot', url: info.url, title: info.title})
+})
+
 // Load Settings
 function loadSettings() {
   const defaultList = getDefaultSettings()
@@ -1162,6 +1168,20 @@ $('#search-pop-tv').on('click', () => {
   clearSearchBtns()
   $('#search-pop-tv').css('background-color', 'var(--color-system-accent-trans)')
   getSearchResults(3, 1, 'tv')
+})
+
+// Drop link to create bookmark
+$('body').on('dragover', false).on('drop', (e) => {
+  e.preventDefault()
+  if (e.originalEvent.dataTransfer.items) {
+    [...e.originalEvent.dataTransfer.items].forEach(item => {
+      if (item.type.match('^text/uri-list')) {
+        item.getAsString(data => {
+          ipcRenderer.send('get-url-info', data)
+        })
+      }
+    })
+  }
 })
 
 // Reset home screen seperator on screen height change
