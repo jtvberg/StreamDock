@@ -1490,7 +1490,9 @@ ipcMain.on('toggle-facets', () => {
 
 // IPC channel to save bookmark
 ipcMain.on('save-bookmark', () => {
-  captureStream()
+  if (!showHomescreen) {
+    captureStream()
+  }
 })
 
 // IPC channel to toggle bookmarks

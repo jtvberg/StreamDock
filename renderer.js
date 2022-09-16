@@ -102,7 +102,6 @@ ipcRenderer.on('ontop', () => {
 
 // Reveive url info from drop
 ipcRenderer.on('url-info', (e, info) => {
-  setInterval(addBookmarkFlash, 10)
   saveBookmark({serv: 'ot', url: info.url, title: info.title})
 })
 
@@ -653,6 +652,8 @@ function saveBookmark(stream) {
     image: img.resize({ width: 200, height: 200 * imgSize.height / imgSize.width }).toDataURL(),
     timestamp: Date.now()
   }
+  clipboard.clear('image')
+  addBookmarkFlash()
   addBookmark(bookmark)
   bookmarks.push(bookmark)
   localStorage.setItem('bookmarks', JSON.stringify(bookmarks))
@@ -699,7 +700,9 @@ function facetFilter(filter) {
 
 // Flash the bookmarks toggle when adding bookmark
 function addBookmarkFlash() {
-  $('#home-btn').addClass('bookmarks-btn-add')
+  $('#home-btn').addClass('bookmarks-btn-add').on('animationend', () => {
+    $('#home-btn').removeClass('bookmarks-btn-add')
+  })
 }
 
 // Call API to get search results
@@ -740,7 +743,6 @@ function getSearchResults(api, page, media) {
         const media = item.media_type ? item.media_type : mediaType
         const getDetails = $.getJSON(`https://api.themoviedb.org/3/${media}/${item.id}?api_key=${apiKey}&append_to_response=credits,watch/providers,genres,release_dates,content_ratings`)
           .always(() => {
-            // console.log(getDetails.responseJSON)
             if (getDetails.statusText !== 'success') return
             let cast = []
             try { cast = getDetails.responseJSON.credits.cast } catch(err) { console.log(`No cast found for id ${item.id}`) }
@@ -1057,11 +1059,7 @@ $('#facets-btn').on('click', () => {
 
 // Bookmark location
 $('#bookmark-btn').on('click', () => {
-  if ($('#home-btn').hasClass('bookmarks-btn-add')) {
-    $('#home-btn').removeClass('bookmarks-btn-add')
-  }
   ipcRenderer.send('save-bookmark')
-  setInterval(addBookmarkFlash, 10)
 })
 
 // Back button click handler
