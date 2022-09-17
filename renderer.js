@@ -706,7 +706,7 @@ function addBookmarkFlash() {
 }
 
 // Call API to get search results
-function getSearchResults(api, page, media) {
+function getSearchResults(api, page, media, id) {
   let pages = 1
   if(!settings.searchApiKey || settings.searchApiKey.length === 0) {
     alert('You must enter a valid API key in Preferences > Search Settings for search to work')
@@ -728,7 +728,8 @@ function getSearchResults(api, page, media) {
   const searchApi = `https://api.themoviedb.org/3/search/multi?api_key=${apiKey}&language=${langLoc}&query=${searchInput}&page=${page}&include_adult=false`
   const trendApi = `https://api.themoviedb.org/3/trending/all/week?api_key=${apiKey}&page=${page}&include_adult=false`
   const discApi = `https://api.themoviedb.org/3/discover/${mediaType}?api_key=${apiKey}&language=${lang}&sort_by=popularity.desc&include_adult=false&include_video=false&page=${page}&watch_region=${loc}&with_watch_monetization_types=flatrate`
-  const apiCall = api === 0 ? searchApi : api === 1 ? trendApi : discApi
+  const recApi = `https://api.themoviedb.org/3/${mediaType}/${id}/recommendations?api_key=${apiKey}&language=${langLoc}&page=${page}`
+  const apiCall = api === 0 ? searchApi : api === 1 ? trendApi : api === 2 ? recApi : discApi
   const formatTime = (n) => `${n / 60 ^ 0}:` + ('0' + n % 60).slice(-2)
   var getMedia = $.getJSON(apiCall)  
     .fail(() => {
@@ -745,14 +746,14 @@ function getSearchResults(api, page, media) {
           .always(() => {
             if (getDetails.statusText !== 'success') return
             let cast = []
-            try { cast = getDetails.responseJSON.credits.cast } catch(err) { console.log(`No cast found for id ${item.id}`) }
+            try { cast = getDetails.responseJSON.credits.cast } catch(err) { console.error(`No cast found for id ${item.id}`) }
             let providers = []
-            try { providers = _.get(getDetails.responseJSON['watch/providers'].results, loc).flatrate } catch(err) { console.log(`No ${loc} stream providers found for id ${item.id}`) }
+            try { providers = _.get(getDetails.responseJSON['watch/providers'].results, loc).flatrate } catch(err) { console.error(`No ${loc} stream providers found for id ${item.id}`) }
             let link = ''
-            try { link = _.get(getDetails.responseJSON['watch/providers'].results, loc).link } catch(err) { console.log(`No stream link found for id ${item.id}`) }
+            try { link = _.get(getDetails.responseJSON['watch/providers'].results, loc).link } catch(err) { console.error(`No stream link found for id ${item.id}`) }
             link = link === '' ? `https://www.themoviedb.org/${media}/${item.id}/` : link
             let genres = []
-            try { genres = getDetails.responseJSON.genres } catch(err) { console.log(`No genres found for id ${item.id}`) }
+            try { genres = getDetails.responseJSON.genres } catch(err) { console.error(`No genres found for id ${item.id}`) }
             let rating = 'NA'
             try {
               if (media === 'movie') {
@@ -760,7 +761,7 @@ function getSearchResults(api, page, media) {
               } else {
                 rating = _.find(getDetails.responseJSON.content_ratings.results, (o) => { return o.iso_3166_1 === loc}).rating
               }
-            } catch(err) { console.log(`No rating found for id ${item.id}`) }
+            } catch(err) { console.error(`No rating found for id ${item.id}`) }
             const title = item.title === undefined ? item.name : item.title
             const first_date = item.release_date === undefined ? item.first_air_date : item.release_date
             const poster = item.poster_path ? `https://image.tmdb.org/t/p/original${item.poster_path}` : ''
@@ -884,7 +885,8 @@ function loadSearchDetailModal(media, id) {
   $('#result-detail-runtime').text(`${resultDetail.runtime}`)
   $('#result-detail-overview').text(`${resultDetail.overview}`)
   $('#result-detail-cast').text(txtCast.slice(0, -2))
-  $('#result-detail-tmdb-logo').prop('src', './res/serv_logos/small/tmdb.png').data('link', resultDetail.link)
+  $('#result-detail-tmdb-logo').prop('src', './res/serv_logos/small/tmdb.png').data('link', resultDetail.link).data('media', media).data('id', id)
+  $('#result-detail-rec').data('media', media).data('id', id)
   $('#result-detail-provider-host').empty()
   if (resultDetail.providers && resultDetail.providers.length > 0) {
     $.each(resultDetail.providers, (i, item) => {
@@ -896,6 +898,12 @@ function loadSearchDetailModal(media, id) {
     })
   }
   $('#search-detail-modal').modal('show')
+}
+
+// Bookmark search result
+function bookmarkSearchResult(media, id) {
+  const resultDetail = searchResults.find(item => item.media === media && item.id === id)
+  ipcRenderer.send('get-url-info', resultDetail.link)
 }
 
 // Toggle search pane on home screen
@@ -1011,9 +1019,21 @@ $(document).on('click', '.result-tile', function() {
   loadSearchDetailModal($(this).data('media'), $(this).data('id'))
 })
 
+// Bookmark search result event
+$(document).on('click', '.result-bookmark', function(e) {
+  e.stopPropagation()
+  bookmarkSearchResult($(this).parent().data('media'), $(this).parent().data('id'))
+})
+
 // Open TMDB link
 $('#result-detail-tmdb-logo').on('click', function() {
   openStream('ot', $(this).data('link'))
+})
+
+// Get recommendations based on title
+$('#result-detail-rec').on('click', function() {
+  getSearchResults(2, 1, $(this).data('media'), $(this).data('id'))
+  $('#search-detail-modal').modal('hide')
 })
 
 // Home Screen toggle click handler

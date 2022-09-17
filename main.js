@@ -550,7 +550,7 @@ async function getCurrentUrl() {
   let url = view.webContents.getURL()
   if (currentStream === 'ap') {
     let urlAp = await view.webContents.executeJavaScript(
-      `try { console.log('got url'); sdAmzUrl; } catch(err) { console.log('not yet') }`
+      `try { console.log('got url'); sdAmzUrl; } catch(err) { console.error('not yet') }`
     ).catch((err) => { console.error('GCU:'+err) })
     url = urlAp === undefined ? url : urlAp
   }

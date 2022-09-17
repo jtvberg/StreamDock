@@ -724,6 +724,18 @@ input[type=color] {
   background-color: var(--color-neutral-light);
 }
 
+.result-bookmark {
+  position: absolute;
+  right: 5px;
+  top: 0px;
+  opacity: 0;
+}
+
+.result-bookmark:hover {
+  opacity: 1;
+  transition: opacity 0.5s;
+}
+
 .result-title {
   font-weight: 700;
   font-size: large;
