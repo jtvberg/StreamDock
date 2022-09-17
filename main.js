@@ -1598,6 +1598,7 @@ ipcMain.on('get-url-info', (e, url) => {
     show: false
   })
   ghostWin.loadURL(url)
+  ghostWin.webContents.audioMuted = true
   ghostWin.webContents.on('did-finish-load', () => {
     ghostWin.webContents.capturePage().then(image => {
       clipboard.writeImage(image)

@@ -807,6 +807,7 @@ input[type=color] {
 
 img {
   display: none;
+  -webkit-user-drag: none;
 }
 
 img[src] {
