@@ -1034,6 +1034,7 @@ $('#result-detail-tmdb-logo').on('click', function() {
 $('#result-detail-rec').on('click', function() {
   getSearchResults(2, 1, $(this).data('media'), $(this).data('id'))
   $('#search-detail-modal').modal('hide')
+  clearSearchBtns()
 })
 
 // Home Screen toggle click handler
@@ -1089,7 +1090,11 @@ $('#back-btn').on('click', () => {
 
 // Open link from clipboard click handler
 $('#link-btn').on('click', () => {
-  ipcRenderer.send('open-link')
+  if ($('.home-screen').css('display') === 'none') {
+    ipcRenderer.send('open-link')
+  } else {
+    ipcRenderer.send('get-url-info', clipboard.readText())
+  }
 })
 
 // Scale horizontal click handler

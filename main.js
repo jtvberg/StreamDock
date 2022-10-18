@@ -528,6 +528,26 @@ function toggleOnTop() {
   win.webContents.send('ontop')
 }
 
+// Get info (image, title) from url
+function getUrlInfo (url) {
+  if (validateLink(url)) {
+    let ghostWin = new BrowserWindow({
+      width: 1024,
+      height: 600,
+      show: false
+    })
+    ghostWin.loadURL(url)
+    ghostWin.webContents.audioMuted = true
+    ghostWin.webContents.on('did-finish-load', () => {
+      ghostWin.webContents.capturePage().then(image => {
+        clipboard.writeImage(image)
+        win.webContents.send('url-info', { url: ghostWin.webContents.getURL(), title: ghostWin.webContents.getTitle() })
+        ghostWin.destroy()
+      })
+    })
+  }
+}
+
 // Send bookmark to renderer
 async function sendBookmark() {
   await getCurrentUrl().then((currentUrl) => {
@@ -1594,18 +1614,7 @@ ipcMain.on('set-defaultstreams', (e, data) => {
 
 // IPC channel to get url info from dropped link
 ipcMain.on('get-url-info', (e, url) => {
-  let ghostWin = new BrowserWindow({
-    show: false
-  })
-  ghostWin.loadURL(url)
-  ghostWin.webContents.audioMuted = true
-  ghostWin.webContents.on('did-finish-load', () => {
-    ghostWin.webContents.capturePage().then(image => {
-      clipboard.writeImage(image)
-      win.webContents.send('url-info', { url: ghostWin.webContents.getURL(), title: ghostWin.webContents.getTitle() })
-      ghostWin.destroy()
-    })
-  })
+  getUrlInfo(url)
 })
 
 // Build menu template
