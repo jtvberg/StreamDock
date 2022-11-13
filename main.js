@@ -35,8 +35,10 @@ let hlSkipRecap = false
 let hlNextEpisode = false
 let dpNextEpisode = false
 let dpSkipRecap = false
-// let hmNextEpisode = false
-// let hmSkipRecap = false
+let hmNextEpisode = false
+let hmSkipRecap = false
+let cbNextEpisode = false
+let cbSkipRecap = false
 let showHomescreen = false
 let userAgent = ''
 let currentStream = ''
@@ -402,6 +404,10 @@ function streamLoaded() {
   setTimeout(hlEpisodeNext, 3000)
   setTimeout(dpRecapSkip, 3000)
   setTimeout(dpEpisodeNext, 3000)
+  hmRecapSkip()
+  hmEpisodeNext()
+  cbRecapSkip()
+  cbEpisodeNext()
   enableFacets()
 }
 
@@ -668,7 +674,7 @@ function ytAdSkipMut() {
         if (mut.type === 'childList' && mut.target.classList.contains('ytp-ad-module')) {
           ytAdOverlayClick()
         }
-        if (mut.type === 'childList' && mut.target.classList.contains('ytd-mealbar-promo-renderer')) {
+        if (mut.type === 'childList' && (mut.target.classList.contains('ytd-mealbar-promo-renderer') || mut.target.classList.contains('ytd-popup-container'))) {
           ytPromoCloseClick()
         }
       }
@@ -1357,7 +1363,7 @@ function dpEpisodeNextObs() {
 function dpEpisodeNextDis() {
   try {
     console.log('next dis')
-    if (typeof obsDpRecap !== 'undefined') {
+    if (typeof obsDpNext !== 'undefined') {
       obsDpNext.disconnect()
     }
   } catch (err) { console.error(err) }
@@ -1367,7 +1373,171 @@ function dpEpisodeNextDis() {
 
 //#region HBO Max scripts
 
-//TODO
+// HBO observer dummy declaration (this is not actually used as it is sent over as a string!)
+let obsHmRecap = null
+
+// Skip/close HBO episode recap & intros
+function hmRecapSkip() {
+  if (hmSkipRecap && currentStream === 'hm') {
+    view.webContents.executeJavaScript(`${hmRecapSkipClick.toString()}`).catch((err) => { console.error(err) })
+    view.webContents.executeJavaScript('try { let obsHmRecap = null } catch(err) { console.error(err) }')
+      .then(() => view.webContents.executeJavaScript(`(${hmRecapSkipMut.toString()})()`))
+      .then(() => view.webContents.executeJavaScript(`(${hmRecapSkipObs.toString()})()`))
+      .catch((err) => { console.error(err) })
+  } else if (currentStream === 'hm') {
+    view.webContents.executeJavaScript(`(${hmRecapSkipDis.toString()})()`).catch((err) => { console.error(err) })
+  }
+}
+
+// HBO recap skip click
+function hmRecapSkipClick() {
+  try {
+    console.log('recap episode')
+    if (document.querySelector('[data-testid="SkipButton"]') != undefined) {
+      document.querySelector('[data-testid="SkipButton"]').click()
+    }
+  } catch(err) { console.error(err) }
+}
+
+// HBO recap skip mutation observer
+function hmRecapSkipMut() {
+  try {
+    console.log('recap mut')
+    obsHmRecap = new MutationObserver(() => {
+      hmRecapSkipClick()
+    })
+  } catch(err) { console.error(err) }
+}
+
+// HBO recap skip observer invocation
+function hmRecapSkipObs() {
+  try {
+    console.log('recap obs')
+    obsHmRecap.observe(document.querySelector('#root'), { childList: true, subtree: true })
+  } catch (err) { console.error(err) }
+}
+
+// HBO recap skip observer disconnection
+function hmRecapSkipDis() {
+  try {
+    console.log('recap dis')
+    if (typeof obsHmRecap !== 'undefined') {
+      obsHmRecap.disconnect()
+    }
+  } catch (err) { console.error(err) }
+}
+
+// HBO observer dummy declaration (this is not actually used as it is sent over as a string!)
+let obsHmNext = null
+
+// Automatically start next HBO episode
+function hmEpisodeNext() {
+  if (hmNextEpisode && currentStream === 'hm') {
+    view.webContents.executeJavaScript(`${hmEpisodeNextClick.toString()}`).catch((err) => { console.error(err) })
+    view.webContents.executeJavaScript('try { let obsHmNext = null } catch(err) { console.error(err) }')
+      .then(() => view.webContents.executeJavaScript(`(${hmEpisodeNextMut.toString()})()`))
+      .then(() => view.webContents.executeJavaScript(`(${hmEpisodeNextObs.toString()})()`))
+      .catch((err) => { console.error(err) })
+  } else if (currentStream === 'hm') {
+    view.webContents.executeJavaScript(`(${hmEpisodeNextDis.toString()})()`).catch((err) => { console.error(err) })
+  }
+}
+
+// HBO next episode click
+function hmEpisodeNextClick() {
+  try {
+    console.log('next episode')
+    if (document.querySelector('[data-testid="UpNextButton"]') != undefined) {
+      document.querySelector('[data-testid="UpNextButton"]').click()
+    }
+  } catch(err) { console.error(err) }
+}
+
+// HBO next episode mutation observer
+function hmEpisodeNextMut() {
+  try {
+    console.log('next mut')
+    obsHmNext = new MutationObserver(() => {
+      hmEpisodeNextClick()
+    })
+  } catch(err) { console.error(err) }
+}
+
+// HBO next episode observer invocation
+function hmEpisodeNextObs() {
+  try {
+    console.log('next obs')
+    obsHmNext.observe(document.querySelector('#root'), { childList: true, subtree: true })
+  } catch (err) { console.error(err) }
+}
+
+// HBO next episode observer disconnection
+function hmEpisodeNextDis() {
+  try {
+    console.log('next dis')
+    if (typeof obsHmNext !== 'undefined') {
+      obsHmNext.disconnect()
+    }
+  } catch (err) { console.error(err) }
+}
+
+//#endregion
+
+//#region Paramount (formerly CBS) scripts
+
+// Paramount observer dummy declaration (this is not actually used as it is sent over as a string!)
+let obsCbNext = null
+
+// Automatically start next Paramount episode
+function cbEpisodeNext() {
+  if (cbNextEpisode && currentStream === 'cb') {
+    view.webContents.executeJavaScript(`${cbEpisodeNextClick.toString()}`).catch((err) => { console.error(err) })
+    view.webContents.executeJavaScript('try { let obsCbNext = null } catch(err) { console.error(err) }')
+      .then(() => view.webContents.executeJavaScript(`(${cbEpisodeNextMut.toString()})()`))
+      .then(() => view.webContents.executeJavaScript(`(${cbEpisodeNextObs.toString()})()`))
+      .catch((err) => { console.error(err) })
+  } else if (currentStream === 'cb') {
+    view.webContents.executeJavaScript(`(${cbEpisodeNextDis.toString()})()`).catch((err) => { console.error(err) })
+  }
+}
+
+// Paramount next episode click
+function cbEpisodeNextClick() {
+  try {
+    console.log('next episode')
+    if (document.querySelector('.watch-now-btn') != undefined) {
+      document.querySelector('.watch-now-btn').click()
+    }
+  } catch(err) { console.error(err) }
+}
+
+// Paramount next episode mutation observer
+function cbEpisodeNextMut() {
+  try {
+    console.log('next mut')
+    obsCbNext = new MutationObserver(() => {
+      cbEpisodeNextClick()
+    })
+  } catch(err) { console.error(err) }
+}
+
+// Paramount next episode observer invocation
+function cbEpisodeNextObs() {
+  try {
+    console.log('next obs')
+    obsCbNext.observe(document.querySelector('#main-container'), { childList: true, subtree: true })
+  } catch (err) { console.error(err) }
+}
+
+// Paramount next episode observer disconnection
+function cbEpisodeNextDis() {
+  try {
+    console.log('next dis')
+    if (typeof obsCbNext !== 'undefined') {
+      obsCbNext.disconnect()
+    }
+  } catch (err) { console.error(err) }
+}
 
 //#endregion
 
