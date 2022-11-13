@@ -763,14 +763,14 @@ function getSearchResults(api, page, media, id) {
           .always(() => {
             if (getDetails.statusText !== 'success') return
             let cast = []
-            try { cast = getDetails.responseJSON.credits.cast } catch(err) { console.error(`No cast found for id ${item.id}`) }
+            try { cast = getDetails.responseJSON.credits.cast } catch(err) { console.log(`No cast found for id ${item.id}`) }
             let providers = []
-            try { providers = _.get(getDetails.responseJSON['watch/providers'].results, loc).flatrate } catch(err) { console.error(`No ${loc} stream providers found for id ${item.id}`) }
+            try { providers = _.get(getDetails.responseJSON['watch/providers'].results, loc).flatrate } catch(err) { console.log(`No ${loc} stream providers found for id ${item.id}`) }
             let link = ''
-            try { link = _.get(getDetails.responseJSON['watch/providers'].results, loc).link } catch(err) { console.error(`No stream link found for id ${item.id}`) }
+            try { link = _.get(getDetails.responseJSON['watch/providers'].results, loc).link } catch(err) { console.log(`No stream link found for id ${item.id}`) }
             link = link === '' ? `https://www.themoviedb.org/${media}/${item.id}/` : link
             let genres = []
-            try { genres = getDetails.responseJSON.genres } catch(err) { console.error(`No genres found for id ${item.id}`) }
+            try { genres = getDetails.responseJSON.genres } catch(err) { console.log(`No genres found for id ${item.id}`) }
             let rating = 'NA'
             try {
               if (media === 'movie') {
@@ -778,7 +778,7 @@ function getSearchResults(api, page, media, id) {
               } else {
                 rating = _.find(getDetails.responseJSON.content_ratings.results, (o) => { return o.iso_3166_1 === loc}).rating
               }
-            } catch(err) { console.error(`No rating found for id ${item.id}`) }
+            } catch(err) { console.log(`No rating found for id ${item.id}`) }
             const title = item.title === undefined ? item.name : item.title
             const first_date = item.release_date === undefined ? item.first_air_date : item.release_date
             const poster = item.poster_path ? `https://image.tmdb.org/t/p/original${item.poster_path}` : ''

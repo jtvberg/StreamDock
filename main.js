@@ -1575,7 +1575,7 @@ function cbEpisodeNextMut() {
     console.log('next mut')
     obsCbNext = new MutationObserver((ml) => {
       for(const mut of ml) {
-        if (mut.type === 'childList' && mut.addedNodes[0] && mut.addedNodes[0].classList.contains('single-video-bottom-right')) {
+        if (mut.type === 'childList' && mut.addedNodes[0] && mut.addedNodes[0].classList && mut.addedNodes[0].classList.contains('single-video-bottom-right')) {
           cbEpisodeNextClick()
         }
       }
