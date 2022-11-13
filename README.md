@@ -105,6 +105,7 @@ I also wanted a way to find where something might be streaming. The search on th
 
 ## TODO
    - Looking to add a watch queue to the home screen
+   - The only services left I may add scripts for are Apple TV and Peacock
    - I need to investigate adding Google OAuth to allow more reliable logins for YouTube TV and other services
    - Contemplating multiple windows but in general, this seems silly (leave a comment if you think there is a good reason to do this!)
    - I don't like how there is no z-order for the BrowserWindow vs. BrowserView. This means I can't render any UI elements above the view (and why video is hidden when using the preferences menu.) In general, this is not a big deal but there are some cool UI tricks I could implement if I moved portions of the UI to another BrowserView (for instance, I could use custom tooltips and auto-hide the header bar)
