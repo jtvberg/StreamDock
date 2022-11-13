@@ -1805,16 +1805,28 @@ ipcMain.on('set-dpepisodenext', (e, bool) => {
 })
 
 // IPC channel to skip HBO recap
-// ipcMain.on('set-hmrecapskip', (e, bool) => {
-//  hmSkipRecap = bool
-//  hmRecapSkip()
-// })
+ipcMain.on('set-hmrecapskip', (e, bool) => {
+  hmSkipRecap = bool
+  hmRecapSkip()
+})
 
 // IPC channel to automatically start next episode on HBO
-// ipcMain.on('set-hmepisodenext', (e, bool) => {
-//  hmNextEpisode = bool
-//  hmEpisodeNext()
-// })
+ipcMain.on('set-hmepisodenext', (e, bool) => {
+  hmNextEpisode = bool
+  hmEpisodeNext()
+})
+
+// IPC channel to skip Paramount recap
+ipcMain.on('set-cbrecapskip', (e, bool) => {
+  cbSkipRecap = bool
+  cbRecapSkip()
+})
+
+// IPC channel to automatically start next episode on Paramount
+ipcMain.on('set-cbepisodenext', (e, bool) => {
+  cbNextEpisode = bool
+  cbEpisodeNext()
+})
 
 // IPC channel to hide/show header
 ipcMain.on('hide-header-bar', (e, bool) => {

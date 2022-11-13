@@ -199,7 +199,16 @@ function applyUpdateSettings() {
   ipcRenderer.send('set-dpepisodenext', settings.dpNextEpisode)
 
   // Skip HBO recap skip
-  // ipcRenderer.send('set-hmrecapskip', settings.hmSkipRecap)
+  ipcRenderer.send('set-hmrecapskip', settings.hmSkipRecap)
+
+  // Skip HBO next episode
+  ipcRenderer.send('set-hmepisodenext', settings.hmNextEpisode)
+
+  // Skip Paramount recap skip
+  ipcRenderer.send('set-cbrecapskip', settings.cbSkipRecap)
+
+  // Skip Paramount next episode
+  ipcRenderer.send('set-cbepisodenext', settings.cbNextEpisode)
 
   // Set user agent
   ipcRenderer.send('set-user-agent', userAgent)
@@ -413,6 +422,8 @@ function getDefaultSettings() {
     dpNextEpisode: false,
     hmSkipRecap: false,
     hmNextEpisode: false,
+    cbSkipRecap: false,
+    cbNextEpisode: false,
     showSearch: false,
     locId: 'US',
     searchApiKey: '',
@@ -463,6 +474,8 @@ function loadSettingsModal() {
   $('#dp-next-check').prop('checked', settings.dpNextEpisode)
   $('#hm-recap-check').prop('checked', settings.hmSkipRecap)
   $('#hm-next-check').prop('checked', settings.hmNextEpisode)
+  $('#cb-recap-check').prop('checked', settings.cbSkipRecap)
+  $('#cb-next-check').prop('checked', settings.cbNextEpisode)
   $('input[name=radio-theme]').prop('checked', false).parent('.btn').removeClass('active')
   $(`input[name=radio-theme][value=${settings.themeMode}]`).prop('checked', true).parent('.btn').addClass('active')
   $('#settings-services-available').empty()
@@ -518,6 +531,8 @@ function saveSettings() {
     dpNextEpisode: $('#dp-next-check').is(':checked'),
     hmSkipRecap: $('#hm-recap-check').is(':checked'),
     hmNextEpisode: $('#hm-next-check').is(':checked'),
+    cbSkipRecap: $('#cb-recap-check').is(':checked'),
+    cbNextEpisode: $('#cb-next-check').is(':checked'),
     themeMode: $('#choose-theme input:radio:checked').val(),
     lastStream: settings.lastStream,
     activeAgent: userAgent,
@@ -567,6 +582,8 @@ function loadDefaultSettings() {
   $('#dp-next-check').prop('checked', defaultSettings.dpNextEpisode)
   $('#hm-recap-check').prop('checked', defaultSettings.hmSkipRecap)
   $('#hm-next-check').prop('checked', defaultSettings.hmNextEpisode)
+  $('#cb-recap-check').prop('checked', defaultSettings.cbSkipRecap)
+  $('#cb-next-check').prop('checked', defaultSettings.cbNextEpisode)
   $('.serv-check').prop('checked', false)
   $('#agent-string-input').val(defaultAgent)
   $('#search-check').prop('checked', defaultSettings.showSearch)
