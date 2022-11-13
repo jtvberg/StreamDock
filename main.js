@@ -1486,6 +1486,60 @@ function hmEpisodeNextDis() {
 //#region Paramount (formerly CBS) scripts
 
 // Paramount observer dummy declaration (this is not actually used as it is sent over as a string!)
+let obsCbRecap = null
+
+// Skip/close Paramount episode recap & intros
+function cbRecapSkip() {
+  if (cbSkipRecap && currentStream === 'cb') {
+    view.webContents.executeJavaScript(`${cbRecapSkipClick.toString()}`).catch((err) => { console.error(err) })
+    view.webContents.executeJavaScript('try { let obsCbRecap = null } catch(err) { console.error(err) }')
+      .then(() => view.webContents.executeJavaScript(`(${cbRecapSkipMut.toString()})()`))
+      .then(() => view.webContents.executeJavaScript(`(${cbRecapSkipObs.toString()})()`))
+      .catch((err) => { console.error(err) })
+  } else if (currentStream === 'cb') {
+    view.webContents.executeJavaScript(`(${cbRecapSkipDis.toString()})()`).catch((err) => { console.error(err) })
+  }
+}
+
+// Paramount recap skip click
+function cbRecapSkipClick() {
+  try {
+    console.log('recap episode')
+    if (document.querySelector('.skip-button') != undefined) {
+      document.querySelector('.skip-button').click()
+    }
+  } catch(err) { console.error(err) }
+}
+
+// Paramount recap skip mutation observer
+function cbRecapSkipMut() {
+  try {
+    console.log('recap mut')
+    obsCbRecap = new MutationObserver(() => {
+      cbRecapSkipClick()
+    })
+  } catch(err) { console.error(err) }
+}
+
+// Paramount recap skip observer invocation
+function cbRecapSkipObs() {
+  try {
+    console.log('recap obs')
+    obsCbRecap.observe(document.querySelector('#main-container'), { attributes: true })
+  } catch (err) { console.error(err) }
+}
+
+// Paramount recap skip observer disconnection
+function cbRecapSkipDis() {
+  try {
+    console.log('recap dis')
+    if (typeof obsCbRecap !== 'undefined') {
+      obsCbRecap.disconnect()
+    }
+  } catch (err) { console.error(err) }
+}
+
+// Paramount observer dummy declaration (this is not actually used as it is sent over as a string!)
 let obsCbNext = null
 
 // Automatically start next Paramount episode
