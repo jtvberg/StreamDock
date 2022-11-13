@@ -1042,6 +1042,12 @@ $(document).on('click', '.result-bookmark', function(e) {
   bookmarkSearchResult($(this).parent().data('media'), $(this).parent().data('id'))
 })
 
+// Bookmark search result detail event
+$('#result-detail-bm').on('click', (e) => {
+  e.stopPropagation()
+  bookmarkSearchResult($('#result-detail-rec').data('media'), $('#result-detail-rec').data('id'))
+})
+
 // Open TMDB link
 $('#result-detail-tmdb-logo').on('click', function() {
   openStream('ot', $(this).data('link'))
