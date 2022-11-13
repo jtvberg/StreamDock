@@ -85,8 +85,8 @@ I also wanted a way to find where something might be streaming. The search on th
    Various service-specific behaviors can be toggled in the settings under preferences including:
    - Which streaming services are present and what colors and glyphs are used to represent them in the quick access bar
    - Prime auto-skip previews
-   - Netflix, Hulu, Disney+ and Prime episode recap/intro auto-skip
-   - Netflix, Hulu, Disney+ and Prime 'Binge Mode' that will automatically start the next episode in a series (skipping delay)
+   - Netflix, Hulu, Disney+, Prime, HBO and Paramount episode recap/intro auto-skip
+   - Netflix, Hulu, Disney+, Prime, HBO and Paramount 'Binge Mode' that will automatically start the next episode in a series (skipping delay)
    - You can also skip YouTube ads and dismiss ad overlays when possible (while not all ads are skippable, if turned on it will even skip ads before the skip button even appears)
 
    One note: On some services there are scenarios where an option to skip something doesn't show up. For instance, on Prime, sometimes the episode recap is not skippable. There doesn't appear to be any rhyme or reason as to why sometimes you can't skip a recap or intro for certain shows on certain services, but if you notice that something is playing that you chose to skip and there is no UI element that would allow a user to skip that content, the app is working as intended as there is nothing to key off of for that show/service combo. I have even seen scenarios where for a specific episode, there is no option to skip a recap, but you can on other episodes of the same show/service combo.
@@ -105,8 +105,6 @@ I also wanted a way to find where something might be streaming. The search on th
 
 ## TODO
    - Looking to add a watch queue to the home screen
-   - Need to add some of the skipping features to other services
-   - I haven't given up yet but HBO Max is pretty much impossible to work with around recap/intro/preview/next episode skipping
    - I need to investigate adding Google OAuth to allow more reliable logins for YouTube TV and other services
    - Contemplating multiple windows but in general, this seems silly (leave a comment if you think there is a good reason to do this!)
    - I don't like how there is no z-order for the BrowserWindow vs. BrowserView. This means I can't render any UI elements above the view (and why video is hidden when using the preferences menu.) In general, this is not a big deal but there are some cool UI tricks I could implement if I moved portions of the UI to another BrowserView (for instance, I could use custom tooltips and auto-hide the header bar)
