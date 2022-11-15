@@ -210,6 +210,18 @@ function applyUpdateSettings() {
   // Skip Paramount next episode
   ipcRenderer.send('set-cbepisodenext', settings.cbNextEpisode)
 
+  // Skip Apple recap skip
+  ipcRenderer.send('set-atrecapskip', settings.cbSkipRecap)
+
+  // Skip Apple next episode
+  ipcRenderer.send('set-atepisodenext', settings.cbNextEpisode)
+
+  // Skip Peacock recap skip
+  ipcRenderer.send('set-pcrecapskip', settings.cbSkipRecap)
+
+  // Skip Peacock next episode
+  ipcRenderer.send('set-pcepisodenext', settings.cbNextEpisode)
+
   // Set user agent
   ipcRenderer.send('set-user-agent', userAgent)
 
@@ -424,6 +436,10 @@ function getDefaultSettings() {
     hmNextEpisode: false,
     cbSkipRecap: false,
     cbNextEpisode: false,
+    atSkipRecap: false,
+    atNextEpisode: false,
+    pcSkipRecap: false,
+    pcNextEpisode: false,
     showSearch: false,
     locId: 'US',
     searchApiKey: '',
@@ -476,6 +492,10 @@ function loadSettingsModal() {
   $('#hm-next-check').prop('checked', settings.hmNextEpisode)
   $('#cb-recap-check').prop('checked', settings.cbSkipRecap)
   $('#cb-next-check').prop('checked', settings.cbNextEpisode)
+  $('#at-recap-check').prop('checked', settings.cbSkipRecap)
+  $('#at-next-check').prop('checked', settings.cbNextEpisode)
+  $('#pc-recap-check').prop('checked', settings.cbSkipRecap)
+  $('#pc-next-check').prop('checked', settings.cbNextEpisode)
   $('input[name=radio-theme]').prop('checked', false).parent('.btn').removeClass('active')
   $(`input[name=radio-theme][value=${settings.themeMode}]`).prop('checked', true).parent('.btn').addClass('active')
   $('#settings-services-available').empty()
@@ -533,6 +553,10 @@ function saveSettings() {
     hmNextEpisode: $('#hm-next-check').is(':checked'),
     cbSkipRecap: $('#cb-recap-check').is(':checked'),
     cbNextEpisode: $('#cb-next-check').is(':checked'),
+    atSkipRecap: $('#cb-recap-check').is(':checked'),
+    atNextEpisode: $('#cb-next-check').is(':checked'),
+    pcSkipRecap: $('#cb-recap-check').is(':checked'),
+    pcNextEpisode: $('#cb-next-check').is(':checked'),
     themeMode: $('#choose-theme input:radio:checked').val(),
     lastStream: settings.lastStream,
     activeAgent: userAgent,
@@ -584,6 +608,10 @@ function loadDefaultSettings() {
   $('#hm-next-check').prop('checked', defaultSettings.hmNextEpisode)
   $('#cb-recap-check').prop('checked', defaultSettings.cbSkipRecap)
   $('#cb-next-check').prop('checked', defaultSettings.cbNextEpisode)
+  $('#at-recap-check').prop('checked', defaultSettings.cbSkipRecap)
+  $('#at-next-check').prop('checked', defaultSettings.cbNextEpisode)
+  $('#pc-recap-check').prop('checked', defaultSettings.cbSkipRecap)
+  $('#pc-next-check').prop('checked', defaultSettings.cbNextEpisode)
   $('.serv-check').prop('checked', false)
   $('#agent-string-input').val(defaultAgent)
   $('#search-check').prop('checked', defaultSettings.showSearch)

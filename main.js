@@ -39,6 +39,10 @@ let hmNextEpisode = false
 let hmSkipRecap = false
 let cbNextEpisode = false
 let cbSkipRecap = false
+let atNextEpisode = false
+let atSkipRecap = false
+let pcNextEpisode = false
+let pcSkipRecap = false
 let showHomescreen = false
 let userAgent = ''
 let currentStream = ''
@@ -408,6 +412,10 @@ function streamLoaded() {
   hmEpisodeNext()
   cbRecapSkip()
   cbEpisodeNext()
+  // atRecapSkip()
+  // atEpisodeNext()
+  setTimeout(pcRecapSkip, 3000)
+  setTimeout(pcEpisodeNext, 3000)
   enableFacets()
 }
 
@@ -1603,6 +1611,132 @@ function cbEpisodeNextDis() {
 
 //#endregion
 
+//#region Peacock
+
+// Paramount observer dummy declaration (this is not actually used as it is sent over as a string!)
+let obsPcRecap = null
+
+// Skip/close Paramount episode recap & intros
+function pcRecapSkip() {
+  if (pcSkipRecap && currentStream === 'pc') {
+    view.webContents.executeJavaScript(`${pcRecapSkipClick.toString()}`).catch((err) => { console.error(err) })
+    view.webContents.executeJavaScript('try { let obsPcRecap = null } catch(err) { console.error(err) }')
+      .then(() => view.webContents.executeJavaScript(`(${pcRecapSkipMut.toString()})()`))
+      .then(() => view.webContents.executeJavaScript(`(${pcRecapSkipObs.toString()})()`))
+      .catch((err) => { console.error(err) })
+  } else if (currentStream === 'pc') {
+    view.webContents.executeJavaScript(`(${pcRecapSkipDis.toString()})()`).catch((err) => { console.error(err) })
+  }
+}
+
+// Paramount recap skip click
+function pcRecapSkipClick() {
+  try {
+    console.log('recap episode')
+    if (document.querySelector('.playback-controls__skip--button') != undefined) {
+      document.querySelector('.playback-controls__skip--button').click()
+    }
+  } catch(err) { console.error(err) }
+}
+
+// Paramount recap skip mutation observer
+function pcRecapSkipMut() {
+  try {
+    console.log('recap mut')
+    obsPcRecap = new MutationObserver((ml) => {
+      for(const mut of ml) {
+        if (mut.type === 'childList' && mut.addedNodes[0] && mut.addedNodes[0].classList && mut.addedNodes[0].classList.contains('playback-controls__skip--button')) {
+          pcRecapSkipClick()
+        }
+      }
+    })
+  } catch(err) { console.error(err) }
+}
+
+// Paramount recap skip observer invocation
+function pcRecapSkipObs() {
+  try {
+    console.log('recap obs')
+    obsPcRecap.observe(document.querySelector('.primary-layout__content'), { childList: true, subtree: true })
+  } catch (err) { console.error(err) }
+}
+
+// Paramount recap skip observer disconnection
+function pcRecapSkipDis() {
+  try {
+    console.log('recap dis')
+    if (typeof obspcRecap !== 'undefined') {
+      obsPcRecap.disconnect()
+    }
+  } catch (err) { console.error(err) }
+}
+
+// Paramount observer dummy declaration (this is not actually used as it is sent over as a string!)
+let obspcNext = null
+
+// Automatically start next Paramount episode
+function pcEpisodeNext() {
+  if (pcNextEpisode && currentStream === 'pc') {
+    view.webContents.executeJavaScript(`${pcEpisodeNextClick.toString()}`).catch((err) => { console.error(err) })
+    view.webContents.executeJavaScript('try { let obsPcNext = null } catch(err) { console.error(err) }')
+      .then(() => view.webContents.executeJavaScript(`(${pcEpisodeNextMut.toString()})()`))
+      .then(() => view.webContents.executeJavaScript(`(${pcEpisodeNextObs.toString()})()`))
+      .catch((err) => { console.error(err) })
+  } else if (currentStream === 'pc') {
+    view.webContents.executeJavaScript(`(${pcEpisodeNextDis.toString()})()`).catch((err) => { console.error(err) })
+  }
+}
+
+// Paramount next episode click
+function pcEpisodeNextClick() {
+  try {
+    console.log('next episode')
+    if (document.querySelector('.playback-binge__image') != undefined) {
+      document.querySelector('.playback-binge__image').click()
+    }
+  } catch(err) { console.error(err) }
+}
+
+// Paramount next episode mutation observer
+function pcEpisodeNextMut() {
+  try {
+    console.log('next mut')
+    obspcNext = new MutationObserver((ml) => {
+      for(const mut of ml) {
+        if (mut.type === 'childList' && mut.addedNodes[0] && mut.addedNodes[0].classList && mut.addedNodes[0].classList.contains('playback-binge__container')) {
+          pcEpisodeNextClick()
+        }
+      }
+    })
+  } catch(err) { console.error(err) }
+}
+
+// Paramount next episode observer invocation
+function pcEpisodeNextObs() {
+  try {
+    console.log('next obs')
+    obspcNext.observe(document.querySelector('.primary-layout__content'), { childList: true, subtree: true })
+  } catch (err) { console.error(err) }
+}
+
+// Paramount next episode observer disconnection
+function pcEpisodeNextDis() {
+  try {
+    console.log('next dis')
+    if (typeof obspcNext !== 'undefined') {
+      obspcNext.disconnect()
+    }
+  } catch (err) { console.error(err) }
+}
+
+//#endregion
+
+//#region Apple TV
+
+
+
+//#endregion
+
 // Load electron-reload in dev
 if (isDev) {
   require('electron-reload')(__dirname, {
@@ -1834,6 +1968,30 @@ ipcMain.on('set-cbrecapskip', (e, bool) => {
 ipcMain.on('set-cbepisodenext', (e, bool) => {
   cbNextEpisode = bool
   cbEpisodeNext()
+})
+
+// IPC channel to skip Apple recap
+ipcMain.on('set-atrecapskip', (e, bool) => {
+  atSkipRecap = bool
+  // atRecapSkip()
+})
+
+// IPC channel to automatically start next episode on Apple
+ipcMain.on('set-atepisodenext', (e, bool) => {
+  atNextEpisode = bool
+  // atEpisodeNext()
+})
+
+// IPC channel to skip Peacock recap
+ipcMain.on('set-pcrecapskip', (e, bool) => {
+  pcSkipRecap = bool
+  pcRecapSkip()
+})
+
+// IPC channel to automatically start next episode on Peacock
+ipcMain.on('set-pcepisodenext', (e, bool) => {
+  pcNextEpisode = bool
+  pcEpisodeNext()
 })
 
 // IPC channel to hide/show header
