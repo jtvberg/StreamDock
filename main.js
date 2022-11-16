@@ -412,8 +412,8 @@ function streamLoaded() {
   hmEpisodeNext()
   cbRecapSkip()
   cbEpisodeNext()
-  // atRecapSkip()
-  // atEpisodeNext()
+  setTimeout(atRecapSkip, 3000)
+  setTimeout(atEpisodeNext, 3000)
   setTimeout(pcRecapSkip, 3000)
   setTimeout(pcEpisodeNext, 3000)
   enableFacets()
@@ -1733,7 +1733,121 @@ function pcEpisodeNextDis() {
 
 //#region Apple TV
 
+// Apple TV observer dummy declaration (this is not actually used as it is sent over as a string!)
+let obsAtRecap = null
 
+// Skip/close Apple TV episode recap & intros
+function atRecapSkip() {
+  if (atSkipRecap && currentStream === 'at') {
+    view.webContents.executeJavaScript(`${atRecapSkiatlick.toString()}`).catch((err) => { console.error(err) })
+    view.webContents.executeJavaScript('try { let obsAtRecap = null } catch(err) { console.error(err) }')
+      .then(() => view.webContents.executeJavaScript(`(${atRecapSkipMut.toString()})()`))
+      .then(() => view.webContents.executeJavaScript(`(${atRecapSkipObs.toString()})()`))
+      .catch((err) => { console.error(err) })
+  } else if (currentStream === 'at') {
+    view.webContents.executeJavaScript(`(${atRecapSkipDis.toString()})()`).catch((err) => { console.error(err) })
+  }
+}
+
+// Apple TV recap skip click
+function atRecapSkiatlick() {
+  try {
+    console.log('recap episode')
+    if (document.querySelector('.skip__button') != undefined) {
+      document.querySelector('.skip__button').click()
+    }
+  } catch(err) { console.error(err) }
+}
+
+// Apple TV recap skip mutation observer
+function atRecapSkipMut() {
+  try {
+    console.log('recap mut')
+    obsAtRecap = new MutationObserver((ml) => {
+      for(const mut of ml) {
+        if (mut.type === 'attributes') {
+          atRecapSkiatlick()
+        }
+      }
+    })
+  } catch(err) { console.error(err) }
+}
+
+// Apple TV recap skip observer invocation
+function atRecapSkipObs() {
+  try {
+    console.log('recap obs')
+    obsAtRecap.observe(document.querySelector('.skip__button'), { attributes: true })
+  } catch (err) { console.error(err) }
+}
+
+// Apple TV recap skip observer disconnection
+function atRecapSkipDis() {
+  try {
+    console.log('recap dis')
+    if (typeof obsAtRecap !== 'undefined') {
+      obsAtRecap.disconnect()
+    }
+  } catch (err) { console.error(err) }
+}
+
+// Apple TV observer dummy declaration (this is not actually used as it is sent over as a string!)
+let obsAtNext = null
+
+// Automatically start next Apple TV episode
+function atEpisodeNext() {
+  if (atNextEpisode && currentStream === 'at') {
+    view.webContents.executeJavaScript(`${atEpisodeNextClick.toString()}`).catch((err) => { console.error(err) })
+    view.webContents.executeJavaScript('try { let obsAtNext = null } catch(err) { console.error(err) }')
+      .then(() => view.webContents.executeJavaScript(`(${atEpisodeNextMut.toString()})()`))
+      .then(() => view.webContents.executeJavaScript(`(${atEpisodeNextObs.toString()})()`))
+      .catch((err) => { console.error(err) })
+  } else if (currentStream === 'at') {
+    view.webContents.executeJavaScript(`(${atEpisodeNextDis.toString()})()`).catch((err) => { console.error(err) })
+  }
+}
+
+// Apple TV next episode click
+function atEpisodeNextClick() {
+  try {
+    console.log('next episode')
+    if (document.querySelector('amp-up-next').shadowRoot.querySelector('.up-next__button') != undefined) {
+      document.querySelector('amp-up-next').shadowRoot.querySelector('.up-next__button').click()
+    }
+  } catch(err) { console.error(err) }
+}
+
+// Apple TV next episode mutation observer
+function atEpisodeNextMut() {
+  try {
+    console.log('next mut')
+    obsAtNext = new MutationObserver((ml) => {
+      for(const mut of ml) {
+        if (mut.type === 'childList') {
+          atEpisodeNextClick()
+        }
+      }
+    })
+  } catch(err) { console.error(err) }
+}
+
+// Apple TV next episode observer invocation
+function atEpisodeNextObs() {
+  try {
+    console.log('next obs')
+    obsAtNext.observe(document.querySelector('amp-up-next').shadowRoot.querySelector('.up-next__button'), { childList: true })
+  } catch (err) { console.error(err) }
+}
+
+// Apple TV next episode observer disconnection
+function atEpisodeNextDis() {
+  try {
+    console.log('next dis')
+    if (typeof obsAtNext !== 'undefined') {
+      obsAtNext.disconnect()
+    }
+  } catch (err) { console.error(err) }
+}
 
 //#endregion
 
