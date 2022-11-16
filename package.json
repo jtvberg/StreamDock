@@ -58,6 +58,7 @@
     },
     "linux": {
       "category": "Video",
+      "icon": "build/icon.icns",
       "target": [
         "AppImage",
         "snap",
