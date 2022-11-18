@@ -21,6 +21,7 @@ let restorePlay = false
 let showFacets = false
 let showPrefs = false
 let ytSkipAds = false
+let ytScreenFull = false
 let amzSkipPreview = false
 let amzSkipRecap = false
 let amzNextEpisode = false
@@ -92,7 +93,7 @@ const createWindow = () => {
       action: 'allow',
       overrideBrowserWindowOptions: {
         fullscreenable: false,
-        titleBarStyle: 'customButtonsOnHover'
+        autoHideMenuBar: true
       }
     }
   })
@@ -409,6 +410,7 @@ function streamChange(stream) {
 
 // Stream loaded
 function streamLoaded() {
+  setTimeout(ytFullScreen, 1500)
   ytAdsSkip()
   amzGetUrl()
   setTimeout(amzUpgradeDismiss, 3000)
@@ -645,18 +647,20 @@ let obsYtAds = null
 
 // YouTube ad script injection
 function ytAdsSkip() {
-  if (ytSkipAds && currentStream === 'yt') {
-    view.webContents.executeJavaScript(`${ytAdOverlayClick.toString()}`).catch((err) => { console.error(err) })
-    view.webContents.executeJavaScript(`${ytPromoCloseClick.toString()}`).catch((err) => { console.error(err) })
-    view.webContents.executeJavaScript(`${ytAdSkipClick.toString()}`)
-      .then(() => ('ytAdSkipClick()'))
-      .catch((err) => { console.error(err) })
-    view.webContents.executeJavaScript('try { let obsYtAds = null } catch(err) { console.error(err) }')
-      .then(() => view.webContents.executeJavaScript(`(${ytAdSkipMut.toString()})()`))
-      .then(() => view.webContents.executeJavaScript(`(${ytAdSkipObs.toString()})()`))
-      .catch((err) => { console.error(err) })
-  } else if (currentStream === 'yt') {
-    view.webContents.executeJavaScript(`(${ytAdSkipDis.toString()})()`).catch((err) => { console.error(err) })
+  if (currentStream === 'yt') {
+    if (ytSkipAds) {
+      view.webContents.executeJavaScript(`${ytAdOverlayClick.toString()}`).catch((err) => { console.error(err) })
+      view.webContents.executeJavaScript(`${ytPromoCloseClick.toString()}`).catch((err) => { console.error(err) })
+      view.webContents.executeJavaScript(`${ytAdSkipClick.toString()}`)
+        .then(() => ('ytAdSkipClick()'))
+        .catch((err) => { console.error(err) })
+      view.webContents.executeJavaScript('try { let obsYtAds = null } catch(err) { console.error(err) }')
+        .then(() => view.webContents.executeJavaScript(`(${ytAdSkipMut.toString()})()`))
+        .then(() => view.webContents.executeJavaScript(`(${ytAdSkipObs.toString()})()`))
+        .catch((err) => { console.error(err) })
+    } else {
+      view.webContents.executeJavaScript(`(${ytAdSkipDis.toString()})()`).catch((err) => { console.error(err) })
+    }
   }
 }
 
@@ -728,10 +732,65 @@ function ytAdSkipDis() {
   } catch (err) { console.error(err) }
 }
 
+// YouTube observer dummy declaration (this is not actually used as it is sent over as a string!)
+let obsYtFs = null
+
+// YouTube ad script injection
 function ytFullScreen() {
-  if (!document.querySelector('.ytp-fullscreen-button').getAttribute('title').includes('Exit')) {
-    document.querySelector('.ytp-fullscreen-button').click()
+  if (currentStream === 'yt' && ytScreenFull) {
+    view.webContents.executeJavaScript(`${ytFullScreenClick.toString()}`)
+      .then(() => ('ytFullScreenClick()'))
+      .catch((err) => { console.error(err) })
+    view.webContents.executeJavaScript('try { let obsYtFs = null } catch(err) { console.error(err) }')
+      .then(() => view.webContents.executeJavaScript(`(${ytFullScreenMut.toString()})()`))
+      .then(() => view.webContents.executeJavaScript(`(${ytFullScreenObs.toString()})()`))
+      .catch((err) => { console.error(err) })
+  } else {
+    view.webContents.executeJavaScript(`(${ytFullScreenDis.toString()})()`).catch((err) => { console.error(err) })
   }
+}
+
+// YouTube fullscreen click
+function ytFullScreenClick() {
+  try {
+    console.log('fs click')
+    document.querySelectorAll('.ytp-fullscreen-button').forEach(input => { 
+      if (input.getAttribute('title') && !input.getAttribute('title').includes('Exit')) {
+        input.click()
+      }
+    })
+  } catch(err) { console.error(err) }
+}
+
+// YouTube fullscreen mutation observer
+function ytFullScreenMut() {
+  try {
+    console.log('fs mut')
+    obsYtFs = new MutationObserver(() => {
+      ytFullScreenClick()
+      // for(const mut of ml) {
+      //   console.log(mut)
+      // }
+    })
+  } catch (err) { console.error(err) }
+}
+
+// YouTube fullscreen observer invocation
+function ytFullScreenObs() {
+  try {
+    console.log('fs obs')
+    obsYtFs.observe(document.querySelector('#ytd-player'), { subtree: true, attributes: true, attributeFilter: ['src'] })
+  } catch (err) { console.error(err) }
+}
+
+// YouTube fullscreen observer disconnection
+function ytFullScreenDis() {
+  try {
+    console.log('fs dis')
+    if (typeof obsYtFs !== 'undefined') {
+      obsYtFs.disconnect()
+    }
+  } catch (err) { console.error(err) }
 }
 
 //#endregion
@@ -2030,6 +2089,12 @@ ipcMain.on('toggle-homescreen', () => {
 ipcMain.on('set-ytadskip', (e, bool) => {
   ytSkipAds = bool
   ytAdsSkip()
+})
+
+// IPC channel to auto fullscreen YouTube
+ipcMain.on('set-ytfullscreen', (e, bool) => {
+  ytScreenFull = bool
+  ytFullScreen()
 })
 
 // IPC channel to skip Prime previews

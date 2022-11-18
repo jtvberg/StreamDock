@@ -167,55 +167,58 @@ function applyUpdateSettings() {
   // Set the theme
   ipcRenderer.send('set-theme', settings.themeMode ? settings.themeMode : 'system')
 
-  // Skip YouTube ad skip
+  // Auto fullscreen YouTube
+  ipcRenderer.send('set-ytfullscreen', settings.ytFullScreen)
+
+  // Skip YouTube ads
   ipcRenderer.send('set-ytadskip', settings.ytSkipAds)
 
-  // Skip Prime preview skip
+  // Skip Prime previews
   ipcRenderer.send('set-amzprevskip', settings.amzSkipPreview)
 
-  // Skip Prime recap skip
+  // Skip Prime recaps
   ipcRenderer.send('set-amzrecapskip', settings.amzSkipRecap)
 
   // Skip Prime next episode
   ipcRenderer.send('set-amzepisodenext', settings.amzNextEpisode)
 
-  // Skip Netflix recap skip
+  // Skip Netflix recaps
   ipcRenderer.send('set-nfrecapskip', settings.nfSkipRecap)
 
   // Skip Netflix next episode
   ipcRenderer.send('set-nfepisodenext', settings.nfNextEpisode)
 
-  // Skip Hulu recap skip
+  // Skip Hulu recaps
   ipcRenderer.send('set-hlrecapskip', settings.hlSkipRecap)
 
   // Skip Hulu next episode
   ipcRenderer.send('set-hlepisodenext', settings.hlNextEpisode)
 
-  // Skip Disney recap skip
+  // Skip Disney recaps
   ipcRenderer.send('set-dprecapskip', settings.dpSkipRecap)
 
   // Skip Disney next episode
   ipcRenderer.send('set-dpepisodenext', settings.dpNextEpisode)
 
-  // Skip HBO recap skip
+  // Skip HBO recaps
   ipcRenderer.send('set-hmrecapskip', settings.hmSkipRecap)
 
   // Skip HBO next episode
   ipcRenderer.send('set-hmepisodenext', settings.hmNextEpisode)
 
-  // Skip Paramount recap skip
+  // Skip Paramount recaps
   ipcRenderer.send('set-cbrecapskip', settings.cbSkipRecap)
 
   // Skip Paramount next episode
   ipcRenderer.send('set-cbepisodenext', settings.cbNextEpisode)
 
-  // Skip Apple recap skip
+  // Skip Apple recaps
   ipcRenderer.send('set-atrecapskip', settings.cbSkipRecap)
 
   // Skip Apple next episode
   ipcRenderer.send('set-atepisodenext', settings.cbNextEpisode)
 
-  // Skip Peacock recap skip
+  // Skip Peacock recaps
   ipcRenderer.send('set-pcrecapskip', settings.cbSkipRecap)
 
   // Skip Peacock next episode
@@ -421,6 +424,7 @@ function getDefaultSettings() {
     hideDock: false,
     themeMode: 'system',
     lastStream: { id: getDefaultStreams()[0].id, url: getDefaultStreams()[0].url },
+    ytFullScreen: false,
     ytSkipAds: true,
     amzSkipPreview: false,
     amzSkipRecap: false,
@@ -477,6 +481,7 @@ function loadSettingsModal() {
   $('#quick-check').prop('checked', settings.quickMenu)
   $('#nav-check').prop('checked', settings.hideNav)
   $('#dock-check').prop('checked', settings.hideDock)
+  $('#yt-fs-check').prop('checked', settings.ytFullScreen)
   $('#yt-skip-check').prop('checked', settings.ytSkipAds)
   $('#amz-preview-check').prop('checked', settings.amzSkipPreview)
   $('#amz-recap-check').prop('checked', settings.amzSkipRecap)
@@ -538,6 +543,7 @@ function saveSettings() {
     quickMenu: $('#quick-check').is(':checked'),
     hideNav: $('#nav-check').is(':checked'),
     hideDock: $('#dock-check').is(':checked'),
+    ytFullScreen: $('#yt-fs-check').is(':checked'),
     ytSkipAds: $('#yt-skip-check').is(':checked'),
     amzSkipPreview: $('#amz-preview-check').is(':checked'),
     amzSkipRecap: $('#amz-recap-check').is(':checked'),
@@ -593,6 +599,7 @@ function loadDefaultSettings() {
   $('#quick-check').prop('checked', defaultSettings.quickMenu)
   $('#nav-check').prop('checked', defaultSettings.hideNav)
   $('#dock-check').prop('checked', defaultSettings.hideDock)
+  $('#yt-fs-check').prop('checked', defaultSettings.ytFullScreen)
   $('#yt-skip-check').prop('checked', defaultSettings.ytSkipAds)
   $('#amz-preview-check').prop('checked', defaultSettings.amzSkipPreview)
   $('#amz-recap-check').prop('checked', defaultSettings.amzSkipRecap)
