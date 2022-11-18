@@ -88,6 +88,7 @@ I also wanted a way to find where something might be streaming. The search on th
    - Prime auto-skip previews
    - Netflix, Hulu, Disney+, Prime, HBO and Paramount episode recap/intro auto-skip
    - Netflix, Hulu, Disney+, Prime, HBO and Paramount 'Binge Mode' that will automatically start the next episode in a series (skipping delay)
+   - YouTube videos can be set to automatically go to fullscreen after selection
    - You can also skip YouTube ads and dismiss ad overlays when possible (while not all ads are skippable, if turned on it will even skip ads before the skip button even appears)
 
    One note: On some services there are scenarios where an option to skip something doesn't show up. For instance, on Prime, sometimes the episode recap is not skippable. There doesn't appear to be any rhyme or reason as to why sometimes you can't skip a recap or intro for certain shows on certain services, but if you notice that something is playing that you chose to skip and there is no UI element that would allow a user to skip that content, the app is working as intended as there is nothing to key off of for that show/service combo. I have even seen scenarios where for a specific episode, there is no option to skip a recap, but you can on other episodes of the same show/service combo.
