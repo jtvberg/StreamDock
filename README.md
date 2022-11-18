@@ -49,7 +49,7 @@ I also wanted a way to find where something might be streaming. The search on th
    There are also some build scripts in place (NOTE: You may want to disable notarization in the mac build script while testing your build as this can take a long time.)
 
 ## Releases / Known Issues
-   The current release works on Mac (signed and notarized). There are previous versions for Windows (self-signed) and Linux.
+   The current release works on Mac (signed and notarized), Windows (self-signed) and Linux.
    
    The auto-update should prompt you as new releases come out and then, post download, prompt you to install/restart. Sometimes, it won't do the restart. If you wait a minute and exit the app completely, it should automatically restart the new version (I think I have a fix for this coming in the next release.)
 
@@ -71,6 +71,7 @@ I also wanted a way to find where something might be streaming. The search on th
    - There is an always on top toggle button in the top right corner (or in 'Window' menu)
    - You can open a link from clipboard via the 'View' menu (or in the header)
    - You can scale the video to 16:9 (or 4:3, 2:1, 2.4:1) either vertically or horizontally also in the view menu (or in the header for 16:9 only)
+   - You can also open the current stream in a new window from the header controls (or under via the 'View' menu)
 
 ## Bookmarking
    - You can bookmark a stream you are currently watching via the bookmark button in the header or via the 'View' menu
@@ -105,8 +106,8 @@ I also wanted a way to find where something might be streaming. The search on th
 
 ## TODO
    - Looking to add a watch queue to the home screen
-   - The only services left I may add scripts for are Apple TV and Peacock
    - I need to investigate adding Google OAuth to allow more reliable logins for YouTube TV and other services
-   - Contemplating multiple windows but in general, this seems silly (leave a comment if you think there is a good reason to do this!)
    - I don't like how there is no z-order for the BrowserWindow vs. BrowserView. This means I can't render any UI elements above the view (and why video is hidden when using the preferences menu.) In general, this is not a big deal but there are some cool UI tricks I could implement if I moved portions of the UI to another BrowserView (for instance, I could use custom tooltips and auto-hide the header bar)
    - Would like to be able to allow the user to add services. As it is, you can do this by changing the URLs for existing services (which I don't recommend as there is service specific code associated with the service ID) or by adding bookmarks to other services
+   - Need to handle menu events when main window is closed
+   - Would like to add more options to child window viewing

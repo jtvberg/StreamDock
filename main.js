@@ -1,9 +1,4 @@
 /* eslint-disable quotes */
-// TODO: Peacock won't login
-// TODO: Scrollbar css
-// BUG: Random rubberbanding when going fullscreen
-// TODO: Hide bar on fullscreen
-
 // Imports and variable declarations
 const { app, BrowserWindow, ipcMain, BrowserView, Tray, TouchBar, Menu, MenuItem, components, systemPreferences, clipboard, nativeTheme, dialog, shell } = require('electron')
 const { TouchBarButton } = TouchBar
@@ -73,7 +68,6 @@ const createWindow = () => {
     minHeight: 400,
     minWidth: 672,
     transparent: isMac,
-    hasShadow: false,
     frame: !isMac,
     visualEffectState: 'active',
     titleBarStyle: isMac ? 'hidden' : 'default',
@@ -84,6 +78,16 @@ const createWindow = () => {
     webPreferences: {
       nodeIntegration: true,
       contextIsolation: false
+    }
+  })
+
+  // Set window options for new windows
+  win.webContents.setWindowOpenHandler(() => {
+    return {
+      action: 'allow',
+      overrideBrowserWindowOptions: {
+        fullscreenable: false
+      }
     }
   })
 
@@ -562,6 +566,13 @@ function getUrlInfo (url) {
   }
 }
 
+// Get current url and then send to renderer to open new window
+function openNewin() {
+  getCurrentUrl().then(url => {
+    win.webContents.send('newin-url', url)
+  })
+}
+
 // Send bookmark to renderer
 async function sendBookmark() {
   await getCurrentUrl().then((currentUrl) => {
@@ -706,6 +717,12 @@ function ytAdSkipDis() {
       obsYtAds.disconnect()
     }
   } catch (err) { console.error(err) }
+}
+
+function ytFullScreen() {
+  if (!document.querySelector('.ytp-fullscreen-button').getAttribute('title').includes('Exit')) {
+    document.querySelector('.ytp-fullscreen-button').click()
+  }
 }
 
 //#endregion
@@ -2133,6 +2150,11 @@ ipcMain.on('get-url-info', (e, url) => {
   getUrlInfo(url)
 })
 
+// IPC channel to get current url
+ipcMain.on('newin-open', () => {
+  openNewin()
+})
+
 // Build menu template
 const template = [
   {
@@ -2241,6 +2263,13 @@ const template = [
       },
       {
         type: 'separator'
+      },
+      {
+        label: 'Open Stream in New Window',
+        id: 'newin',
+        click() {
+          openNewin()
+        }
       },
       {
         label: 'Toggle Full Screen',

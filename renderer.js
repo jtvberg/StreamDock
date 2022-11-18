@@ -1,9 +1,3 @@
-// TODO: Open services in new window
-// TODO: Setting: let user pick whether or not a new window is created
-// TODO: Setting: add services
-// TODO: Inicator for when a bookmark is added
-// TODO: Watchlist vs bookmark
-
 // Imports and variable declarations
 const { ipcRenderer, nativeImage, clipboard } = require('electron')
 const $ = require('jquery')
@@ -100,9 +94,14 @@ ipcRenderer.on('ontop', () => {
   toggleOnTop()
 })
 
-// Reveive url info from drop
+// Receive url info from drop
 ipcRenderer.on('url-info', (e, info) => {
   saveBookmark({serv: 'ot', url: info.url, title: info.title})
+})
+
+// Receive current url from main
+ipcRenderer.on('newin-url', (e, url) => {
+  openWindow(url)
 })
 
 // Load Settings
@@ -978,6 +977,11 @@ function toggleOnTop() {
   }
 }
 
+// Open url in a new window
+function openWindow(url) {
+  window.open(url)
+}
+
 // Load NF facets from file
 $.getJSON('nffacets.json', json => { 
   nfFacets = json
@@ -1161,6 +1165,11 @@ $('#scalev-btn').on('click', () => {
 // Open prefs click handler
 $('#prefs-btn').on('click', () => {
   loadSettingsModal()
+})
+
+// Open stream in new window click handler
+$('#newin-btn').on('click', () => {
+  ipcRenderer.send('newin-open')
 })
 
 // Header double-click handler
