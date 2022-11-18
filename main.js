@@ -70,7 +70,12 @@ const createWindow = () => {
     transparent: isMac,
     frame: !isMac,
     visualEffectState: 'active',
-    titleBarStyle: isMac ? 'hidden' : 'default',
+    titleBarStyle: isLinux ? 'default' : 'hidden',
+    titleBarOverlay: {
+      color: '#2f3241',
+      symbolColor: '#74b1be',
+      height: 60
+    },
     trafficLightPosition: {
       x: 6,
       y: 3
@@ -86,7 +91,8 @@ const createWindow = () => {
     return {
       action: 'allow',
       overrideBrowserWindowOptions: {
-        fullscreenable: false
+        fullscreenable: false,
+        titleBarStyle: 'customButtonsOnHover'
       }
     }
   })
@@ -110,7 +116,7 @@ const createWindow = () => {
   // Show browserView when loaded
   view.webContents.on('did-finish-load', () => {
     // Open DevTools (view, dev only)
-    // isDev && view.webContents.openDevTools('detach')
+    isDev && view.webContents.openDevTools('detach')
     sendCurrentStream()
     setView()
     streamLoaded()
@@ -125,6 +131,9 @@ const createWindow = () => {
       view.webContents.userAgent = userAgent
     }
     sendCurrentStream()
+    if (currentStream === 'yt') {
+      // ytFullScreen()
+    }
   })
 
   // Capture playing
