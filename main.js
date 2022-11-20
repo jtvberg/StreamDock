@@ -652,7 +652,7 @@ function ytAdsSkip() {
       view.webContents.executeJavaScript(`${ytAdOverlayClick.toString()}`).catch((err) => { console.error(err) })
       view.webContents.executeJavaScript(`${ytPromoCloseClick.toString()}`).catch((err) => { console.error(err) })
       view.webContents.executeJavaScript(`${ytAdSkipClick.toString()}`)
-        .then(() => ('ytAdSkipClick()'))
+        .then(() => view.webContents.executeJavaScript('ytAdSkipClick()'))
         .catch((err) => { console.error(err) })
       view.webContents.executeJavaScript('try { let obsYtAds = null } catch(err) { console.error(err) }')
         .then(() => view.webContents.executeJavaScript(`(${ytAdSkipMut.toString()})()`))
@@ -739,7 +739,7 @@ let obsYtFs = null
 function ytFullScreen() {
   if (currentStream === 'yt' && ytScreenFull) {
     view.webContents.executeJavaScript(`${ytFullScreenClick.toString()}`)
-      .then(() => ('ytFullScreenClick()'))
+      .then(() => view.webContents.executeJavaScript('ytFullScreenClick()'))
       .catch((err) => { console.error(err) })
     view.webContents.executeJavaScript('try { let obsYtFs = null } catch(err) { console.error(err) }')
       .then(() => view.webContents.executeJavaScript(`(${ytFullScreenMut.toString()})()`))
