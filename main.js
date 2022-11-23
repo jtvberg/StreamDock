@@ -706,7 +706,7 @@ function ytAdSkipMut() {
         if (mut.type === 'childList' && mut.target.classList.contains('ytp-ad-module')) {
           ytAdOverlayClick()
         }
-        if (mut.type === 'childList' && (mut.target.classList.contains('ytd-mealbar-promo-renderer') || mut.target.nodeName.toLowerCase() === 'ytd-popup-container')) {
+        if (mut.type === 'childList' && (mut.target.classList.contains('ytd-mealbar-promo-renderer') || mut.target.nodeName.toLowerCase() === 'tp-yt-paper-dialog')) {
           ytPromoCloseClick()
         }
       }
