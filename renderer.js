@@ -1179,6 +1179,12 @@ $('#newin-btn').on('click', () => {
   ipcRenderer.send('newin-open')
 })
 
+// Go framless click handler
+$('#noframe-btn').on('click', () => {
+  ipcRenderer.send('frameless-toggle')
+  // $('.header-bar').hide()
+})
+
 // Header double-click handler
 $('.header-bar').on('dblclick', () => {
   maxRestoreWindow()

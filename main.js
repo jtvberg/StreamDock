@@ -40,6 +40,7 @@ let atSkipRecap = false
 let pcNextEpisode = false
 let pcSkipRecap = false
 let showHomescreen = false
+let frameless = false
 let userAgent = ''
 let currentStream = ''
 let touchBarItems = []
@@ -72,11 +73,6 @@ const createWindow = () => {
     frame: !isMac,
     visualEffectState: 'active',
     titleBarStyle: isLinux ? 'default' : 'hidden',
-    titleBarOverlay: {
-      color: '#2f3241',
-      symbolColor: '#74b1be',
-      height: 60
-    },
     trafficLightPosition: {
       x: 6,
       y: 3
@@ -381,12 +377,14 @@ function setView() {
 function setViewBounds() {
   if (!showHomescreen && !showPrefs) {
     updateShowFacets()
-    let waw = showFacets ? facetAdjustWidth : baseAdjustWidth
+    const waw = showFacets ? facetAdjustWidth : baseAdjustWidth
+    const wah = frameless ? 0 : winAdjustHeight
+    const hs = frameless ? 0 : headerSize
     view.setBounds({
       x: 0,
-      y: headerSize,
+      y: hs,
       width: wb.width - waw,
-      height: wb.height - winAdjustHeight
+      height: wb.height - wah
     })
   }
 }
@@ -432,6 +430,8 @@ function streamLoaded() {
   setTimeout(pcRecapSkip, 3000)
   setTimeout(pcEpisodeNext, 3000)
   enableFacets()
+  noFrame()
+  removeScrollbars()
 }
 
 // Toggle facets if Netflix
@@ -488,7 +488,7 @@ function setStreamId(host) {
 
 // Scale height to supplied aspect ratio
 function scaleHeight(width, height) {
-  height = Math.round((((wb.width - baseAdjustWidth) * height) / width) + winAdjustHeight)
+  height = Math.round((((wb.width - baseAdjustWidth) * height) / width) + (frameless ? 0 : winAdjustHeight))
   win.setBounds({
     x: wb.x,
     y: wb.y,
@@ -499,7 +499,7 @@ function scaleHeight(width, height) {
 
 // Scale width to supplied aspect ratio
 function scaleWidth(width, height) {
-  width = Math.round(((wb.height - winAdjustHeight) * width) / height) + baseAdjustWidth
+  width = Math.round(((wb.height - (frameless ? 0 : winAdjustHeight)) * width) / height) + baseAdjustWidth
   win.setBounds({
     x: wb.x,
     y: wb.y,
@@ -558,7 +558,7 @@ function toggleOnTop() {
 }
 
 // Get info (image, title) from url
-function getUrlInfo (url) {
+function getUrlInfo(url) {
   if (validateLink(url)) {
     let ghostWin = new BrowserWindow({
       width: 1024,
@@ -582,6 +582,35 @@ function openNewin() {
   getCurrentUrl().then(url => {
     win.webContents.send('newin-url', url)
   })
+}
+
+// Toggle frameless window
+function toggleFrame() {
+  if (!frameless) {
+    frameless = true
+  } else {
+    frameless = false
+  }
+  noFrame()
+}
+
+// Set framless window
+function noFrame() {
+  if (frameless) {
+    view.webContents.executeJavaScript(
+      `document.body.insertAdjacentHTML('beforeend', '<div class="sd-framless-header"></div><style> .sd-framless-header { position: fixed; top: 0; left: 0; width: 100%; height: 13px; opacity: 0; z-index: 99999; cursor: -webkit-grab; cursor: grab; -webkit-user-drag: none; -webkit-app-region: drag; } </style>')`
+    )
+  } else {
+    view.webContents.executeJavaScript(`document.querySelector('.sd-framless-header').remove()`)
+  }
+  setViewBounds()
+}
+
+// Remove scrollbars from stream view
+function removeScrollbars() {
+  view.webContents.executeJavaScript(
+    `document.body.insertAdjacentHTML('beforeend', '<style> ::-webkit-scrollbar { display: none; } </style>')`
+  )
 }
 
 // Send bookmark to renderer
@@ -745,7 +774,7 @@ function ytFullScreen() {
       .then(() => view.webContents.executeJavaScript(`(${ytFullScreenMut.toString()})()`))
       .then(() => view.webContents.executeJavaScript(`(${ytFullScreenObs.toString()})()`))
       .catch((err) => { console.error(err) })
-  } else {
+  } else if (currentStream === 'yt') {
     view.webContents.executeJavaScript(`(${ytFullScreenDis.toString()})()`).catch((err) => { console.error(err) })
   }
 }
@@ -2229,6 +2258,11 @@ ipcMain.on('newin-open', () => {
   openNewin()
 })
 
+// IPC channel to toggle frameless
+ipcMain.on('frameless-toggle', () => {
+  toggleFrame()
+})
+
 // Build menu template
 const template = [
   {
@@ -2466,6 +2500,13 @@ const template = [
         label: 'Toggle Always On Top',
         click() {
           toggleOnTop()
+        }
+      },
+      {
+        label: 'Toggle Frameless Window',
+        id: 'frameless',
+        click() {
+          toggleFrame()
         }
       },
       ...(isMac ? [
