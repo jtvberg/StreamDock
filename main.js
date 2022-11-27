@@ -72,7 +72,7 @@ const createWindow = () => {
     transparent: isMac,
     frame: !isMac,
     visualEffectState: 'active',
-    titleBarStyle: isLinux ? 'default' : 'hidden',
+    titleBarStyle: isMac ? 'hidden' : 'default',
     trafficLightPosition: {
       x: 6,
       y: 3
@@ -586,12 +586,14 @@ function openNewin() {
 
 // Toggle frameless window
 function toggleFrame() {
-  if (!frameless) {
-    frameless = true
-  } else {
-    frameless = false
+  if (isMac) {
+    if (!frameless) {
+      frameless = true
+    } else {
+      frameless = false
+    }
+    noFrame()
   }
-  noFrame()
 }
 
 // Set framless window
@@ -2502,14 +2504,14 @@ const template = [
           toggleOnTop()
         }
       },
-      {
-        label: 'Toggle Frameless Window',
-        id: 'frameless',
-        click() {
-          toggleFrame()
-        }
-      },
       ...(isMac ? [
+        {
+          label: 'Toggle Frameless Window',
+          id: 'frameless',
+          click() {
+            toggleFrame()
+          }
+        },
         {
           type: 'separator'
         },
