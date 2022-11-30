@@ -83,17 +83,6 @@ const createWindow = () => {
     }
   })
 
-  // Set window options for new windows
-  win.webContents.setWindowOpenHandler(() => {
-    return {
-      action: 'allow',
-      overrideBrowserWindowOptions: {
-        fullscreenable: false,
-        autoHideMenuBar: true
-      }
-    }
-  })
-
   // Add app icon in Linux (automatic otherwise)
   if (isLinux) {
     win.setIcon(path.join(__dirname, '/res/logo/icon.png'))
@@ -105,7 +94,7 @@ const createWindow = () => {
   })
 
   // Open DevTools (window, dev only)
-  isDev && win.webContents.openDevTools('detach')
+  // isDev && win.webContents.openDevTools('detach')
 
   // Create main browserView
   view = new BrowserView()
@@ -113,7 +102,7 @@ const createWindow = () => {
   // Show browserView when loaded
   view.webContents.on('did-finish-load', () => {
     // Open DevTools (view, dev only)
-    isDev && view.webContents.openDevTools('detach')
+    // isDev && view.webContents.openDevTools('detach')
     sendCurrentStream()
     setView()
     streamLoaded()
@@ -408,7 +397,7 @@ function streamChange(stream) {
 
 // Stream loaded
 function streamLoaded() {
-  setTimeout(ytFullScreen, 1500)
+  setTimeout(ytFullScreen, 3000)
   ytAdsSkip()
   amzGetUrl()
   setTimeout(amzUpgradeDismiss, 3000)
@@ -577,10 +566,46 @@ function getUrlInfo(url) {
   }
 }
 
-// Get current url and then send to renderer to open new window
+// Get current url and then open child window
 function openNewin() {
   getCurrentUrl().then(url => {
-    win.webContents.send('newin-url', url)
+    const child = new BrowserWindow({
+      width: 800,
+      height: 800 * 9 / 16,
+      frame: false,
+      fullscreenable: false,
+      titleBarStyle: isMac ? 'customButtonsOnHover' : 'hidden'
+    })
+    child.loadURL(url)
+    child.once('ready-to-show', () => {
+      child.show()
+    })
+    child.webContents.once('did-finish-load', () => {
+      child.webContents.executeJavaScript(`document.body.insertAdjacentHTML('beforeend', '<div class="sd-framless-header"></div><style> .sd-framless-header { position: fixed; top: 0; left: 0; width: 100%; height: 15px; opacity: 0; z-index: 99999; cursor: -webkit-grab; cursor: grab; -webkit-user-drag: none; -webkit-app-region: drag; } ::-webkit-scrollbar { display: none; } </style>')`)
+      child.webContents.focus()
+      child.webContents.sendInputEvent({type: 'keyDown', keyCode: 'f'})
+      setTimeout(ytFullScreen, 1500, child)
+      setTimeout(ytAdsSkip, 3000, child)
+      // amzUpgradeDismiss()
+      // amzPreviewSkip()
+      // amzRecapSkip()
+      // amzEpisodeNext()
+      // nfRecapSkip()
+      // nfEpisodeNext()
+      // hlRecapSkip()
+      // hlEpisodeNext()
+      // dpRecapSkip()
+      // dpEpisodeNext()
+      // hmRecapSkip()
+      // hmEpisodeNext()
+      // cbRecapSkip()
+      // cbEpisodeNext()
+      // atRecapSkip()
+      // atEpisodeNext()
+      // pcRecapSkip()
+      // pcEpisodeNext()
+      isDev && child.webContents.openDevTools('detach')
+    })
   })
 }
 
@@ -677,20 +702,21 @@ async function saveSettings() {
 let obsYtAds = null
 
 // YouTube ad script injection
-function ytAdsSkip() {
+function ytAdsSkip(bv) {
+  if (bv === undefined) bv = view
   if (currentStream === 'yt') {
     if (ytSkipAds) {
-      view.webContents.executeJavaScript(`${ytAdOverlayClick.toString()}`).catch((err) => { console.error(err) })
-      view.webContents.executeJavaScript(`${ytPromoCloseClick.toString()}`).catch((err) => { console.error(err) })
-      view.webContents.executeJavaScript(`${ytAdSkipClick.toString()}`)
-        .then(() => view.webContents.executeJavaScript('ytAdSkipClick()'))
+      bv.webContents.executeJavaScript(`${ytAdOverlayClick.toString()}`).catch((err) => { console.error(err) })
+      bv.webContents.executeJavaScript(`${ytPromoCloseClick.toString()}`).catch((err) => { console.error(err) })
+      bv.webContents.executeJavaScript(`${ytAdSkipClick.toString()}`)
+        .then(() => bv.webContents.executeJavaScript('ytAdSkipClick()'))
         .catch((err) => { console.error(err) })
-      view.webContents.executeJavaScript('try { let obsYtAds = null } catch(err) { console.error(err) }')
-        .then(() => view.webContents.executeJavaScript(`(${ytAdSkipMut.toString()})()`))
-        .then(() => view.webContents.executeJavaScript(`(${ytAdSkipObs.toString()})()`))
+      bv.webContents.executeJavaScript('try { let obsYtAds = null } catch(err) { console.error(err) }')
+        .then(() => bv.webContents.executeJavaScript(`(${ytAdSkipMut.toString()})()`))
+        .then(() => bv.webContents.executeJavaScript(`(${ytAdSkipObs.toString()})()`))
         .catch((err) => { console.error(err) })
     } else {
-      view.webContents.executeJavaScript(`(${ytAdSkipDis.toString()})()`).catch((err) => { console.error(err) })
+      bv.webContents.executeJavaScript(`(${ytAdSkipDis.toString()})()`).catch((err) => { console.error(err) })
     }
   }
 }
@@ -767,17 +793,20 @@ function ytAdSkipDis() {
 let obsYtFs = null
 
 // YouTube ad script injection
-function ytFullScreen() {
+function ytFullScreen(bv) {
+  if (bv === undefined) bv = view
   if (currentStream === 'yt' && ytScreenFull) {
-    view.webContents.executeJavaScript(`${ytFullScreenClick.toString()}`)
-      .then(() => view.webContents.executeJavaScript('ytFullScreenClick()'))
+    bv.webContents.executeJavaScript(`${ytFullScreenClick.toString()}`)
+      .then(() => bv.webContents.focus())
+      .then(() => bv.webContents.sendInputEvent({type: 'keyDown', keyCode: 'f'}))
+      .then(() => bv.webContents.executeJavaScript('ytFullScreenClick()'))
       .catch((err) => { console.error(err) })
-    view.webContents.executeJavaScript('try { let obsYtFs = null } catch(err) { console.error(err) }')
-      .then(() => view.webContents.executeJavaScript(`(${ytFullScreenMut.toString()})()`))
-      .then(() => view.webContents.executeJavaScript(`(${ytFullScreenObs.toString()})()`))
+    bv.webContents.executeJavaScript('try { let obsYtFs = null } catch(err) { console.error(err) }')
+      .then(() => bv.webContents.executeJavaScript(`(${ytFullScreenMut.toString()})()`))
+      .then(() => bv.webContents.executeJavaScript(`(${ytFullScreenObs.toString()})()`))
       .catch((err) => { console.error(err) })
   } else if (currentStream === 'yt') {
-    view.webContents.executeJavaScript(`(${ytFullScreenDis.toString()})()`).catch((err) => { console.error(err) })
+    bv.webContents.executeJavaScript(`(${ytFullScreenDis.toString()})()`).catch((err) => { console.error(err) })
   }
 }
 
@@ -2255,7 +2284,7 @@ ipcMain.on('get-url-info', (e, url) => {
   getUrlInfo(url)
 })
 
-// IPC channel to get current url
+// IPC channel to open child window
 ipcMain.on('newin-open', () => {
   openNewin()
 })

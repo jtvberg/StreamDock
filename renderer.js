@@ -99,11 +99,6 @@ ipcRenderer.on('url-info', (e, info) => {
   saveBookmark({serv: 'ot', url: info.url, title: info.title})
 })
 
-// Receive current url from main
-ipcRenderer.on('newin-url', (e, url) => {
-  openWindow(url)
-})
-
 // Load Settings
 function loadSettings() {
   const defaultList = getDefaultSettings()
@@ -984,11 +979,6 @@ function toggleOnTop() {
   }
 }
 
-// Open url in a new window
-function openWindow(url) {
-  window.open(url)
-}
-
 // Load NF facets from file
 $.getJSON('nffacets.json', json => { 
   nfFacets = json
@@ -1182,7 +1172,6 @@ $('#newin-btn').on('click', () => {
 // Go framless click handler
 $('#noframe-btn').on('click', () => {
   ipcRenderer.send('frameless-toggle')
-  // $('.header-bar').hide()
 })
 
 // Header double-click handler
