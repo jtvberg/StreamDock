@@ -94,7 +94,7 @@ const createWindow = () => {
   })
 
   // Open DevTools (window, dev only)
-  // isDev && win.webContents.openDevTools('detach')
+  isDev && win.webContents.openDevTools('detach')
 
   // Create main browserView
   view = new BrowserView()
@@ -102,7 +102,7 @@ const createWindow = () => {
   // Show browserView when loaded
   view.webContents.on('did-finish-load', () => {
     // Open DevTools (view, dev only)
-    // isDev && view.webContents.openDevTools('detach')
+    isDev && view.webContents.openDevTools('detach')
     sendCurrentStream()
     setView()
     streamLoaded()
@@ -568,10 +568,12 @@ function getUrlInfo(url) {
 
 // Get current url and then open child window
 function openNewin() {
+  const ch = 600
+  const cw = Math.round(ch * (wb.width / wb.height))
   getCurrentUrl().then(url => {
     const child = new BrowserWindow({
-      width: 800,
-      height: 800 * 9 / 16,
+      height: ch,
+      width: cw,
       frame: false,
       fullscreenable: false,
       titleBarStyle: isMac ? 'customButtonsOnHover' : 'hidden'
@@ -582,8 +584,6 @@ function openNewin() {
     })
     child.webContents.once('did-finish-load', () => {
       child.webContents.executeJavaScript(`document.body.insertAdjacentHTML('beforeend', '<div class="sd-framless-header"></div><style> .sd-framless-header { position: fixed; top: 0; left: 0; width: 100%; height: 15px; opacity: 0; z-index: 99999; cursor: -webkit-grab; cursor: grab; -webkit-user-drag: none; -webkit-app-region: drag; } ::-webkit-scrollbar { display: none; } </style>')`)
-      child.webContents.focus()
-      child.webContents.sendInputEvent({type: 'keyDown', keyCode: 'f'})
       setTimeout(ytFullScreen, 1500, child)
       setTimeout(ytAdsSkip, 3000, child)
       // amzUpgradeDismiss()
@@ -628,7 +628,7 @@ function noFrame() {
       `document.body.insertAdjacentHTML('beforeend', '<div class="sd-framless-header"></div><style> .sd-framless-header { position: fixed; top: 0; left: 0; width: 100%; height: 13px; opacity: 0; z-index: 99999; cursor: -webkit-grab; cursor: grab; -webkit-user-drag: none; -webkit-app-region: drag; } </style>')`
     )
   } else {
-    view.webContents.executeJavaScript(`document.querySelector('.sd-framless-header').remove()`)
+    view.webContents.executeJavaScript(`if(document.querySelector('.sd-framless-header')) document.querySelector('.sd-framless-header').remove()`)
   }
   setViewBounds()
 }
@@ -676,7 +676,9 @@ async function beforeClose() {
     console.error('BC:'+err) 
   }).finally(() => {
     tray.destroy()
-    win.destroy()
+    BrowserWindow.getAllWindows().forEach(wins => {
+      wins.destroy()
+    })
     app.quit()
   })
 }
@@ -816,6 +818,7 @@ function ytFullScreenClick() {
     console.log('fs click')
     document.querySelectorAll('.ytp-fullscreen-button').forEach(input => { 
       if (input.getAttribute('title') && !input.getAttribute('title').includes('Exit')) {
+        input.focus()
         input.click()
       }
     })
