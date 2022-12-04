@@ -568,8 +568,9 @@ function getUrlInfo(url) {
 
 // Get current url and then open child window
 function openNewin() {
+  const hs = frameless ? 0 : headerSize
   const ch = 600
-  const cw = Math.round(ch * (wb.width / wb.height))
+  const cw = Math.round(ch * (wb.width / (wb.height - hs)))
   getCurrentUrl().then(url => {
     const child = new BrowserWindow({
       height: ch,
