@@ -1238,7 +1238,7 @@ function nfEpisodeNextMut() {
       for(const mut of ml) {
         if (mut.type === 'childList' && mut.addedNodes && mut.addedNodes.length > 0) {
           mut.addedNodes.forEach(element => {
-            if (element.classList && element.classList.contains('main-hitzone-element-container')) {
+            if (element.classList && element.classList.contains('SeamlessControls--container')) {
               nfEpisodeNextClick()
             }
           })
