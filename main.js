@@ -1159,8 +1159,8 @@ function nfRecapSkip() {
 function nfRecapSkipClick() {
   try {
     console.log('recap skip')
-    if (document.querySelector('.skip-credits') != undefined) {
-      document.querySelector('.skip-credits > a').click()
+    if (document.querySelector('.watch-video--skip-content-button') != undefined) {
+      document.querySelector('.watch-video--skip-content-button').click()
     }
   } catch(err) { console.error(err) }
 }
@@ -1173,8 +1173,12 @@ function nfRecapSkipMut() {
       for(const mut of ml) {
         if (mut.type === 'childList' && mut.addedNodes && mut.addedNodes.length > 0) {
           mut.addedNodes.forEach(element => {
-            if (element.classList && element.classList.contains('skip-credits')) {
-              nfRecapSkipClick()
+            if (element.childNodes) {
+              element.childNodes.forEach(childNode => {
+                if (childNode.classList && (childNode.classList.contains('watch-video--skip-content') || childNode.classList.contains('watch-video--skip-content-button'))) {
+                  nfRecapSkipClick()
+                }
+              })
             }
           })
         }
