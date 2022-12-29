@@ -6,6 +6,8 @@ const isMac = process.platform === 'darwin'
 const isLinux = process.platform === 'linux'
 const isWindows = process.platform === 'win32'
 const tmdbImagePath = 'https://image.tmdb.org/t/p/original'
+const tmdbBaseUrl = 'https://www.themoviedb.org/'
+const tmdbBaseApi = 'https://api.themoviedb.org/3/'
 let streamList = []
 let settings = []
 let nfFacets = []
@@ -771,10 +773,10 @@ function getSearchResults(api, page, media, id) {
   const langLoc = `${lang}-${loc}`
   const apiKey = settings.searchApiKey
   const mediaType = media
-  const searchApi = `https://api.themoviedb.org/3/search/multi?api_key=${apiKey}&language=${langLoc}&query=${searchInput}&page=${page}&include_adult=false`
-  const trendApi = `https://api.themoviedb.org/3/trending/all/week?api_key=${apiKey}&page=${page}&include_adult=false`
-  const discApi = `https://api.themoviedb.org/3/discover/${mediaType}?api_key=${apiKey}&language=${lang}&sort_by=popularity.desc&include_adult=false&include_video=false&page=${page}&watch_region=${loc}&with_watch_monetization_types=flatrate`
-  const recApi = `https://api.themoviedb.org/3/${mediaType}/${id}/recommendations?api_key=${apiKey}&language=${langLoc}&page=${page}`
+  const searchApi = `${tmdbBaseApi}search/multi?api_key=${apiKey}&language=${langLoc}&query=${searchInput}&page=${page}&include_adult=false`
+  const trendApi = `${tmdbBaseApi}trending/all/week?api_key=${apiKey}&page=${page}&include_adult=false`
+  const discApi = `${tmdbBaseApi}discover/${mediaType}?api_key=${apiKey}&language=${lang}&sort_by=popularity.desc&include_adult=false&include_video=false&page=${page}&watch_region=${loc}&with_watch_monetization_types=flatrate`
+  const recApi = `${tmdbBaseApi}${mediaType}/${id}/recommendations?api_key=${apiKey}&language=${langLoc}&page=${page}`
   const apiCall = api === 0 ? searchApi : api === 1 ? trendApi : api === 2 ? recApi : discApi
   const formatTime = (n) => `${n / 60 ^ 0}:` + ('0' + n % 60).slice(-2)
   var getMedia = $.getJSON(apiCall)  
@@ -788,7 +790,7 @@ function getSearchResults(api, page, media, id) {
       let records = results.length
       $.each(results, (i, item) => {
         const media = item.media_type ? item.media_type : mediaType
-        const getDetails = $.getJSON(`https://api.themoviedb.org/3/${media}/${item.id}?api_key=${apiKey}&append_to_response=credits,watch/providers,genres,release_dates,content_ratings`)
+        const getDetails = $.getJSON(`${tmdbBaseApi}${media}/${item.id}?api_key=${apiKey}&append_to_response=credits,watch/providers,genres,release_dates,content_ratings`)
           .always(() => {
             if (getDetails.statusText !== 'success') return
             let cast = []
@@ -797,7 +799,7 @@ function getSearchResults(api, page, media, id) {
             try { providers = _.get(getDetails.responseJSON['watch/providers'].results, loc).flatrate } catch(err) { console.log(`No ${loc} stream providers found for id ${item.id}`) }
             let link = ''
             try { link = _.get(getDetails.responseJSON['watch/providers'].results, loc).link } catch(err) { console.log(`No stream link found for id ${item.id}`) }
-            link = link === '' ? `https://www.themoviedb.org/${media}/${item.id}/` : link
+            link = link === '' ? `${tmdbBaseUrl}${media}/${item.id}/` : link
             let genres = []
             try { genres = getDetails.responseJSON.genres } catch(err) { console.log(`No genres found for id ${item.id}`) }
             let rating = 'NA'
@@ -810,7 +812,7 @@ function getSearchResults(api, page, media, id) {
             } catch(err) { console.log(`No rating found for id ${item.id}`) }
             const title = item.title === undefined ? item.name : item.title
             const first_date = item.release_date === undefined ? item.first_air_date : item.release_date
-            const poster = item.poster_path ? `https://image.tmdb.org/t/p/original${item.poster_path}` : ''
+            const poster = item.poster_path ? `${tmdbImagePath}${item.poster_path}` : ''
             const year = getYear(first_date)
             const runtime = getDetails.responseJSON.runtime === undefined ? getDetails.responseJSON.episode_run_time[0] : getDetails.responseJSON.runtime
             const searchResult = {
@@ -887,7 +889,7 @@ function addSearchResult(result) {
     $.each(result.providers, (i, item) => {
       if (i < 8) {
         const providerIns = $($('#provider\\-image\\-instance').html())
-        $('.provider-image', providerIns).prop('src', `https://image.tmdb.org/t/p/original${item.logo_path}`).prop('title', `${item.provider_name}`).data('link', `${result.link}`)
+        $('.provider-image', providerIns).prop('src', `${tmdbImagePath}${item.logo_path}`).prop('title', `${item.provider_name}`).data('link', `${result.link}`)
         $('.result-provider-host', detailIns).append(providerIns)
       }
     })
@@ -1003,7 +1005,7 @@ $(document).on('click', '.result-detail-provider-image, .provider-image', functi
 // NF facet click handler
 $(document).on('click', '.nf-facet', function () {
   if ($(this).data('code') > 0) {
-    openStream('nf', `https://www.netflix.com/browse/genre/${$(this).data('code')}`)
+    openStream('nf', `${getDefaultStreams().find(ds => ds.id === 'nf').url}/browse/genre/${$(this).data('code')}`)
   }
 })
 
