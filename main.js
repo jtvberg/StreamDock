@@ -705,8 +705,7 @@ async function saveSettings() {
 let obsYtAds = null
 
 // YouTube ad script injection
-function ytAdsSkip(bv) {
-  if (bv === undefined) bv = view
+function ytAdsSkip(bv = view) {
   if (currentStream === 'yt') {
     if (ytSkipAds) {
       bv.webContents.executeJavaScript(`${ytAdOverlayClick.toString()}`).catch((err) => { console.error(err) })
@@ -796,8 +795,7 @@ function ytAdSkipDis() {
 let obsYtFs = null
 
 // YouTube ad script injection
-function ytFullScreen(bv) {
-  if (bv === undefined) bv = view
+function ytFullScreen(bv = view) {
   if (currentStream === 'yt' && ytScreenFull) {
     bv.webContents.executeJavaScript(`${ytFullScreenClick.toString()}`)
       .then(() => bv.webContents.focus())

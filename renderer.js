@@ -773,7 +773,7 @@ function getSearchResults(api, page, media, id) {
   const langLoc = `${lang}-${loc}`
   const apiKey = settings.searchApiKey
   const mediaType = media
-  const searchApi = `${tmdbBaseApi}search/multi?api_key=${apiKey}&language=${langLoc}&query=${searchInput}&page=${page}&include_adult=false`
+  const searchApi = `${tmdbBaseApi}search/multi?api_key=${apiKey}&language=${langLoc}&query=${encodeURIComponent(searchInput)}&page=${page}&include_adult=false`
   const trendApi = `${tmdbBaseApi}trending/all/week?api_key=${apiKey}&page=${page}&include_adult=false`
   const discApi = `${tmdbBaseApi}discover/${mediaType}?api_key=${apiKey}&language=${lang}&sort_by=popularity.desc&include_adult=false&include_video=false&page=${page}&watch_region=${loc}&with_watch_monetization_types=flatrate`
   const recApi = `${tmdbBaseApi}${mediaType}/${id}/recommendations?api_key=${apiKey}&language=${langLoc}&page=${page}`
