@@ -23,6 +23,7 @@ I also wanted a way to find where something might be streaming. The search on th
    - Provided instructions assume you are using npm as your package manager
    - Code has not been tested with other package managers such as Yarn
    - Navigate to directory and run ```npm install``` to install dependencies
+   - DO NOT USE THE NPM VERSION OF STREAMDOCK (I didn't put it there and it is old AF)
 
 ## Running the code
    Some npm scripts are already setup in package.json\
