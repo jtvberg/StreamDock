@@ -94,7 +94,7 @@ const createWindow = () => {
   })
 
   // Open DevTools (window, dev only)
-  isDev && win.webContents.openDevTools('detach')
+  // isDev && win.webContents.openDevTools('detach')
 
   // Create main browserView
   view = new BrowserView()
@@ -102,7 +102,7 @@ const createWindow = () => {
   // Show browserView when loaded
   view.webContents.on('did-finish-load', () => {
     // Open DevTools (view, dev only)
-    isDev && view.webContents.openDevTools('detach')
+    // isDev && view.webContents.openDevTools('detach')
     sendCurrentStream()
     setView()
     streamLoaded()
@@ -398,7 +398,8 @@ function streamChange(stream) {
 // Stream loaded
 function streamLoaded() {
   amzGetUrl()
-  setTimeout(ytFullScreen, 3000)
+  // Disabling as it can disable the viewer fullscreen button
+  // setTimeout(ytFullScreen, 3000)
   setTimeout(ytAdsSkip, 1000)  
   setTimeout(amzUpgradeDismiss, 3000)
   setTimeout(amzPreviewSkip, 3000)
@@ -585,26 +586,25 @@ function openNewin() {
     })
     child.webContents.once('did-finish-load', () => {
       child.webContents.executeJavaScript(`document.body.insertAdjacentHTML('beforeend', '<div class="sd-framless-header"></div><style> .sd-framless-header { position: fixed; top: 0; left: 0; width: 100%; height: 15px; opacity: 0; z-index: 99999; cursor: -webkit-grab; cursor: grab; -webkit-user-drag: none; -webkit-app-region: drag; } ::-webkit-scrollbar { display: none; } </style>')`)
-      setTimeout(ytFullScreen, 1500, child)
-      setTimeout(ytAdsSkip, 3000, child)
-      // amzUpgradeDismiss()
-      // amzPreviewSkip()
-      // amzRecapSkip()
-      // amzEpisodeNext()
-      // nfRecapSkip()
-      // nfEpisodeNext()
-      // hlRecapSkip()
-      // hlEpisodeNext()
-      // dpRecapSkip()
-      // dpEpisodeNext()
-      // hmRecapSkip()
-      // hmEpisodeNext()
-      // cbRecapSkip()
-      // cbEpisodeNext()
-      // atRecapSkip()
-      // atEpisodeNext()
-      // pcRecapSkip()
-      // pcEpisodeNext()
+      setTimeout(ytAdsSkip, 1500, child)
+      // setTimeout(amzUpgradeDismiss, 3000, child)
+      // setTimeout(amzPreviewSkip, 3000, child)
+      // setTimeout(amzRecapSkip, 3000, child)
+      // setTimeout(amzEpisodeNext, 3000, child)
+      // setTimeout(nfRecapSkip, 1000, child)
+      // setTimeout(nfEpisodeNext, 1000, child)
+      // setTimeout(hlRecapSkip, 3000, child)
+      // setTimeout(hlEpisodeNext, 3000, child)
+      // setTimeout(dpRecapSkip, 3000, child)
+      // setTimeout(dpEpisodeNext, 3000, child)
+      // setTimeout(hmRecapSkip, 3000, child)
+      // setTimeout(hmEpisodeNext, 3000, child)
+      // setTimeout(cbRecapSkip, 1000, child)
+      // setTimeout(cbEpisodeNext, 1000, child)
+      // setTimeout(atRecapSkip, 3000, child)
+      // setTimeout(atEpisodeNext, 3000, child)
+      // setTimeout(pcRecapSkip, 3000, child)
+      // setTimeout(pcEpisodeNext, 3000, child)
       isDev && child.webContents.openDevTools('detach')
     })
   })
@@ -879,12 +879,12 @@ function amzGetUrl() {
 let obsAmzUpgrade = null
 
 // Prime dismiss browser upgrade notification
-function amzUpgradeDismiss() {
+function amzUpgradeDismiss(bv = view) {
   if (!isLinux && currentStream === 'ap') {
-    view.webContents.executeJavaScript(`${amzUpgradeDismissClick.toString()}`).catch((err) => { console.error(err) })
-    view.webContents.executeJavaScript('try { let obsAmzUpgrade = null } catch(err) { console.error(err) }')
-      .then(() => view.webContents.executeJavaScript(`(${amzUpgradeDismissMut.toString()})()`))
-      .then(() => view.webContents.executeJavaScript(`(${amzUpgradeDismissObs.toString()})()`))
+    bv.webContents.executeJavaScript(`${amzUpgradeDismissClick.toString()}`).catch((err) => { console.error(err) })
+    bv.webContents.executeJavaScript('try { let obsAmzUpgrade = null } catch(err) { console.error(err) }')
+      .then(() => bv.webContents.executeJavaScript(`(${amzUpgradeDismissMut.toString()})()`))
+      .then(() => bv.webContents.executeJavaScript(`(${amzUpgradeDismissObs.toString()})()`))
       .catch((err) => { console.error(err) })
   }
 }
@@ -931,7 +931,7 @@ let eleAmzPreview = null
 let obsEleAmzPreview = null
 
 // Skip/close Prime previews
-function amzPreviewSkip() {
+function amzPreviewSkip(bv = view) {
   if (amzSkipPreview && currentStream === 'ap') {
     eleAmzPreview = 'fu4rd6c'
     obsEleAmzPreview = '.webPlayerUIContainer'
@@ -939,15 +939,15 @@ function amzPreviewSkip() {
       eleAmzPreview = 'adSkipButton'
       obsEleAmzPreview = '.bottomPanel'
     }
-    view.webContents.executeJavaScript(`${amzPrevSkipClick.toString()}`).catch((err) => { console.error(err) })
-    view.webContents.executeJavaScript('let obsAmzPreview = null')
-      .then(() => view.webContents.executeJavaScript(`let eleAmzPreview = '${eleAmzPreview}'`))
-      .then(() => view.webContents.executeJavaScript(`let obsEleAmzPreview = '${obsEleAmzPreview}'`))
-      .then(() => view.webContents.executeJavaScript(`(${amzPreviewSkipMut.toString()})()`))
-      .then(() => view.webContents.executeJavaScript(`(${amzPreviewSkipObs.toString()})()`))
+    bv.webContents.executeJavaScript(`${amzPrevSkipClick.toString()}`).catch((err) => { console.error(err) })
+    bv.webContents.executeJavaScript('let obsAmzPreview = null')
+      .then(() => bv.webContents.executeJavaScript(`let eleAmzPreview = '${eleAmzPreview}'`))
+      .then(() => bv.webContents.executeJavaScript(`let obsEleAmzPreview = '${obsEleAmzPreview}'`))
+      .then(() => bv.webContents.executeJavaScript(`(${amzPreviewSkipMut.toString()})()`))
+      .then(() => bv.webContents.executeJavaScript(`(${amzPreviewSkipObs.toString()})()`))
       .catch((err) => { console.error(err) })
   } else if (currentStream === 'ap') {
-    view.webContents.executeJavaScript(`(${amzPreviewSkipDis.toString()})()`).catch((err) => { console.error(err) })
+    bv.webContents.executeJavaScript(`(${amzPreviewSkipDis.toString()})()`).catch((err) => { console.error(err) })
   }
 }
 
@@ -1003,7 +1003,7 @@ let eleAmzRecap = null
 let obsEleAmzRecap = null
 
 // Skip/close Prime episode recap & intros
-function amzRecapSkip() {
+function amzRecapSkip(bv = view) {
   if (amzSkipRecap && currentStream === 'ap') {
     eleAmzRecap = 'atvwebplayersdk-skipelement-button'
     obsEleAmzRecap = '.webPlayerUIContainer'
@@ -1011,15 +1011,15 @@ function amzRecapSkip() {
       eleAmzRecap = 'skipElement'
       obsEleAmzRecap = '.notificationsWrapper'
     }
-    view.webContents.executeJavaScript(`${amzRecapSkipClick.toString()}`).catch((err) => { console.error(err) })
-    view.webContents.executeJavaScript('let obsAmzRecap = null')
-      .then(() => view.webContents.executeJavaScript(`let eleAmzRecap = '${eleAmzRecap}'`))
-      .then(() => view.webContents.executeJavaScript(`let obsEleAmzRecap = '${obsEleAmzRecap}'`))
-      .then(() => view.webContents.executeJavaScript(`(${amzRecapSkipMut.toString()})()`))
-      .then(() => view.webContents.executeJavaScript(`(${amzRecapSkipObs.toString()})()`))
+    bv.webContents.executeJavaScript(`${amzRecapSkipClick.toString()}`).catch((err) => { console.error(err) })
+    bv.webContents.executeJavaScript('let obsAmzRecap = null')
+      .then(() => bv.webContents.executeJavaScript(`let eleAmzRecap = '${eleAmzRecap}'`))
+      .then(() => bv.webContents.executeJavaScript(`let obsEleAmzRecap = '${obsEleAmzRecap}'`))
+      .then(() => bv.webContents.executeJavaScript(`(${amzRecapSkipMut.toString()})()`))
+      .then(() => bv.webContents.executeJavaScript(`(${amzRecapSkipObs.toString()})()`))
       .catch((err) => { console.error(err) })
   } else if (currentStream === 'ap') {
-    view.webContents.executeJavaScript(`(${amzRecapSkipDis.toString()})()`).catch((err) => { console.error(err) })
+    bv.webContents.executeJavaScript(`(${amzRecapSkipDis.toString()})()`).catch((err) => { console.error(err) })
   }
 }
 
@@ -1075,7 +1075,7 @@ let eleAmzNext = null
 let obsEleAmzNext = null
 
 // Automatically start next Prime episode
-function amzEpisodeNext() {
+function amzEpisodeNext(bv = view) {
   if (amzNextEpisode && currentStream === 'ap') {
     eleAmzNext = 'atvwebplayersdk-nextupcard-button'
     obsEleAmzNext = '.atvwebplayersdk-nextupcard-wrapper'
@@ -1083,15 +1083,15 @@ function amzEpisodeNext() {
       eleAmzNext = 'nextUpCard'
       obsEleAmzNext = '.notificationsWrapper'
     }
-    view.webContents.executeJavaScript(`${amzEpisodeNextClick.toString()}`).catch((err) => { console.error(err) })
-    view.webContents.executeJavaScript('let obsAmzNext = null')
-      .then(() => view.webContents.executeJavaScript(`let eleAmzNext = '${eleAmzNext}'`))
-      .then(() => view.webContents.executeJavaScript(`let obsEleAmzNext = '${obsEleAmzNext}'`))
-      .then(() => view.webContents.executeJavaScript(`(${amzEpisodeNextMut.toString()})()`))
-      .then(() => view.webContents.executeJavaScript(`(${amzEpisodeNextObs.toString()})()`))
+    bv.webContents.executeJavaScript(`${amzEpisodeNextClick.toString()}`).catch((err) => { console.error(err) })
+    bv.webContents.executeJavaScript('let obsAmzNext = null')
+      .then(() => bv.webContents.executeJavaScript(`let eleAmzNext = '${eleAmzNext}'`))
+      .then(() => bv.webContents.executeJavaScript(`let obsEleAmzNext = '${obsEleAmzNext}'`))
+      .then(() => bv.webContents.executeJavaScript(`(${amzEpisodeNextMut.toString()})()`))
+      .then(() => bv.webContents.executeJavaScript(`(${amzEpisodeNextObs.toString()})()`))
       .catch((err) => { console.error(err) })
   } else if (currentStream === 'ap') {
-    view.webContents.executeJavaScript(`(${amzEpisodeNextDis.toString()})()`).catch((err) => { console.error(err) })
+    bv.webContents.executeJavaScript(`(${amzEpisodeNextDis.toString()})()`).catch((err) => { console.error(err) })
   }
 }
 
@@ -1141,15 +1141,15 @@ function amzEpisodeNextDis() {
 let obsNfSkip = null
 
 // Skip/close Netlfix episode recap & intros
-function nfRecapSkip() {
+function nfRecapSkip(bv = view) {
   if (nfSkipRecap && currentStream === 'nf') {
-    view.webContents.executeJavaScript(`${nfRecapSkipClick.toString()}`).catch((err) => { console.error(err) })
-    view.webContents.executeJavaScript('try { let obsNfSkip = null } catch(err) { console.error(err) }')
-      .then(() => view.webContents.executeJavaScript(`(${nfRecapSkipMut.toString()})()`))
-      .then(() => view.webContents.executeJavaScript(`(${nfRecapSkipObs.toString()})()`))
+    bv.webContents.executeJavaScript(`${nfRecapSkipClick.toString()}`).catch((err) => { console.error(err) })
+    bv.webContents.executeJavaScript('try { let obsNfSkip = null } catch(err) { console.error(err) }')
+      .then(() => bv.webContents.executeJavaScript(`(${nfRecapSkipMut.toString()})()`))
+      .then(() => bv.webContents.executeJavaScript(`(${nfRecapSkipObs.toString()})()`))
       .catch((err) => { console.error(err) })
   } else if (currentStream === 'nf') {
-    view.webContents.executeJavaScript(`(${nfRecapSkipDis.toString()})()`).catch((err) => { console.error(err) })
+    bv.webContents.executeJavaScript(`(${nfRecapSkipDis.toString()})()`).catch((err) => { console.error(err) })
   }
 }
 
@@ -1207,15 +1207,15 @@ function nfRecapSkipDis() {
 let obsNfNext = null
 
 // Automatically start next Netlfix episode
-function nfEpisodeNext() {
+function nfEpisodeNext(bv = view) {
   if (nfNextEpisode && currentStream === 'nf') {
-    view.webContents.executeJavaScript(`${nfEpisodeNextClick.toString()}`).catch((err) => { console.error(err) })
-    view.webContents.executeJavaScript('try { let obsNfNext = null } catch(err) { console.error(err) }')
-      .then(() => view.webContents.executeJavaScript(`(${nfEpisodeNextMut.toString()})()`))
-      .then(() => view.webContents.executeJavaScript(`(${nfEpisodeNextObs.toString()})()`))
+    bv.webContents.executeJavaScript(`${nfEpisodeNextClick.toString()}`).catch((err) => { console.error(err) })
+    bv.webContents.executeJavaScript('try { let obsNfNext = null } catch(err) { console.error(err) }')
+      .then(() => bv.webContents.executeJavaScript(`(${nfEpisodeNextMut.toString()})()`))
+      .then(() => bv.webContents.executeJavaScript(`(${nfEpisodeNextObs.toString()})()`))
       .catch((err) => { console.error(err) })
   } else if (currentStream === 'nf') {
-    view.webContents.executeJavaScript(`(${nfEpisodeNextDis.toString()})()`).catch((err) => { console.error(err) })
+    bv.webContents.executeJavaScript(`(${nfEpisodeNextDis.toString()})()`).catch((err) => { console.error(err) })
   }
 }
 
@@ -1276,15 +1276,15 @@ function nfEpisodeNextDis() {
 let obsHlRecapSkip = null
 
 // Hulu recap & credits script injection
-function hlRecapSkip() {
+function hlRecapSkip(bv = view) {
   if (hlSkipRecap && currentStream === 'hl') {
-    view.webContents.executeJavaScript(`${hlRecapSkipClick.toString()}`).catch((err) => { console.error(err) })
-    view.webContents.executeJavaScript('try { let obsHlRecapSkip = null } catch(err) { console.error(err) }')
-      .then(() => view.webContents.executeJavaScript(`(${hlRecapSkipMut.toString()})()`))
-      .then(() => view.webContents.executeJavaScript(`(${hlRecapSkipObs.toString()})()`))
+    bv.webContents.executeJavaScript(`${hlRecapSkipClick.toString()}`).catch((err) => { console.error(err) })
+    bv.webContents.executeJavaScript('try { let obsHlRecapSkip = null } catch(err) { console.error(err) }')
+      .then(() => bv.webContents.executeJavaScript(`(${hlRecapSkipMut.toString()})()`))
+      .then(() => bv.webContents.executeJavaScript(`(${hlRecapSkipObs.toString()})()`))
       .catch((err) => { console.error(err) })
   } else if (currentStream === 'hl') {
-    view.webContents.executeJavaScript(`(${hlRecapSkipDis.toString()})()`).catch((err) => { console.error(err) })
+    bv.webContents.executeJavaScript(`(${hlRecapSkipDis.toString()})()`).catch((err) => { console.error(err) })
   }
 }
 
@@ -1332,20 +1332,20 @@ let obsHlNextImp = null
 let obsHlNextBool = true
 
 // Automatically start next Hulu episode
-function hlEpisodeNext() {
+function hlEpisodeNext(bv = view) {
   if (hlNextEpisode && currentStream === 'hl') {
-    view.webContents.executeJavaScript('let obsHlNextBool = true')
-    view.webContents.executeJavaScript(`${hlEpisodeNextClick.toString()}`).catch((err) => { console.error(err) })
-    view.webContents.executeJavaScript('try { let obsHlNext = null } catch(err) { console.error(err) }')
-      .then(() => view.webContents.executeJavaScript(`(${hlEpisodeNextMut.toString()})()`))
-      .then(() => view.webContents.executeJavaScript(`${hlEpisodeNextObs.toString()}`))
+    bv.webContents.executeJavaScript('let obsHlNextBool = true')
+    bv.webContents.executeJavaScript(`${hlEpisodeNextClick.toString()}`).catch((err) => { console.error(err) })
+    bv.webContents.executeJavaScript('try { let obsHlNext = null } catch(err) { console.error(err) }')
+      .then(() => bv.webContents.executeJavaScript(`(${hlEpisodeNextMut.toString()})()`))
+      .then(() => bv.webContents.executeJavaScript(`${hlEpisodeNextObs.toString()}`))
       .catch((err) => { console.error(err) })
-    view.webContents.executeJavaScript('try { let obsHlNextImp = null } catch(err) { console.error(err) }')
-      .then(() => view.webContents.executeJavaScript(`(${hlEpisodeNextImpMut.toString()})()`))
-      .then(() => view.webContents.executeJavaScript(`(${hlEpisodeNextImpObs.toString()})()`))
+    bv.webContents.executeJavaScript('try { let obsHlNextImp = null } catch(err) { console.error(err) }')
+      .then(() => bv.webContents.executeJavaScript(`(${hlEpisodeNextImpMut.toString()})()`))
+      .then(() => bv.webContents.executeJavaScript(`(${hlEpisodeNextImpObs.toString()})()`))
       .catch((err) => { console.error(err) })
   } else if (currentStream === 'hl') {
-    view.webContents.executeJavaScript(`(${hlEpisodeNextDis.toString()})()`).catch((err) => { console.error(err) })
+    bv.webContents.executeJavaScript(`(${hlEpisodeNextDis.toString()})()`).catch((err) => { console.error(err) })
   }
 }
 
@@ -1424,15 +1424,15 @@ function hlEpisodeNextDis() {
 let obsDpRecap = null
 
 // Skip/close Disney episode recap & intros
-function dpRecapSkip() {
+function dpRecapSkip(bv = view) {
   if (dpSkipRecap && currentStream === 'dp') {
-    view.webContents.executeJavaScript(`${dpRecapSkipClick.toString()}`).catch((err) => { console.error(err) })
-    view.webContents.executeJavaScript('try { let obsDpRecap = null } catch(err) { console.error(err) }')
-      .then(() => view.webContents.executeJavaScript(`(${dpRecapSkipMut.toString()})()`))
-      .then(() => view.webContents.executeJavaScript(`(${dpRecapSkipObs.toString()})()`))
+    bv.webContents.executeJavaScript(`${dpRecapSkipClick.toString()}`).catch((err) => { console.error(err) })
+    bv.webContents.executeJavaScript('try { let obsDpRecap = null } catch(err) { console.error(err) }')
+      .then(() => bv.webContents.executeJavaScript(`(${dpRecapSkipMut.toString()})()`))
+      .then(() => bv.webContents.executeJavaScript(`(${dpRecapSkipObs.toString()})()`))
       .catch((err) => { console.error(err) })
   } else if (currentStream === 'dp') {
-    view.webContents.executeJavaScript(`(${dpRecapSkipDis.toString()})()`).catch((err) => { console.error(err) })
+    bv.webContents.executeJavaScript(`(${dpRecapSkipDis.toString()})()`).catch((err) => { console.error(err) })
   }
 }
 
@@ -1478,15 +1478,15 @@ function dpRecapSkipDis() {
 let obsDpNext = null
 
 // Automatically start next Disney episode
-function dpEpisodeNext() {
+function dpEpisodeNext(bv = view) {
   if (dpNextEpisode && currentStream === 'dp') {
-    view.webContents.executeJavaScript(`${dpEpisodeNextClick.toString()}`).catch((err) => { console.error(err) })
-    view.webContents.executeJavaScript('try { let obsDpNext = null } catch(err) { console.error(err) }')
-      .then(() => view.webContents.executeJavaScript(`(${dpEpisodeNextMut.toString()})()`))
-      .then(() => view.webContents.executeJavaScript(`(${dpEpisodeNextObs.toString()})()`))
+    bv.webContents.executeJavaScript(`${dpEpisodeNextClick.toString()}`).catch((err) => { console.error(err) })
+    bv.webContents.executeJavaScript('try { let obsDpNext = null } catch(err) { console.error(err) }')
+      .then(() => bv.webContents.executeJavaScript(`(${dpEpisodeNextMut.toString()})()`))
+      .then(() => bv.webContents.executeJavaScript(`(${dpEpisodeNextObs.toString()})()`))
       .catch((err) => { console.error(err) })
   } else if (currentStream === 'dp') {
-    view.webContents.executeJavaScript(`(${dpEpisodeNextDis.toString()})()`).catch((err) => { console.error(err) })
+    bv.webContents.executeJavaScript(`(${dpEpisodeNextDis.toString()})()`).catch((err) => { console.error(err) })
   }
 }
 
@@ -1536,15 +1536,15 @@ function dpEpisodeNextDis() {
 let obsHmRecap = null
 
 // Skip/close HBO episode recap & intros
-function hmRecapSkip() {
+function hmRecapSkip(bv = view) {
   if (hmSkipRecap && currentStream === 'hm') {
-    view.webContents.executeJavaScript(`${hmRecapSkipClick.toString()}`).catch((err) => { console.error(err) })
-    view.webContents.executeJavaScript('try { let obsHmRecap = null } catch(err) { console.error(err) }')
-      .then(() => view.webContents.executeJavaScript(`(${hmRecapSkipMut.toString()})()`))
-      .then(() => view.webContents.executeJavaScript(`(${hmRecapSkipObs.toString()})()`))
+    bv.webContents.executeJavaScript(`${hmRecapSkipClick.toString()}`).catch((err) => { console.error(err) })
+    bv.webContents.executeJavaScript('try { let obsHmRecap = null } catch(err) { console.error(err) }')
+      .then(() => bv.webContents.executeJavaScript(`(${hmRecapSkipMut.toString()})()`))
+      .then(() => bv.webContents.executeJavaScript(`(${hmRecapSkipObs.toString()})()`))
       .catch((err) => { console.error(err) })
   } else if (currentStream === 'hm') {
-    view.webContents.executeJavaScript(`(${hmRecapSkipDis.toString()})()`).catch((err) => { console.error(err) })
+    bv.webContents.executeJavaScript(`(${hmRecapSkipDis.toString()})()`).catch((err) => { console.error(err) })
   }
 }
 
@@ -1590,15 +1590,15 @@ function hmRecapSkipDis() {
 let obsHmNext = null
 
 // Automatically start next HBO episode
-function hmEpisodeNext() {
+function hmEpisodeNext(bv = view) {
   if (hmNextEpisode && currentStream === 'hm') {
-    view.webContents.executeJavaScript(`${hmEpisodeNextClick.toString()}`).catch((err) => { console.error(err) })
-    view.webContents.executeJavaScript('try { let obsHmNext = null } catch(err) { console.error(err) }')
-      .then(() => view.webContents.executeJavaScript(`(${hmEpisodeNextMut.toString()})()`))
-      .then(() => view.webContents.executeJavaScript(`(${hmEpisodeNextObs.toString()})()`))
+    bv.webContents.executeJavaScript(`${hmEpisodeNextClick.toString()}`).catch((err) => { console.error(err) })
+    bv.webContents.executeJavaScript('try { let obsHmNext = null } catch(err) { console.error(err) }')
+      .then(() => bv.webContents.executeJavaScript(`(${hmEpisodeNextMut.toString()})()`))
+      .then(() => bv.webContents.executeJavaScript(`(${hmEpisodeNextObs.toString()})()`))
       .catch((err) => { console.error(err) })
   } else if (currentStream === 'hm') {
-    view.webContents.executeJavaScript(`(${hmEpisodeNextDis.toString()})()`).catch((err) => { console.error(err) })
+    bv.webContents.executeJavaScript(`(${hmEpisodeNextDis.toString()})()`).catch((err) => { console.error(err) })
   }
 }
 
@@ -1648,15 +1648,15 @@ function hmEpisodeNextDis() {
 let obsCbRecap = null
 
 // Skip/close Paramount episode recap & intros
-function cbRecapSkip() {
+function cbRecapSkip(bv = view) {
   if (cbSkipRecap && currentStream === 'cb') {
-    view.webContents.executeJavaScript(`${cbRecapSkipClick.toString()}`).catch((err) => { console.error(err) })
-    view.webContents.executeJavaScript('try { let obsCbRecap = null } catch(err) { console.error(err) }')
-      .then(() => view.webContents.executeJavaScript(`(${cbRecapSkipMut.toString()})()`))
-      .then(() => view.webContents.executeJavaScript(`(${cbRecapSkipObs.toString()})()`))
+    bv.webContents.executeJavaScript(`${cbRecapSkipClick.toString()}`).catch((err) => { console.error(err) })
+    bv.webContents.executeJavaScript('try { let obsCbRecap = null } catch(err) { console.error(err) }')
+      .then(() => bv.webContents.executeJavaScript(`(${cbRecapSkipMut.toString()})()`))
+      .then(() => bv.webContents.executeJavaScript(`(${cbRecapSkipObs.toString()})()`))
       .catch((err) => { console.error(err) })
   } else if (currentStream === 'cb') {
-    view.webContents.executeJavaScript(`(${cbRecapSkipDis.toString()})()`).catch((err) => { console.error(err) })
+    bv.webContents.executeJavaScript(`(${cbRecapSkipDis.toString()})()`).catch((err) => { console.error(err) })
   }
 }
 
@@ -1706,15 +1706,15 @@ function cbRecapSkipDis() {
 let obsCbNext = null
 
 // Automatically start next Paramount episode
-function cbEpisodeNext() {
+function cbEpisodeNext(bv = view) {
   if (cbNextEpisode && currentStream === 'cb') {
-    view.webContents.executeJavaScript(`${cbEpisodeNextClick.toString()}`).catch((err) => { console.error(err) })
-    view.webContents.executeJavaScript('try { let obsCbNext = null } catch(err) { console.error(err) }')
-      .then(() => view.webContents.executeJavaScript(`(${cbEpisodeNextMut.toString()})()`))
-      .then(() => view.webContents.executeJavaScript(`(${cbEpisodeNextObs.toString()})()`))
+    bv.webContents.executeJavaScript(`${cbEpisodeNextClick.toString()}`).catch((err) => { console.error(err) })
+    bv.webContents.executeJavaScript('try { let obsCbNext = null } catch(err) { console.error(err) }')
+      .then(() => bv.webContents.executeJavaScript(`(${cbEpisodeNextMut.toString()})()`))
+      .then(() => bv.webContents.executeJavaScript(`(${cbEpisodeNextObs.toString()})()`))
       .catch((err) => { console.error(err) })
   } else if (currentStream === 'cb') {
-    view.webContents.executeJavaScript(`(${cbEpisodeNextDis.toString()})()`).catch((err) => { console.error(err) })
+    bv.webContents.executeJavaScript(`(${cbEpisodeNextDis.toString()})()`).catch((err) => { console.error(err) })
   }
 }
 
@@ -1768,15 +1768,15 @@ function cbEpisodeNextDis() {
 let obsPcRecap = null
 
 // Skip/close Paramount episode recap & intros
-function pcRecapSkip() {
+function pcRecapSkip(bv = view) {
   if (pcSkipRecap && currentStream === 'pc') {
-    view.webContents.executeJavaScript(`${pcRecapSkipClick.toString()}`).catch((err) => { console.error(err) })
-    view.webContents.executeJavaScript('try { let obsPcRecap = null } catch(err) { console.error(err) }')
-      .then(() => view.webContents.executeJavaScript(`(${pcRecapSkipMut.toString()})()`))
-      .then(() => view.webContents.executeJavaScript(`(${pcRecapSkipObs.toString()})()`))
+    bv.webContents.executeJavaScript(`${pcRecapSkipClick.toString()}`).catch((err) => { console.error(err) })
+    bv.webContents.executeJavaScript('try { let obsPcRecap = null } catch(err) { console.error(err) }')
+      .then(() => bv.webContents.executeJavaScript(`(${pcRecapSkipMut.toString()})()`))
+      .then(() => bv.webContents.executeJavaScript(`(${pcRecapSkipObs.toString()})()`))
       .catch((err) => { console.error(err) })
   } else if (currentStream === 'pc') {
-    view.webContents.executeJavaScript(`(${pcRecapSkipDis.toString()})()`).catch((err) => { console.error(err) })
+    bv.webContents.executeJavaScript(`(${pcRecapSkipDis.toString()})()`).catch((err) => { console.error(err) })
   }
 }
 
@@ -1826,15 +1826,15 @@ function pcRecapSkipDis() {
 let obsPcNext = null
 
 // Automatically start next Paramount episode
-function pcEpisodeNext() {
+function pcEpisodeNext(bv = view) {
   if (pcNextEpisode && currentStream === 'pc') {
-    view.webContents.executeJavaScript(`${pcEpisodeNextClick.toString()}`).catch((err) => { console.error(err) })
-    view.webContents.executeJavaScript('try { let obsPcNext = null } catch(err) { console.error(err) }')
-      .then(() => view.webContents.executeJavaScript(`(${pcEpisodeNextMut.toString()})()`))
-      .then(() => view.webContents.executeJavaScript(`(${pcEpisodeNextObs.toString()})()`))
+    bv.webContents.executeJavaScript(`${pcEpisodeNextClick.toString()}`).catch((err) => { console.error(err) })
+    bv.webContents.executeJavaScript('try { let obsPcNext = null } catch(err) { console.error(err) }')
+      .then(() => bv.webContents.executeJavaScript(`(${pcEpisodeNextMut.toString()})()`))
+      .then(() => bv.webContents.executeJavaScript(`(${pcEpisodeNextObs.toString()})()`))
       .catch((err) => { console.error(err) })
   } else if (currentStream === 'pc') {
-    view.webContents.executeJavaScript(`(${pcEpisodeNextDis.toString()})()`).catch((err) => { console.error(err) })
+    bv.webContents.executeJavaScript(`(${pcEpisodeNextDis.toString()})()`).catch((err) => { console.error(err) })
   }
 }
 
@@ -1888,15 +1888,15 @@ function pcEpisodeNextDis() {
 let obsAtRecap = null
 
 // Skip/close Apple TV episode recap & intros
-function atRecapSkip() {
+function atRecapSkip(bv = view) {
   if (atSkipRecap && currentStream === 'at') {
-    view.webContents.executeJavaScript(`${atRecapSkipClick.toString()}`).catch((err) => { console.error(err) })
-    view.webContents.executeJavaScript('try { let obsAtRecap = null } catch(err) { console.error(err) }')
-      .then(() => view.webContents.executeJavaScript(`(${atRecapSkipMut.toString()})()`))
-      .then(() => view.webContents.executeJavaScript(`(${atRecapSkipObs.toString()})()`))
+    bv.webContents.executeJavaScript(`${atRecapSkipClick.toString()}`).catch((err) => { console.error(err) })
+    bv.webContents.executeJavaScript('try { let obsAtRecap = null } catch(err) { console.error(err) }')
+      .then(() => bv.webContents.executeJavaScript(`(${atRecapSkipMut.toString()})()`))
+      .then(() => bv.webContents.executeJavaScript(`(${atRecapSkipObs.toString()})()`))
       .catch((err) => { console.error(err) })
   } else if (currentStream === 'at') {
-    view.webContents.executeJavaScript(`(${atRecapSkipDis.toString()})()`).catch((err) => { console.error(err) })
+    bv.webContents.executeJavaScript(`(${atRecapSkipDis.toString()})()`).catch((err) => { console.error(err) })
   }
 }
 
@@ -1946,15 +1946,15 @@ function atRecapSkipDis() {
 let obsAtNext = null
 
 // Automatically start next Apple TV episode
-function atEpisodeNext() {
+function atEpisodeNext(bv = view) {
   if (atNextEpisode && currentStream === 'at') {
-    view.webContents.executeJavaScript(`${atEpisodeNextClick.toString()}`).catch((err) => { console.error(err) })
-    view.webContents.executeJavaScript('try { let obsAtNext = null } catch(err) { console.error(err) }')
-      .then(() => view.webContents.executeJavaScript(`(${atEpisodeNextMut.toString()})()`))
-      .then(() => view.webContents.executeJavaScript(`(${atEpisodeNextObs.toString()})()`))
+    bv.webContents.executeJavaScript(`${atEpisodeNextClick.toString()}`).catch((err) => { console.error(err) })
+    bv.webContents.executeJavaScript('try { let obsAtNext = null } catch(err) { console.error(err) }')
+      .then(() => bv.webContents.executeJavaScript(`(${atEpisodeNextMut.toString()})()`))
+      .then(() => bv.webContents.executeJavaScript(`(${atEpisodeNextObs.toString()})()`))
       .catch((err) => { console.error(err) })
   } else if (currentStream === 'at') {
-    view.webContents.executeJavaScript(`(${atEpisodeNextDis.toString()})()`).catch((err) => { console.error(err) })
+    bv.webContents.executeJavaScript(`(${atEpisodeNextDis.toString()})()`).catch((err) => { console.error(err) })
   }
 }
 
@@ -2160,7 +2160,7 @@ ipcMain.on('set-ytadskip', (e, bool) => {
 // IPC channel to auto fullscreen YouTube
 ipcMain.on('set-ytfullscreen', (e, bool) => {
   ytScreenFull = bool
-  ytFullScreen()
+  // ytFullScreen()
 })
 
 // IPC channel to skip Prime previews

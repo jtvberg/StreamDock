@@ -22,11 +22,11 @@
   "author": "jtvberg <streamdockapp@gmail.com> (https://github.com/jtvberg/StreamDock)",
   "license": "MIT",
   "devDependencies": {
-    "electron": "github:castlabs/electron-releases#v18.3.15+wvcus",
+    "electron": "github:castlabs/electron-releases#v19.0.9+wvcus",
     "electron-builder": "^23.6.0",
     "electron-notarize": "^1.2.2",
     "electron-reload": "^1.5.0",
-    "eslint": "^8.30.0"
+    "eslint": "^8.34.0"
   },
   "dependencies": {
     "@fortawesome/fontawesome-free": "^5.15.4",
@@ -42,7 +42,6 @@
       "mirror": "https://github.com/castlabs/electron-releases/releases/download/v"
     },
     "afterPack": "./build/afterPack.js",
-    "afterSign": "./build/afterSign.js",
     "mac": {
       "category": "public.app-category.video",
       "entitlements": "./entitlements.plist"
