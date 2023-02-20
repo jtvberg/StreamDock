@@ -400,7 +400,7 @@ function streamLoaded() {
   amzGetUrl()
   // Disabling as it can disable the viewer fullscreen button
   // setTimeout(ytFullScreen, 3000)
-  setTimeout(ytAdsSkip, 1000)  
+  setTimeout(ytAdsSkip, 1500)  
   setTimeout(amzUpgradeDismiss, 3000)
   setTimeout(amzPreviewSkip, 3000)
   setTimeout(amzRecapSkip, 3000)
@@ -1962,8 +1962,8 @@ function atEpisodeNext(bv = view) {
 function atEpisodeNextClick() {
   try {
     console.log('next episode')
-    if (document.querySelector('amp-up-next').shadowRoot.querySelector('.up-next__button') != undefined) {
-      document.querySelector('amp-up-next').shadowRoot.querySelector('.up-next__button').click()
+    if (document.querySelector('.post-play__cta-button') != undefined) {
+      document.querySelector('.post-play__cta-button').click()
     }
   } catch(err) { console.error(err) }
 }
@@ -1974,7 +1974,7 @@ function atEpisodeNextMut() {
     console.log('next mut')
     obsAtNext = new MutationObserver((ml) => {
       for(const mut of ml) {
-        if (mut.type === 'childList') {
+        if (mut.type === 'childList' && mut.addedNodes[0] && mut.addedNodes[0].classList && mut.addedNodes[0].classList.contains('playback-modal__blur')) {
           atEpisodeNextClick()
         }
       }
@@ -1986,7 +1986,7 @@ function atEpisodeNextMut() {
 function atEpisodeNextObs() {
   try {
     console.log('next obs')
-    obsAtNext.observe(document.querySelector('amp-up-next').shadowRoot.querySelector('.up-next__button'), { childList: true })
+    obsAtNext.observe(document.querySelector('.playback-modal'), { childList: true })
   } catch (err) { console.error(err) }
 }
 
