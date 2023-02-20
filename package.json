@@ -36,6 +36,12 @@
     "lodash": "^4.17.21"
   },
   "build": {
+    "files": [
+      "**/*",
+      "!private/",
+      "!test.*",
+      "!*eslint*"
+    ],
     "appId": "com.jtvberg.streamdock",
     "copyright": "Copyright jtvberg",
     "electronDownload": {
