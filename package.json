@@ -55,7 +55,6 @@
     },
     "win": {
       "certificateFile": "private/jtvberg.p12",
-      "certificatePassword": "",
       "verifyUpdateCodeSignature": false,
       "target": [
         "nsis",
