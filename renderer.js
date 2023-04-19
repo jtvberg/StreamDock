@@ -779,7 +779,7 @@ function getSearchResults(api, page, media, id) {
   const recApi = `${tmdbBaseApi}${mediaType}/${id}/recommendations?api_key=${apiKey}&language=${langLoc}&page=${page}`
   const apiCall = api === 0 ? searchApi : api === 1 ? trendApi : api === 2 ? recApi : discApi
   const formatTime = (n) => `${n / 60 ^ 0}:` + ('0' + n % 60).slice(-2)
-  var getMedia = $.getJSON(apiCall)  
+  var getMedia = $.getJSON(apiCall)
     .fail(() => {
       alert('Search query failed. Check that you have an internet connection and a valid API key.')
     })

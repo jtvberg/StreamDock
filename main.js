@@ -271,7 +271,7 @@ function pause() {
   }
 }
 
-// Amazon pause function
+// Apple pause function
 function atPause() {
   try {
     document.querySelector('apple-tv-plus-player').shadowRoot.querySelector('amp-video-player-internal').shadowRoot.querySelector('amp-video-player').shadowRoot.querySelector('video').pause()
@@ -2604,7 +2604,7 @@ function addStream(serv) {
     }
   })
   streamMenu.submenu.append(menuItem)
-  Menu.setApplicationMenu(menu)
+  Menu.setApplicationMenu(menu)  
 
   if (isMac) {
     touchBarItems.push(
