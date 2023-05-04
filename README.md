@@ -20,7 +20,7 @@
  - Child windows now get the full boat of scripted service features, but I won't be adding others like aspect ratio or always on top.
  - Search is still in place with some subtle UI changes. The initial search returns less info than before. This is to save on API calls. Getting all the details as before would require up to 21 calls per search. Now it is just 1 and the detail modal will get the rest as you click on a title. I may revisit that.
  - Resuming play when restoring the window now only activates if the video being restored was playing when you hid it. Used to be that if you had resume turned on it would resume play after restore whether it was playing or not.
- - There is a button in the advanded tab under settings you can use to wipe all your data from StreamDock. This will reset the app as if it was freshly installed and restart. This will log you out of all services and delete all bookmarks and updated settings. **This cannot be undone!**
+ - There is a button in the advanded tab under settings you can use to wipe all your data from StreamDock. This will reset the app as if it was freshly installed and restart. This will log you out of all services and delete all bookmarks and updated settings. ==**This cannot be undone!**==
  - Touchbar is out. Was anyone really using that?
  - Electron: Using the latest stable version.
  - Security: Node integration is now turned off and context isolation is turned on. A preload script only exposes node functionality as needed.
@@ -71,7 +71,7 @@
 
 ## Releases / Known Issues
  Bookmarks and settings from older versions of StreamDock will not show up properly in 2.0.0+
- **Note: If you are currently using StreamDock 1.x.x or older, I highly recommend you use the Clear Data funtion in the advanced section in the settings!**
+ ==**Note: If you are currently using StreamDock 1.x.x or older, I highly recommend you use the Clear Data funtion in the advanced section in the settings!**==
  
  The current release works on macOS (signed, notarized and tested on Monterey and Ventura), Windows 10/11 (self-signed) and Linux (tested on Mint).
 
