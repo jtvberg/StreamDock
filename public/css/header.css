@@ -1,0 +1,178 @@
+#header {
+  display: grid;
+  grid-template-rows: auto 1fr;
+  height: 100vh;
+  background: var(--color-control-black-trans);
+  overflow: hidden;
+  user-select: none;
+  opacity: 0;
+}
+
+.drag {
+  background-color: transparent;
+  flex-grow: 1;
+  min-width: 24px;
+  height: 30px;
+}
+
+#drag-win {
+  min-width: 88px;
+}
+
+#header-controls {
+  display: grid;
+  grid-template-columns: minmax(max-content, 1fr) minmax(0px, max-content) minmax(max-content, 1fr);
+  height: 30px;
+}
+
+#win-controls,
+#stream-controls,
+#app-controls {
+  display: flex;
+  align-items: center;
+  grid-row: 1;
+  margin: auto;
+  height: 100%;
+}
+
+#stream-controls {
+  grid-row: 1;
+  grid-column: 2;
+  width: -webkit-fill-available;
+  overflow-x: auto;
+}
+
+#app-controls {
+  grid-row: 1;
+  grid-column: 3;
+  width: 100%;
+}
+
+#win-controls {
+  grid-row: 1;
+  grid-column: 1;
+  width: 100%;
+}
+
+.win-control,
+.stream-control,
+.app-control {
+  display: flex;
+  min-width: 22px;
+  font-size: 1.25rem;
+  margin-inline: 2px;
+  align-items: center;
+  justify-content: center;
+  transition: color 250ms ease-out, background-color 200ms ease-out;
+}
+
+.stream-control {
+  border-radius: 3px;
+  height: 22px;
+  line-height: 1;
+}
+
+.win-control,
+.app-control {
+  color: var(--color-control-lightgray)
+}
+
+.app-control:hover {
+  color: var(--color-system-accent);
+}
+
+.win-control {
+  display: none;
+  justify-content: center;
+  align-items: center;
+  font-family: 'Segoe MDL2 Assets';
+  font-size: .7rem;
+  line-height: 2.6;
+  height: 30px;
+  padding: 0px 10px;
+  margin: 0px;
+  transition: background-color 100ms ease-in-out;
+}
+
+.win-control:hover {
+  background-color: var(--color-control-darkgray);
+}
+
+.win-close:hover {
+  background-color: var(--color-control-red);
+  color: var(--color-control-white);
+}
+
+.header-panels {
+  display: none;
+  overflow: hidden;
+  margin: 5px;
+}
+
+.lin-control {
+  font-family: 'Font Awesome 6 Free';
+  font-size: .5rem;
+  height: 14px;
+  min-width: 14px;
+  padding: 4px;
+  margin: 4px;
+  border-radius: 50%;
+}
+
+.lin-close {
+  font-size: .7rem;
+  color: var(--color-system-white);
+  background-color: var(--color-control-darkgray);
+}
+
+.lin-close:hover {
+  background-color: var(--color-system-accent);
+}
+
+#home-nav,
+#settings-nav {
+  display: flex;
+  flex-flow: column;
+  gap: 5px;
+  user-select: none;
+  margin-right: 6px;
+}
+
+.home-heading,
+.settings-heading {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin: auto;
+  color: var(--color-control-white);
+}
+
+.home-nav-comp-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-size: .8rem;
+  padding-top: 6px;
+}
+
+.comp-second-btn {
+  font-size: 1.3rem;
+  margin-block: -6px;
+}
+
+.btn-divider {
+  height: 0px;
+  border: 2px solid var(--color-control-darkgray);
+  border-radius: 2px;
+}
+
+.toggled {
+  color: var(--color-system-accent-trans);
+}
+
+.toggled-bg {
+  background-color: var(--color-system-accent-trans);
+}
+
+.toggled-bg:hover {
+  background-color: var(--color-system-accent);
+}

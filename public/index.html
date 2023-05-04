@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <!-- <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'"> -->
+    <link rel="stylesheet" href="../node_modules/@fortawesome/fontawesome-free/css/all.min.css">
+    <link rel="stylesheet" href="./css/global.css">
+    <link rel="stylesheet" href="./css/header.css">
+    <link rel="stylesheet" href="./css/settings.css">
+    <link rel="stylesheet" href="./css/bookmarks.css">
+    <link rel="stylesheet" href="./css/search.css">
+    <title>StreamDock</title>
+  </head>
+  <body>
+    <div id="header">
+      <div id="header-controls">
+        <div id="win-controls">
+          <div class="win-control win-close" id="close-btn">&#xE8BB;</div>
+          <div class="win-control" id="max-btn">&#xE922;</div>
+          <div class="win-control" id="min-btn">&#xE921;</div>
+          <div id="drag-win" class="drag">
+        </div>
+        </div>
+        <div id="stream-controls">
+        </div>
+        <div id="app-controls">
+          <div id="drag-app" class="drag"></div>
+          <div id="back-btn" class="fas fa-arrow-left app-control" title="Go Back"></div>
+          <div id="home-btn" class="fas fa-house app-control panel-toggle" data-panel="home" title="Toggle Home Screen"></div>
+          <div id="bookmark-btn" class="fas fa-bookmark app-control" title="Bookmark"></div>
+          <div id="link-btn" class="fas fa-link app-control" title="Navigate to Link from Clipboard"></div>
+          <div id="newin-btn" class="fas fa-up-right-from-square app-control" title="Open in New Window"></div>
+          <div id="prefs-btn" class="fas fa-gear app-control panel-toggle" data-panel="settings" title="Toggle Settings"></div>
+          <div id="scaleh-btn" class="fas fa-up-down app-control" title="Scale Height to 16:9" style="margin: 0px -3px;"></div>
+          <div id="scalew-btn" class="fas fa-left-right app-control" title="Scale Width to 16:9"></div>
+          <div id="constrain-btn" class="fas fa-arrow-down-up-lock app-control" title="Lock Aspect Ratio"></div>
+          <div id="ontop-btn" class="fas fa-lock app-control" title="Toggle Window On Top"></div>
+        </div>
+      </div>
+      <div id="settings-panel" class="header-panels" data-panel="settings">
+        <div id="settings-nav">
+          <button class="settings-nav-btn fas fa-s" data-layout="streams" title="Stream Editor"></button>
+          <button class="settings-nav-btn fas fa-sliders" data-layout="prefs" title="Preferences"></button>
+          <button class="settings-nav-btn fas fa-play" data-layout="service" title="Service-Specific Preferences"></button>
+          <button class="settings-nav-btn fas fa-magnifying-glass" data-layout="search" title="Search Settings"></button>
+          <button class="settings-nav-btn fas fa-screwdriver-wrench" data-layout="advanced" title="Advanced"></button>
+          <button class="settings-nav-btn fas fa-info-circle" data-layout="about" title="About"></button>
+          <div class="btn-divider"></div>
+          <button id="stream-restore-btn" class="settings-layout-btn fas fa-trash-arrow-up" data-layout="streams" title="Restore Missing Default Streams"></button>
+          <button id="open-devtools-btn" class="settings-layout-btn fas fa-toolbox" data-layout="advanced" title="Open Devtools"></button>
+          <button id="stream-done-btn" class="fas far fa-check-circle toggled-bg" data-layout="streams" title="Exit Lineup Edit"></button>
+        </div>
+        <div id="streams-layout" class="settings-layout">
+          <div class="settings-layout-header">
+            <div class="settings-heading">Stream Editor</div>
+          </div>
+          <div id="streams-edit"></div>
+        </div>
+        <div id="prefs-layout" class="settings-layout">
+          <div class="settings-layout-header">
+            <div class="settings-heading">General Preferences</div>
+          </div>
+        </div>
+        <div id="service-layout" class="settings-layout">
+          <div class="settings-layout-header">
+            <div class="settings-heading">Streaming Service Options</div>
+          </div>
+        </div>
+        <div id="search-layout" class="settings-layout">
+          <div class="settings-layout-header">
+            <div class="settings-heading">Search Settings</div>
+          </div>
+        </div>
+        <div id="advanced-layout" class="settings-layout">
+          <div class="settings-layout-header">
+            <div class="settings-heading">Advanced</div>
+          </div>
+        </div>
+        <div id="about-layout" class="settings-layout">
+          <div class="settings-layout-header">
+            <div class="settings-heading">About</div>
+          </div>
+          <div id="about-info">
+            <img class="about-icon" src="./res/icon.png">
+            <div id="about-name"></div>
+            <div id="about-ver"></div>
+            <div><span class="far fa-copyright"></span><span id="about-copyright"></span></div>
+            <div class="about-help">
+              <div id="about-repo-btn" class="about-help-link fab fa-github" title="Copy Repo Link"></div>
+              <div id="about-email-btn" class="about-help-link fas fa-envelope" title="Copy Email Address"></div>
+              <div id="about-bug-btn" class="about-help-link fas fa-bug" title="Copy Bug Report Link"></div>
+            </div>
+            <div id="about-attribution"></div>
+          </div>
+        </div>
+      </div>
+      <div id="home-panel" class="header-panels" data-panel="home">
+        <div id="home-nav">
+          <button class="home-nav-btn fas fa-book-bookmark" data-layout="bookmark" title="Bookmarks"></button>
+          <button id="search-nav-btn" class="home-nav-btn fas fa-magnifying-glass" data-layout="search" title="Search"></button>
+          <div class="btn-divider"></div>
+          <button id="bookmark-list-btn" class="home-layout-btn fas fa-list-ul" data-layout="bookmark" title="List View"></button>
+          <button id="bookmark-sort-old-btn" class="home-layout-btn home-nav-comp-btn" data-layout="bookmark" title="Sort Oldest to Newest">
+            <div class="fas fa-clock"></div>
+            <div class="fas fa-caret-down comp-second-btn"></div>
+          </button>
+          <button id="bookmark-sort-new-btn" class="home-layout-btn home-nav-comp-btn" data-layout="bookmark" title="Sort Newest to Oldest">
+            <div class="fas fa-caret-up comp-second-btn"></div>
+            <div class="fas fa-clock"></div>
+          </button>
+          <button id="bookmark-sort-title-btn" class="home-layout-btn home-nav-comp-btn" data-layout="bookmark" title="Sort A to Z (by Title)">
+            <div class="fas fa-t"></div>
+            <div class="fas fa-caret-down comp-second-btn"></div>
+          </button>
+          <button id="bookmark-sort-host-btn" class="home-layout-btn home-nav-comp-btn" data-layout="bookmark" title="Sort A to Z (by URL)">
+            <div class="fas fa-link"></div>
+            <div class="fas fa-caret-down comp-second-btn"></div>
+          </button>
+          <button id="bookmark-newlink-btn" class="home-layout-btn fas fa-link" data-layout="bookmark" title="Boomark from Clipboard"></button>
+          <button id="search-hot-btn" class="home-layout-btn fas fa-fire-flame-curved" data-layout="search" title="Hot Titles"></button>
+          <button id="search-tv-btn" class="home-layout-btn fas fas fa-tv" data-layout="search" title="Top Streaming TV Title"></button>
+          <button id="search-film-btn" class="home-layout-btn fas fa-film" data-layout="search" title="Top Streaming Film Titles"></button>
+          <button id="search-clear-btn" class="home-layout-btn fas fa-circle-xmark" data-layout="search" title="Clear Results"></button>
+        </div>
+        <div id="bookmark-home-layout" class="home-layout">
+          <div id="bookmarks"></div>
+          <div id="bookmark-list"></div>
+        </div>
+        <div id="search-home-layout" class="home-layout">
+          <div id="search-box">
+            <input id="search-input" type="text" placeholder="Search Term">
+          </div>
+          <div id="search-noresults">
+            <div class="result-glyph fa fa-ban"></div>
+            <div>No Results Found</div>
+          </div>
+          <div id="search-error">
+            <div class="result-glyph fas fa-exclamation-triangle"></div>
+            <div>Error</div>
+            <div>Check your connection and make sure your API key is set.</div>
+          </div>
+          <div id="search-results">
+          </div>
+          <div id="search-overlay">
+            <div id="modal">
+              <div id="modal-header">
+                <div id="modal-title" title="Title (Year)"></div>
+                <div id="modal-title-props">
+                  <div id="modal-rating" title="Rating"></div>
+                  <div class="fas fa-circle fa-xs modal-title-dots"></div>
+                  <div id="modal-media" title="Film or Total Seasons/Episodes"></div>
+                  <div class="fas fa-circle fa-xs modal-title-dots"></div>
+                  <div id="modal-genre" title="Genres"></div>
+                  <div class="fas fa-circle fa-xs modal-title-dots"></div>
+                  <div id="modal-runtime" title="Runtime"></div>
+                  <div class="fas fa-circle fa-xs modal-title-dots"></div>
+                  <div id="modal-language" title="Original Language"></div>
+                  <div class="fas fa-circle fa-xs modal-title-dots"></div>
+                  <div id="modal-bookmark" class="fas fa-bookmark" title="Bookmark this TMDB Page"></div>
+                  <div class="fas fa-circle fa-xs modal-title-dots"></div>
+                  <div id="modal-recommendations" class="fas fa-thumbs-up" title="Get Recommendations based on this Title"></div>
+                </div>
+              </div>
+              <div id="modal-body">
+                <img id="modal-poster"></img>
+                <div id="modal-noposter" class="fa fa-ban"></div>
+                <div id="modal-content">
+                  <div id="modal-tagline"></div>
+                  <div class="modal-heading">Overview</div>
+                  <div id="modal-overview"></div>
+                  <div class="modal-heading">Top Billed Cast</div>
+                  <div id="modal-cast"></div>
+                </div>
+              </div>
+              <div id="modal-footer">
+                <img id="modal-tmdb-logo" src="./res/tmdb.png" title="Open Title in TMDB"></img>
+                <div id="modal-providers"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script src="./js/renderer.js" type="module"></script>
+    <script src="./js/search.js" type="module"></script>
+  </body>
+</html>

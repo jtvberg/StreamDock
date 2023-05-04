@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'">
+    <link rel="stylesheet" href="../node_modules/@fortawesome/fontawesome-free/css/all.min.css">
+    <link rel="stylesheet" href="./css/global.css">
+    <link rel="stylesheet" href="./css/facets.css">
+  </head>
+  <body>
+    <div id="facet-panel">
+      <div id="facet-title">Genres</div>
+      <div id="facet-filter">
+        <input id="facet-input" placeholder="Filter" title="Filter Genres"></input>
+        <button id="facet-clear-btn" class="fas fa-filter-circle-xmark" title="Clear Filter"></button>
+      </div>
+      <div id="facet-layout">
+        <div id="facet-host"></div>
+      </div>
+    </div>
+    <script src="./js/facets.js" type="module"></script>
+  </body>
+</html>

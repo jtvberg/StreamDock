@@ -1,4 +1,4 @@
-const { notarize } = require('electron-notarize')
+const { notarize } = require('@electron/notarize')
 
 exports.default = function (context) {
   // Skip if not mac build

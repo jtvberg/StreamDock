@@ -1,0 +1,202 @@
+:root {
+  --color-system-accent: #1f86db;
+  --color-system-accent-trans: #1f86db80;
+  --color-system-white: #ffffff;
+  --color-control-white: #dbdbdb;
+  --color-control-black: #0f0f0f;
+  --color-control-black-trans: #0f0f0ff2;
+  --color-control-darkgray: #2f2f2f;
+  --color-control-darkgray-trans: #2f2f2f80;
+  --color-control-lightgray: #878787;
+  --color-control-trans: #00000070;
+  --color-control-part-trans: #000000ad;
+  --color-control-red: #e81123;
+}
+
+::-webkit-scrollbar { display: none; }
+
+@font-face {
+  font-family: 'Quicksand';
+  src: url('../res/Quicksand/Quicksand-Medium.woff') format('woff');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Quicksand';
+  src: url('../res/Quicksand/Quicksand-SemiBold.woff') format('woff');
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Quicksand';
+  src: url('../res/Quicksand/Quicksand-Bold.woff') format('woff');
+  font-weight: bold;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Quicksand';
+  src: url('../res/Quicksand/Quicksand-Light.woff') format('woff');
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Quicksand';
+  src: url('../res/Quicksand/Quicksand-Regular.woff') format('woff');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+body {
+  margin: 0px;
+  font-family: 'Quicksand';
+  font-weight: 700;
+}
+
+button {
+  font-family: inherit;
+  font-size: 1rem;
+  font-weight: inherit;
+  height: 2rem;
+  color: var(--color-control-white);
+  background-color: transparent;
+  outline: none;
+  border: none;
+  border-radius: 5px;
+  transition: background-color 150ms ease-out;
+}
+
+button:hover {
+  background-color: var(--color-system-accent-trans);
+}
+
+button:active {
+  background-color: var(--color-system-accent);
+}
+
+select,
+input {
+  font-size: 1rem;
+  font-family: monospace;
+  outline: none;
+  border: 1px solid transparent;
+  border-radius: 3px;
+  margin-block: 5px;
+  width: -webkit-fill-available;
+  height: 32px;
+  padding: 0px 5px;
+  color: var(--color-control-white);
+  background-color: var(--color-control-darkgray);;
+}
+
+select {
+  height: 34px;
+}
+
+select:active,
+select:focus,
+input:active,
+input:focus {
+  border-color: var(--color-system-accent)
+}
+
+*:disabled {
+  color: var(--color-control-lightgray);
+  opacity: 0.7;
+}
+
+a {
+  color: var(--color-system-accent);
+}
+
+.text-muted {
+  font-size: .8rem;
+  font-weight: 400;
+  margin-top: -4px;
+  color: var(--color-control-lightgray);
+}
+
+.element-flash {
+  animation-name: element-flash-animation;
+  animation-duration: 1000ms;
+}
+
+@keyframes element-flash-animation {
+  10%, 50%, 90% { color: var(--color-system-accent); }
+  30%, 70% { color: var(--color-control-white); }
+}
+
+.copied {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  color: var(--color-control-darkgray);
+  background-color: var(--color-control-white);
+  border-radius: 5px;
+  padding: 5px 7px;
+  opacity: 1;
+  z-index: 100;
+}
+
+.element-fadeout {
+  opacity: 0;
+  transition: opacity 300ms ease-in;
+}
+
+.toggle {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  width: 50px;
+  height: 22px;
+  display: inline-block;
+  position: relative;
+  border-radius: 50px;
+  overflow: hidden;
+  outline: none;
+  border: none;
+  cursor: pointer;
+  background-color: var(--color-control-lightgray);
+  transition: background-color ease-in-out 300ms;
+}
+
+.toggle:before {
+  content: "on off";
+  display: block;
+  position: absolute;
+  z-index: 2;
+  width: 18px;
+  height: 18px;
+  background: var(--color-control-white);
+  left: 2px;
+  top: 2px;
+  border-radius: 50%;
+  font: 10px/19px Helvetica;
+  text-transform: uppercase;
+  font-weight: bold;
+  text-indent: -21px;
+  word-spacing: 25px;
+  color: var(--color-control-white);
+  text-shadow: -1px -1px rgba(0,0,0,0.15);
+  white-space: nowrap;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.2);
+  transition: all cubic-bezier(0.3, 1.5, 0.7, 1) 300ms;
+}
+
+.toggle:checked {
+  background-color: var(--color-system-accent);
+}
+
+.toggle:checked:before {
+  left: 30px;
+}

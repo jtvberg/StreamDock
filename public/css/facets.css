@@ -1,0 +1,48 @@
+#facet-panel {
+  display: flex;
+  flex-direction: column;
+  color: var(--color-control-white);
+  background-color: var(--color-control-black);
+  height: calc(100vh - 24px);
+  padding: 12px;
+  user-select: none;
+  overflow-y: hidden;
+  opacity: 0;
+}
+
+#facet-panel.visible {
+  transition: opacity 200ms ease-in-out;
+  opacity: 1;
+}
+
+#facet-layout {
+  overflow-y: auto;
+}
+
+#facet-host {
+  display: flex;
+  flex-direction: column;
+}
+
+.facet {
+  cursor: pointer;
+}
+
+.facet:hover {
+  color: var(--color-system-accent)
+}
+
+#facet-input {
+  font-size: inherit;
+  width: -webkit-fill-available;
+}
+
+#facet-title {
+  font-size: 1.5rem;
+}
+
+#facet-filter {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
