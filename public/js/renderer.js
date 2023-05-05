@@ -472,6 +472,7 @@ const loadClearDataPanel = () => {
     target.removeEventListener('transitionend', done)
   }
   function done() {
+    cdBtn.disabled = true
     window.electronAPI.clearData(restart)
   }
 
@@ -489,12 +490,6 @@ const loadClearDataPanel = () => {
   cdBtn.addEventListener('mouseup', () => cancel(cdBtn))
   cdBtn.addEventListener('mouseleave', () => cancel(cdBtn))
   btns.appendChild(cdBtn)
-  // TODO: future, more agressive deletions
-  // const uiBtn = elementFromHtml(`<button class="clear-data-btn">Uninstall</button>`)
-  // uiBtn.addEventListener('mousedown', () => start(uiBtn))
-  // uiBtn.addEventListener('mouseup', () => cancel(uiBtn))
-  // uiBtn.addEventListener('mouseleave', () => cancel(uiBtn))
-  // btns.appendChild(uiBtn)
   pane.appendChild(btns)
   const dc = elementFromHtml(`<div class="clear-data-disclaimer">This will reset the app as if it was freshly installed and restart. This will log you out of all services and delete all bookmarks and updated settings. This cannot be undone! Click and hold the button until it fills to activate.</div>`)
   pane.appendChild(dc)
