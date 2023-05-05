@@ -71,7 +71,7 @@
 
 ## Releases / Known Issues
  Bookmarks and settings from older versions of StreamDock will not show up properly in 2.0.0+
- :rotating_light:**Note: If you are currently using StreamDock 1.x.x or older, I highly recommend you use the Clear Data funtion in the advanced section in the settings!**:rotating_light:
+ :rotating_light:**Note: If you are currently using StreamDock 1.x.x or older, I highly recommend you use the Clear Data function in the advanced section in the settings!**:rotating_light:
  
  The current release works on macOS (signed, notarized and tested on Monterey and Ventura), Windows 10/11 (self-signed) and Linux (tested on Mint).
 
