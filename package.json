@@ -12,7 +12,7 @@
     "buildWin": "electron-builder -w",
     "buildLinux": "electron-builder -l"
   },
-  "repository": "https://github.com/jtvberg/streamdock2",
+  "repository": "https://github.com/jtvberg/streamdock",
   "keywords": [
     "Electron",
     "Streaming",
@@ -23,7 +23,7 @@
     "email": "streamdockapp@gmail.com"
   },
   "bugs": {
-    "url": "https://github.com/jtvberg/streamdock2/issues"
+    "url": "https://github.com/jtvberg/streamdock/issues"
   },
   "license": "MIT",
   "devDependencies": {
