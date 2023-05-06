@@ -473,6 +473,7 @@ const loadClearDataPanel = () => {
   }
   function done() {
     cdBtn.disabled = true
+    cdBtn.style.backgroundColor = getComputedStyle(document.documentElement).getPropertyValue('--color-system-accent')
     window.electronAPI.clearData(restart)
   }
 
