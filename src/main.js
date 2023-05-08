@@ -135,7 +135,7 @@ const createWindow = () => {
     if (cleanUrl) {
       domain = cleanUrl.hostname
       headerView.webContents.executeJavaScript('localStorage.getItem("pref-agent");', true).then(response => {
-        streamView.webContents.userAgent = domain === 'accounts.google.com' ? 'Chrome' : response ? response : null || defaultAgent
+        streamView.webContents.userAgent = domain === googleAuthHost ? 'Chrome' : response ? response : null || defaultAgent
       })
     }
   })
