@@ -77,7 +77,9 @@
 
  The auto-update should prompt you as new releases come out and then, post download, prompt you to install/restart. Sometimes, it won't do the restart. If you wait a minute and exit the app completely, it should automatically restart the new version.
 
- No known issues.
+ Two Issues:
+ - If you drag the window around and cross into a an OS toolbar or off to another screen, occasionally, the mouse will stick to the drag area. You can hit escape to disconnect it
+ - Peacock is broken again. If you already successfully logged in prior to upgrading, don't delete your settings as I recommended. You will have to delete your bookmarks manually and there will be some random data that doesn't do anything left over but that shouldn't be a problem. Peacock sucks anyway (seriously Peacock, try using your native apps for a minute.)
 
 ## App Control
  - Click on the quick-access buttons across the top to load streaming services as setup in the stream editor
