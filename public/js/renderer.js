@@ -74,6 +74,7 @@ let headerTimeOut
 let editMode = false
 
 // Functions
+// create stream element for stream bar, stream edit panel and append insert new element
 const loadStreams = () => {
   $streamControls.replaceChildren([])
   $streamsEdit.replaceChildren([])
@@ -94,6 +95,7 @@ const loadStreams = () => {
   })
 }
 
+// apply settings on startup
 const applySettings = () => {
   loadStreams()
 
@@ -136,12 +138,14 @@ const applySettings = () => {
   })
 }
 
+// helper funtion to create element from html string
 const elementFromHtml = html => {
   const template = document.createElement('template')
   template.innerHTML = html.trim()
   return template.content.firstElementChild
 }
 
+// create stream element for stream bar and stream edit panel
 const createStreamElement = stream => {
   const ele = elementFromHtml(`<div class="stream-control" data-url="${stream.url}" data-id="${stream.id}" title="${stream.title}" style="order:${stream.order}; color:${stream.color}; background-color:${stream.bgColor};">${stream.glyph}</div>`)
   ele.addEventListener('mouseenter', () => {
@@ -155,6 +159,7 @@ const createStreamElement = stream => {
   return ele
 }
 
+// call create element for stream object and add to stream bar
 const loadStreamBar = stream => {
   const frag = document.createDocumentFragment()
   const ele = createStreamElement(stream)
@@ -167,6 +172,7 @@ const loadStreamBar = stream => {
   $streamControls.appendChild(frag)
 }
 
+// turn on stream edit mode
 const editStreamLineup = bool => {
   editMode = bool
   if (editMode) {
@@ -193,6 +199,7 @@ const editStreamLineup = bool => {
   }
 }
 
+// load stream edit panel
 const loadStreamPanel = stream => {
   let mouseTimeout = undefined
   let mouseHold = false
@@ -265,6 +272,7 @@ const loadStreamPanel = stream => {
   $streamsEdit.appendChild(frag)
 }
 
+// open stream edit pop up
 const openStreamEdit = stream => {
   closeStreamEdit()
   const updateStream = { ...stream }
@@ -322,10 +330,12 @@ const openStreamEdit = stream => {
   $streamsEdit.appendChild(frag)
 }
 
+// close stream edit pop up
 const closeStreamEdit = () => {
   document.querySelectorAll('.stream-edit-container').forEach(el => el.remove())
 }
 
+// update or add stream to streams arra, save to local storage, load stream bar and panel
 const updateStreams = stream => {
   const streamToReplace = streams.find(s => s.id === stream.id)
   if (streamToReplace) {
@@ -339,6 +349,7 @@ const updateStreams = stream => {
   repaintStreamBar()
 }
 
+// reorder stream elements in stream edit pane
 const updateOrder = ele => {
   // New order
   const loc = (parseInt(ele.style.order) + 1) > 9999 ? 9999 : parseInt(ele.style.order) + 1
@@ -355,6 +366,7 @@ const updateOrder = ele => {
   repaintStreamBar()
 }
 
+// reorder streams array and save to local storage
 const reorderStreams = () => {
   // Sort the steams array based on new order
   streams.sort((a,b) => (a.order > b.order) ? 1 : ((b.order > a.order) ? -1 : 0))
@@ -364,11 +376,13 @@ const reorderStreams = () => {
   setStreams(streams)
 }
 
+// reload stream bar elements
 const repaintStreamBar = () => {
   $streamControls.replaceChildren([])
   streams.forEach(stream => loadStreamBar(stream))
 }
 
+// load settings panel
 const loadSettingsPanel = pref => {
   if (!pref.live) return
   const frag = document.createDocumentFragment()
@@ -461,6 +475,7 @@ const loadSettingsPanel = pref => {
   }
 }
 
+// load clear data elements
 const loadClearDataPanel = () => {
   let restart = true
   function start(target) {
@@ -498,6 +513,7 @@ const loadClearDataPanel = () => {
   $advancedLayout.appendChild(frag)
 }
 
+// change settings layout based on button clicked
 const changeSettingsLayout = (el = $settingsNavBtn[0]) => {
   editStreamLineup(false)
   $settingsNavBtn.forEach(el => el.style.backgroundColor = '')
@@ -515,6 +531,7 @@ const changeSettingsLayout = (el = $settingsNavBtn[0]) => {
   document.querySelector(`#${el.dataset.layout}-layout`).style.display = ''
 }
 
+// change home layout based on button clicked
 const changeHomeLayout = (el = $homeNavBtn[0]) => {
   $homeNavBtn.forEach(el => el.style.backgroundColor = '')
   el.style.backgroundColor = getComputedStyle(document.documentElement).getPropertyValue('--color-control-darkgray')
@@ -523,6 +540,7 @@ const changeHomeLayout = (el = $homeNavBtn[0]) => {
   document.querySelector(`#${el.dataset.layout}-home-layout`).style.display = ''
 }
 
+// toggle header panel based on button clicked
 const togglePanel = (panelBtn, override) => {
   editStreamLineup(false)
   closeStreamEdit()
@@ -539,6 +557,7 @@ const togglePanel = (panelBtn, override) => {
   }
 }
 
+// toggle window ratio lock
 const toggleRatio = (override = false) => {
   const toggle = $constrainBtn.classList.contains('toggled') || !override
   window.electronAPI.winRatio(!toggle)
@@ -546,6 +565,7 @@ const toggleRatio = (override = false) => {
   setWinRatio(!toggle)
 }
 
+// toggle window ontop
 const toggleOntop = (override = false) => {
   const toggle = $ontopBtn.classList.contains('toggled') || !override
   window.electronAPI.winLock(!toggle)
@@ -553,6 +573,7 @@ const toggleOntop = (override = false) => {
   setWinLock(!toggle)
 }
 
+// start dragging window
 const onDragMouseDown = e => {
   dragMouseX = e.clientX
   dragMouseY = e.clientY
@@ -560,16 +581,19 @@ const onDragMouseDown = e => {
   requestAnimationFrame(moveWindow)
 }
 
+// stop dragging window
 const onDragMouseUp = () => {
   $drag.forEach(el => el.removeEventListener('mouseup', onDragMouseUp))
   cancelAnimationFrame(dragAnimationId)
 }
 
+// move window on drag
 const moveWindow = () => {
   window.electronAPI.winMove({ mouseX: dragMouseX, mouseY: dragMouseY })
   dragAnimationId = requestAnimationFrame(moveWindow)
 }
 
+// collapse header on mouseleave
 const collaspeHeader = () => {
   if ($header.offsetHeight > headerExpanded) return
   $header.removeEventListener('mouseleave', waitHeader)
@@ -578,11 +602,13 @@ const collaspeHeader = () => {
   window.electronAPI.headerHeight({ height: headerCollapsed, base: headerCollapsed })
 }
 
+// wait to collaspe header on mouseleave
 const waitHeader = () => {
   window.clearTimeout(headerTimeOut)
   headerTimeOut = window.setTimeout(collaspeHeader, 1000)
 }
 
+// expand header on mouseenter
 const expandHeader = () => {
   if ($header.offsetHeight > headerExpanded) return
   $header.addEventListener('mouseleave', waitHeader)
@@ -592,6 +618,7 @@ const expandHeader = () => {
   window.clearTimeout(headerTimeOut)
 }
 
+// render header based on OS
 const osHeader = isMac => {
   if (!isMac) {
     $dragWin.style.minWidth = '24px'
@@ -615,6 +642,7 @@ const osHeader = isMac => {
   }
 }
 
+// apply preference updates
 const updatePref = (id, val) => {
   switch (id) {
     case 'pref-fullscreen':
@@ -643,6 +671,7 @@ const updatePref = (id, val) => {
   }
 }
 
+// toggle search UI elements
 const toggleSearch = bool => {
   if (bool) {
     $searchNavBtn.style.display = ''
@@ -655,6 +684,7 @@ const toggleSearch = bool => {
   }
 }
 
+// restore missing default streams
 const restoreStreams = () => {
   getStreams(true).forEach(s => {
     streams.find(c => c.url === s.url) ? null : streams.push(s)
@@ -663,6 +693,7 @@ const restoreStreams = () => {
   loadStreams()
 }
 
+// create a bookmark tile
 const createBookmarkTile = bookmarkObj => {
   const cleanTitle = getCleanTitle(bookmarkObj.title)
   const frag = document.createDocumentFragment()
@@ -688,6 +719,7 @@ const createBookmarkTile = bookmarkObj => {
   return frag
 }
 
+// create a boookmark list item
 const createBookmarkListItem = bookmarkObj => {
   const cleanTitle = getCleanTitle(bookmarkObj.title)
   const frag = document.createDocumentFragment()
@@ -715,6 +747,7 @@ const createBookmarkListItem = bookmarkObj => {
   return frag
 }
 
+// toggle bookmark list view
 const bookmarkListView = () => {
   if ($bookmarkListBtn.classList.contains('toggled-bg')) {
     $bookmarkListBtn.classList.remove('toggled-bg')
@@ -727,6 +760,7 @@ const bookmarkListView = () => {
   }
 }
 
+// add bookmark to UI and local storage
 const addBookmark = bookmarkObj => {
   $bookmarks.appendChild(createBookmarkTile(bookmarkObj))
   $bookmarkList.appendChild(createBookmarkListItem(bookmarkObj))
@@ -736,6 +770,7 @@ const addBookmark = bookmarkObj => {
   localStorage.setItem('bookmarks', JSON.stringify(bookmarks))
 }
 
+// delete bookmark by timestamp
 const deleteBookmark = timestamp => {
   document.querySelectorAll('.bookmark-instance, .bookmark-row').forEach(bm => {
     if (bm.dataset.ts == timestamp) {
@@ -749,11 +784,13 @@ const deleteBookmark = timestamp => {
   localStorage.setItem('bookmarks', JSON.stringify(bookmarks.filter(bm => bm.timestamp !== timestamp)))
 }
 
+// load bookmarks from local storage
 const getBookmarks = () => {
   const bookmarks = JSON.parse(localStorage.getItem('bookmarks')) || []
   loadBookmarks(bookmarks)
 }
 
+// load bookmarks from array
 const loadBookmarks = bookmarks => {
   const fragTiles = document.createDocumentFragment()
   const fragList = document.createDocumentFragment()
@@ -765,27 +802,34 @@ const loadBookmarks = bookmarks => {
   $bookmarkList.appendChild(fragList)
 }
 
+// remove www. from host
 const getCleanHost = url => {
   return new URL(url).hostname.replace('www.', '')
 }
 
+// remove special characters from title
 const getCleanTitle = title => {
   return title.replaceAll(/["'&<>]/g, '')
 }
 
+// sort bookmarks by order param
 const sortBookmarks = order => {
   const bookmarks = JSON.parse(localStorage.getItem('bookmarks')) || []
   switch (order) {
     case 'old':
+      // sort boomarks by timestamp ascending
       bookmarks.sort((a, b) => a.timestamp - b.timestamp)
       break
     case 'new':
+      // sort boomarks by timestamp descending
       bookmarks.sort((a, b) => b.timestamp - a.timestamp)
       break
     case 'title':
-      bookmarks.sort((a, b) => a.title < b.title ? -1 : 1)
+      // sort boomarks by title ascending
+      bookmarks.sort((a, b) => getCleanTitle(a.title) < getCleanTitle(b.title) ? -1 : 1)
       break
     case 'host':
+      // sort boomarks by host ascending
       bookmarks.sort((a, b) => getCleanHost(a.url) < getCleanHost(b.url) ? -1 : 1)
       break
     default:
@@ -797,16 +841,19 @@ const sortBookmarks = order => {
   loadBookmarks(bookmarks)
 }
 
+// add flash animation class
 const elementAddFlash = el => {
   el.classList.add('element-flash')
   el.addEventListener('animationend', elementRemoveFlash)
 }
 
+// remove flash animation class
 const elementRemoveFlash = e => {
   e.target.removeEventListener('animationend', elementRemoveFlash)
   e.target.classList.remove('element-flash')
 }
 
+// load about panel details
 const loadAbout = appInfo => {
   $aboutName.textContent = appInfo.name
   $aboutVer.textContent = appInfo.version
@@ -816,6 +863,7 @@ const loadAbout = appInfo => {
   $aboutBugBtn.dataset.link = appInfo.bugs
 }
 
+// copy link to clipboard and display 'copied' message
 const copyLink = (e, link, alt = false) => {
   navigator.clipboard.writeText(link)
   const frag = document.createDocumentFragment()
