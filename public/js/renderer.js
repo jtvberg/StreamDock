@@ -74,7 +74,7 @@ let headerTimeOut
 let editMode = false
 
 // Functions
-// create stream element for stream bar, stream edit panel and append insert new element
+// create stream element for stream bar, stream edit panel and append add new stream element
 const loadStreams = () => {
   $streamControls.replaceChildren([])
   $streamsEdit.replaceChildren([])

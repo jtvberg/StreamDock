@@ -69,16 +69,22 @@ let ratioLocked = false
 let isPlaying = false
 let resumePlaying = false
 
+// load reload module in dev
 if (isDev) {
   try {
     require('electron-reloader')(module)
   } catch {}
 }
 
+// disable hardware acceleration
 app.disableHardwareAcceleration()
+
+// set menu
 Menu.setApplicationMenu(menu)
 
 // Functions
+
+// create main window and views
 const createWindow = () => {
   mainWin = new BrowserWindow({
     width: 1024,
@@ -99,6 +105,7 @@ const createWindow = () => {
 
   mainWin.loadFile(path.join(__dirname, './index.html'))
   
+  // create browser view for header
   headerView = new BrowserView({
     webPreferences: { 
       preload: path.join(__dirname, 'preload.js')
@@ -107,9 +114,11 @@ const createWindow = () => {
   headerView.webContents.loadFile(path.join(__dirname, '../public/index.html'))
   headerView.setAutoResize({ width: true, height: false })
 
+  // create browser view for streams
   streamView = new BrowserView()
   streamView.setAutoResize({ width: true, height: true })
 
+  // create browser view for facets
   facetView = new BrowserView({
     webPreferences: { 
       preload: path.join(__dirname, 'preload.js')
@@ -119,6 +128,8 @@ const createWindow = () => {
   facetView.setAutoResize({ width: false, height: true })
 
   isMac ? mainWin.setWindowButtonVisibility(false) : null
+
+  // add views to main window
   mainWin.addBrowserView(streamView)
   mainWin.addBrowserView(facetView)
   mainWin.addBrowserView(headerView)
@@ -145,7 +156,7 @@ const createWindow = () => {
     if (cleanUrl) {
       domain = cleanUrl.hostname
     }
-    removeScrollbars()
+    removeScrollbars(streamView)
     showStream(true, streamView)
     loadScripts(streamView, domain)
   })
@@ -200,10 +211,13 @@ const createWindow = () => {
   windows.add(mainWin)
 }
 
+// create tray icon
 const createTray = () => {
   tray = new Tray(path.join(__dirname, '../public/res/iconTemplate@2x.png'))
   tray.setToolTip('StreamDock')
   setTrayTheme()
+
+  // if linux, set tray context menu
   if (isLinux) {
     const contextMenu = Menu.buildFromTemplate([
       { label: 'Exit',
@@ -212,6 +226,7 @@ const createTray = () => {
     ])
     tray.setContextMenu(contextMenu)
   }
+
   tray.on('click', () => toggleWin())
   tray.on('right-click', () => app.quit())
 
@@ -221,17 +236,12 @@ const createTray = () => {
     if (show) {
       hideWin()
     } else {
-      windows.forEach(win => win.show())
-      headerView.webContents.executeJavaScript('localStorage.getItem("pref-resume");', true).then(response => {
-        if (response === 'true' && resumePlaying) {
-          playVideo(streamView)
-        }
-      })
-      headerView.webContents.send('hide-header')
+      showWin()
     }
   }
 }
 
+// set tray icon based on system theme and OS
 const setTrayTheme = () => {
   if (!isMac) {
     if (nativeTheme.shouldUseDarkColors) {
@@ -242,6 +252,7 @@ const setTrayTheme = () => {
   }
 }
 
+// hide windows and pause video
 const hideWin = () => {
   resumePlaying = isPlaying
   pauseVideo(streamView)
@@ -251,6 +262,18 @@ const hideWin = () => {
   })
 }
 
+// show windows and resume video (if enabled)
+const showWin = () => {
+  windows.forEach(win => win.show())
+  headerView.webContents.executeJavaScript('localStorage.getItem("pref-resume");', true).then(response => {
+    if (response === 'true' && resumePlaying) {
+      playVideo(streamView)
+    }
+  })
+  headerView.webContents.send('hide-header')
+}
+
+// inject scripts into view based on host
 const loadScripts = (bv = streamView, host) => {
   headerView.webContents.executeJavaScript('({...localStorage});', true).then(response => {
     facetView.webContents.send('is-netflix', false)
@@ -301,16 +324,20 @@ const loadScripts = (bv = streamView, host) => {
   })
 }
 
+// set headerView bounds to match mainWin with supplied height
 const setHeaderViewBounds = height => headerView.setBounds({ x: 0, y: 0, width: mainWin.getBounds().width, height})
 
+// set facetView bounds to match mainWin with supplied width
 const setFacetViewBounds = width => facetView.setBounds({ x: 0, y: 0, width, height: mainWin.getBounds().height})
 
+// open url in streamView and send stream opened message to renderer
 const openUrl = url => {
   streamView.webContents.loadURL(url)
   showStream(false)
   headerView.webContents.send('stream-opened')
 }
 
+// toggle streamView visibility
 const showStream = bool => {
   if (bool) {
     const wb = mainWin.getBounds()
@@ -320,6 +347,7 @@ const showStream = bool => {
   }
 }
 
+// check if url is valid return url if valid or false if invalid
 const validUrl = url => {
   let valid
   try {
@@ -331,29 +359,36 @@ const validUrl = url => {
   return valid
 }
 
+// get system preference for accent color and send to renderers
 const setAccent = () => {
   headerView.webContents.send('set-accent', `#${systemPreferences.getAccentColor()}`)
   facetView.webContents.send('set-accent', `#${systemPreferences.getAccentColor()}`)
 }
 
+// navigate back in view if possible
 const navBack = () => streamView.webContents.canGoBack() ? streamView.webContents.goBack() : null
 
+// inject pause video function into view
 const pauseVideo = bv => bv.webContents.executeJavaScript(`(${defaultPause.toString()})()`)
 
+// default pause video function
 const defaultPause = () => {
   try {
     document.querySelectorAll('video').forEach(input => { input.pause() })
   } catch (err) { console.error(err) }
 }
 
+// inject play video function into view
 const playVideo = bv => bv.webContents.executeJavaScript(`(${defaultPlay.toString()})()`)
 
+// default play video function
 const defaultPlay = () => {
   try {
     document.querySelectorAll('video').forEach(input => { input.play() })
   } catch (err) { console.error(err) }
 }
 
+// set window fullscreenable
 const setFullScreen = (bool) => {
   if (isMac) { mainWin.setFullScreen(false) }
   setTimeout(() => {
@@ -361,6 +396,7 @@ const setFullScreen = (bool) => {
   }, 500)
 }
 
+// scale window height to width ratio
 const scaleHeight = (width, height) => {
   const ws = mainWin.getSize()
   mainWin.setAspectRatio(0)
@@ -368,6 +404,7 @@ const scaleHeight = (width, height) => {
   if (ratioLocked) { lockRatio() }
 }
 
+// scale window width to height ratio
 const scaleWidth = (width, height) => {
   const ws = mainWin.getSize()
   mainWin.setAspectRatio(0)
@@ -375,19 +412,23 @@ const scaleWidth = (width, height) => {
   if (ratioLocked) { lockRatio() }
 }
 
+// lock aspect ratio
 const lockRatio = () => {
   const ws = mainWin.getSize()
   mainWin.setAspectRatio(ws[0] / ws[1])
   ratioLocked = true
 }
 
+// unlock aspect ratio
 const unlockRatio = () => {
   mainWin.setAspectRatio(0)
   ratioLocked = false
 }
 
-const removeScrollbars = () => streamView.webContents.executeJavaScript(`document.body.insertAdjacentHTML('beforeend', '<style> ::-webkit-scrollbar { display: none; } </style>')`)
+// remove scrollbars from view
+const removeScrollbars = bv => bv.webContents.executeJavaScript(`document.body.insertAdjacentHTML('beforeend', '<style> ::-webkit-scrollbar { display: none; } </style>')`)
 
+// open child window with url
 const openNewin = url => {
   const wb = mainWin.getBounds()
   const ch = 600
@@ -416,6 +457,7 @@ const openNewin = url => {
       child.webContents.executeJavaScript(`document.body.insertAdjacentHTML('beforeend', '<div class="sd-frameless-close" onclick="window.close();">&times;</div><style> .sd-frameless-close { position: fixed; top: 4px; right: 4px; display: flex; height: 27px; align-items: center; justify-content: center; font-family: sans-serif; font-size: 36px; color: #dbdbdb; background-color: #0f0f0f; border-radius: 50%; z-index: 999999; opacity: 0; aspect-ratio: 1 / 1; user-select: none;} .sd-frameless-close:hover { opacity: 1 } </style>')`)
     }
     // isDev && child.webContents.openDevTools('detach')
+    removeScrollbars(child)
     loadScripts(child, validUrl(getCurrentUrl(child)).hostname)
   })
   child.on('closed', () => {
@@ -424,22 +466,25 @@ const openNewin = url => {
   })
 }
 
+// get current url from view parameter or streamView
 const getCurrentUrl = (bv = streamView) => {
   return bv.webContents.getURL()
   // amzGetUrl()
 }
 
-const createBookmark = async () => {
-  const image = await streamView.webContents.capturePage()
+// create and send bookmark object to renderer from streamView
+const createBookmark = async bv => {
+  const image = await bv.webContents.capturePage()
   const bookmarkObj = {
-    title: streamView.webContents.getTitle(),
+    title: bv.webContents.getTitle(),
     img: image.resize({ height: 180 }).toDataURL(),
-    url: getCurrentUrl(),
+    url: getCurrentUrl(bv),
     timestamp: Date.now()
   }
   headerView.webContents.send('send-bookmark', bookmarkObj)
 }
 
+// open url in hidden window and create and send bookmark object to renderer
 const urlToBookmark = url => {
   if (validUrl(url)) {
     let ghostWin = new BrowserWindow({
@@ -451,19 +496,13 @@ const urlToBookmark = url => {
     ghostWin.loadURL(url)
     ghostWin.webContents.audioMuted = true
     ghostWin.webContents.on('did-finish-load', async () => {
-      const image = await ghostWin.webContents.capturePage()
-      const bookmarkObj = {
-        title: ghostWin.webContents.getTitle(),
-        img: image.resize({ height: 180 }).toDataURL(),
-        url: ghostWin.webContents.getURL(),
-        timestamp: Date.now()
-      }
-      headerView.webContents.send('send-bookmark', bookmarkObj)
+      await createBookmark(ghostWin)
       ghostWin.destroy()
     })
   }
 }
 
+// clear app data and relaunch if bool is true
 const clearAppData = async relaunch => {
   await headerView.webContents.session.clearStorageData().catch(err => console.log(err))
   if (relaunch) { 
@@ -528,7 +567,7 @@ ipcMain.on('win-move', (e, { mouseX, mouseY }) => {
 
 ipcMain.on('open-url', (e, url) => openUrl(url))
 
-ipcMain.on('create-bookmark', createBookmark)
+ipcMain.on('create-bookmark', () => createBookmark(streamView))
 
 ipcMain.on('nav-back', navBack)
 
