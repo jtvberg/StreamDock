@@ -83,9 +83,9 @@ app.disableHardwareAcceleration()
 Menu.setApplicationMenu(menu)
 
 // Functions
-
 // create main window and views
 const createWindow = () => {
+  // create main window
   mainWin = new BrowserWindow({
     width: 1024,
     height: 576,
@@ -99,10 +99,12 @@ const createWindow = () => {
     }
   })
 
+  // if linux, set icon
   if (isLinux) {
     mainWin.setIcon(path.join(__dirname, '../public/res/icon.png'))
   }
 
+  // load main window
   mainWin.loadFile(path.join(__dirname, './index.html'))
   
   // create browser view for header
@@ -127,6 +129,7 @@ const createWindow = () => {
   facetView.webContents.loadFile(path.join(__dirname, '../public/facets.html'))
   facetView.setAutoResize({ width: false, height: true })
 
+  // if mac, hide window buttons
   isMac ? mainWin.setWindowButtonVisibility(false) : null
 
   // add views to main window
@@ -134,6 +137,7 @@ const createWindow = () => {
   mainWin.addBrowserView(facetView)
   mainWin.addBrowserView(headerView)
 
+  // set stream view bounds
   streamView.setBounds({
     x: 0,
     y: 0,
@@ -141,6 +145,7 @@ const createWindow = () => {
     height: mainWin.getBounds().height
   })
 
+  // on steam view navigation check if url is valid and set userAgent
   streamView.webContents.on('did-start-navigation', () => {
     const cleanUrl = validUrl(getCurrentUrl())
     if (cleanUrl) {
@@ -151,6 +156,7 @@ const createWindow = () => {
     }
   })
 
+  // on stream view load get url, remove scrollbars, show stream, load scripts
   streamView.webContents.on('did-finish-load', () => {
     const cleanUrl = validUrl(getCurrentUrl())
     if (cleanUrl) {
@@ -161,27 +167,32 @@ const createWindow = () => {
     loadScripts(streamView, domain)
   })
 
+  // check if call for new window matches google auth host and if so, allow otherwise deny
   streamView.webContents.setWindowOpenHandler(({ url }) => {
     const navUrl = validUrl(url) ? new URL(url) : null
-    if (navUrl && navUrl.host === googleAuthHost) {
+    if (navUrl?.host === googleAuthHost) {
       return { action: 'allow' }
     }
     openUrl(url)
     return { action: 'deny' }
   })
 
+  // set is playing variable on media play
   streamView.webContents.on('media-started-playing', () => {
     isPlaying = true
   })
 
+  // set is playing variable on media pause
   streamView.webContents.on('media-paused', () => {
     isPlaying = false
   })
 
+  // on header view load send is mac to renderer
   headerView.webContents.on('did-finish-load', () => {
     headerView.webContents.send('is-mac', isMac)
   })
 
+  // on closing of main window, send window location to renderer and close all windows
   mainWin.on('close', () => {
     headerView.webContents.send('win-getloc', mainWin.getBounds())
     headerView.webContents.send('last-stream', getCurrentUrl())
@@ -189,6 +200,7 @@ const createWindow = () => {
     windows.forEach(win => win.close())
   })
 
+  // on main window ready set OS specific settings and send app info to renderer
   mainWin.on('ready-to-show', () => {
     headerView.webContents.send('app-info', appInfo)
     if (!isLinux) {
@@ -206,8 +218,10 @@ const createWindow = () => {
     }
   })
 
+  // subscribe to system theme changes and apply to tray icon
   nativeTheme.on('updated', setTrayTheme)
 
+  // add main window to windows set
   windows.add(mainWin)
 }
 
@@ -230,6 +244,7 @@ const createTray = () => {
   tray.on('click', () => toggleWin())
   tray.on('right-click', () => app.quit())
 
+  // toggle window visibility on tray icon click
   const toggleWin = () => {
     let show = false
     windows.forEach(win => show = win.isVisible() ? true : show)
