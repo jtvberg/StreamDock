@@ -108,11 +108,11 @@ export const getStreams = defaults => {
     ),
     new Stream(
       true,
-      'H',
-      'HBO Max',
-      'https://play.hbomax.com',
+      'M',
+      'Max',
+      'https://play.max.com',
       '#ffffff',
-      '#7e5ee4',
+      '#0000f2',
       11
     ),
     new Stream(

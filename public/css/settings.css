@@ -154,9 +154,9 @@
   flex-direction: column;
   align-items: center;
   position: absolute;
-  top: 50%;
+  top: 56%;
   width: 250px;
-  font-size: 2rem;
+  font-size: 1.2rem;
   color: var(--color-control-white);
   transform: translate(0%, -50%);
 }
@@ -168,10 +168,6 @@
 
 #about-name {
   font-size: 2rem;
-}
-
-#about-info {
-  font-size: 1.2rem;
 }
 
 #about-attribution {
@@ -200,6 +196,9 @@
   font-size: 1.1rem;
   margin: 3px;
   width: -webkit-fill-available;
+  background: var(--color-control-darkgray-trans);
+  border-radius: 5px;
+  padding: 5px;
 }
 
 .settings-toggle {
@@ -261,6 +260,7 @@
   gap: 5px;
   max-width: 400px;
   color: var(--color-control-white);
+  margin: auto;
 }
 
 .clear-data-warn {
