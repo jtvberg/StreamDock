@@ -494,7 +494,6 @@ const loadClearDataPanel = () => {
 
   const frag = document.createDocumentFragment()
   const title = elementFromHtml(`<div class="settings-control">Clear StreamDock Data</div>`)
-  frag.appendChild(title)
   const pane = elementFromHtml(`<div class="clear-data-pane"></div>`)
   const et = elementFromHtml(`<div class="clear-data-warn fas fa-triangle-exclamation"></div>`)
   pane.appendChild(et)
@@ -509,7 +508,8 @@ const loadClearDataPanel = () => {
   pane.appendChild(btns)
   const dc = elementFromHtml(`<div class="clear-data-disclaimer">This will reset the app as if it was freshly installed and restart. This will log you out of all services and delete all bookmarks and updated settings. This cannot be undone! Click and hold the button until it fills to activate.</div>`)
   pane.appendChild(dc)
-  frag.appendChild(pane)
+  title.appendChild(pane)
+  frag.appendChild(title)
   $advancedLayout.appendChild(frag)
 }
 
