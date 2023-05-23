@@ -35,7 +35,7 @@ function nfRecapSkipMut() {
           mut.addedNodes.forEach(element => {
             if (element.childNodes) {
               element.childNodes.forEach(childNode => {
-                if (childNode.classList && (childNode.classList.contains('watch-video--skip-content') || childNode.classList.contains('watch-video--skip-content-button'))) {
+                if (childNode.classList?.contains('watch-video--skip-content') || childNode.classList?.contains('watch-video--skip-content-button')) {
                   nfRecapSkipClick()
                 }
               })
@@ -101,9 +101,9 @@ function nfEpisodeNextMut() {
     console.log('next mut')
     obsNfNext = new MutationObserver((ml) => {
       for(const mut of ml) {
-        if (mut.type === 'childList' && mut.addedNodes && mut.addedNodes.length > 0) {
+        if (mut.type === 'childList' && mut.addedNodes?.length > 0) {
           mut.addedNodes.forEach(element => {
-            if (element.classList && element.classList.contains('SeamlessControls--container')) {
+            if (element.classList?.contains('SeamlessControls--container')) {
               nfEpisodeNextClick()
             }
           })

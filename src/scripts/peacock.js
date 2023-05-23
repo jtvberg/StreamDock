@@ -31,7 +31,7 @@ function pcRecapSkipMut() {
     console.log('recap mut')
     obsPcRecap = new MutationObserver((ml) => {
       for(const mut of ml) {
-        if (mut.type === 'childList' && mut.addedNodes[0] && mut.addedNodes[0].classList && mut.addedNodes[0].classList.contains('playback-controls__skip--button')) {
+        if (mut.type === 'childList' && mut.addedNodes[0]?.classList?.contains('playback-controls__skip--button')) {
           pcRecapSkipClick()
         }
       }
@@ -90,7 +90,7 @@ function pcEpisodeNextMut() {
     console.log('next mut')
     obsPcNext = new MutationObserver((ml) => {
       for(const mut of ml) {
-        if (mut.type === 'childList' && mut.addedNodes[0] && mut.addedNodes[0].classList && mut.addedNodes[0].classList.contains('playback-binge__container')) {
+        if (mut.type === 'childList' && mut.addedNodes[0]?.classList?.contains('playback-binge__container')) {
           pcEpisodeNextClick()
         }
       }

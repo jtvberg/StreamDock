@@ -90,7 +90,7 @@ function atEpisodeNextMut() {
     console.log('next mut')
     obsAtNext = new MutationObserver((ml) => {
       for(const mut of ml) {
-        if (mut.type === 'childList' && mut.addedNodes[0] && mut.addedNodes[0].classList && mut.addedNodes[0].classList.contains('playback-modal__blur')) {
+        if (mut.type === 'childList' && mut.addedNodes[0]?.classList?.contains('playback-modal__blur')) {
           atEpisodeNextClick()
         }
       }

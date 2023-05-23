@@ -45,7 +45,7 @@ function amzUpgradeDismissMut() {
     console.log('upgrade mut')
     obsAmzUpgrade = new MutationObserver((ml) => {
       for(const mut of ml) {
-        if (mut.type === 'childList' && mut.addedNodes && mut.addedNodes.length > 0) {
+        if (mut.type === 'childList' && mut.addedNodes?.length > 0) {
           mut.addedNodes.forEach(element => {
             if (element.classList && element.classList.contains('f1jhb4b3')) {
               amzUpgradeDismissClick()
@@ -108,9 +108,9 @@ function amzPreviewSkipMut() {
     console.log('prev mut')
     obsAmzPreview = new MutationObserver((ml) => {
       for(const mut of ml) {
-        if (mut.type === 'childList' && mut.addedNodes && mut.addedNodes.length > 0) {
+        if (mut.type === 'childList' && mut.addedNodes?.length > 0) {
           mut.addedNodes.forEach(element => {
-            if (element.classList && element.classList.contains(eleAmzPreview)) {
+            if (element.classList?.contains(eleAmzPreview)) {
               amzPrevSkipClick(`.${eleAmzPreview}`)
             }
           })
@@ -181,9 +181,9 @@ function amzRecapSkipMut() {
     console.log('recap mut')
     obsAmzRecap = new MutationObserver((ml) => {
       for(const mut of ml) {
-        if (mut.type === 'childList' && mut.addedNodes && mut.addedNodes.length > 0) {
+        if (mut.type === 'childList' && mut.addedNodes?.length > 0) {
           mut.addedNodes.forEach(element => {
-            if (element.classList && element.classList.contains(eleAmzRecap)) {
+            if (element.classList?.contains(eleAmzRecap)) {
               amzRecapSkipClick(`.${eleAmzRecap}`)
             }
           })

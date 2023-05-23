@@ -93,9 +93,9 @@ function hlEpisodeNextImpMut() {
     console.log('imp mut')
     obsHlNextImp = new MutationObserver((ml) => {
       for(const mut of ml) {
-        if (mut.type === 'childList' && mut.addedNodes && mut.addedNodes.length > 0) {
+        if (mut.type === 'childList' && mut.addedNodes?.length > 0) {
           mut.addedNodes.forEach(element => {
-            if (element.classList && element.classList.contains('PlayerMetadata')) {
+            if (element.classList?.contains('PlayerMetadata')) {
               setTimeout(hlEpisodeNextObs, 3000)
             }
           })

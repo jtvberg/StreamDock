@@ -33,7 +33,7 @@ function ytAdOverlayClick() {
 function ytPromoCloseClick() {
   try {
     console.log('promo skip')
-    if (document.querySelectorAll('#dismiss-button').length > 0) {
+    if (document.querySelectorAll('#dismiss-button')?.length > 0) {
       document.querySelectorAll('#dismiss-button').forEach(input => { input.click() })
     }
   } catch(err) { console.error(err) }
@@ -55,7 +55,6 @@ function ytAdSkipMut() {
     console.log('ads mut')
     obsYtAds = new MutationObserver((ml) => {
       for(const mut of ml) {
-        if (mut.target.id === 'dismiss-button') console.log(mut.target.id)
         if (mut.type === 'childList' && mut.target.classList.contains('ytp-ad-text')) {
           ytAdSkipClick()
         }
