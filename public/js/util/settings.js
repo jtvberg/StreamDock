@@ -328,6 +328,24 @@ export const getPrefs = () => {
       'Hide Scale Width Button App Control in Header',
       false,
       true
+    ),
+    new Pref(
+      'constrain-btn',
+      'prefs-show',
+      'checkbox',
+      'Aspect Ratio Lock Button',
+      'Hide Aspect Ratio Lock Button App Control in Header',
+      false,
+      true
+    ),
+    new Pref(
+      'ontop-btn',
+      'prefs-show',
+      'checkbox',
+      'Lock Window On Top Button',
+      'Hide Lock Window On Top Button App Control in Header',
+      false,
+      true
     )
   ]
   return prefs

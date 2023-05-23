@@ -666,6 +666,12 @@ const updatePref = (id, val) => {
     case 'scalew-btn':
       $scalewBtn.style.display = val ? 'none' : ''
       break
+    case 'constrain-btn':
+      $constrainBtn.style.display = val ? 'none' : ''
+      break
+    case 'ontop-btn':
+      $ontopBtn.style.display = val ? 'none' : ''
+      break
     default:
       break
   }
