@@ -63,7 +63,7 @@
   margin-inline: 2px;
   align-items: center;
   justify-content: center;
-  transition: color 250ms ease-out, background-color 200ms ease-out;
+  transition: color 200ms ease-out, background-color 200ms ease-out;
 }
 
 .stream-control {

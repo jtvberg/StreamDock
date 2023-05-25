@@ -184,6 +184,7 @@
 .about-help-link {
   font-size: 2rem;
   cursor: pointer;
+  transition: color 200ms ease-out;
 }
 
 .about-help-link:hover {
@@ -195,9 +196,15 @@
   font-size: 1.1rem;
   margin: 3px;
   width: -webkit-fill-available;
-  background: var(--color-control-darkgray-trans);
+  background-color: var(--color-control-darkgray-trans);
   border-radius: 5px;
-  padding: 5px;
+  padding-inline: 5px;
+  padding-block: 2px;
+  transition: background-color 200ms ease-out;
+}
+
+.settings-control:hover {
+  background-color: var(--color-system-accent-trans);
 }
 
 .settings-toggle {
@@ -212,6 +219,7 @@
 
 .settings-label {
   margin: auto 0px;
+  line-height: 1;
 }
 
 .settings-muted {
