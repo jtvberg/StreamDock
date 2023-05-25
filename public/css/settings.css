@@ -153,12 +153,11 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  position: absolute;
-  top: 56%;
+  justify-content: center;
   width: 250px;
+  height: -webkit-fill-available;
   font-size: 1.2rem;
   color: var(--color-control-white);
-  transform: translate(0%, -50%);
 }
 
 .about-icon {
