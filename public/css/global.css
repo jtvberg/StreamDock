@@ -121,6 +121,7 @@ a {
   font-size: .8rem;
   font-weight: 400;
   margin-top: -4px;
+  padding-bottom: 5px;
   color: var(--color-control-lightgray);
 }
 

@@ -343,7 +343,7 @@ const loadScripts = (bv = streamView, host) => {
 const setHeaderViewBounds = height => headerView.setBounds({ x: 0, y: 0, width: mainWin.getBounds().width, height})
 
 // set facetView bounds to match mainWin with supplied width
-const setFacetViewBounds = width => facetView.setBounds({ x: 0, y: 0, width, height: mainWin.getBounds().height})
+const setFacetViewBounds = width => facetView.setBounds({ x: 0, y: 0, width, height: mainWin.getBounds().height + 2})
 
 // open url in streamView and send stream opened message to renderer
 const openUrl = url => {
