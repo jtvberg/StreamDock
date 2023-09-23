@@ -28,13 +28,13 @@
   "license": "MIT",
   "devDependencies": {
     "@electron/notarize": "^2.1.0",
-    "electron": "github:castlabs/electron-releases#v24.6.1+wvcus",
-    "electron-builder": "^24.4.0",
+    "electron": "github:castlabs/electron-releases#v26.2.2+wvcus",
+    "electron-builder": "^24.6.4",
     "electron-reloader": "^1.2.3"
   },
   "dependencies": {
-    "@fortawesome/fontawesome-free": "^6.4.0",
-    "electron-updater": "^6.1.1"
+    "@fortawesome/fontawesome-free": "^6.4.2",
+    "electron-updater": "^6.1.4"
   },
   "build": {
     "files": [
@@ -49,7 +49,6 @@
       "mirror": "https://github.com/castlabs/electron-releases/releases/download/v"
     },
     "afterPack": "./build/afterPack.js",
-    "afterSign": "./build/afterSign.js",
     "mac": {
       "category": "public.app-category.video"
     },

@@ -8,7 +8,7 @@
  StreamDock still has all the principal functionality it did before with some caveats...
 
 # Material Changes
- - The bar at the top is still there but now it disappears. This was much more straight forward that I thought (clarity being the value of just starting over)
+ - The bar at the top is still there but now it disappears. This was much more straight forward than I thought (clarity being the value of just starting over)
  - Menus are out. Menus were fine in macOS but really made the UI ugly on Windows in Linux. Now, everything is either in the header or an internal control.
  - Other aspect ratios are out. Outside of 16x9 there are so many cinema standards that are very close to each other. 4x3 is rare and typically has the bars to make it 16x9 anyway. However, I did add an aspect ratio lock so that when you get it where you want it you can scale as needed.
  - Dark vs. Light modes. There is so little UI to this thing it hardly seems worth it so I scraped it for now. Dark is king!
