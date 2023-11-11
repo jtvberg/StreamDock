@@ -73,7 +73,8 @@
  Bookmarks and settings from older versions of StreamDock will not show up properly in 2.0.0+
  :rotating_light:**Note: If you are currently using StreamDock 1.x.x or older, I highly recommend you use the Clear Data function in the advanced section in the settings!**:rotating_light:
  
- The current release works on macOS (signed, notarized and tested on Monterey and Ventura), Windows 10/11 (self-signed) and Linux (tested on Mint).
+ The current release works on macOS (signed, notarized and tested on Ventura and Sonoma), Windows 10/11 (self-signed) and Linux (tested on Mint).
+ Version 2.0.1 is the first release that includes a macOS distribution for Apple silicon. This was a miss on my part as the application will run much slower given the JS will be interpreted twice via Rosetta. Be sure to use the arm64 dmg if you have an M1/M2.
 
  The auto-update should prompt you as new releases come out and then, post download, prompt you to install/restart. Sometimes, it won't do the restart. If you wait a minute and exit the app completely, it should automatically restart the new version.
 

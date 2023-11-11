@@ -8,7 +8,7 @@
     "start": "electron .",
     "debug": "electron --inspect=7171 .",
     "break": "electron --inspect-brk=7171 .",
-    "buildMac": "electron-builder -m",
+    "buildMac": "electron-builder -m --x64 --arm64",
     "buildWin": "electron-builder -w",
     "buildLinux": "electron-builder -l"
   },
@@ -28,7 +28,7 @@
   "license": "MIT",
   "devDependencies": {
     "@electron/notarize": "^2.1.0",
-    "electron": "github:castlabs/electron-releases#v26.2.2+wvcus",
+    "electron": "github:castlabs/electron-releases#v27.0.4+wvcus",
     "electron-builder": "^24.6.4",
     "electron-reloader": "^1.2.3"
   },
