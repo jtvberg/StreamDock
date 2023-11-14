@@ -45,7 +45,7 @@
  - DO NOT USE THE NPM VERSION OF STREAMDOCK (I didn't put it there and it is old AF)
  - And, really, just use a release...
  
- NOTE: There is an odd bug some people run into where the dist for Castlabs Electron won't load. To fix, delete the dist directory under Electron in the node_modules directory and then run install.js from it (```node run install.js```). That should fix it.
+ NOTE: There is an odd bug some people run into where the dist for Castlabs Electron won't load. To fix, delete the dist directory under Electron in the node_modules directory and then run install.js from it (```node install.js```). That should fix it.
 
 ## Running the code
  Some npm scripts are already setup in package.json\
