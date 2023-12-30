@@ -8,7 +8,7 @@
  StreamDock still has all the principal functionality it did before with some caveats...
 
 # Material Changes
- - The bar at the top is still there but now it disappears. This was much more straight forward that I thought (clarity being the value of just starting over)
+ - The bar at the top is still there but now it disappears. This was much more straight forward than I thought (clarity being the value of just starting over)
  - Menus are out. Menus were fine in macOS but really made the UI ugly on Windows in Linux. Now, everything is either in the header or an internal control.
  - Other aspect ratios are out. Outside of 16x9 there are so many cinema standards that are very close to each other. 4x3 is rare and typically has the bars to make it 16x9 anyway. However, I did add an aspect ratio lock so that when you get it where you want it you can scale as needed.
  - Dark vs. Light modes. There is so little UI to this thing it hardly seems worth it so I scraped it for now. Dark is king!
@@ -44,6 +44,8 @@
  - Navigate to directory and run ```npm install``` to install dependencies
  - DO NOT USE THE NPM VERSION OF STREAMDOCK (I didn't put it there and it is old AF)
  - And, really, just use a release...
+ 
+ NOTE: There is an odd bug some people run into where the dist for Castlabs Electron won't load. To fix, delete the dist directory under Electron in the node_modules directory and then run install.js from it (```node install.js```). That should fix it.
 
 ## Running the code
  Some npm scripts are already setup in package.json\
@@ -73,7 +75,8 @@
  Bookmarks and settings from older versions of StreamDock will not show up properly in 2.0.0+
  :rotating_light:**Note: If you are currently using StreamDock 1.x.x or older, I highly recommend you use the Clear Data function in the advanced section in the settings!**:rotating_light:
  
- The current release works on macOS (signed, notarized and tested on Monterey and Ventura), Windows 10/11 (self-signed) and Linux (tested on Mint).
+ The current release works on macOS (signed, notarized and tested on Ventura and Sonoma), Windows 10/11 (self-signed) and Linux (tested on Mint).
+ Version 2.0.1 (coming soon) will be the first release that includes a macOS distribution for Apple silicon. This was a miss on my part as the application will run much slower given the JS will be interpreted twice via Rosetta. Be sure to use the arm64 dmg if you have an M1/M2/M3.
 
  The auto-update should prompt you as new releases come out and then, post download, prompt you to install/restart. Sometimes, it won't do the restart. If you wait a minute and exit the app completely, it should automatically restart the new version.
 
@@ -111,7 +114,7 @@ On AppleTV, Disney+, HBO Max, Hulu, Netflix, Paramount+, Peacock and Prime Video
  - There are recap, preview and opening credits auto-skipping options
  - Binge-mode will automatically start the next episode as soon as skipping is allowed
  
-One note: On some services there are scenarios where an option to skip something doesn't show up. Usually, it's the opening credits for the first episode of a season.
+NOTE: On some services there are scenarios where an option to skip something doesn't show up. Usually, it's the opening credits for the first episode of a season.
 
 ## Stream Search
  You can search for a stream from the home screen.
@@ -123,4 +126,5 @@ One note: On some services there are scenarios where an option to skip something
  - Clicking on one of the streaming options at TMDB will open the link in the app however, some services, like HBO, will ask who is watching and then lose its way to the content
  - The primary search defaults to US only but you can pick your region in the preferences (this effects search only!)
  - There are also 3 quick search buttons: Popular films and TV shows that can be streamed and then 1 more for trending titles over the last week (but may not be on a stream service yet)
- - Some price of admission: to use search in the home screen you will need to enable 'show search' in the search settings and provide an API key. This requires you create a free account on TMDB and generate the v3 key.
+ 
+ NOTE: Some price of admission: to use search in the home screen you will need to enable 'show search' in the search settings and provide an API key. This requires you create a free account on TMDB and generate the v3 key.
