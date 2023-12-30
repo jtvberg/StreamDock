@@ -36,6 +36,9 @@ function ytPromoCloseClick() {
     if (document.querySelectorAll('#dismiss-button')?.length > 0) {
       document.querySelectorAll('#dismiss-button').forEach(input => { input.click() })
     }
+    if (document.querySelector('[aria-label="Dismiss"]') != undefined) {
+      document.querySelector('[aria-label="Dismiss"]').click()
+    }
   } catch(err) { console.error(err) }
 }
 
@@ -45,6 +48,9 @@ function ytAdSkipClick() {
     console.log('ad skip')
     if (document.querySelector('.ytp-ad-skip-button') != undefined) {
       document.querySelector('.ytp-ad-skip-button').click()
+    }
+    if (document.querySelector('.ytp-ad-skip-button-modern') != undefined) {
+      document.querySelector('.ytp-ad-skip-button-modern').click()
     }
   } catch(err) { console.error(err) }
 }
