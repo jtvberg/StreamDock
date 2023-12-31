@@ -21,6 +21,7 @@
   border: 2px solid transparent;
   border-radius: 5px;
   aspect-ratio: 16/9;
+  cursor: pointer;
 }
 
 .bookmark-instance:hover {

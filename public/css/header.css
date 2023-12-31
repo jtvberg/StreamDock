@@ -64,6 +64,7 @@
   align-items: center;
   justify-content: center;
   transition: color 200ms ease-out, background-color 200ms ease-out;
+  cursor: pointer;
 }
 
 .stream-control {
