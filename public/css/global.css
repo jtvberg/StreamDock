@@ -83,7 +83,8 @@ button:active {
 }
 
 select,
-input {
+input,
+.log {
   font-size: 1rem;
   font-family: monospace;
   outline: none;
@@ -94,7 +95,12 @@ input {
   height: 32px;
   padding: 0px 5px;
   color: var(--color-control-white);
-  background-color: var(--color-control-darkgray);;
+  background-color: var(--color-control-darkgray);
+}
+
+.log {
+  height: -webkit-fill-available;
+  resize: none;
 }
 
 select {

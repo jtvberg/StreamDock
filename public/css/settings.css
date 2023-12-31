@@ -221,6 +221,11 @@
   display: grid;
 }
 
+.settings-log {
+  display: grid;
+  grid-template-rows: max-content auto max-content;
+}
+
 .settings-label {
   margin: auto 0px;
   line-height: 1;

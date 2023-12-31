@@ -8,6 +8,7 @@
     "start": "electron .",
     "debug": "electron --inspect=7171 .",
     "break": "electron --inspect-brk=7171 .",
+    "buildMacTest": "electron-builder -m --arm64",
     "buildMac": "electron-builder -m --x64 --arm64",
     "buildWin": "electron-builder -w",
     "buildLinux": "electron-builder -l"
@@ -49,7 +50,6 @@
       "mirror": "https://github.com/castlabs/electron-releases/releases/download/v"
     },
     "afterPack": "./build/afterPack.js",
-    "afterSign": "./build/afterSign.js",
     "mac": {
       "category": "public.app-category.video"
     },

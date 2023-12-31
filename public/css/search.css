@@ -296,3 +296,9 @@
   border-color: transparent;
   color: var(--color-system-accent);
 }
+
+#advanced-log-text {
+  border-radius: 5px;
+  color: var(--color-control-white);
+  background-color: var(--color-control-darkgray);
+}

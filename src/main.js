@@ -282,6 +282,7 @@ const showWin = () => {
   windows.forEach(win => win.show())
   headerView.webContents.executeJavaScript('localStorage.getItem("pref-resume");', true).then(response => {
     if (response === 'true' && resumePlaying) {
+      console.log('play')
       playVideo(streamView)
     }
   })

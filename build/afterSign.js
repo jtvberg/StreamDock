@@ -13,7 +13,8 @@ exports.default = function (context) {
       appBundleId: 'com.jtvberg.streamdock',
       appPath: `${appDir}/${appName}.app`,
       appleId: process.env.appleId,
-      appleIdPassword: process.env.appleIdPassword
+      appleIdPassword: process.env.appleIdPassword,
+      teamId: process.env.teamId
     })
   } else if (process.platform === 'win32') {
     // VMP sign via EVS
