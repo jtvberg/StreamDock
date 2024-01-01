@@ -173,7 +173,6 @@ const loadStreamBar = stream => {
   ele.addEventListener('click', e => {
     togglePanel(null, true)
     window.electronAPI.openUrl(e.target.dataset.url)
-    logOutput(e.target.dataset.url)
   })
   ele.addEventListener('dblclick', e => e.stopPropagation())
   frag.appendChild(ele)
@@ -796,6 +795,7 @@ const addBookmark = bookmarkObj => {
   const bookmarks = JSON.parse(localStorage.getItem('bookmarks')) || []
   bookmarks.push(bookmarkObj)
   localStorage.setItem('bookmarks', JSON.stringify(bookmarks))
+  logOutput('Bookmark Added')
 }
 
 // delete bookmark by timestamp
@@ -810,6 +810,7 @@ const deleteBookmark = timestamp => {
   })
   const bookmarks = JSON.parse(localStorage.getItem('bookmarks'))
   localStorage.setItem('bookmarks', JSON.stringify(bookmarks.filter(bm => bm.timestamp !== timestamp)))
+  logOutput('Bookmark Deleted')
 }
 
 // load bookmarks from local storage
@@ -1006,6 +1007,8 @@ $headerPanels.forEach(el => el.addEventListener('dblclick', e => e.stopPropagati
 $headerPanels.forEach(el => el.addEventListener('contextmenu', e => e.stopPropagation()))
 
 document.onkeydown = e => e.key === 'Escape' ? onDragMouseUp() : null
+
+window.electronAPI.logData((e, data) => logOutput(data))
 
 window.electronAPI.hideHeader(collaspeHeader)
 

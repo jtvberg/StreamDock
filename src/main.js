@@ -348,6 +348,7 @@ const setFacetViewBounds = width => facetView.setBounds({ x: 0, y: 0, width, hei
 
 // open url in streamView and send stream opened message to renderer
 const openUrl = url => {
+  sendLogData(url)
   streamView.webContents.loadURL(url)
   showStream(false)
   headerView.webContents.send('stream-opened')
@@ -369,7 +370,7 @@ const validUrl = url => {
   try {
     valid = new URL(url)
   } catch (err) {
-    console.log('invalid URL: ' + url)
+    sendLogData('invalid URL: ' + url)
     return false
   }
   return valid
@@ -395,7 +396,10 @@ const defaultPause = () => {
 }
 
 // inject play video function into view
-const playVideo = bv => bv.webContents.executeJavaScript(`(${defaultPlay.toString()})()`)
+const playVideo = bv => {
+  sendLogData('play')
+  bv.webContents.executeJavaScript(`(${defaultPlay.toString()})()`)
+}
 
 // default play video function
 const defaultPlay = () => {
@@ -525,6 +529,11 @@ const clearAppData = async relaunch => {
     app.relaunch()
   } 
   app.exit()
+}
+
+// send log data to renderer
+const sendLogData = log => {
+  headerView.webContents.send('log-data', log)
 }
 
 // App events
