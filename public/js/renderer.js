@@ -76,7 +76,9 @@ let editMode = false
 // Functions
 const logOutput = log => {
   const logTs = new Date().toLocaleString()
-  document.querySelector('#log-text').value += `${logTs}: ${log}\n`
+  const logMsg = `${logTs}: ${log}\n`
+  console.log(logMsg)
+  document.querySelector('#log-text').value += logMsg
 }
 
 // create stream element for stream bar, stream edit panel and append add new stream element
