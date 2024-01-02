@@ -22,9 +22,9 @@ function ytAdSkipRem(bv) {
 // YouTube overlay close click
 function ytAdOverlayClick() {
   try {
-    console.log('overlay close')
     if (document.querySelector('.ytp-ad-overlay-close-button') != undefined) {
       document.querySelector('.ytp-ad-overlay-close-button').click()
+      console.log('overlay close')
     }
   } catch(err) { console.error(err) }
 }
@@ -32,12 +32,13 @@ function ytAdOverlayClick() {
 // YouTube promo close click
 function ytPromoCloseClick() {
   try {
-    console.log('promo skip')
     if (document.querySelectorAll('#dismiss-button')?.length > 0) {
       document.querySelectorAll('#dismiss-button').forEach(input => { input.click() })
+      console.log('promo skip')
     }
     if (document.querySelector('[aria-label="Dismiss"]') != undefined) {
       document.querySelector('[aria-label="Dismiss"]').click()
+      console.log('promo skip')
     }
   } catch(err) { console.error(err) }
 }
@@ -45,12 +46,13 @@ function ytPromoCloseClick() {
 // YouTube ad skip click
 function ytAdSkipClick() {
   try {
-    console.log('ad skip')
     if (document.querySelector('.ytp-ad-skip-button') != undefined) {
       document.querySelector('.ytp-ad-skip-button').click()
+      console.log('ad skip')
     }
     if (document.querySelector('.ytp-ad-skip-button-modern') != undefined) {
       document.querySelector('.ytp-ad-skip-button-modern').click()
+      console.log('ad skip')
     }
   } catch(err) { console.error(err) }
 }

@@ -18,9 +18,9 @@ function atRecapSkipRem(bv) {
 // Apple TV recap skip click
 function atRecapSkipClick() {
   try {
-    console.log('recap episode')
-    if (document.querySelector('.skip__button') != undefined) {
-      document.querySelector('.skip__button').click()
+    if (document.querySelector('.skip-intro__button') != undefined) {
+      document.querySelector('.skip-intro__button').click()
+      console.log('recap skip')
     }
   } catch(err) { console.error(err) }
 }
@@ -30,9 +30,14 @@ function atRecapSkipMut() {
   try {
     console.log('recap mut')
     obsAtRecap = new MutationObserver((ml) => {
-      for(const mut of ml) {
-        if (mut.type === 'attributes') {
-          atRecapSkipClick()
+      console.log(ml)
+      for (const mut of ml) {
+        if (mut.type === 'childList') {
+          for (const an of mut.addedNodes) {
+            if (an.classList?.contains('skip-intro__container')) {
+              atRecapSkipClick()
+            }
+          }
         }
       }
     })
@@ -43,7 +48,7 @@ function atRecapSkipMut() {
 function atRecapSkipObs() {
   try {
     console.log('recap obs')
-    obsAtRecap.observe(document.querySelector('.skip__button'), { attributes: true })
+    obsAtRecap.observe(document.querySelector('#video-player-ember8'), { childList: true })
   } catch (err) { console.error(err) }
 }
 
@@ -77,9 +82,9 @@ function atEpisodeNextRem(bv) {
 // Apple TV next episode click
 function atEpisodeNextClick() {
   try {
-    console.log('next episode')
     if (document.querySelector('.post-play__cta-button') != undefined) {
       document.querySelector('.post-play__cta-button').click()
+      console.log('next episode')
     }
   } catch(err) { console.error(err) }
 }

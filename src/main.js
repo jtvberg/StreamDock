@@ -250,7 +250,9 @@ const createTray = () => {
     windows.forEach(win => show = win.isVisible() ? true : show)
     if (show) {
       hideWin()
+      sendLogData('toggleHide')
     } else {
+      sendLogData('toggleShow')
       showWin()
     }
   }
@@ -282,7 +284,7 @@ const showWin = () => {
   windows.forEach(win => win.show())
   headerView.webContents.executeJavaScript('localStorage.getItem("pref-resume");', true).then(response => {
     if (response === 'true' && resumePlaying) {
-      console.log('play')
+      sendLogData('show')
       playVideo(streamView)
     }
   })
@@ -293,6 +295,7 @@ const showWin = () => {
 const loadScripts = (bv = streamView, host) => {
   headerView.webContents.executeJavaScript('({...localStorage});', true).then(response => {
     facetView.webContents.send('is-netflix', false)
+    sendLogData(host)
     switch(host) {
       case 'www.youtube.com':
         response['service-ad'] === 'true' ? ytAdsSkip(bv) : ytAdSkipRem(bv)
@@ -305,20 +308,20 @@ const loadScripts = (bv = streamView, host) => {
         }
         break
       case 'www.hulu.com':
-        response['service-rs'] === 'true' ? hlRecapSkip(bv) : hlRecapSkipRem(bv)
-        response['service-bm'] === 'true' ? hlEpisodeNext(bv) : hlEpisodeNextRem(bv)
+        response['service-rs'] === 'true' ? setTimeout(hlRecapSkip, 3000, bv) : hlRecapSkipRem(bv)
+        response['service-rs'] === 'true' ? setTimeout(hlEpisodeNext, 3000, bv) : hlEpisodeNextRem(bv)
         break
       case 'www.disneyplus.com':
         response['service-rs'] === 'true' ? setTimeout(dpRecapSkip, 3000, bv) : dpRecapSkipRem(bv)
         response['service-bm'] === 'true' ? setTimeout(dpEpisodeNext, 3000, bv) : dpEpisodeNextRem(bv)
         break
-      case 'play.hbomax.com':
-        response['service-rs'] === 'true' ? hmRecapSkip(bv) : hmRecapSkipRem(bv)
-        response['service-bm'] === 'true' ? hmEpisodeNext(bv) : hmEpisodeNextRem(bv)
+      case 'play.max.com':
+        response['service-rs'] === 'true' ? setTimeout(hmRecapSkip, 3000, bv) : hmRecapSkipRem(bv)
+        response['service-bm'] === 'true' ? setTimeout(hmEpisodeNext, 3000, bv) : hmEpisodeNextRem(bv)
         break
       case 'www.paramountplus.com':
         response['service-rs'] === 'true' ? cbRecapSkip(bv) : cbRecapSkipRem(bv)
-        response['service-bm'] === 'true' ? cbEpisodeNext(bv) : cbEpisodeNextRem(bv)
+        response['service-bm'] === 'true' ? setTimeout(cbEpisodeNext, 3000, bv) : cbEpisodeNextRem(bv)
         break
       case 'www.peacocktv.com':
         response['service-rs'] === 'true' ? setTimeout(pcRecapSkip, 3000, bv) : pcRecapSkipRem(bv)

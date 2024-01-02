@@ -18,9 +18,9 @@ function pcRecapSkipRem(bv) {
 // Peacock recap skip click
 function pcRecapSkipClick() {
   try {
-    console.log('recap episode')
     if (document.querySelector('.playback-controls__skip--button') != undefined) {
       document.querySelector('.playback-controls__skip--button').click()
+      console.log('recap skip')
     }
   } catch(err) { console.error(err) }
 }
@@ -77,9 +77,9 @@ function pcEpisodeNextRem(bv) {
 // Peacock next episode click
 function pcEpisodeNextClick() {
   try {
-    console.log('next episode')
     if (document.querySelector('.playback-binge__image') != undefined) {
       document.querySelector('.playback-binge__image').click()
+      console.log('next episode')
     }
   } catch(err) { console.error(err) }
 }

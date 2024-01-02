@@ -18,9 +18,9 @@ function nfRecapSkipRem(bv) {
 // Netflix recap skip click
 function nfRecapSkipClick() {
   try {
-    console.log('recap skip')
     if (document.querySelector('.watch-video--skip-content-button') != undefined) {
       document.querySelector('.watch-video--skip-content-button').click()
+      console.log('recap skip')
     }
   } catch(err) { console.error(err) }
 }
@@ -85,12 +85,13 @@ function nfEpisodeNextRem(bv) {
 // Netflix next episode click
 function nfEpisodeNextClick() {
   try {
-    console.log('next episode')
     if (document.querySelector('[data-uia = "next-episode-seamless-button-draining"]') != undefined) {
       document.querySelector('[data-uia = "next-episode-seamless-button-draining"]').click()
+      console.log('next episode')
     }
     if (document.querySelector('[data-uia = "next-episode-seamless-button"]') != undefined) {
       document.querySelector('[data-uia = "next-episode-seamless-button"]').click()
+      console.log('next episode')
     }
   } catch(err) { console.error(err) }
 }

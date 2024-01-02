@@ -18,9 +18,9 @@ function hlRecapSkipRem(bv) {
 // Hulu skip click
 function hlRecapSkipClick() {
   try {
-    console.log('skip recap')
     if (document.querySelector('.SkipButton__button') != undefined) {
       document.querySelector('.SkipButton__button').click()
+      console.log('recap skip')
     }
   } catch(err) { console.error(err) }
 }
@@ -80,9 +80,9 @@ function hlEpisodeNextRem(bv) {
 // Hulu next episode click
 function hlEpisodeNextClick() {
   try {
-    console.log('next episode')
     if (document.querySelector('.EndCardButton').closest('.ControlsContainer__transition').style.visibility === 'visible') {
-      document.querySelector('.EndCardButton').click()
+      document.querySelector('.EndCardButton--active').click()
+      console.log('next episode')
     }
   } catch(err) { console.error(err) }
 }

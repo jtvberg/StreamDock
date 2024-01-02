@@ -18,9 +18,9 @@ function dpRecapSkipRem(bv) {
 // Disney recap skip click
 function dpRecapSkipClick() {
   try {
-    console.log('recap episode')
     if (document.querySelector('.skip__button') != undefined) {
       document.querySelector('.skip__button').click()
+      console.log('recap skip')
     }
   } catch(err) { console.error(err) }
 }
@@ -73,9 +73,9 @@ function dpEpisodeNextRem(bv) {
 // Disney next episode click
 function dpEpisodeNextClick() {
   try {
-    console.log('next episode')
     if (document.querySelectorAll('[data-testid = "up-next-play-button"]')[0] != undefined) {
       document.querySelectorAll('[data-testid = "up-next-play-button"]')[0].click()
+      console.log('next episode')
     }
   } catch(err) { console.error(err) }
 }
@@ -94,7 +94,7 @@ function dpEpisodeNextMut() {
 function dpEpisodeNextObs() {
   try {
     console.log('next obs')
-    obsDpNext.observe(document.querySelector('#app_scene_content'), { childList: true, subtree: true })
+    obsDpNext.observe(document.querySelector('.hudson-container'), { childList: true, subtree: true })
   } catch (err) { console.error(err) }
 }
 

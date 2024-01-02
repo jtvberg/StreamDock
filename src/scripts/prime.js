@@ -32,9 +32,9 @@ function amzUpgradeDismiss(bv) {
 // Prime upgrade your browser dismiss click
 function amzUpgradeDismissClick() {
   try {
-    console.log('upgrade dismiss')
     if (document.querySelector('.f1dk4awg') != undefined) {
       document.querySelector('.f1dk4awg').click()
+      console.log('upgrade dismiss')
     }
   } catch(err) { console.error(err) }
 }
@@ -95,9 +95,9 @@ function amzPrevewSkipRem(bv) {
 // Prime preview skip click
 function amzPrevSkipClick(ele) {
   try {
-    console.log('prev skip')
     if (document.querySelector(ele) != undefined) {
       document.querySelector(ele).click()
+      console.log('prev skip')
     }
   } catch(err) { console.error(err) }
 }
@@ -168,9 +168,9 @@ function amzRecapSkipRem(bv) {
 // Prime recap skip click
 function amzRecapSkipClick(ele) {
   try {
-    console.log('recap skip')
     if (document.querySelector(ele) != undefined) {
       document.querySelector(ele).click()
+      console.log('recap skip')
     }
   } catch(err) { console.error(err) }
 }
@@ -241,9 +241,9 @@ function amzEpisodeNextRem(bv) {
 // Prime next episode click
 function amzEpisodeNextClick(ele) {
   try {
-    console.log('next episode')
     if (document.querySelector(ele) != undefined) {
       document.querySelector(ele).click()
+      console.log('next episode')
     }
   } catch(err) { console.error(err) }
 }

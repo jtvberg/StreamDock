@@ -18,9 +18,9 @@ function hmRecapSkipRem(bv) {
 // HBO recap skip click
 function hmRecapSkipClick() {
   try {
-    console.log('recap episode')
-    if (document.querySelector('[data-testid="SkipButton"]') != undefined) {
-      document.querySelector('[data-testid="SkipButton"]').click()
+    if (document.querySelector('[data-testid="player-ux-skip-button"]') != undefined) {
+      document.querySelector('[data-testid="player-ux-skip-button"]').click()
+      console.log('recap skip')
     }
   } catch(err) { console.error(err) }
 }
@@ -39,7 +39,7 @@ function hmRecapSkipMut() {
 function hmRecapSkipObs() {
   try {
     console.log('recap obs')
-    obsHmRecap.observe(document.querySelector('#root'), { childList: true, subtree: true })
+    obsHmRecap.observe(document.querySelector('[data-testid="skip"]'), { attributes: true })
   } catch (err) { console.error(err) }
 }
 
@@ -73,9 +73,9 @@ function hmEpisodeNextRem(bv) {
 // HBO next episode click
 function hmEpisodeNextClick() {
   try {
-    console.log('next episode')
-    if (document.querySelector('[data-testid="UpNextButton"]') != undefined) {
-      document.querySelector('[data-testid="UpNextButton"]').click()
+    if (document.querySelector('[data-testid="player-ux-up-next-button"]') != undefined) {
+      document.querySelector('[data-testid="player-ux-up-next-button"]').click()
+      console.log('next episode')
     }
   } catch(err) { console.error(err) }
 }
@@ -94,7 +94,7 @@ function hmEpisodeNextMut() {
 function hmEpisodeNextObs() {
   try {
     console.log('next obs')
-    obsHmNext.observe(document.querySelector('#root'), { childList: true, subtree: true })
+    obsHmNext.observe(document.querySelector('[data-testid="up_next"]'), { attributes: true })
   } catch (err) { console.error(err) }
 }
 

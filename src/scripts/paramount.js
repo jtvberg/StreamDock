@@ -18,9 +18,9 @@ function cbRecapSkipRem(bv) {
 // Paramount recap skip click
 function cbRecapSkipClick() {
   try {
-    console.log('recap episode')
     if (document.querySelector('.skip-button') != undefined) {
       document.querySelector('.skip-button').click()
+      console.log('recap skip')
     }
   } catch(err) { console.error(err) }
 }
@@ -31,7 +31,7 @@ function cbRecapSkipMut() {
     console.log('recap mut')
     obsCbRecap = new MutationObserver((ml) => {
       for(const mut of ml) {
-        if (mut.type === 'attributes') {
+        if (mut.type === 'attributes' && mut.target.classList?.contains('skip-button')) {
           cbRecapSkipClick()
         }
       }
@@ -77,9 +77,9 @@ function cbEpisodeNextRem(bv) {
 // Paramount next episode click
 function cbEpisodeNextClick() {
   try {
-    console.log('next episode')
     if (document.querySelector('.watch-now-btn') != undefined) {
       document.querySelector('.watch-now-btn').click()
+      console.log('next episode')
     }
   } catch(err) { console.error(err) }
 }
@@ -88,12 +88,8 @@ function cbEpisodeNextClick() {
 function cbEpisodeNextMut() {
   try {
     console.log('next mut')
-    obsCbNext = new MutationObserver((ml) => {
-      for(const mut of ml) {
-        if (mut.type === 'childList' && mut.addedNodes[0]?.classList?.contains('single-video-bottom-right')) {
-          cbEpisodeNextClick()
-        }
-      }
+    obsCbNext = new MutationObserver(() => {
+      cbEpisodeNextClick()
     })
   } catch(err) { console.error(err) }
 }
@@ -102,7 +98,7 @@ function cbEpisodeNextMut() {
 function cbEpisodeNextObs() {
   try {
     console.log('next obs')
-    obsCbNext.observe(document.querySelector('#main-container'), { childList: true, subtree: true })
+    obsCbNext.observe(document.querySelector('.base-container'), { childList: true, subtree: true })
   } catch (err) { console.error(err) }
 }
 
