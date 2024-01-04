@@ -109,7 +109,8 @@ function hlEpisodeNextImpMut() {
 function hlEpisodeNextImpObs() {
   try {
     console.log('imp obs')
-    obsHlNextImp.observe(document.querySelector('.ControlsContainer'), { childList: true, subtree: true })
+    setTimeout(hlEpisodeNextObs, 3000)
+    obsHlNextImp.observe(document.querySelector('#web-player-app'), { childList: true, subtree: true })
   } catch (err) { console.error(err) }
 }
 

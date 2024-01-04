@@ -75,10 +75,7 @@ let editMode = false
 
 // Functions
 const logOutput = log => {
-  const logTs = new Date().toLocaleString()
-  const logMsg = `${logTs}: ${log}\n`
-  console.log(logMsg)
-  document.querySelector('#log-text').value += logMsg
+  console.log(`${new Date().toLocaleString()}: ${log}\n`)
 }
 
 // create stream element for stream bar, stream edit panel and append add new stream element
@@ -127,8 +124,6 @@ const applySettings = () => {
   }
 
   loadClearDataPanel()
-
-  loadLogPanel()
 
   window.electronAPI.defaultAgent(getDefaultAgent())
 
@@ -482,20 +477,6 @@ const loadSettingsPanel = pref => {
       $advancedLayout.appendChild(frag)
       break
   }
-}
-
-// load log elements
-const loadLogPanel = () => {
-  const frag = document.createDocumentFragment()
-  const ele = elementFromHtml(`<div class="settings-control settings-log" title="StreamDock Log" style="height: 100%;"></div>`)
-  const lbl = elementFromHtml(`<div>StreamDock Log</div>`)
-  const pane = elementFromHtml(`<textarea id="log-text" class="log"></textarea>`)
-  const desc = elementFromHtml(`<div class="text-muted">When things get weird...</div>`)
-  ele.appendChild(lbl)
-  ele.appendChild(pane)
-  ele.appendChild(desc)
-  frag.appendChild(ele)
-  $advancedLayout.appendChild(frag)
 }
 
 // load clear data elements
