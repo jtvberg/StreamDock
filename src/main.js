@@ -389,7 +389,7 @@ const setAccent = () => {
 const navBack = () => streamView.webContents.canGoBack() ? streamView.webContents.goBack() : null
 
 // inject pause video function into view
-const pauseVideo = bv => bv.webContents.executeJavaScript(`(${hlPause.toString()})()`)
+const pauseVideo = bv => bv.webContents.executeJavaScript(`(${defaultPause.toString()})()`)
 
 // default pause video function
 const defaultPause = () => {
@@ -398,30 +398,13 @@ const defaultPause = () => {
   } catch (err) { console.error(err) }
 }
 
-// pause script for Hulu --> to be moved
-const hlPause = () => {
-  try {
-    document.querySelector('#content-video-player').pause()
-  } catch (err) { console.error(err) }
-}
-
 // inject play video function into view
-const playVideo = bv => {
-  sendLogData('play')
-  bv.webContents.executeJavaScript(`(${hlPlay.toString()})()`)
-}
+const playVideo = bv => bv.webContents.executeJavaScript(`(${defaultPlay.toString()})()`)
 
 // default play video function
 const defaultPlay = () => {
   try {
     document.querySelectorAll('video').forEach(input => { input.play() })
-  } catch (err) { console.error(err) }
-}
-
-// play script for Hulu --> to be moved
-const hlPlay = () => {
-  try {
-    document.querySelector('#content-video-player').play()
   } catch (err) { console.error(err) }
 }
 
