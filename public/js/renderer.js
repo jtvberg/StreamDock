@@ -87,6 +87,7 @@ const loadStreams = () => {
     loadStreamPanel(stream)
   })
   setStreams(streams)
+  logOutput('Streams Updated')
   loadStreamPanel({
     active: true,
     glyph: '+',
@@ -349,6 +350,7 @@ const updateStreams = stream => {
     streams.push(stream)
   }
   setStreams(streams)
+  logOutput('Streams Updated')
   loadStreamPanel(stream)
   repaintStreamBar()
 }
@@ -378,6 +380,7 @@ const reorderStreams = () => {
   streams.forEach((s, i) => s.order = i + 1)
   // Save to local storage
   setStreams(streams)
+  logOutput('Streams Updated')
 }
 
 // reload stream bar elements
@@ -648,6 +651,7 @@ const osHeader = isMac => {
 
 // apply preference updates
 const updatePref = (id, val) => {
+  logOutput(`Preference ${id} Updated`)
   switch (id) {
     case 'pref-fullscreen':
       window.electronAPI.winFullscreen(val)

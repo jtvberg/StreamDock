@@ -248,13 +248,7 @@ const createTray = () => {
   const toggleWin = () => {
     let show = false
     windows.forEach(win => show = win.isVisible() ? true : show)
-    if (show) {
-      hideWin()
-      sendLogData('toggleHide')
-    } else {
-      sendLogData('toggleShow')
-      showWin()
-    }
+    show ? hideWin() : showWin()
   }
 }
 
@@ -284,7 +278,6 @@ const showWin = () => {
   windows.forEach(win => win.show())
   headerView.webContents.executeJavaScript('localStorage.getItem("pref-resume");', true).then(response => {
     if (response === 'true' && resumePlaying) {
-      sendLogData('show')
       playVideo(streamView)
     }
   })
@@ -295,7 +288,7 @@ const showWin = () => {
 const loadScripts = (bv = streamView, host) => {
   headerView.webContents.executeJavaScript('({...localStorage});', true).then(response => {
     facetView.webContents.send('is-netflix', false)
-    sendLogData(host)
+    sendLogData(`Using Hostname: ${host}`)
     switch(host) {
       case 'www.youtube.com':
         response['service-ad'] === 'true' ? ytAdsSkip(bv) : ytAdSkipRem(bv)
@@ -351,7 +344,7 @@ const setFacetViewBounds = width => facetView.setBounds({ x: 0, y: 0, width, hei
 
 // open url in streamView and send stream opened message to renderer
 const openUrl = url => {
-  sendLogData(url)
+  sendLogData(`Open URL: ${url}`)
   streamView.webContents.loadURL(url)
   showStream(false)
   headerView.webContents.send('stream-opened')
@@ -373,7 +366,7 @@ const validUrl = url => {
   try {
     valid = new URL(url)
   } catch (err) {
-    sendLogData('invalid URL: ' + url)
+    sendLogData(`Invalid URL: ${url}`)
     return false
   }
   return valid
@@ -524,7 +517,7 @@ const urlToBookmark = url => {
 
 // clear app data and relaunch if bool is true
 const clearAppData = async relaunch => {
-  await headerView.webContents.session.clearStorageData().catch(err => sendLogData(err))
+  await headerView.webContents.session.clearStorageData().catch(err => sendLogData(`Clear Data Error: ${err}`))
   if (relaunch) { 
     app.relaunch()
   } 
