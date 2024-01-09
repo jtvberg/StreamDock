@@ -76,13 +76,14 @@
  :rotating_light:**Note: If you are currently using StreamDock 1.x.x or older, I highly recommend you use the Clear Data function in the advanced section in the settings!**:rotating_light:
  
  The current release works on macOS (signed, notarized and tested on Ventura and Sonoma), Windows 10/11 (self-signed) and Linux (tested on Mint).
- Version 2.0.1 (coming soon) will be the first release that includes a macOS distribution for Apple silicon. This was a miss on my part as the application will run much slower given the JS will be interpreted twice via Rosetta. Be sure to use the arm64 dmg if you have an M1/M2/M3.
+ Version 2.0.1 is the first release that includes a macOS distribution for Apple silicon. This was a miss on my part as the application will run much slower given the JS will be interpreted twice via Rosetta. Be sure to use the arm64 dmg if you have an M1/M2/M3.
 
  The auto-update should prompt you as new releases come out and then, post download, prompt you to install/restart. Sometimes, it won't do the restart. If you wait a minute and exit the app completely, it should automatically restart the new version.
 
- Two Issues:
+ Three Issues:
  - If you drag the window around and cross into a an OS toolbar or off to another screen, occasionally, the mouse will stick to the drag area. You can hit escape to disconnect it
  - Peacock is broken again. If you already successfully logged in prior to upgrading, don't delete your settings as I recommended. You will have to delete your bookmarks manually and there will be some random data that doesn't do anything left over but that shouldn't be a problem. Peacock sucks anyway (seriously Peacock, try using your native apps for a minute.)
+ - Hulu will resume playing when minimized to tray after a short amount of time. If you pause it before you minimize to tray, it does not. I have not found a root cause for this and it only happens on Hulu. This may have been around for quite some time.
 
 ## App Control
  - Click on the quick-access buttons across the top to load streaming services as setup in the stream editor
