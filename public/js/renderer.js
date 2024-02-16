@@ -129,24 +129,25 @@ const applySettings = () => {
   window.electronAPI.defaultAgent(getDefaultAgent())
 
   window.electronAPI.headerHeight({ height: headerCollapsed, base: headerCollapsed })
-  
+
   window.electronAPI.openUrl(getLastStream())
-  
+
   window.electronAPI.winGetLoc((e, bounds) => setWinBounds(bounds))
-  
+
   window.electronAPI.setIsMac((e, bool) => osHeader(bool))
-  
+
   window.electronAPI.setAccent((e, color) => {
     let root = document.documentElement
     root.style.setProperty('--color-system-accent', color)
-    root.style.setProperty('--color-system-accent-trans', color.substring(0,7) + '80')
+    root.style.setProperty('--color-system-accent-trans', color.substring(0, 7) + '80')
   })
 }
 
 // helper funtion to create element from html string
 const elementFromHtml = html => {
+  const parser = new DOMParser()
   const template = document.createElement('template')
-  template.innerHTML = html.trim()
+  template.innerHTML = parser.parseFromString(html.trim(), "text/html").body.innerHTML
   return template.content.firstElementChild
 }
 
@@ -188,8 +189,8 @@ const editStreamLineup = bool => {
     document.querySelectorAll('.stream-settings-control').forEach(el => {
       el.setAttribute('draggable', true)
       el.classList.add('wobble')
-      el.style.animationDelay = `-${(Math.random() * (75-5) + 5) / 100}s` // -.05 - -.75
-      el.style.animationDuration = `${(Math.random() * (33-22) + 22) / 100}s` // .22 - .33
+      el.style.animationDelay = `-${(Math.random() * (75 - 5) + 5) / 100}s` // -.05 - -.75
+      el.style.animationDuration = `${(Math.random() * (33 - 22) + 22) / 100}s` // .22 - .33
     })
   } else {
     $streamDoneBtn.style.display = 'none'
@@ -364,9 +365,9 @@ const updateOrder = ele => {
     if (el.style.order && el.style.order >= loc) {
       el.style.order++
     }
-  dragStream.style.order = loc
-  // Update order in streams array
-  streams.find(s => s.id === el.dataset.id).order = parseInt(el.style.order)
+    dragStream.style.order = loc
+    // Update order in streams array
+    streams.find(s => s.id === el.dataset.id).order = parseInt(el.style.order)
   })
   reorderStreams()
   repaintStreamBar()
@@ -375,7 +376,7 @@ const updateOrder = ele => {
 // reorder streams array and save to local storage
 const reorderStreams = () => {
   // Sort the steams array based on new order
-  streams.sort((a,b) => (a.order > b.order) ? 1 : ((b.order > a.order) ? -1 : 0))
+  streams.sort((a, b) => (a.order > b.order) ? 1 : ((b.order > a.order) ? -1 : 0))
   // Reset order# from 1 to n based on new index
   streams.forEach((s, i) => s.order = i + 1)
   // Save to local storage
@@ -431,7 +432,7 @@ const loadSettingsPanel = pref => {
       const sel = elementFromHtml(`<select id="${pref.id}" class="${pref.category}" ></select>`)
       ele.classList.add('settings-text')
       // this is a little dumb but room for other select custom logic
-      switch(pref.id) {
+      switch (pref.id) {
         case 'search-loc':
           locs.sort((a, b) => a.LocName.localeCompare(b.LocName))
           locs.forEach(loc => {
@@ -960,7 +961,7 @@ $bookmarkSortHostBtn.addEventListener('click', () => sortBookmarks('host'))
 
 $bookmarkSortTitleBtn.addEventListener('click', () => sortBookmarks('title'))
 
-$bookmarkNewLinkBtn.addEventListener('click', async () => window.electronAPI.urlToBookmark(`${ await navigator.clipboard.readText() }`))
+$bookmarkNewLinkBtn.addEventListener('click', async () => window.electronAPI.urlToBookmark(`${await navigator.clipboard.readText()}`))
 
 $header.addEventListener('mouseenter', expandHeader)
 
@@ -982,7 +983,7 @@ $header.addEventListener('drop', e => {
   e.preventDefault()
   if (e.dataTransfer.items) {
     [...e.dataTransfer.items].forEach(item => {
-      item.type.match('^text/uri-list') ? item.getAsString(data => window.electronAPI.urlToBookmark(`${ data }`)) : null
+      item.type.match('^text/uri-list') ? item.getAsString(data => window.electronAPI.urlToBookmark(`${data}`)) : null
     })
   }
 })

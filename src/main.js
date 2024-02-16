@@ -73,7 +73,7 @@ let resumePlaying = false
 if (isDev) {
   try {
     require('electron-reloader')(module)
-  } catch {}
+  } catch { }
 }
 
 // disable hardware acceleration
@@ -106,10 +106,10 @@ const createWindow = () => {
 
   // load main window
   mainWin.loadFile(path.join(__dirname, './index.html'))
-  
+
   // create browser view for header
   headerView = new BrowserView({
-    webPreferences: { 
+    webPreferences: {
       preload: path.join(__dirname, 'preload.js')
     }
   })
@@ -122,7 +122,7 @@ const createWindow = () => {
 
   // create browser view for facets
   facetView = new BrowserView({
-    webPreferences: { 
+    webPreferences: {
       preload: path.join(__dirname, 'preload.js')
     }
   })
@@ -234,7 +234,8 @@ const createTray = () => {
   // if linux, set tray context menu
   if (isLinux) {
     const contextMenu = Menu.buildFromTemplate([
-      { label: 'Exit',
+      {
+        label: 'Exit',
         click() { app.quit() }
       }
     ])
@@ -289,7 +290,7 @@ const loadScripts = (bv = streamView, host) => {
   headerView.webContents.executeJavaScript('({...localStorage});', true).then(response => {
     facetView.webContents.send('is-netflix', false)
     sendLogData(`Using Hostname: ${host}`)
-    switch(host) {
+    switch (host) {
       case 'www.youtube.com':
         response['service-ad'] === 'true' ? ytAdsSkip(bv) : ytAdSkipRem(bv)
         break
@@ -337,10 +338,10 @@ const loadScripts = (bv = streamView, host) => {
 }
 
 // set headerView bounds to match mainWin with supplied height
-const setHeaderViewBounds = height => headerView.setBounds({ x: 0, y: 0, width: mainWin.getBounds().width, height})
+const setHeaderViewBounds = height => headerView.setBounds({ x: 0, y: 0, width: mainWin.getBounds().width, height })
 
 // set facetView bounds to match mainWin with supplied width
-const setFacetViewBounds = width => facetView.setBounds({ x: 0, y: 0, width, height: mainWin.getBounds().height + 2})
+const setFacetViewBounds = width => facetView.setBounds({ x: 0, y: 0, width, height: mainWin.getBounds().height + 2 })
 
 // open url in streamView and send stream opened message to renderer
 const openUrl = url => {
@@ -518,9 +519,9 @@ const urlToBookmark = url => {
 // clear app data and relaunch if bool is true
 const clearAppData = async relaunch => {
   await headerView.webContents.session.clearStorageData().catch(err => sendLogData(`Clear Data Error: ${err}`))
-  if (relaunch) { 
+  if (relaunch) {
     app.relaunch()
-  } 
+  }
   app.exit()
 }
 
