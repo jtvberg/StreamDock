@@ -1,5 +1,5 @@
 // Imports
-const { app, BrowserWindow, BrowserView, Tray, Menu, nativeTheme, components, ipcMain, screen, systemPreferences, clipboard } = require('electron')
+const { app, BrowserWindow, WebContentsView, Tray, Menu, nativeTheme, components, ipcMain, screen, systemPreferences, clipboard } = require('electron')
 const { version, productName, author, repository, bugs } = require('../package.json');
 const path = require('path')
 const menu = require('./util/menu')
@@ -108,41 +108,37 @@ const createWindow = () => {
   mainWin.loadFile(path.join(__dirname, './index.html'))
 
   // create browser view for header
-  headerView = new BrowserView({
+  headerView = new WebContentsView({
     webPreferences: {
+      transparent: true,
       preload: path.join(__dirname, 'preload.js')
     }
   })
   headerView.webContents.loadFile(path.join(__dirname, '../public/index.html'))
-  headerView.setAutoResize({ width: true, height: false })
 
   // create browser view for streams
-  streamView = new BrowserView()
-  streamView.setAutoResize({ width: true, height: true })
+  streamView = new WebContentsView()
 
   // create browser view for facets
-  facetView = new BrowserView({
+  facetView = new WebContentsView({
     webPreferences: {
+      transparent: true,
       preload: path.join(__dirname, 'preload.js')
     }
   })
   facetView.webContents.loadFile(path.join(__dirname, '../public/facets.html'))
-  facetView.setAutoResize({ width: false, height: true })
 
   // if mac, hide window buttons
   isMac ? mainWin.setWindowButtonVisibility(false) : null
 
   // add views to main window
-  mainWin.addBrowserView(streamView)
-  mainWin.addBrowserView(facetView)
-  mainWin.addBrowserView(headerView)
+  mainWin.contentView.addChildView(streamView)
+  mainWin.contentView.addChildView(facetView)
+  mainWin.contentView.addChildView(headerView)
 
-  // set stream view bounds
-  streamView.setBounds({
-    x: 0,
-    y: 0,
-    width: mainWin.getBounds().width,
-    height: mainWin.getBounds().height
+  // TODO: fix
+  mainWin.on('resize', () => {
+    streamView.setBounds({ x: 0, y: 0, width: mainWin.getBounds().width, height: mainWin.getBounds().height })
   })
 
   // on steam view navigation check if url is valid and set userAgent
@@ -337,9 +333,11 @@ const loadScripts = (bv = streamView, host) => {
   })
 }
 
+// TODO: fix
 // set headerView bounds to match mainWin with supplied height
 const setHeaderViewBounds = height => headerView.setBounds({ x: 0, y: 0, width: mainWin.getBounds().width, height })
 
+// TODO: fix
 // set facetView bounds to match mainWin with supplied width
 const setFacetViewBounds = width => facetView.setBounds({ x: 0, y: 0, width, height: mainWin.getBounds().height + 2 })
 
@@ -380,7 +378,7 @@ const setAccent = () => {
 }
 
 // navigate back in view if possible
-const navBack = () => streamView.webContents.canGoBack() ? streamView.webContents.goBack() : null
+const navBack = () => streamView.webContents.navigationHistory.canGoBack() ? streamView.webContents.navigationHistory.goBack() : null
 
 // inject pause video function into view
 const pauseVideo = bv => bv.webContents.executeJavaScript(`(${defaultPause.toString()})()`)
@@ -603,18 +601,18 @@ ipcMain.on('open-devtools', () => {
   headerView.webContents.openDevTools({ mode: 'detach' })
 })
 
+// TODO: fix
 ipcMain.on('update-header-height', (e, { height, base }) => {
   if (!mainWin) return
   if (height) {
     isMac ? height > base ? mainWin.setWindowButtonVisibility(true) : mainWin.setWindowButtonVisibility(mainWin.isFullScreen()) : null
-    headerView.setAutoResize({ width: true, height: false })
     setHeaderViewBounds(height)
   } else {
     setHeaderViewBounds(mainWin.getBounds().height)
-    headerView.setAutoResize({ width: true, height: true })
   }
 })
 
+// TODO: fix
 ipcMain.on('update-facets-width', (e, width) => {
   setFacetViewBounds(width)
 })

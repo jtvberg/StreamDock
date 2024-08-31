@@ -1,5 +1,5 @@
 // Imports
-import nfFacets from '../res/nffacets.json' assert { type: 'json' }
+import nfFacets from '../res/nffacets.json' with { type: 'json' }
 
 // Constants
 const facetsCollapsed = 12
@@ -20,7 +20,7 @@ let facetsTimeOut
 window.electronAPI.setAccent((e, color) => {
   let root = document.documentElement
   root.style.setProperty('--color-system-accent', color)
-  root.style.setProperty('--color-system-accent-trans', color.substring(0,7) + '80')
+  root.style.setProperty('--color-system-accent-trans', color.substring(0, 7) + '80')
 })
 
 window.electronAPI.setIsNetflix((e, bool) => {

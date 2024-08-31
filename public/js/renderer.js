@@ -1,6 +1,6 @@
 // Imports
 import { getStreams, setStreams, getNewStreamId, getLastStream, getPrefs, setLastStream, getWinBounds, setWinBounds, getWinLock, setWinLock, getWinRatio, setWinRatio, getDefaultAgent } from "./util/settings.js"
-import locs from '../res/loc.json' assert { type: 'json' }
+import locs from '../res/loc.json' with { type: 'json' }
 
 // Constants
 const headerCollapsed = 12
