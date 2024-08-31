@@ -136,9 +136,13 @@ const createWindow = () => {
   mainWin.contentView.addChildView(facetView)
   mainWin.contentView.addChildView(headerView)
 
-  // TODO: fix
+  // TODO: fix 31
   mainWin.on('resize', () => {
-    streamView.setBounds({ x: 0, y: 0, width: mainWin.getBounds().width, height: mainWin.getBounds().height })
+    const wb = mainWin.getBounds()
+    const hb = headerView.getBounds()
+    streamView.setBounds({ x: 0, y: 0, width: wb.width, height: wb.height })
+    facetView.setBounds({ x: 0, y: 0, width: facetView.getBounds().width, height: wb.height + 2 })
+    headerView.setBounds({ x: 0, y: 0, width: wb.width, height: hb.height > 31 ? wb.height : hb.height })
   })
 
   // on steam view navigation check if url is valid and set userAgent
@@ -333,11 +337,9 @@ const loadScripts = (bv = streamView, host) => {
   })
 }
 
-// TODO: fix
 // set headerView bounds to match mainWin with supplied height
 const setHeaderViewBounds = height => headerView.setBounds({ x: 0, y: 0, width: mainWin.getBounds().width, height })
 
-// TODO: fix
 // set facetView bounds to match mainWin with supplied width
 const setFacetViewBounds = width => facetView.setBounds({ x: 0, y: 0, width, height: mainWin.getBounds().height + 2 })
 
@@ -601,7 +603,6 @@ ipcMain.on('open-devtools', () => {
   headerView.webContents.openDevTools({ mode: 'detach' })
 })
 
-// TODO: fix
 ipcMain.on('update-header-height', (e, { height, base }) => {
   if (!mainWin) return
   if (height) {
@@ -612,7 +613,6 @@ ipcMain.on('update-header-height', (e, { height, base }) => {
   }
 })
 
-// TODO: fix
 ipcMain.on('update-facets-width', (e, width) => {
   setFacetViewBounds(width)
 })
