@@ -5,7 +5,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
     logData: data => ipcRenderer.on('log-data', data),
     clearData: bool => ipcRenderer.send('clear-data', bool),
     defaultAgent: agent => ipcRenderer.send('default-agent', agent),
-    headerHeight: heightObj => ipcRenderer.send('update-header-height', heightObj),
+    updateHeaderHeight: height => ipcRenderer.send('update-header-height', height),
     facetWidth: width => ipcRenderer.send('update-facets-width', width),
     urlToBookmark: url => ipcRenderer.send('url-to-bookmark', url),
     openUrl: url => ipcRenderer.send('open-url', url),
@@ -19,7 +19,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
     winMin: () => ipcRenderer.send('win-min'),
     winHide: () => ipcRenderer.send('win-hide'),
     winClose: () => ipcRenderer.send('win-close'),
-    winFocus: () => ipcRenderer.send('win-focus'), 
+    winFocus: () => ipcRenderer.send('win-focus'),
     winMove: mouseObj => ipcRenderer.send('win-move', mouseObj),
     winLock: bool => ipcRenderer.send('win-lock', bool),
     winRatio: bool => ipcRenderer.send('win-ratio', bool),
@@ -34,6 +34,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
     lastStream: url => ipcRenderer.on('last-stream', url),
     setIsNetflix: bool => ipcRenderer.on('is-netflix', bool),
     streamOpened: bool => ipcRenderer.on('stream-opened', bool),
+    getHeaderHeight: heightObj => ipcRenderer.invoke('set-header-height', heightObj),
     setIsMac: bool => ipcRenderer.once('is-mac', bool),
     getAppInfo: appInfo => ipcRenderer.once('app-info', appInfo)
 })

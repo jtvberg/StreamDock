@@ -3,8 +3,6 @@ import { getStreams, setStreams, getNewStreamId, getLastStream, getPrefs, setLas
 import locs from '../res/loc.json' with { type: 'json' }
 
 // Constants
-const headerCollapsed = 12
-const headerExpanded = 31
 const streams = getStreams()
 
 // Element references
@@ -65,6 +63,8 @@ const $bookmarkSortHostBtn = document.querySelector('#bookmark-sort-host-btn')
 const $bookmarkNewLinkBtn = document.querySelector('#bookmark-newlink-btn')
 
 // Vars
+let headerCollapsed = 0
+let headerExpanded = 0
 let dragAnimationId
 let dragMouseX
 let dragMouseY
@@ -74,6 +74,8 @@ let headerTimeOut
 let editMode = false
 
 // Functions
+const headerDim = await window.electronAPI.getHeaderHeight()
+
 const logOutput = log => {
   console.log(`${new Date().toLocaleString()}: ${log}\n`)
 }
@@ -102,6 +104,9 @@ const loadStreams = () => {
 
 // apply settings on startup
 const applySettings = () => {
+  headerCollapsed = headerDim.base
+  headerExpanded = headerDim.height
+
   loadStreams()
 
   getBookmarks()
@@ -128,7 +133,7 @@ const applySettings = () => {
 
   window.electronAPI.defaultAgent(getDefaultAgent())
 
-  window.electronAPI.headerHeight({ height: headerCollapsed, base: headerCollapsed })
+  window.electronAPI.updateHeaderHeight(headerCollapsed)
 
   window.electronAPI.openUrl(getLastStream())
 
@@ -555,12 +560,12 @@ const togglePanel = (panelBtn, override) => {
   changeSettingsLayout()
   if (override || panelBtn.classList.contains('toggled')) {
     $panelToggle.forEach(b => b.classList.remove('toggled'))
-    window.electronAPI.headerHeight({ height: headerExpanded, base: headerCollapsed })
+    window.electronAPI.updateHeaderHeight(headerExpanded)
     $headerPanels.forEach(p => p.style.display = '')
   } else {
     $panelToggle.forEach(b => b.classList.remove('toggled'))
     panelBtn.classList.add('toggled')
-    window.electronAPI.headerHeight({ height: null, base: headerCollapsed })
+    window.electronAPI.updateHeaderHeight(null)
     $headerPanels.forEach(p => p.style.display = p.dataset.panel === panelBtn.dataset.panel ? 'flex' : '')
   }
 }
@@ -607,7 +612,7 @@ const collaspeHeader = () => {
   $header.removeEventListener('mouseleave', waitHeader)
   $headerControls.style.cssText = ''
   $header.style.cssText = ''
-  window.electronAPI.headerHeight({ height: headerCollapsed, base: headerCollapsed })
+  window.electronAPI.updateHeaderHeight(headerCollapsed)
 }
 
 // wait to collaspe header on mouseleave
@@ -621,7 +626,7 @@ const expandHeader = () => {
   if ($header.offsetHeight > headerExpanded) return
   $header.addEventListener('mouseleave', waitHeader)
   $header.style.cssText = 'opacity: 1'
-  window.electronAPI.headerHeight({ height: headerExpanded, base: headerCollapsed })
+  window.electronAPI.updateHeaderHeight(headerExpanded)
   window.electronAPI.winFocus()
   window.clearTimeout(headerTimeOut)
 }

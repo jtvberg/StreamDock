@@ -47,6 +47,8 @@ const isMac = process.platform === 'darwin'
 const isLinux = process.platform === 'linux'
 const isWindows = process.platform === 'win32'
 const windows = new Set()
+const headerCollapsed = 31
+const headerBase = 12
 const googleAuthHost = 'accounts.google.com'
 const appInfo = {
   name: productName,
@@ -142,7 +144,7 @@ const createWindow = () => {
     const hb = headerView.getBounds()
     streamView.setBounds({ x: 0, y: 0, width: wb.width, height: wb.height })
     facetView.setBounds({ x: 0, y: 0, width: facetView.getBounds().width, height: wb.height + 2 })
-    headerView.setBounds({ x: 0, y: 0, width: wb.width, height: hb.height > 31 ? wb.height : hb.height })
+    setHeaderViewBounds(hb.height > headerCollapsed ? wb.height : hb.height)
   })
 
   // on steam view navigation check if url is valid and set userAgent
@@ -191,7 +193,7 @@ const createWindow = () => {
   headerView.webContents.on('did-finish-load', () => {
     headerView.webContents.send('is-mac', isMac)
   })
-
+  // 
   // on closing of main window, send window location to renderer and close all windows
   mainWin.on('close', () => {
     headerView.webContents.send('win-getloc', mainWin.getBounds())
@@ -603,10 +605,10 @@ ipcMain.on('open-devtools', () => {
   headerView.webContents.openDevTools({ mode: 'detach' })
 })
 
-ipcMain.on('update-header-height', (e, { height, base }) => {
+ipcMain.on('update-header-height', (e, height) => {
   if (!mainWin) return
   if (height) {
-    isMac ? height > base ? mainWin.setWindowButtonVisibility(true) : mainWin.setWindowButtonVisibility(mainWin.isFullScreen()) : null
+    isMac ? height > headerBase ? mainWin.setWindowButtonVisibility(true) : mainWin.setWindowButtonVisibility(mainWin.isFullScreen()) : null
     setHeaderViewBounds(height)
   } else {
     setHeaderViewBounds(mainWin.getBounds().height)
@@ -615,4 +617,8 @@ ipcMain.on('update-header-height', (e, { height, base }) => {
 
 ipcMain.on('update-facets-width', (e, width) => {
   setFacetViewBounds(width)
+})
+
+ipcMain.handle('set-header-height', async (e) => {
+  return { height: headerCollapsed, base: headerBase }
 })
