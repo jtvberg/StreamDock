@@ -26,7 +26,7 @@ function ytAdOverlayClick() {
       document.querySelector('.ytp-ad-overlay-close-button').click()
       console.log('overlay close')
     }
-  } catch(err) { console.error(err) }
+  } catch (err) { console.error(err) }
 }
 
 // YouTube promo close click
@@ -40,21 +40,21 @@ function ytPromoCloseClick() {
       document.querySelector('[aria-label="Dismiss"]').click()
       console.log('promo skip')
     }
-  } catch(err) { console.error(err) }
+  } catch (err) { console.error(err) }
 }
 
 // YouTube ad skip click
 function ytAdSkipClick() {
   try {
-    if (document.querySelector('.ytp-ad-skip-button') != undefined) {
-      document.querySelector('.ytp-ad-skip-button').click()
+    if (document.querySelector('.ytp-skip-ad-button') != undefined) {
+      document.querySelector('.ytp-skip-ad-button').click()
       console.log('ad skip')
     }
     if (document.querySelector('.ytp-ad-skip-button-modern') != undefined) {
       document.querySelector('.ytp-ad-skip-button-modern').click()
       console.log('ad skip')
     }
-  } catch(err) { console.error(err) }
+  } catch (err) { console.error(err) }
 }
 
 // YouTube ad skip mutation observer
@@ -62,7 +62,7 @@ function ytAdSkipMut() {
   try {
     console.log('ads mut')
     obsYtAds = new MutationObserver((ml) => {
-      for(const mut of ml) {
+      for (const mut of ml) {
         if (mut.type === 'childList' && mut.target.classList.contains('ytp-ad-text')) {
           ytAdSkipClick()
         }
