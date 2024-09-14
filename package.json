@@ -29,7 +29,7 @@
   "license": "MIT",
   "devDependencies": {
     "@electron/notarize": "^2.4.0",
-    "electron": "github:castlabs/electron-releases#v32.0.1+wvcus",
+    "electron": "github:castlabs/electron-releases#v32.1.0+wvcus",
     "electron-builder": "^25.0.5",
     "electron-reloader": "^1.2.3"
   },
