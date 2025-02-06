@@ -1,5 +1,5 @@
 # Update
- I am aware that some of the service-specific scripts are no longer behaving. I have not updated them in 8 months but am working on updates to them now.
+ I am aware that some of the service-specific scripts are no longer behaving. I have been working primarily on the YouTube ones as those are the most impactful but I may have reached an "isTrusted" dead end.
 
 # StreamDock 2.0.0, The Sequel!
  It took two years and a lack of focus to get 1.0.0 out the door and upon completion I looked at what I had wrought and wept.
