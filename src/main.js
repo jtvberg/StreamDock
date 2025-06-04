@@ -157,7 +157,6 @@ const createWindow = () => {
     if (cleanUrl) {
       domain = cleanUrl.hostname
       headerView.webContents.executeJavaScript('localStorage.getItem("pref-agent");', true).then(response => {
-        console.log(`User Agent Pref: ${response}`)
         if (response === null || response === '') { return }
         streamView.webContents.userAgent = domain === googleAuthHost ? 'Chrome' : response
       })
@@ -588,7 +587,7 @@ app.whenReady().then(async () => {
   app.focus({ steal: true })
   if (isDev) {
     // mainWin.webContents.openDevTools({ mode: 'detach' })
-    // headerView.webContents.openDevTools({ mode: 'detach' })
+    headerView.webContents.openDevTools({ mode: 'detach' })
     // streamView.webContents.openDevTools({ mode: 'detach' })
     // facetView.webContents.openDevTools({ mode: 'detach' })
   } else {

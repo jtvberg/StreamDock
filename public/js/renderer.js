@@ -265,14 +265,21 @@ const loadStreamPanel = stream => {
     })
     del.addEventListener('click', e => {
       e.stopPropagation()
+      if (e.target.dataset.deleting === 'true') {
+        return
+      }
       if (confirm(`Delete ${stream.title}?`) == true) {
+        e.target.dataset.deleting = 'true'
         e.target.parentElement.classList.add('element-fadeout')
         e.target.parentElement.addEventListener('transitionend', () => {
           e.target.parentElement.remove()
-          streams.splice(streams.findIndex(s => s.id === stream.id), 1)
-          reorderStreams()
-          repaintStreamBar()
-        })
+          const streamIndex = streams.findIndex(s => s.id === stream.id)
+          if (streamIndex > -1) {
+            streams.splice(streamIndex, 1)
+            reorderStreams()
+            repaintStreamBar()
+          }
+        }, { once: true })
       }
     })
   }
@@ -346,7 +353,7 @@ const closeStreamEdit = () => {
   document.querySelectorAll('.stream-edit-container').forEach(el => el.remove())
 }
 
-// update or add stream to streams arra, save to local storage, load stream bar and panel
+// update or add streams, save to local storage, load stream bar and panel
 const updateStreams = stream => {
   const streamToReplace = streams.find(s => s.id === stream.id)
   if (streamToReplace) {
