@@ -28,14 +28,14 @@
   },
   "license": "MIT",
   "devDependencies": {
-    "@electron/notarize": "^2.4.0",
-    "electron": "github:castlabs/electron-releases#v32.1.0+wvcus",
-    "electron-builder": "^25.0.5",
+    "@electron/notarize": "^3.0.1",
+    "electron": "github:castlabs/electron-releases#v36.3.2+wvcus",
+    "electron-builder": "^26.0.12",
     "electron-reloader": "^1.2.3"
   },
   "dependencies": {
-    "@fortawesome/fontawesome-free": "^6.6.0",
-    "electron-updater": "^6.3.4"
+    "@fortawesome/fontawesome-free": "^6.7.2",
+    "electron-updater": "^6.6.2"
   },
   "build": {
     "files": [
@@ -50,17 +50,8 @@
       "mirror": "https://github.com/castlabs/electron-releases/releases/download/v"
     },
     "afterPack": "./build/afterPack.js",
-    "afterSign": "./build/afterSign.js",
     "mac": {
       "category": "public.app-category.video"
-    },
-    "win": {
-      "certificateFile": "private/jtvberg.p12",
-      "verifyUpdateCodeSignature": false,
-      "target": [
-        "nsis",
-        "zip"
-      ]
     },
     "linux": {
       "category": "Video",

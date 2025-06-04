@@ -588,16 +588,23 @@ const toggleOntop = (override = false) => {
 
 // start dragging window
 const onDragMouseDown = e => {
+  onDragMouseUp()
+  if (e.button !== 0) {
+    return;
+  }
   dragMouseX = e.clientX
   dragMouseY = e.clientY
-  $drag.forEach(el => el.addEventListener('mouseup', onDragMouseUp))
-  requestAnimationFrame(moveWindow)
+  window.addEventListener('mouseup', onDragMouseUp)
+  dragAnimationId = requestAnimationFrame(moveWindow)
 }
 
 // stop dragging window
 const onDragMouseUp = () => {
-  $drag.forEach(el => el.removeEventListener('mouseup', onDragMouseUp))
-  cancelAnimationFrame(dragAnimationId)
+  if (dragAnimationId) {
+    cancelAnimationFrame(dragAnimationId);
+    dragAnimationId = null;
+  }
+  window.removeEventListener('mouseup', onDragMouseUp);
 }
 
 // move window on drag

@@ -153,7 +153,9 @@ const createWindow = () => {
     if (cleanUrl) {
       domain = cleanUrl.hostname
       headerView.webContents.executeJavaScript('localStorage.getItem("pref-agent");', true).then(response => {
-        streamView.webContents.userAgent = domain === googleAuthHost ? 'Chrome' : response ? response : null || defaultAgent
+        console.log(`User Agent Pref: ${response}`)
+        if (response === null || response === '') { return }
+        streamView.webContents.userAgent = domain === googleAuthHost ? 'Chrome' : response
       })
     }
   })
