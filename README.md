@@ -1,5 +1,7 @@
 # Update
- I am aware that some of the service-specific scripts are no longer behaving. I have been working primarily on the YouTube ones as those are the most impactful but I may have reached an "isTrusted" dead end.
+ I am aware that some of the service-specific scripts are no longer behaving. I have a work-around for the isTrusted issue on YouTube and am working on a comprehensive fix.
+ Also, Netflix is not working if you provide a userAgent anymore. To fix that, I am removing the use of a userAgent unless you explicitly set one in the settings.
+ New release soon...
 
 # StreamDock 2.0.0, The Sequel!
  It took two years and a lack of focus to get 1.0.0 out the door and upon completion I looked at what I had wrought and wept.
