@@ -1,101 +1,117 @@
 // YouTube observer dummy declaration (this is not actually used as it is sent over as a string!)
-let obsYtAds = null
+let obsYtAds = null;
 
 // YouTube ad script injection
 function ytAdsSkip(bv) {
-  bv.webContents.executeJavaScript(`${ytAdOverlayClick.toString()}`).catch((err) => { console.error(err) })
-  bv.webContents.executeJavaScript(`${ytPromoCloseClick.toString()}`).catch((err) => { console.error(err) })
-  bv.webContents.executeJavaScript(`${ytAdSkipClick.toString()}`)
-    .then(() => bv.webContents.executeJavaScript('ytAdSkipClick()'))
-    .catch((err) => { console.error(err) })
-  bv.webContents.executeJavaScript('try { let obsYtAds = null } catch(err) { console.error(err) }')
-    .then(() => bv.webContents.executeJavaScript(`(${ytAdSkipMut.toString()})()`))
-    .then(() => bv.webContents.executeJavaScript(`(${ytAdSkipObs.toString()})()`))
-    .catch((err) => { console.error(err) })
+  bv.webContents.executeJavaScript(`${ytAdOverlayClick.toString()}`).catch((err) => { console.error(err); });
+  bv.webContents.executeJavaScript(`${ytPromoCloseClick.toString()}`).catch((err) => { console.error(err); });
+  bv.webContents.executeJavaScript('try { let obsYtAds = null; } catch(err) { console.error("Error declaring obsYtAds in page:", err); }')
+    .then(() => bv.webContents.executeJavaScript(`(${ytAdSkipObserverSetup.toString()})()`))
+    .then(() => bv.webContents.executeJavaScript(`(${ytAdSkipObserveStart.toString()})()`))
+    .catch((err) => { console.error('Error injecting or starting YouTube ad observer:', err); });
 }
 
 // Remove observer
 function ytAdSkipRem(bv) {
-  bv.webContents.executeJavaScript(`(${ytAdSkipDis.toString()})()`).catch((err) => { console.error(err) })
+  bv.webContents.executeJavaScript(`(${ytAdSkipObserveDisconnect.toString()})()`).catch((err) => { console.error(err); });
 }
 
-// YouTube overlay close click
+// YouTube overlay close click (standard click)
 function ytAdOverlayClick() {
   try {
-    if (document.querySelector('.ytp-ad-overlay-close-button') != undefined) {
-      document.querySelector('.ytp-ad-overlay-close-button').click()
-      console.log('overlay close')
+    const overlayButton = document.querySelector('.ytp-ad-overlay-close-button');
+    if (overlayButton) {
+      overlayButton.click();
+      console.log('YT: Overlay ad closed');
     }
-  } catch (err) { console.error(err) }
+  } catch (err) { console.error('YT: Error closing overlay ad:', err); }
 }
 
-// YouTube promo close click
+// YouTube promo close click (standard click)
 function ytPromoCloseClick() {
   try {
-    if (document.querySelectorAll('#dismiss-button')?.length > 0) {
-      document.querySelectorAll('#dismiss-button').forEach(input => { input.click() })
-      console.log('promo skip')
+    let promoClosed = false;
+    const dismissButtons = document.querySelectorAll('#dismiss-button');
+    if (dismissButtons.length > 0) {
+      dismissButtons.forEach(input => { input.click(); });
+      promoClosed = true;
     }
-    if (document.querySelector('[aria-label="Dismiss"]') != undefined) {
-      document.querySelector('[aria-label="Dismiss"]').click()
-      console.log('promo skip')
+    const ariaDismissButton = document.querySelector('[aria-label="Dismiss"]');
+    if (ariaDismissButton) {
+      ariaDismissButton.click();
+      promoClosed = true;
     }
-  } catch (err) { console.error(err) }
+    if (promoClosed) console.log('YT: Promo dismissed');
+  } catch (err) { console.error('YT: Error dismissing promo:', err); }
 }
 
-// YouTube ad skip click
-function ytAdSkipClick() {
+// Sets up the MutationObserver in the page context
+function ytAdSkipObserverSetup() {
   try {
-    if (document.querySelector('.ytp-skip-ad-button') != undefined) {
-      document.querySelector('.ytp-skip-ad-button').click()
-      console.log('ad skip')
-    }
-    if (document.querySelector('.ytp-ad-skip-button-modern') != undefined) {
-      document.querySelector('.ytp-ad-skip-button-modern').click()
-      console.log('ad skip')
-    }
-  } catch (err) { console.error(err) }
-}
+    console.log('YT: Setting up ad skip MutationObserver.');
+    const adSkipSelectors = ['.ytp-skip-ad-button', '.ytp-ad-skip-button-modern'];
+    const signaledButtons = new Set();
 
-// YouTube ad skip mutation observer
-function ytAdSkipMut() {
-  try {
-    console.log('ads mut')
-    obsYtAds = new MutationObserver((ml) => {
-      for (const mut of ml) {
-        if (mut.type === 'childList' && mut.target.classList.contains('ytp-ad-text')) {
-          ytAdSkipClick()
-        }
-        if (mut.type === 'childList' && mut.target.classList.contains('ytp-ad-module')) {
-          ytAdOverlayClick()
-        }
-        if (mut.type === 'childList' && (mut.target.id === 'dismiss-button' || mut.target.classList.contains('ytd-popup-container') || mut.target.classList.contains('yt-mealbar-promo-renderer') || mut.target.nodeName.toLowerCase() === 'tp-yt-paper-dialog')) {
-          ytPromoCloseClick()
+    obsYtAds = new MutationObserver((mutationsList, observer) => {
+      let adButtonFoundAndSignaled = false;
+      for (const selector of adSkipSelectors) {
+        const adSkipButton = document.querySelector(selector);
+        if (adSkipButton && adSkipButton.offsetParent !== null && !signaledButtons.has(adSkipButton)) {
+          console.log(`YT: Detected skip button "${selector}". Requesting trusted click.`);
+          if (typeof window.electronAPI?.signalElementReadyForTrustedClick === 'function') {
+            window.electronAPI.signalElementReadyForTrustedClick(selector);
+            signaledButtons.add(adSkipButton); // Mark as signaled
+            // Clear this button from signaled set after a delay to allow re-signaling if it reappears for a new ad
+            setTimeout(() => signaledButtons.delete(adSkipButton), 5000); 
+            adButtonFoundAndSignaled = true;
+            // break; // Found one, no need to check other ad skip selectors in this mutation cycle for this specific button type
+          } else {
+            console.warn(`YT: electronIntercom.signalElementReadyForTrustedClick not found. Falling back to standard .click() for ${selector}`);
+            adSkipButton.click();
+          }
         }
       }
-    })
-  } catch (err) { console.error(err) }
+
+      if (!adButtonFoundAndSignaled) {
+          for (const mutation of mutationsList) {
+            if (mutation.type === 'childList') {
+              ytAdOverlayClick();
+              ytPromoCloseClick();
+            }
+          }
+      }
+    });
+  } catch (err) {
+    console.error('YT: Error setting up MutationObserver:', err);
+  }
 }
 
-// YouTube ad skip observer invocation
-function ytAdSkipObs() {
+// Starts the observer
+function ytAdSkipObserveStart() {
   try {
-    console.log('ads obs')
-    obsYtAds.observe(document.querySelector('ytd-app'), { childList: true, subtree: true })
-  } catch (err) { console.error(err) }
-}
-
-// YouTube ad skip observer disconnection
-function ytAdSkipDis() {
-  try {
-    console.log('ads dis')
-    if (typeof obsYtAds !== 'undefined') {
-      obsYtAds.disconnect()
+    const targetNode = document.querySelector('ytd-app');
+    if (targetNode && obsYtAds) {
+      obsYtAds.observe(targetNode, { childList: true, subtree: true });
+      console.log('YT: Ad skip MutationObserver started on ytd-app.');
+    } else {
+      if (!targetNode) console.error('YT: ytd-app element not found for observer.');
+      if (!obsYtAds) console.error('YT: obsYtAds not initialized before observe.');
     }
-  } catch (err) { console.error('No observer found') }
+  } catch (err) { console.error('YT: Error starting MutationObserver:', err); }
+}
+
+// Disconnects the observer
+function ytAdSkipObserveDisconnect() {
+  try {
+    if (obsYtAds && typeof obsYtAds.disconnect === 'function') {
+      obsYtAds.disconnect();
+      console.log('YT: Ad skip MutationObserver disconnected.');
+      obsYtAds = null;
+    }
+  } catch (err) { console.error('YT: Error disconnecting MutationObserver:', err); }
 }
 
 module.exports = {
   ytAdsSkip,
   ytAdSkipRem
-}
+};

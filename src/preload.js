@@ -36,5 +36,8 @@ contextBridge.exposeInMainWorld('electronAPI', {
     streamOpened: bool => ipcRenderer.on('stream-opened', bool),
     getHeaderHeight: heightObj => ipcRenderer.invoke('set-header-height', heightObj),
     setIsMac: bool => ipcRenderer.once('is-mac', bool),
-    getAppInfo: appInfo => ipcRenderer.once('app-info', appInfo)
+    getAppInfo: appInfo => ipcRenderer.once('app-info', appInfo),
+    signalElementReadyForTrustedClick: (selector) => {
+      ipcRenderer.send('request-trusted-click', selector);
+    }
 })

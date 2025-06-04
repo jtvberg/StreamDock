@@ -119,7 +119,11 @@ const createWindow = () => {
   headerView.webContents.loadFile(path.join(__dirname, '../public/index.html'))
 
   // create browser view for streams
-  streamView = new WebContentsView()
+  streamView = new WebContentsView({
+    webPreferences: {
+      preload: path.join(__dirname, 'preload.js'),
+    }
+  })
 
   // create browser view for facets
   facetView = new WebContentsView({
@@ -534,6 +538,48 @@ const sendLogData = log => {
   headerView.webContents.send('log-data', log)
 }
 
+async function performTrustedClick(webContents, selector) {
+  if (!webContents || webContents.isDestroyed()) {
+    console.log(`performTrustedClick: webContents for ${selector} is not available or destroyed.`);
+    return false;
+  }
+  console.log(`Attempting trusted click for selector: ${selector}`);
+  try {
+    const rect = await webContents.executeJavaScript(`
+      (() => {
+        const el = document.querySelector('${selector}');
+        // Check if element exists, is part of the layout (offsetParent), and has dimensions
+        if (el && el.offsetParent !== null && typeof el.getBoundingClientRect === 'function') {
+          const bounds = el.getBoundingClientRect();
+          if (bounds.width > 0 && bounds.height > 0) { // Basic visibility check
+            return {
+              x: Math.round(bounds.left + bounds.width / 2),
+              y: Math.round(bounds.top + bounds.height / 2),
+              found: true
+            };
+          }
+        }
+        return { found: false };
+      })();
+    `);
+
+    if (rect && rect.found) {
+      console.log(`Element ${selector} found at x: ${rect.x}, y: ${rect.y}. Sending input events.`);
+      await webContents.sendInputEvent({ type: 'mouseDown', button: 'left', x: rect.x, y: rect.y, clickCount: 1 });
+      await new Promise(resolve => setTimeout(resolve, 30)); // Small delay for reliability
+      await webContents.sendInputEvent({ type: 'mouseUp', button: 'left', x: rect.x, y: rect.y, clickCount: 1 });
+      console.log(`Trusted click sequence sent to: ${selector}`);
+      return true;
+    } else {
+      console.log(`Element ${selector} not found or not visible for trusted click.`);
+      return false;
+    }
+  } catch (error) {
+    console.error(`Error performing trusted click for ${selector}:`, error.message);
+    return false;
+  }
+}
+
 // App events
 app.whenReady().then(async () => {
   await components.whenReady()
@@ -624,3 +670,8 @@ ipcMain.on('update-facets-width', (e, width) => {
 ipcMain.handle('set-header-height', async (e) => {
   return { height: headerCollapsed, base: headerBase }
 })
+
+ipcMain.on('request-trusted-click', async (event, selector) => {
+  const webContents = event.sender;
+  await performTrustedClick(webContents, selector);
+});
