@@ -1,116 +1,52 @@
 // Disney observer dummy declaration (this is not actually used as it is sent over as a string!)
-let obsDpRecap = null
+let obsDpSkip = null
 
 // Skip/close Disney episode recap & intros
-function dpRecapSkip(bv) {
-  bv.webContents.executeJavaScript(`${dpRecapSkipClick.toString()}`).catch((err) => { console.error(err) })
-  bv.webContents.executeJavaScript('try { let obsDpRecap = null } catch(err) { console.error(err) }')
-    .then(() => bv.webContents.executeJavaScript(`(${dpRecapSkipMut.toString()})()`))
-    .then(() => bv.webContents.executeJavaScript(`(${dpRecapSkipObs.toString()})()`))
+function dpSkip(bv) {
+  bv.webContents.executeJavaScript('try { let obsDpSkip = null } catch(err) { console.error(err) }')
+    .then(() => bv.webContents.executeJavaScript(`(${dpSkipMut.toString()})()`))
+    .then(() => bv.webContents.executeJavaScript(`(${dpSkipObs.toString()})()`))
     .catch((err) => { console.error(err) })
 }
 
 // Remove observer
-function dpRecapSkipRem(bv) {
-  bv.webContents.executeJavaScript(`(${dpRecapSkipDis.toString()})()`).catch((err) => { console.error(err) })
-}
-
-// Disney recap skip click
-function dpRecapSkipClick() {
-  try {
-    if (document.querySelector('.skip__button') != undefined) {
-      document.querySelector('.skip__button').click()
-      console.log('recap skip')
-    }
-  } catch(err) { console.error(err) }
+function dpSkipRem(bv) {
+  bv.webContents.executeJavaScript(`(${dpSkipDis.toString()})()`).catch((err) => { console.error(err) })
 }
 
 // Disney recap skip mutation observer
-function dpRecapSkipMut() {
+function dpSkipMut() {
   try {
     console.log('recap mut')
-    obsDpRecap = new MutationObserver(() => {
-      dpRecapSkipClick()
+    obsDpSkip = new MutationObserver(() => {
+      const targetElement = document.querySelector('.skip__button');
+      if (targetElement) {
+        targetElement.click()
+        console.log('skipping')
+      }
     })
   } catch(err) { console.error(err) }
 }
 
 // Disney recap skip observer invocation
-function dpRecapSkipObs() {
+function dpSkipObs() {
   try {
     console.log('recap obs')
-    obsDpRecap.observe(document.querySelector('.hudson-container'), { childList: true, subtree: true })
+    obsDpSkip.observe(document.querySelector('#app_body_content'), { childList: true, subtree: true })
   } catch (err) { console.error(err) }
 }
 
 // Disney recap skip observer disconnection
-function dpRecapSkipDis() {
+function dpSkipDis() {
   try {
     console.log('recap dis')
-    if (typeof obsDpRecap !== 'undefined') {
-      obsDpRecap.disconnect()
-    }
-  } catch (err) { console.error('No observer found') }
-}
-
-// Disney observer dummy declaration (this is not actually used as it is sent over as a string!)
-let obsDpNext = null
-
-// Automatically start next Disney episode
-function dpEpisodeNext(bv) {
-  bv.webContents.executeJavaScript(`${dpEpisodeNextClick.toString()}`).catch((err) => { console.error(err) })
-  bv.webContents.executeJavaScript('try { let obsDpNext = null } catch(err) { console.error(err) }')
-    .then(() => bv.webContents.executeJavaScript(`(${dpEpisodeNextMut.toString()})()`))
-    .then(() => bv.webContents.executeJavaScript(`(${dpEpisodeNextObs.toString()})()`))
-    .catch((err) => { console.error(err) })
-}
-
-// Remove observer
-function dpEpisodeNextRem(bv) {
-  bv.webContents.executeJavaScript(`(${dpEpisodeNextDis.toString()})()`).catch((err) => { console.error(err) })
-}
-
-// Disney next episode click
-function dpEpisodeNextClick() {
-  try {
-    if (document.querySelectorAll('[data-testid = "up-next-play-button"]')[0] != undefined) {
-      document.querySelectorAll('[data-testid = "up-next-play-button"]')[0].click()
-      console.log('next episode')
-    }
-  } catch(err) { console.error(err) }
-}
-
-// Disney next episode mutation observer
-function dpEpisodeNextMut() {
-  try {
-    console.log('next mut')
-    obsDpNext = new MutationObserver(() => {
-      dpEpisodeNextClick()
-    })
-  } catch(err) { console.error(err) }
-}
-
-// Disney next episode observer invocation
-function dpEpisodeNextObs() {
-  try {
-    console.log('next obs')
-    obsDpNext.observe(document.querySelector('.hudson-container'), { childList: true, subtree: true })
-  } catch (err) { console.error(err) }
-}
-
-// Disney next episode observer disconnection
-function dpEpisodeNextDis() {
-  try {
-    console.log('next dis')
-    if (typeof obsDpNext !== 'undefined') {
-      obsDpNext.disconnect()
+    if (typeof obsDpSkip !== 'undefined') {
+      obsDpSkip.disconnect()
     }
   } catch (err) { console.error('No observer found') }
 }
 
 module.exports = {
-  dpRecapSkip,
-  dpRecapSkipRem,
-  dpEpisodeNext,
-  dpEpisodeNextRem
+  dpSkip,
+  dpSkipRem
 }

@@ -15,10 +15,8 @@ const { atRecapSkip,
   atRecapSkipRem,
   atEpisodeNext,
   atEpisodeNextRem } = require('./scripts/appletv')
-const { dpRecapSkip,
-  dpRecapSkipRem,
-  dpEpisodeNext,
-  dpEpisodeNextRem } = require('./scripts/disney')
+const { dpSkip,
+  dpSkipRem } = require('./scripts/disney')
 const { hmRecapSkip,
   hmRecapSkipRem,
   hmEpisodeNext,
@@ -312,8 +310,7 @@ const loadScripts = (bv = streamView, host) => {
         response['service-rs'] === 'true' ? setTimeout(hlEpisodeNext, 3000, bv) : hlEpisodeNextRem(bv)
         break
       case 'www.disneyplus.com':
-        response['service-rs'] === 'true' ? setTimeout(dpRecapSkip, 3000, bv) : dpRecapSkipRem(bv)
-        response['service-bm'] === 'true' ? setTimeout(dpEpisodeNext, 3000, bv) : dpEpisodeNextRem(bv)
+        response['service-rs'] === 'true' ? setTimeout(dpSkip, 3000, bv) : dpSkipRem(bv)
         break
       case 'play.max.com':
         response['service-rs'] === 'true' ? setTimeout(hmRecapSkip, 3000, bv) : hmRecapSkipRem(bv)
