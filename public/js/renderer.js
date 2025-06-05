@@ -597,7 +597,7 @@ const toggleOntop = (override = false) => {
 const onDragMouseDown = e => {
   onDragMouseUp()
   if (e.button !== 0) {
-    return;
+    return
   }
   dragMouseX = e.clientX
   dragMouseY = e.clientY
@@ -608,10 +608,10 @@ const onDragMouseDown = e => {
 // stop dragging window
 const onDragMouseUp = () => {
   if (dragAnimationId) {
-    cancelAnimationFrame(dragAnimationId);
-    dragAnimationId = null;
+    cancelAnimationFrame(dragAnimationId)
+    dragAnimationId = null
   }
-  window.removeEventListener('mouseup', onDragMouseUp);
+  window.removeEventListener('mouseup', onDragMouseUp)
 }
 
 // move window on drag

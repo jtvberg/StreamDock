@@ -1,42 +1,17 @@
 // Check if linux as the elements are named differently... nice one AMZ
 const isLinux = process.platform === 'linux'
 
-// Track the acutal URL for Amazon Prime videos
-function amzGetUrl() {
-  try {
-    view.webContents.executeJavaScript(`
-      console.log('getUrl')
-      let sdAmzUrl = '${view.webContents.getURL()}'
-      try {
-          document.querySelectorAll('.tst-title-card').forEach(function (tile) { tile.dispatchEvent(new MouseEvent('mouseover', { 'bubbles': true })) })
-          document.querySelectorAll('.tst-play-button').forEach(function (btn) { btn.addEventListener('click', function () { sdAmzUrl = this.href }) })
-        } catch(err) { console.error(err) }
-    `)
-  } catch(err) { console.error(err) }
-}
-
 // Prime observer dummy declaration (this is not actually used as it is sent over as a string!)
 let obsAmzUpgrade = null
 
 // Prime dismiss browser upgrade notification (NO LINUX)
 function amzUpgradeDismiss(bv) {
   if (!isLinux) {
-    bv.webContents.executeJavaScript(`${amzUpgradeDismissClick.toString()}`).catch((err) => { console.error(err) })
     bv.webContents.executeJavaScript('try { let obsAmzUpgrade = null } catch(err) { console.error(err) }')
       .then(() => bv.webContents.executeJavaScript(`(${amzUpgradeDismissMut.toString()})()`))
       .then(() => bv.webContents.executeJavaScript(`(${amzUpgradeDismissObs.toString()})()`))
       .catch((err) => { console.error(err) })
   }
-}
-
-// Prime upgrade your browser dismiss click
-function amzUpgradeDismissClick() {
-  try {
-    if (document.querySelector('.f1dk4awg') != undefined) {
-      document.querySelector('.f1dk4awg').click()
-      console.log('upgrade dismiss')
-    }
-  } catch(err) { console.error(err) }
 }
 
 // Prime upgrade your browser dismiss mutation observer
@@ -46,7 +21,8 @@ function amzUpgradeDismissMut() {
     obsAmzUpgrade = new MutationObserver(() => {
       const targetElement = document.querySelector('.f1dk4awg');
       if (targetElement) {
-        amzUpgradeDismissClick()
+        targetElement.click()
+        console.log('upgrade dismissed')
       }
     })
   } catch(err) { console.error(err) }
@@ -73,7 +49,6 @@ function amzPreviewSkip(bv) {
     eleAmzPreview = 'adSkipButton'
     obsEleAmzPreview = '.bottomPanel'
   }
-  bv.webContents.executeJavaScript(`${amzPrevSkipClick.toString()}`).catch((err) => { console.error(err) })
   bv.webContents.executeJavaScript('let obsAmzPreview = null')
     .then(() => bv.webContents.executeJavaScript(`let eleAmzPreview = '${eleAmzPreview}'`))
     .then(() => bv.webContents.executeJavaScript(`let obsEleAmzPreview = '${obsEleAmzPreview}'`))
@@ -87,16 +62,6 @@ function amzPrevewSkipRem(bv) {
   bv.webContents.executeJavaScript(`(${amzPreviewSkipDis.toString()})()`).catch((err) => { console.error(err) })
 }
 
-// Prime preview skip click
-function amzPrevSkipClick(ele) {
-  try {
-    if (document.querySelector(ele) != undefined) {
-      document.querySelector(ele).click()
-      console.log('prev skip')
-    }
-  } catch(err) { console.error(err) }
-}
-
 // Prime preview skip mutation observer
 function amzPreviewSkipMut() {
   try {
@@ -104,7 +69,8 @@ function amzPreviewSkipMut() {
     obsAmzPreview = new MutationObserver(() => {
       const targetElement = document.querySelector(`.${eleAmzPreview}`);
       if (targetElement) {
-        amzPrevSkipClick(`.${eleAmzPreview}`)
+        targetElement.click()
+        console.log('prev skip')
       }
     })
   } catch(err) { console.error(err) }
@@ -136,18 +102,29 @@ let obsEleAmzRecap = null
 // Skip/close Prime episode recap & intros
 function amzRecapSkip(bv) {
   eleAmzRecap = 'atvwebplayersdk-skipelement-button'
-  obsEleAmzRecap = '.atvwebplayersdk-action-buttons'
+  obsEleAmzRecap = '.atvwebplayersdk-player-container'
   if (isLinux) {
     eleAmzRecap = 'skipElement'
     obsEleAmzRecap = '.notificationsWrapper'
   }
-  bv.webContents.executeJavaScript(`${amzRecapSkipClick.toString()}`).catch((err) => { console.error(err) })
-  bv.webContents.executeJavaScript('let obsAmzRecap = null')
-    .then(() => bv.webContents.executeJavaScript(`let eleAmzRecap = '${eleAmzRecap}'`))
-    .then(() => bv.webContents.executeJavaScript(`let obsEleAmzRecap = '${obsEleAmzRecap}'`))
-    .then(() => bv.webContents.executeJavaScript(`(${amzRecapSkipMut.toString()})()`))
-    .then(() => bv.webContents.executeJavaScript(`(${amzRecapSkipObs.toString()})()`))
-    .catch((err) => { console.error(err) })
+  
+  // Execute everything in one go to ensure proper scope
+  bv.webContents.executeJavaScript(`
+    try {
+      let obsAmzRecap = null;
+      let eleAmzRecap = '${eleAmzRecap}';
+      let obsEleAmzRecap = '${obsEleAmzRecap}';
+      
+      ${amzRecapSkipClick.toString()}
+      ${amzRecapSkipMut.toString()}
+      ${amzRecapSkipObs.toString()}
+
+      amzRecapSkipMut();
+      amzRecapSkipObs();
+    } catch(err) { 
+      console.error('Recap skip error:', err); 
+    }
+  `).catch((err) => { console.error(err) })
 }
 
 // Remove observer
@@ -169,10 +146,20 @@ function amzRecapSkipClick(ele) {
 function amzRecapSkipMut() {
   try {
     console.log('recap mut')
+    let clickedButtons = new Set();
     obsAmzRecap = new MutationObserver(() => {
       const targetElement = document.querySelector(`.${eleAmzRecap}`);
       if (targetElement) {
-        amzRecapSkipClick(`.${eleAmzRecap}`)
+        const buttonId = targetElement.textContent.trim() + '_' + targetElement.getBoundingClientRect().left;
+        if (!clickedButtons.has(buttonId)) {
+          console.log('Found skip button:', targetElement.textContent, 'at', new Date().toLocaleTimeString());
+          console.log('Button HTML:', targetElement.outerHTML);
+          clickedButtons.add(buttonId);
+          amzRecapSkipClick(`.${eleAmzRecap}`);
+          setTimeout(() => {
+            clickedButtons.delete(buttonId);
+          }, 3000);
+        }
       }
     })
   } catch(err) { console.error(err) }
@@ -209,7 +196,6 @@ function amzEpisodeNext(bv) {
     eleAmzNext = 'nextUpCard'
     obsEleAmzNext = '.notificationsWrapper'
   }
-  bv.webContents.executeJavaScript(`${amzEpisodeNextClick.toString()}`).catch((err) => { console.error(err) })
   bv.webContents.executeJavaScript('let obsAmzNext = null')
     .then(() => bv.webContents.executeJavaScript(`let eleAmzNext = '${eleAmzNext}'`))
     .then(() => bv.webContents.executeJavaScript(`let obsEleAmzNext = '${obsEleAmzNext}'`))
@@ -223,22 +209,16 @@ function amzEpisodeNextRem(bv) {
   bv.webContents.executeJavaScript(`(${amzEpisodeNextDis.toString()})()`).catch((err) => { console.error(err) })
 }
 
-// Prime next episode click
-function amzEpisodeNextClick(ele) {
-  try {
-    if (document.querySelector(ele) != undefined) {
-      document.querySelector(ele).click()
-      console.log('next episode')
-    }
-  } catch(err) { console.error(err) }
-}
-
 // Prime next episode mutation observer
 function amzEpisodeNextMut() {
   try {
     console.log('next mut')
     obsAmzNext = new MutationObserver(() => {
-      amzEpisodeNextClick(`.${eleAmzNext}`)
+      const targetElement = document.querySelector(`.${eleAmzNext}`);
+      if (targetElement) {
+        targetElement.click()
+        console.log('next episode')
+      }
     })
   } catch(err) { console.error(err) }
 }
@@ -262,7 +242,6 @@ function amzEpisodeNextDis() {
 }
 
 module.exports = {
-  amzGetUrl,
   amzUpgradeDismiss,
   amzPreviewSkip,
   amzPrevewSkipRem,

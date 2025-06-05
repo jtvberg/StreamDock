@@ -102,7 +102,7 @@ const filterFacets = () => {
             el.style.display = ''
             return
           }
-          el = el.previousElementSibling;
+          el = el.previousElementSibling
         }
       }
     } else {

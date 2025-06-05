@@ -1,11 +1,10 @@
 // Imports
 const { app, BrowserWindow, WebContentsView, Tray, Menu, nativeTheme, components, ipcMain, screen, systemPreferences, clipboard } = require('electron')
-const { version, productName, author, repository, bugs } = require('../package.json');
+const { version, productName, author, repository, bugs } = require('../package.json')
 const path = require('path')
 const menu = require('./util/menu')
 const { ytAdsSkip, ytAdSkipRem } = require('./scripts/youtube')
-const { amzGetUrl,
-  amzUpgradeDismiss,
+const { amzUpgradeDismiss,
   amzPreviewSkip,
   amzPrevewSkipRem,
   amzRecapSkip,
@@ -490,7 +489,6 @@ const openNewin = url => {
 // get current url from view parameter or streamView
 const getCurrentUrl = (bv = streamView) => {
   return bv.webContents.getURL()
-  // amzGetUrl()
 }
 
 // create and send bookmark object to renderer from streamView
@@ -539,10 +537,10 @@ const sendLogData = log => {
 
 async function performTrustedClick(webContents, selector) {
   if (!webContents || webContents.isDestroyed()) {
-    console.log(`performTrustedClick: webContents for ${selector} is not available or destroyed.`);
-    return false;
+    console.log(`performTrustedClick: webContents for ${selector} is not available or destroyed.`)
+    return false
   }
-  console.log(`Attempting trusted click for selector: ${selector}`);
+  console.log(`Attempting trusted click for selector: ${selector}`)
   try {
     const rect = await webContents.executeJavaScript(`
       (() => {
@@ -563,19 +561,19 @@ async function performTrustedClick(webContents, selector) {
     `);
 
     if (rect && rect.found) {
-      console.log(`Element ${selector} found at x: ${rect.x}, y: ${rect.y}. Sending input events.`);
-      await webContents.sendInputEvent({ type: 'mouseDown', button: 'left', x: rect.x, y: rect.y, clickCount: 1 });
-      await new Promise(resolve => setTimeout(resolve, 30)); // Small delay for reliability
-      await webContents.sendInputEvent({ type: 'mouseUp', button: 'left', x: rect.x, y: rect.y, clickCount: 1 });
-      console.log(`Trusted click sequence sent to: ${selector}`);
-      return true;
+      console.log(`Element ${selector} found at x: ${rect.x}, y: ${rect.y}. Sending input events.`)
+      await webContents.sendInputEvent({ type: 'mouseDown', button: 'left', x: rect.x, y: rect.y, clickCount: 1 })
+      await new Promise(resolve => setTimeout(resolve, 30))
+      await webContents.sendInputEvent({ type: 'mouseUp', button: 'left', x: rect.x, y: rect.y, clickCount: 1 })
+      console.log(`Trusted click sequence sent to: ${selector}`)
+      return true
     } else {
-      console.log(`Element ${selector} not found or not visible for trusted click.`);
-      return false;
+      console.log(`Element ${selector} not found or not visible for trusted click.`)
+      return false
     }
   } catch (error) {
-    console.error(`Error performing trusted click for ${selector}:`, error.message);
-    return false;
+    console.error(`Error performing trusted click for ${selector}:`, error.message)
+    return false
   }
 }
 
@@ -671,6 +669,6 @@ ipcMain.handle('set-header-height', async (e) => {
 })
 
 ipcMain.on('request-trusted-click', async (event, selector) => {
-  const webContents = event.sender;
-  await performTrustedClick(webContents, selector);
-});
+  const webContents = event.sender
+  await performTrustedClick(webContents, selector)
+})

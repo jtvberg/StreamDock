@@ -38,6 +38,6 @@ contextBridge.exposeInMainWorld('electronAPI', {
     setIsMac: bool => ipcRenderer.once('is-mac', bool),
     getAppInfo: appInfo => ipcRenderer.once('app-info', appInfo),
     signalElementReadyForTrustedClick: (selector) => {
-      ipcRenderer.send('request-trusted-click', selector);
+      ipcRenderer.send('request-trusted-click', selector)
     }
 })
