@@ -1,7 +1,7 @@
 // Hulu observer dummy declaration (this is not actually used as it is sent over as a string!)
 let obsHlRecapSkip = null
 
-// Hulu recap & credits script injection
+// Hulu recap & opening credits script injection
 function hlRecapSkip(bv) {
   bv.webContents.executeJavaScript(`${hlRecapSkipClick.toString()}`).catch((err) => { console.error(err) })
   bv.webContents.executeJavaScript('try { let obsHlRecapSkip = null } catch(err) { console.error(err) }')

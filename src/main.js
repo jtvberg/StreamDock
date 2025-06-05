@@ -152,13 +152,13 @@ const createWindow = () => {
   })
 
   // on steam view navigation check if url is valid and set userAgent
+  // setting a userAgent on netflix ever, will cause it to fail
   streamView.webContents.on('did-start-navigation', () => {
     const cleanUrl = validUrl(getCurrentUrl())
     if (cleanUrl) {
-      domain = cleanUrl.hostname
       headerView.webContents.executeJavaScript('localStorage.getItem("pref-agent");', true).then(response => {
-        if (response === null || response === '') { return }
-        streamView.webContents.userAgent = domain === googleAuthHost ? 'Chrome' : response
+        if (cleanUrl.hostname === 'www.netflix.com' || response === null || response.trim() === '""') { return }
+        streamView.webContents.userAgent = cleanUrl.hostname === googleAuthHost ? 'Chrome' : response
       })
     }
   })
@@ -587,7 +587,7 @@ app.whenReady().then(async () => {
   app.focus({ steal: true })
   if (isDev) {
     // mainWin.webContents.openDevTools({ mode: 'detach' })
-    headerView.webContents.openDevTools({ mode: 'detach' })
+    // headerView.webContents.openDevTools({ mode: 'detach' })
     // streamView.webContents.openDevTools({ mode: 'detach' })
     // facetView.webContents.openDevTools({ mode: 'detach' })
   } else {
