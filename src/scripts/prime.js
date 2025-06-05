@@ -43,15 +43,10 @@ function amzUpgradeDismissClick() {
 function amzUpgradeDismissMut() {
   try {
     console.log('upgrade mut')
-    obsAmzUpgrade = new MutationObserver((ml) => {
-      for(const mut of ml) {
-        if (mut.type === 'childList' && mut.addedNodes?.length > 0) {
-          mut.addedNodes.forEach(element => {
-            if (element.classList && element.classList.contains('f1jhb4b3')) {
-              amzUpgradeDismissClick()
-            }
-          })
-        }
+    obsAmzUpgrade = new MutationObserver(() => {
+      const targetElement = document.querySelector('.f1dk4awg');
+      if (targetElement) {
+        amzUpgradeDismissClick()
       }
     })
   } catch(err) { console.error(err) }
@@ -61,7 +56,7 @@ function amzUpgradeDismissMut() {
 function amzUpgradeDismissObs() {
   try {
     console.log('upgrade obs')
-    obsAmzUpgrade.observe(document.querySelector('.webPlayerUIContainer'), { childList: true, subtree: true })
+    obsAmzUpgrade.observe(document.querySelector('.atvwebplayersdk-player-container'), { childList: true, subtree: true })
   } catch (err) { console.error(err) }
 }
 
@@ -73,7 +68,7 @@ let obsEleAmzPreview = null
 // Skip/close Prime previews
 function amzPreviewSkip(bv) {
   eleAmzPreview = 'fu4rd6c'
-  obsEleAmzPreview = '.webPlayerUIContainer'
+  obsEleAmzPreview = '.atvwebplayersdk-player-container'
   if (isLinux) {
     eleAmzPreview = 'adSkipButton'
     obsEleAmzPreview = '.bottomPanel'
@@ -106,15 +101,10 @@ function amzPrevSkipClick(ele) {
 function amzPreviewSkipMut() {
   try {
     console.log('prev mut')
-    obsAmzPreview = new MutationObserver((ml) => {
-      for(const mut of ml) {
-        if (mut.type === 'childList' && mut.addedNodes?.length > 0) {
-          mut.addedNodes.forEach(element => {
-            if (element.classList?.contains(eleAmzPreview)) {
-              amzPrevSkipClick(`.${eleAmzPreview}`)
-            }
-          })
-        }
+    obsAmzPreview = new MutationObserver(() => {
+      const targetElement = document.querySelector(`.${eleAmzPreview}`);
+      if (targetElement) {
+        amzPrevSkipClick(`.${eleAmzPreview}`)
       }
     })
   } catch(err) { console.error(err) }
@@ -146,7 +136,7 @@ let obsEleAmzRecap = null
 // Skip/close Prime episode recap & intros
 function amzRecapSkip(bv) {
   eleAmzRecap = 'atvwebplayersdk-skipelement-button'
-  obsEleAmzRecap = '.webPlayerUIContainer'
+  obsEleAmzRecap = '.atvwebplayersdk-action-buttons'
   if (isLinux) {
     eleAmzRecap = 'skipElement'
     obsEleAmzRecap = '.notificationsWrapper'
@@ -179,15 +169,10 @@ function amzRecapSkipClick(ele) {
 function amzRecapSkipMut() {
   try {
     console.log('recap mut')
-    obsAmzRecap = new MutationObserver((ml) => {
-      for(const mut of ml) {
-        if (mut.type === 'childList' && mut.addedNodes?.length > 0) {
-          mut.addedNodes.forEach(element => {
-            if (element.classList?.contains(eleAmzRecap)) {
-              amzRecapSkipClick(`.${eleAmzRecap}`)
-            }
-          })
-        }
+    obsAmzRecap = new MutationObserver(() => {
+      const targetElement = document.querySelector(`.${eleAmzRecap}`);
+      if (targetElement) {
+        amzRecapSkipClick(`.${eleAmzRecap}`)
       }
     })
   } catch(err) { console.error(err) }
