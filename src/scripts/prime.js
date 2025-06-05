@@ -7,33 +7,55 @@ let obsAmzUpgrade = null
 // Prime dismiss browser upgrade notification (NO LINUX)
 function amzUpgradeDismiss(bv) {
   if (!isLinux) {
-    bv.webContents.executeJavaScript('try { let obsAmzUpgrade = null } catch(err) { console.error(err) }')
-      .then(() => bv.webContents.executeJavaScript(`(${amzUpgradeDismissMut.toString()})()`))
-      .then(() => bv.webContents.executeJavaScript(`(${amzUpgradeDismissObs.toString()})()`))
-      .catch((err) => { console.error(err) })
+    bv.webContents.executeJavaScript(`
+      try {
+        let obsAmzUpgrade = null;
+        
+        ${amzUpgradeDismissMut.toString()}
+        ${amzUpgradeDismissObs.toString()}
+        
+        amzUpgradeDismissMut();
+        amzUpgradeDismissObs();
+      } catch(err) { 
+        console.error('Upgrade dismiss error:', err); 
+      }
+    `).catch((err) => { console.error(err); })
   }
 }
 
 // Prime upgrade your browser dismiss mutation observer
 function amzUpgradeDismissMut() {
   try {
-    console.log('upgrade mut')
+    console.log('upgrade mut');
+    let dismissedNotifications = new Set();
     obsAmzUpgrade = new MutationObserver(() => {
-      const targetElement = document.querySelector('.f1dk4awg');
-      if (targetElement) {
-        targetElement.click()
-        console.log('upgrade dismissed')
+      const notificationContainer = document.querySelector('.f1lb32c2');
+      if (notificationContainer) {
+        const dismissLink = Array.from(notificationContainer.querySelectorAll('a'))
+          .find(link => link.textContent.includes("Don't show again"));
+        
+        if (dismissLink) {
+          const notificationId = notificationContainer.innerHTML.substring(0, 100);
+          if (!dismissedNotifications.has(notificationId)) {
+            dismissedNotifications.add(notificationId);
+            dismissLink.click();
+            console.log('upgrade dismissed');
+            setTimeout(() => {
+              dismissedNotifications.delete(notificationId);
+            }, 3000);
+          }
+        }
       }
     })
-  } catch(err) { console.error(err) }
+  } catch(err) { console.error(err); }
 }
 
 // Prime upgrade your browser dismiss observer invocation
 function amzUpgradeDismissObs() {
   try {
-    console.log('upgrade obs')
-    obsAmzUpgrade.observe(document.querySelector('.atvwebplayersdk-player-container'), { childList: true, subtree: true })
-  } catch (err) { console.error(err) }
+    console.log('upgrade obs');
+    obsAmzUpgrade.observe(document.querySelector('.atvwebplayersdk-player-container'), { childList: true, subtree: true });
+  } catch (err) { console.error(err); }
 }
 
 // Prime dummy declarations (this is not actually used as it is sent over as a string!)
@@ -49,17 +71,28 @@ function amzPreviewSkip(bv) {
     eleAmzPreview = 'adSkipButton'
     obsEleAmzPreview = '.bottomPanel'
   }
-  bv.webContents.executeJavaScript('let obsAmzPreview = null')
-    .then(() => bv.webContents.executeJavaScript(`let eleAmzPreview = '${eleAmzPreview}'`))
-    .then(() => bv.webContents.executeJavaScript(`let obsEleAmzPreview = '${obsEleAmzPreview}'`))
-    .then(() => bv.webContents.executeJavaScript(`(${amzPreviewSkipMut.toString()})()`))
-    .then(() => bv.webContents.executeJavaScript(`(${amzPreviewSkipObs.toString()})()`))
-    .catch((err) => { console.error(err) })
+  
+  // Execute everything in one go to ensure proper scope
+  bv.webContents.executeJavaScript(`
+    try {
+      let obsAmzPreview = null;
+      let eleAmzPreview = '${eleAmzPreview}';
+      let obsEleAmzPreview = '${obsEleAmzPreview}';
+      
+      ${amzPreviewSkipMut.toString()}
+      ${amzPreviewSkipObs.toString()}
+
+      amzPreviewSkipMut();
+      amzPreviewSkipObs();
+    } catch(err) { 
+      console.error('Preview skip error:', err); 
+    }
+  `).catch((err) => { console.error(err); })
 }
 
 // Remove observer
 function amzPrevewSkipRem(bv) {
-  bv.webContents.executeJavaScript(`(${amzPreviewSkipDis.toString()})()`).catch((err) => { console.error(err) })
+  bv.webContents.executeJavaScript(`(${amzPreviewSkipDis.toString()})()`).catch((err) => { console.error(err); })
 }
 
 // Prime preview skip mutation observer
@@ -69,29 +102,29 @@ function amzPreviewSkipMut() {
     obsAmzPreview = new MutationObserver(() => {
       const targetElement = document.querySelector(`.${eleAmzPreview}`);
       if (targetElement) {
-        targetElement.click()
-        console.log('prev skip')
+        targetElement.click();
+        console.log('prev skip');
       }
     })
-  } catch(err) { console.error(err) }
+  } catch(err) { console.error(err); }
 }
 
 // Prime preview skip observer invocation
 function amzPreviewSkipObs() {
   try {
-    console.log('prev obs')
-    obsAmzPreview.observe(document.querySelector(obsEleAmzPreview), { childList: true, subtree: true })
-  } catch (err) { console.error(err) }
+    console.log('prev obs');
+    obsAmzPreview.observe(document.querySelector(obsEleAmzPreview), { childList: true, subtree: true });
+  } catch (err) { console.error(err); }
 }
 
 // Prime preview skip observer disconnection
 function amzPreviewSkipDis() {
   try {
-    console.log('prev dis')
+    console.log('prev dis');
     if (typeof obsAmzPreview !== 'undefined') {
-      obsAmzPreview.disconnect()
+      obsAmzPreview.disconnect();
     }
-  } catch (err) { console.error('No observer found') }
+  } catch (err) { console.error('No observer found'); }
 }
 
 // Prime dummy declarations (this is not actually used as it is sent over as a string!)
