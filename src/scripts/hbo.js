@@ -3,7 +3,6 @@ let obsHmRecap = null
 
 // Skip/close HBO episode recap & intros
 function hmRecapSkip(bv) {
-  bv.webContents.executeJavaScript(`${hmRecapSkipClick.toString()}`).catch((err) => { console.error(err) })
   bv.webContents.executeJavaScript('try { let obsHmRecap = null } catch(err) { console.error(err) }')
     .then(() => bv.webContents.executeJavaScript(`(${hmRecapSkipMut.toString()})()`))
     .then(() => bv.webContents.executeJavaScript(`(${hmRecapSkipObs.toString()})()`))
@@ -15,22 +14,29 @@ function hmRecapSkipRem(bv) {
   bv.webContents.executeJavaScript(`(${hmRecapSkipDis.toString()})()`).catch((err) => { console.error(err) })
 }
 
-// HBO recap skip click
-function hmRecapSkipClick() {
-  try {
-    if (document.querySelector('[data-testid="player-ux-skip-button"]') != undefined) {
-      document.querySelector('[data-testid="player-ux-skip-button"]').click()
-      console.log('recap skip')
-    }
-  } catch(err) { console.error(err) }
-}
-
 // HBO recap skip mutation observer
 function hmRecapSkipMut() {
   try {
     console.log('recap mut')
-    obsHmRecap = new MutationObserver(() => {
-      hmRecapSkipClick()
+    let lastClickTime = 0;
+    
+    obsHmRecap = new MutationObserver((mutations) => {
+      mutations.forEach((mutation) => {
+        if (mutation.type === 'attributes' && mutation.attributeName === 'style') {
+          const skipContainer = document.querySelector('[data-testid="skip"]');
+          if (skipContainer && skipContainer.style.visibility === 'visible') {
+            const now = Date.now();
+            if (now - lastClickTime < 1000) return;
+            
+            const skipButton = skipContainer.querySelector('[data-testid="player-ux-skip-button"]');
+            if (skipButton && skipButton.hasAttribute('aria-label')) {
+              lastClickTime = now;
+              skipButton.click();
+              console.log('recap skip');
+            }
+          }
+        }
+      });
     })
   } catch(err) { console.error(err) }
 }
@@ -39,7 +45,14 @@ function hmRecapSkipMut() {
 function hmRecapSkipObs() {
   try {
     console.log('recap obs')
-    obsHmRecap.observe(document.querySelector('#layer-root-player-screen'), { attributes: true })
+    const skipContainer = document.querySelector('[data-testid="skip"]');
+    
+    if (skipContainer) {
+      obsHmRecap.observe(skipContainer, { 
+        attributes: true, 
+        attributeFilter: ['style'] 
+      });
+    }
   } catch (err) { console.error(err) }
 }
 
