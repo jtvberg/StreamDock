@@ -185,8 +185,6 @@ function amzRecapSkipMut() {
       if (targetElement) {
         const buttonId = targetElement.textContent.trim() + '_' + targetElement.getBoundingClientRect().left;
         if (!clickedButtons.has(buttonId)) {
-          console.log('Found skip button:', targetElement.textContent, 'at', new Date().toLocaleTimeString());
-          console.log('Button HTML:', targetElement.outerHTML);
           clickedButtons.add(buttonId);
           amzRecapSkipClick(`.${eleAmzRecap}`);
           setTimeout(() => {

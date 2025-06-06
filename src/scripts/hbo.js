@@ -39,7 +39,7 @@ function hmRecapSkipMut() {
 function hmRecapSkipObs() {
   try {
     console.log('recap obs')
-    obsHmRecap.observe(document.querySelector('[data-testid="skip"]'), { attributes: true })
+    obsHmRecap.observe(document.querySelector('#layer-root-player-screen'), { attributes: true })
   } catch (err) { console.error(err) }
 }
 
@@ -58,7 +58,6 @@ let obsHmNext = null
 
 // Automatically start next HBO episode
 function hmEpisodeNext(bv) {
-  bv.webContents.executeJavaScript(`${hmEpisodeNextClick.toString()}`).catch((err) => { console.error(err) })
   bv.webContents.executeJavaScript('try { let obsHmNext = null } catch(err) { console.error(err) }')
     .then(() => bv.webContents.executeJavaScript(`(${hmEpisodeNextMut.toString()})()`))
     .then(() => bv.webContents.executeJavaScript(`(${hmEpisodeNextObs.toString()})()`))
@@ -70,22 +69,16 @@ function hmEpisodeNextRem(bv) {
   bv.webContents.executeJavaScript(`(${hmEpisodeNextDis.toString()})()`).catch((err) => { console.error(err) })
 }
 
-// HBO next episode click
-function hmEpisodeNextClick() {
-  try {
-    if (document.querySelector('[data-testid="player-ux-up-next-button"]') != undefined) {
-      document.querySelector('[data-testid="player-ux-up-next-button"]').click()
-      console.log('next episode')
-    }
-  } catch(err) { console.error(err) }
-}
-
 // HBO next episode mutation observer
 function hmEpisodeNextMut() {
   try {
     console.log('next mut')
     obsHmNext = new MutationObserver(() => {
-      hmEpisodeNextClick()
+      const targetElement = document.querySelector('[data-testid="player-ux-up-next-button"]');
+      if (targetElement) {
+        targetElement.click()
+        console.log('next episode')
+      }
     })
   } catch(err) { console.error(err) }
 }
@@ -94,7 +87,7 @@ function hmEpisodeNextMut() {
 function hmEpisodeNextObs() {
   try {
     console.log('next obs')
-    obsHmNext.observe(document.querySelector('[data-testid="up_next"]'), { attributes: true })
+    obsHmNext.observe(document.querySelector('#layer-root-player-screen'), { childList: true, subtree: true })
   } catch (err) { console.error(err) }
 }
 
