@@ -77,8 +77,8 @@ function cbEpisodeNextRem(bv) {
 // Paramount next episode click
 function cbEpisodeNextClick() {
   try {
-    if (document.querySelector('.watch-now-btn') != undefined) {
-      document.querySelector('.watch-now-btn').click()
+    if (document.querySelector('.play-button') != undefined) {
+      document.querySelector('.play-button').click()
       console.log('next episode')
     }
   } catch(err) { console.error(err) }
@@ -89,7 +89,10 @@ function cbEpisodeNextMut() {
   try {
     console.log('next mut')
     obsCbNext = new MutationObserver(() => {
-      cbEpisodeNextClick()
+      const targetElement = document.querySelector('.end-card-panel-sm');
+      if (targetElement) {
+        cbEpisodeNextClick()
+      }
     })
   } catch(err) { console.error(err) }
 }
@@ -98,7 +101,7 @@ function cbEpisodeNextMut() {
 function cbEpisodeNextObs() {
   try {
     console.log('next obs')
-    obsCbNext.observe(document.querySelector('.base-container'), { childList: true, subtree: true })
+    obsCbNext.observe(document.querySelector('#main-container'), { childList: true, subtree: true })
   } catch (err) { console.error(err) }
 }
 
