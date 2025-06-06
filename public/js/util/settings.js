@@ -217,7 +217,7 @@ export const getPrefs = () => {
       'advanced',
       'text',
       'User Agent',
-      'Override User Agent',
+      'Override User Agent (Custom urls only, leave blank for default)',
       '',
       true
     ),

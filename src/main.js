@@ -149,16 +149,25 @@ const createWindow = () => {
   })
 
   // on steam view navigation check if url is valid and set userAgent
-  // setting a userAgent on netflix or prime ever, will cause it to fail
-  // streamView.webContents.on('did-start-navigation', () => {
-  //   const cleanUrl = validUrl(getCurrentUrl())
-  //   if (cleanUrl) {
-  //     headerView.webContents.executeJavaScript('localStorage.getItem("pref-agent");', true).then(response => {
-  //       if (cleanUrl.hostname === 'www.netflix.com' || cleanUrl.hostname === 'www.amazon.com' || response === null || response.trim() === '""') { return }
-  //       streamView.webContents.userAgent = cleanUrl.hostname === googleAuthHost ? 'Chrome' : response
-  //     })
-  //   }
-  // })
+  streamView.webContents.on('did-start-navigation', () => {
+    const cleanUrl = validUrl(getCurrentUrl())
+    if (cleanUrl) {
+      headerView.webContents.executeJavaScript('localStorage.getItem("pref-agent");', true).then(response => {
+        const { getStreams } = require('../public/js/util/settings')
+        const streamHostnames = getStreams(true).map(stream => {
+          try {
+            return new URL(stream.url).hostname
+          } catch {
+            return null
+          }
+        }).filter(Boolean)
+        if (streamHostnames.includes(cleanUrl.hostname) || response === null || response.trim() === '""') { 
+          return 
+        }
+        streamView.webContents.userAgent = cleanUrl.hostname === googleAuthHost ? 'Chrome' : response
+      })
+    }
+  })
 
   // on stream view load get url, remove scrollbars, show stream, load scripts
   streamView.webContents.on('did-finish-load', () => {
