@@ -54,6 +54,18 @@
     "mac": {
       "category": "public.app-category.video"
     },
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64",
+            "ia32"
+          ]
+        }
+      ],
+      "icon": "build/icon.ico"
+    },
     "linux": {
       "category": "Video",
       "icon": "build/icon.icns",

@@ -22,7 +22,18 @@ exports.default = function (context) {
       execSync
     } = require('child_process')
     console.log('VMP signing start')
-    execSync('python3 -m castlabs_evs.vmp sign-pkg ./dist/win-unpacked')
+    try {
+      execSync('python -m castlabs_evs.vmp sign-pkg ./dist/win-arm64-unpacked', { stdio: 'inherit' })
+    } catch (error) {
+      console.error('VMP signing failed (arm):', error.message)
+      throw error
+    }
+    try {
+      execSync('python -m castlabs_evs.vmp sign-pkg ./dist/win-unpacked', { stdio: 'inherit' })
+    } catch (error) {
+      console.error('VMP signing failed (x64):', error.message)
+      throw error
+    }
     console.log('VMP signing complete')
   }
 }
