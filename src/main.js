@@ -467,7 +467,10 @@ const openNewin = url => {
     transparent: true,
     fullscreenable: false,
     frame: false,
-    titleBarStyle: isMac ? 'customButtonsOnHover' : 'hidden'
+    titleBarStyle: isMac ? 'customButtonsOnHover' : 'hidden',
+    webPreferences: {
+      preload: path.join(__dirname, 'preload.js')
+    }
   })
   if (isLinux) {
     child.setIcon(path.join(__dirname, '../public/res/icon.png'))
@@ -478,11 +481,39 @@ const openNewin = url => {
     child.show()
   })
   child.webContents.on('did-finish-load', () => {
-    child.webContents.executeJavaScript(`document.body.insertAdjacentHTML('beforeend', '<div class="sd-frameless-header"></div><style> .sd-frameless-header { position: fixed; top: 0; left: 0; width: calc(100% - 25px); height: 15px; opacity: 0; z-index: 99999; cursor: -webkit-grab; cursor: grab; -webkit-user-drag: none; -webkit-app-region: drag; } ::-webkit-scrollbar { display: none; } </style>')`)
-    if (!isMac) {
-      child.webContents.executeJavaScript(`document.body.insertAdjacentHTML('beforeend', '<div class="sd-frameless-close" onclick="window.close();">&times;</div><style> .sd-frameless-close { position: fixed; top: 4px; right: 4px; display: flex; height: 27px; align-items: center; justify-content: center; font-family: sans-serif; font-size: 36px; color: #dbdbdb; background-color: #0f0f0f; border-radius: 50%; z-index: 999999; opacity: 0; aspect-ratio: 1 / 1; user-select: none;} .sd-frameless-close:hover { opacity: 1 } </style>')`)
-    }
-    // isDev && child.webContents.openDevTools('detach')
+    child.webContents.executeJavaScript(`
+      (() => {
+        try {
+          // Create drag header element
+          const dragHeader = document.createElement('div');
+          dragHeader.className = 'sd-frameless-header';
+          dragHeader.style.cssText = 'position: fixed; top: 0; left: 0; width: calc(100% - 25px); height: 15px; opacity: 0; z-index: 99999; cursor: -webkit-grab; cursor: grab; -webkit-user-drag: none; -webkit-app-region: drag;';
+          document.body.appendChild(dragHeader);
+
+          // Add scrollbar hiding styles
+          const style = document.createElement('style');
+          style.textContent = '::-webkit-scrollbar { display: none; }';
+          document.head.appendChild(style);
+
+          ${!isMac ? `
+          // Create close button (only on non-Mac)
+          const closeBtn = document.createElement('div');
+          closeBtn.className = 'sd-frameless-close';
+          closeBtn.innerHTML = '&times;';
+          closeBtn.onclick = () => window.close();
+          closeBtn.style.cssText = 'position: fixed; top: 4px; right: 4px; display: flex; height: 27px; align-items: center; justify-content: center; font-family: sans-serif; font-size: 36px; color: #dbdbdb; background-color: #0f0f0f; border-radius: 50%; z-index: 999999; opacity: 0; aspect-ratio: 1 / 1; user-select: none; cursor: pointer;';
+          closeBtn.addEventListener('mouseenter', () => closeBtn.style.opacity = '1');
+          closeBtn.addEventListener('mouseleave', () => closeBtn.style.opacity = '0');
+          document.body.appendChild(closeBtn);
+          ` : ''}
+
+          console.log('child window UI elements created');
+        } catch (err) {
+          console.error('Error creating child window UI elements:', err);
+        }
+      })();
+    `)
+    isDev && child.webContents.openDevTools('detach')
     removeScrollbars(child)
     loadScripts(child, validUrl(getCurrentUrl(child)).hostname)
   })
