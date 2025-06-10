@@ -1,7 +1,5 @@
 # Update
- I am aware that some of the service-specific scripts are no longer behaving. I have a work-around for the isTrusted issue on YouTube and am working on a comprehensive fix.
- Also, Netflix is not working if you provide a userAgent anymore. To fix that, I am removing the use of a userAgent unless you explicitly set one in the settings.
- New release soon...
+ New release addresses some service scripts that were no longer working. There was a bug where child windows for YouTube were no longer draggable as a result of the same TrustedHTML issue. This has since been fixed but did not make the 2.1.0 release.
 
 # StreamDock 2.0.0, The Sequel!
  It took two years and a lack of focus to get 1.0.0 out the door and upon completion I looked at what I had wrought and wept.
@@ -86,9 +84,10 @@
  The auto-update should prompt you as new releases come out and then, post download, prompt you to install/restart. Sometimes, it won't do the restart. If you wait a minute and exit the app completely, it should automatically restart the new version.
 
  Three Issues:
- - If you drag the window around and cross into a an OS toolbar or off to another screen, occasionally, the mouse will stick to the drag area. You can hit escape to disconnect it
- - Peacock is broken again. If you already successfully logged in prior to upgrading, don't delete your settings as I recommended. You will have to delete your bookmarks manually and there will be some random data that doesn't do anything left over but that shouldn't be a problem. Peacock sucks anyway (seriously Peacock, try using your native apps for a minute.)
+ - Dragging a window around might still on occasion make the mouse 'stick' to the header. This should be much more rare than in previous version. You can still hit escape to disconnect it
+ - I investigated further but Peacock is still broken.
  - Hulu will resume playing when minimized to tray after a short amount of time. If you pause it before you minimize to tray, it does not. I have not found a root cause for this and it only happens on Hulu. This may have been around for quite some time.
+ - If you open a Netlfix child window, playing a video will likely give you an error. This is beacuse you have 2 windows open in the same 'browser'. If you close the Netflix session in the main window, the child will play
 
 ## App Control
  - Click on the quick-access buttons across the top to load streaming services as setup in the stream editor
