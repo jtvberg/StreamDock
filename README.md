@@ -76,15 +76,16 @@
 
 ## Releases / Known Issues
  Bookmarks and settings from older versions of StreamDock will not show up properly in 2.0.0+
+ 
  :rotating_light:**Note: If you are currently using StreamDock 1.x.x or older, I highly recommend you use the Clear Data function in the advanced section in the settings!**:rotating_light:
  
- The current release works on macOS (signed, notarized and tested on Ventura and Sonoma), Windows 10/11 (self-signed) and Linux (tested on Mint).
- Version 2.0.1 is the first release that includes a macOS distribution for Apple silicon. This was a miss on my part as the application will run much slower given the JS will be interpreted twice via Rosetta. Be sure to use the arm64 dmg if you have an M1/M2/M3.
+ The current release works on macOS (signed, notarized and tested on Sequoia), Windows 11 (self-signed). Linux will be in a future release (but you should be able to build your own).
+ Version 2.0.1 is the first release that includes a macOS distribution for Apple silicon. This was a miss on my part as the application will run much slower given the JS will be interpreted twice via Rosetta. Be sure to use the arm64 dmg if you have an MX chip.
 
  The auto-update should prompt you as new releases come out and then, post download, prompt you to install/restart. Sometimes, it won't do the restart. If you wait a minute and exit the app completely, it should automatically restart the new version.
 
- Three Issues:
- - Dragging a window around might still on occasion make the mouse 'stick' to the header. This should be much more rare than in previous version. You can still hit escape to disconnect it
+ Four Issues:
+ - Dragging a window around might still on occasion make the mouse 'stick' to the header. This should be much more rare than in previous versions. You can still hit escape to disconnect it
  - I investigated further but Peacock is still broken.
  - Hulu will resume playing when minimized to tray after a short amount of time. If you pause it before you minimize to tray, it does not. I have not found a root cause for this and it only happens on Hulu. This may have been around for quite some time.
  - If you open a Netlfix child window, playing a video will likely give you an error. This is beacuse you have 2 windows open in the same 'browser'. If you close the Netflix session in the main window, the child will play
