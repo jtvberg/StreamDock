@@ -93,7 +93,7 @@
 
 .library-row {
   display: grid;
-  grid-template-columns: 1fr 150px 200px auto auto;
+  grid-template-columns: 1fr 2fr 200px auto auto;
   gap: 8px;
   align-items: center;
   font-size: 1.2rem;

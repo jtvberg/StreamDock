@@ -858,10 +858,11 @@ const createLibraryTile = linbraryObj => {
 // create a library list item
 const createLibraryListItem = libraryObj => {
   const cleanTitle = libraryObj.title.trim()
+  const path = libraryObj.url.replace('file://', '')
   const frag = document.createDocumentFragment()
   const libraryListItem = elementFromHtml(`<div class="library-row" data-ts="${libraryObj.timestamp}" title="${cleanTitle}"></div>`)
   const libraryListTitle = elementFromHtml(`<div class="library-cell">${cleanTitle}</div>`)
-  const libraryListPath = elementFromHtml(`<div class="library-cell">${cleanTitle}</div>`)
+  const libraryListPath = elementFromHtml(`<div class="library-cell">${path}</div>`)
   const libraryListTime = elementFromHtml(`<div class="library-cell library-cell-right">${new Date(libraryObj.timestamp).toLocaleString()}</div>`)
   libraryListItem.appendChild(libraryListTitle)
   libraryListItem.appendChild(libraryListPath)
@@ -871,23 +872,9 @@ const createLibraryListItem = libraryObj => {
   return frag
 }
 
-// get library
-const getLibrary = () => {
-  const library = [{
-    title: 'Blade',
-    url: 'file:///Users/jtvberg/Desktop/Movies/Blade.mp4',
-    timestamp: Date.now(),
-  },
-  {
-    title: 'Blood',
-    url: 'file:///Users/jtvberg/Desktop/Movies/Blood.mp4',
-    timestamp: Date.now() + 1000,
-  }]
-  loadLibrary(library)
-}
-
 // load library
 const loadLibrary = library => {
+  console.log('Loading Library')
   // const fragTiles = document.createDocumentFragment()
   const fragList = document.createDocumentFragment()
   library.forEach(li => {
@@ -897,7 +884,6 @@ const loadLibrary = library => {
   // $library.appendChild(fragTiles)
   $libraryList.appendChild(fragList)
 }
-
 
 // remove www. from host
 const getCleanHost = url => {
@@ -1075,6 +1061,8 @@ $headerPanels.forEach(el => el.addEventListener('dblclick', e => e.stopPropagati
 $headerPanels.forEach(el => el.addEventListener('contextmenu', e => e.stopPropagation()))
 
 document.onkeydown = e => e.key === 'Escape' ? onDragMouseUp() : null
+
+window.electronAPI.sendLibrary((e, library) => loadLibrary(library))
 
 window.electronAPI.logData((e, data) => logOutput(data))
 

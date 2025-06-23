@@ -13,6 +13,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
     openLink: () => ipcRenderer.send('open-link'),
     openDevTools: () => ipcRenderer.send('open-devtools'),
     createBookmark: () => ipcRenderer.send('create-bookmark'),
+    signalElementReadyForTrustedClick: selector => ipcRenderer.send('request-trusted-click', selector),
     sendBookmark: bookmarkObj => ipcRenderer.on('send-bookmark', bookmarkObj),
     navBack: () => ipcRenderer.send('nav-back'),
     winMax: () => ipcRenderer.send('win-max'),
@@ -37,5 +38,5 @@ contextBridge.exposeInMainWorld('electronAPI', {
     getHeaderHeight: heightObj => ipcRenderer.invoke('set-header-height', heightObj),
     setIsMac: bool => ipcRenderer.once('is-mac', bool),
     getAppInfo: appInfo => ipcRenderer.once('app-info', appInfo),
-    signalElementReadyForTrustedClick: selector => ipcRenderer.send('request-trusted-click', selector)
+    sendLibrary: library => ipcRenderer.on('send-library', library)
 })

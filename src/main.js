@@ -3,6 +3,7 @@ const { app, BrowserWindow, WebContentsView, Tray, Menu, nativeTheme, components
 const { version, productName, author, repository, bugs } = require('../package.json')
 const path = require('path')
 const menu = require('./util/menu')
+const fs = require('fs').promises
 const { ytAdsSkip, ytAdSkipRem } = require('./scripts/youtube')
 const { amzUpgradeDismiss,
   amzPreviewSkip,
@@ -203,6 +204,7 @@ const createWindow = () => {
   // on header view load send is mac to renderer
   headerView.webContents.on('did-finish-load', () => {
     headerView.webContents.send('is-mac', isMac)
+    getLibrary()
   })
 
   // on closing of main window, send window location to renderer and close all windows
@@ -622,8 +624,8 @@ app.whenReady().then(async () => {
   app.focus({ steal: true })
   if (isDev) {
     // mainWin.webContents.openDevTools({ mode: 'detach' })
-    // headerView.webContents.openDevTools({ mode: 'detach' })
-    // streamView.webContents.openDevTools({ mode: 'detach' })
+    headerView.webContents.openDevTools({ mode: 'detach' })
+    streamView.webContents.openDevTools({ mode: 'detach' })
     // facetView.webContents.openDevTools({ mode: 'detach' })
   } else {
     const updater = require('./util/updater')
@@ -709,3 +711,22 @@ ipcMain.on('request-trusted-click', async (e, selector) => {
   const webContents = e.sender
   await performTrustedClick(webContents, selector)
 })
+
+async function getLibrary() {
+  const dir = '/Users/jtvberg/Desktop/Movies'
+  const files = await fs.readdir(dir)
+  const videoExts = ['.mp4', '.mkv', '.avi', '.mov', '.webm']
+  const library = []
+  for (const file of files) {
+    const ext = path.extname(file).toLowerCase()
+    if (!videoExts.includes(ext)) continue
+    const filePath = path.join(dir, file)
+
+    library.push({
+      title: path.basename(file, ext),
+      url: `file://${filePath}`,
+      timestamp: Date.now()
+    })
+  }
+  headerView.webContents.send('send-library', library)
+}
