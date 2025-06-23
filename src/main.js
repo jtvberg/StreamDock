@@ -204,7 +204,7 @@ const createWindow = () => {
   headerView.webContents.on('did-finish-load', () => {
     headerView.webContents.send('is-mac', isMac)
   })
-  // 
+
   // on closing of main window, send window location to renderer and close all windows
   mainWin.on('close', () => {
     headerView.webContents.send('win-getloc', mainWin.getBounds())
@@ -359,7 +359,7 @@ const setFacetViewBounds = width => facetView.setBounds({ x: 0, y: 0, width, hei
 const openUrl = url => {
   sendLogData(`Open URL: ${url}`)
   streamView.webContents.loadURL(url)
-  showStream(false)
+  showStream(true)
   headerView.webContents.send('stream-opened')
 }
 
@@ -705,7 +705,7 @@ ipcMain.handle('set-header-height', async (e) => {
   return { height: headerCollapsed, base: headerBase }
 })
 
-ipcMain.on('request-trusted-click', async (event, selector) => {
-  const webContents = event.sender
+ipcMain.on('request-trusted-click', async (e, selector) => {
+  const webContents = e.sender
   await performTrustedClick(webContents, selector)
 })

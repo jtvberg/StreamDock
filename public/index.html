@@ -9,6 +9,7 @@
     <link rel="stylesheet" href="./css/settings.css">
     <link rel="stylesheet" href="./css/bookmarks.css">
     <link rel="stylesheet" href="./css/search.css">
+    <link rel="stylesheet" href="./css/library.css">
     <title>StreamDock</title>
   </head>
   <body>
@@ -98,6 +99,7 @@
         <div id="home-nav">
           <button class="home-nav-btn fas fa-book-bookmark" data-layout="bookmark" title="Bookmarks"></button>
           <button id="search-nav-btn" class="home-nav-btn fas fa-magnifying-glass" data-layout="search" title="Search"></button>
+          <button class="home-nav-btn fas fa-film" data-layout="library" title="Library"></button>
           <div class="btn-divider"></div>
           <button id="bookmark-list-btn" class="home-layout-btn fas fa-list-ul" data-layout="bookmark" title="List View"></button>
           <button id="bookmark-sort-old-btn" class="home-layout-btn home-nav-comp-btn" data-layout="bookmark" title="Sort Oldest to Newest">
@@ -126,6 +128,10 @@
           <div id="bookmarks"></div>
           <div id="bookmark-list"></div>
         </div>
+        <div id="library-home-layout" class="home-layout">
+          <!-- <div id="library"></div> -->
+          <div id="library-list"></div>
+        </div>        
         <div id="search-home-layout" class="home-layout">
           <div id="search-box">
             <input id="search-input" type="text" placeholder="Search Term">

@@ -14,6 +14,8 @@ const $streamControls = document.querySelector('#stream-controls')
 const $prefsBtn = document.querySelector('#prefs-btn')
 const $bookmarks = document.querySelector('#bookmarks')
 const $bookmarkList = document.querySelector('#bookmark-list')
+const $library = document.querySelector('#library')
+const $libraryList = document.querySelector('#library-list')
 const $headerPanels = document.querySelectorAll('.header-panels')
 const $prefsLayout = document.querySelector('#prefs-layout')
 const $servicePrefs = document.querySelector('#service-layout')
@@ -110,6 +112,8 @@ const applySettings = () => {
   loadStreams()
 
   getBookmarks()
+
+  getLibrary()
 
   changeHomeLayout()
 
@@ -820,7 +824,7 @@ const deleteBookmark = timestamp => {
   logOutput('Bookmark Deleted')
 }
 
-// load bookmarks from local storage
+// get bookmarks from local storage
 const getBookmarks = () => {
   const bookmarks = JSON.parse(localStorage.getItem('bookmarks')) || []
   loadBookmarks(bookmarks)
@@ -837,6 +841,63 @@ const loadBookmarks = bookmarks => {
   $bookmarks.appendChild(fragTiles)
   $bookmarkList.appendChild(fragList)
 }
+
+// create a library tile
+const createLibraryTile = linbraryObj => {
+  const cleanTitle = getCleanTitle(linbraryObj.title)
+  const frag = document.createDocumentFragment()
+  const bookmark = elementFromHtml(`<div class="bookmark-instance" data-ts="${linbraryObj.timestamp}" title="${cleanTitle}"></div>`)
+  const image = elementFromHtml(`<img class="bookmark-image" src="${linbraryObj.img}">`)
+  const title = elementFromHtml(`<div class="bookmark-title">${cleanTitle}</div>`)
+  bookmark.appendChild(image)
+  bookmark.addEventListener('click', () => window.electronAPI.openUrl(linbraryObj.url))
+  frag.appendChild(bookmark)
+  return frag
+}
+
+// create a library list item
+const createLibraryListItem = libraryObj => {
+  const cleanTitle = libraryObj.title.trim()
+  const frag = document.createDocumentFragment()
+  const libraryListItem = elementFromHtml(`<div class="library-row" data-ts="${libraryObj.timestamp}" title="${cleanTitle}"></div>`)
+  const libraryListTitle = elementFromHtml(`<div class="library-cell">${cleanTitle}</div>`)
+  const libraryListPath = elementFromHtml(`<div class="library-cell">${cleanTitle}</div>`)
+  const libraryListTime = elementFromHtml(`<div class="library-cell library-cell-right">${new Date(libraryObj.timestamp).toLocaleString()}</div>`)
+  libraryListItem.appendChild(libraryListTitle)
+  libraryListItem.appendChild(libraryListPath)
+  libraryListItem.appendChild(libraryListTime)
+  libraryListItem.addEventListener('click', () => window.electronAPI.openUrl(libraryObj.url))
+  frag.appendChild(libraryListItem)
+  return frag
+}
+
+// get library
+const getLibrary = () => {
+  const library = [{
+    title: 'Blade',
+    url: 'file:///Users/jtvberg/Desktop/Movies/Blade.mp4',
+    timestamp: Date.now(),
+  },
+  {
+    title: 'Blood',
+    url: 'file:///Users/jtvberg/Desktop/Movies/Blood.mp4',
+    timestamp: Date.now() + 1000,
+  }]
+  loadLibrary(library)
+}
+
+// load library
+const loadLibrary = library => {
+  // const fragTiles = document.createDocumentFragment()
+  const fragList = document.createDocumentFragment()
+  library.forEach(li => {
+    // fragTiles.appendChild(createLibraryTile(li))
+    fragList.appendChild(createLibraryListItem(li))
+  })
+  // $library.appendChild(fragTiles)
+  $libraryList.appendChild(fragList)
+}
+
 
 // remove www. from host
 const getCleanHost = url => {

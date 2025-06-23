@@ -207,3 +207,7 @@ a {
 .toggle:checked:before {
   left: 30px;
 }
+
+#home-nav {
+  width: 32px;
+}
