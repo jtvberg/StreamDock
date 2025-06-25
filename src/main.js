@@ -574,6 +574,25 @@ const sendLogData = log => {
   headerView.webContents.send('log-data', log)
 }
 
+async function getLibrary() {
+  const dir = '/Users/jtvberg/Desktop/Movies'
+  const files = await fs.readdir(dir)
+  const videoExts = ['.mp4', '.mkv', '.avi', '.mov', '.webm']
+  const library = []
+  for (const file of files) {
+    const ext = path.extname(file).toLowerCase()
+    if (!videoExts.includes(ext)) continue
+    const filePath = path.join(dir, file)
+    const stat = await fs.stat(filePath)
+    library.push({
+      title: path.basename(file, ext),
+      url: `file://${filePath}`,
+      timestamp: stat.mtime
+    })
+  }
+  headerView.webContents.send('send-library', library)
+}
+
 async function performTrustedClick(webContents, selector) {
   if (!webContents || webContents.isDestroyed()) {
     console.log(`performTrustedClick: webContents for ${selector} is not available or destroyed.`)
@@ -625,7 +644,7 @@ app.whenReady().then(async () => {
   if (isDev) {
     // mainWin.webContents.openDevTools({ mode: 'detach' })
     headerView.webContents.openDevTools({ mode: 'detach' })
-    streamView.webContents.openDevTools({ mode: 'detach' })
+    // streamView.webContents.openDevTools({ mode: 'detach' })
     // facetView.webContents.openDevTools({ mode: 'detach' })
   } else {
     const updater = require('./util/updater')
@@ -711,22 +730,3 @@ ipcMain.on('request-trusted-click', async (e, selector) => {
   const webContents = e.sender
   await performTrustedClick(webContents, selector)
 })
-
-async function getLibrary() {
-  const dir = '/Users/jtvberg/Desktop/Movies'
-  const files = await fs.readdir(dir)
-  const videoExts = ['.mp4', '.mkv', '.avi', '.mov', '.webm']
-  const library = []
-  for (const file of files) {
-    const ext = path.extname(file).toLowerCase()
-    if (!videoExts.includes(ext)) continue
-    const filePath = path.join(dir, file)
-
-    library.push({
-      title: path.basename(file, ext),
-      url: `file://${filePath}`,
-      timestamp: Date.now()
-    })
-  }
-  headerView.webContents.send('send-library', library)
-}

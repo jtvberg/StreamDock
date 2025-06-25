@@ -1,5 +1,6 @@
 // Imports
 import { getStreams, setStreams, getNewStreamId, getLastStream, getPrefs, setLastStream, getWinBounds, setWinBounds, getWinLock, setWinLock, getWinRatio, setWinRatio, getDefaultAgent } from "./util/settings.js"
+import { searchTitle } from './util/tmdb.js'
 import locs from '../res/loc.json' with { type: 'json' }
 
 // Constants
@@ -63,6 +64,10 @@ const $bookmarkSortNewBtn = document.querySelector('#bookmark-sort-new-btn')
 const $bookmarkSortTitleBtn = document.querySelector('#bookmark-sort-title-btn')
 const $bookmarkSortHostBtn = document.querySelector('#bookmark-sort-host-btn')
 const $bookmarkNewLinkBtn = document.querySelector('#bookmark-newlink-btn')
+const $libraryListBtn = document.querySelector('#library-list-btn')
+const $librarySortOldBtn = document.querySelector('#library-sort-old-btn')
+const $librarySortNewBtn = document.querySelector('#library-sort-new-btn')
+const $librarySortTitleBtn = document.querySelector('#library-sort-title-btn')
 
 // Vars
 let headerCollapsed = 0
@@ -112,8 +117,6 @@ const applySettings = () => {
   loadStreams()
 
   getBookmarks()
-
-  getLibrary()
 
   changeHomeLayout()
 
@@ -842,49 +845,6 @@ const loadBookmarks = bookmarks => {
   $bookmarkList.appendChild(fragList)
 }
 
-// create a library tile
-const createLibraryTile = linbraryObj => {
-  const cleanTitle = getCleanTitle(linbraryObj.title)
-  const frag = document.createDocumentFragment()
-  const bookmark = elementFromHtml(`<div class="bookmark-instance" data-ts="${linbraryObj.timestamp}" title="${cleanTitle}"></div>`)
-  const image = elementFromHtml(`<img class="bookmark-image" src="${linbraryObj.img}">`)
-  const title = elementFromHtml(`<div class="bookmark-title">${cleanTitle}</div>`)
-  bookmark.appendChild(image)
-  bookmark.addEventListener('click', () => window.electronAPI.openUrl(linbraryObj.url))
-  frag.appendChild(bookmark)
-  return frag
-}
-
-// create a library list item
-const createLibraryListItem = libraryObj => {
-  const cleanTitle = libraryObj.title.trim()
-  const path = libraryObj.url.replace('file://', '')
-  const frag = document.createDocumentFragment()
-  const libraryListItem = elementFromHtml(`<div class="library-row" data-ts="${libraryObj.timestamp}" title="${cleanTitle}"></div>`)
-  const libraryListTitle = elementFromHtml(`<div class="library-cell">${cleanTitle}</div>`)
-  const libraryListPath = elementFromHtml(`<div class="library-cell">${path}</div>`)
-  const libraryListTime = elementFromHtml(`<div class="library-cell library-cell-right">${new Date(libraryObj.timestamp).toLocaleString()}</div>`)
-  libraryListItem.appendChild(libraryListTitle)
-  libraryListItem.appendChild(libraryListPath)
-  libraryListItem.appendChild(libraryListTime)
-  libraryListItem.addEventListener('click', () => window.electronAPI.openUrl(libraryObj.url))
-  frag.appendChild(libraryListItem)
-  return frag
-}
-
-// load library
-const loadLibrary = library => {
-  console.log('Loading Library')
-  // const fragTiles = document.createDocumentFragment()
-  const fragList = document.createDocumentFragment()
-  library.forEach(li => {
-    // fragTiles.appendChild(createLibraryTile(li))
-    fragList.appendChild(createLibraryListItem(li))
-  })
-  // $library.appendChild(fragTiles)
-  $libraryList.appendChild(fragList)
-}
-
 // remove www. from host
 const getCleanHost = url => {
   return new URL(url).hostname.replace('www.', '')
@@ -922,6 +882,117 @@ const sortBookmarks = order => {
   $bookmarks.replaceChildren([])
   $bookmarkList.replaceChildren([])
   loadBookmarks(bookmarks)
+}
+
+// create a library tile
+const createLibraryTile = libraryObj => {
+  const result = libraryObj.metadata
+  const tmdbImagePath = 'https://image.tmdb.org/t/p/original'
+  console.log(libraryObj)
+  const poster = result.poster_path ? `${tmdbImagePath}${result.poster_path}` : null
+  const resultTile = elementFromHtml(`<div class="result-tile"></div>`)
+  const resultPoster = elementFromHtml(`<img class="result-poster" src="${poster}"></img>`)
+  const resultDetails = elementFromHtml(`<div class="result-details"></div>`)
+  const resultTitle = elementFromHtml(`<div class="result-title" title="${result.title || result.name}">${result.title || result.name}</div>`)
+  const resultYear = elementFromHtml(`<div class="result-year" title="${getYear(result.release_date || result.first_air_date)}">(${getYear(result.release_date || result.first_air_date)})</div>`)
+
+  resultDetails.appendChild(resultTitle)
+  resultDetails.appendChild(resultYear)
+  resultTile.appendChild(resultDetails)
+  poster ? resultTile.appendChild(resultPoster) : null
+  resultTile.addEventListener('click', () => window.electronAPI.openUrl(libraryObj.url))
+  return resultTile
+}
+
+function getYear(input) {
+  const year = new Date(input).getFullYear()
+  return isNaN(year) ? 'NA' : year
+}
+
+// create a library list item
+const createLibraryListItem = libraryObj => {
+  const cleanTitle = libraryObj.title.trim()
+  const path = libraryObj.url.replace('file://', '')
+  const frag = document.createDocumentFragment()
+  const libraryListItem = elementFromHtml(`<div class="library-row" data-ts="${libraryObj.timestamp}" title="${cleanTitle}"></div>`)
+  const libraryListTitle = elementFromHtml(`<div class="library-cell">${cleanTitle}</div>`)
+  const libraryListPath = elementFromHtml(`<div class="library-cell">${path}</div>`)
+  const libraryListTime = elementFromHtml(`<div class="library-cell library-cell-right">${new Date(libraryObj.timestamp).toLocaleString()}</div>`)
+  libraryListItem.appendChild(libraryListTitle)
+  libraryListItem.appendChild(libraryListPath)
+  libraryListItem.appendChild(libraryListTime)
+  libraryListItem.addEventListener('click', () => window.electronAPI.openUrl(libraryObj.url))
+  frag.appendChild(libraryListItem)
+  return frag
+}
+
+// toggle bookmark list view
+const libraryListView = () => {
+  if ($libraryListBtn.classList.contains('toggled-bg')) {
+    $libraryListBtn.classList.remove('toggled-bg')
+    $library.style.display = ''
+    $libraryList.style.display = ''
+  } else {
+    $libraryListBtn.classList.add('toggled-bg')
+    $library.style.display = 'none'
+    $libraryList.style.display = 'flex'
+  }
+}
+
+// load library
+const loadLibrary = library => {
+  const fragTiles = document.createDocumentFragment()
+  const fragList = document.createDocumentFragment()
+  library.forEach(li => {
+    fragTiles.appendChild(createLibraryTile(li))
+    fragList.appendChild(createLibraryListItem(li))
+  })
+  $library.appendChild(fragTiles)
+  $libraryList.appendChild(fragList)
+}
+
+// get metadata for library items
+async function getLibraryMetadata(library) {
+  const libraryWithMetadata = []
+  for (const item of library) {
+    const searchTerm = item.title.replace(/[._]/g, ' ')
+    const searchResult = await searchTitle(searchTerm, 1)
+    let metadata = {}
+    if (searchResult && searchResult.results && searchResult.results.length > 0) {
+      metadata = searchResult.results[0]
+    }
+    libraryWithMetadata.push({ ...item, metadata })
+  }
+  loadLibrary(libraryWithMetadata)
+}
+
+// sort library by order param
+const sortLibrary = order => {
+  // const bookmarks = JSON.parse(localStorage.getItem('bookmarks')) || []
+  // switch (order) {
+  //   case 'old':
+  //     // sort boomarks by timestamp ascending
+  //     bookmarks.sort((a, b) => a.timestamp - b.timestamp)
+  //     break
+  //   case 'new':
+  //     // sort boomarks by timestamp descending
+  //     bookmarks.sort((a, b) => b.timestamp - a.timestamp)
+  //     break
+  //   case 'title':
+  //     // sort boomarks by title ascending
+  //     bookmarks.sort((a, b) => getCleanTitle(a.title) < getCleanTitle(b.title) ? -1 : 1)
+  //     break
+  //   case 'host':
+  //     // sort boomarks by host ascending
+  //     bookmarks.sort((a, b) => getCleanHost(a.url) < getCleanHost(b.url) ? -1 : 1)
+  //     break
+  //   default:
+  //     bookmarks.sort((a, b) => a.timestamp - b.timestamp)
+  //     break
+  // }
+  // $bookmarks.replaceChildren([])
+  // $bookmarkList.replaceChildren([])
+  // loadBookmarks(bookmarks)
 }
 
 // add flash animation class
@@ -1029,6 +1100,14 @@ $bookmarkSortTitleBtn.addEventListener('click', () => sortBookmarks('title'))
 
 $bookmarkNewLinkBtn.addEventListener('click', async () => window.electronAPI.urlToBookmark(`${await navigator.clipboard.readText()}`))
 
+$libraryListBtn.addEventListener('click', libraryListView)
+
+$librarySortOldBtn.addEventListener('click', () => sortLibrary('old'))
+
+$librarySortNewBtn.addEventListener('click', () => sortLibrary('new'))
+
+$librarySortTitleBtn.addEventListener('click', () => sortLibrary('title'))
+
 $header.addEventListener('mouseenter', expandHeader)
 
 $header.addEventListener('contextmenu', window.electronAPI.winHide)
@@ -1062,7 +1141,7 @@ $headerPanels.forEach(el => el.addEventListener('contextmenu', e => e.stopPropag
 
 document.onkeydown = e => e.key === 'Escape' ? onDragMouseUp() : null
 
-window.electronAPI.sendLibrary((e, library) => loadLibrary(library))
+window.electronAPI.sendLibrary((e, library) => getLibraryMetadata(library))
 
 window.electronAPI.logData((e, data) => logOutput(data))
 

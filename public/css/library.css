@@ -1,14 +1,18 @@
 #library-home-layout {
-  overflow-y: auto;
+  position: relative;
   width: 100%;
+  display: flex;
+  color: var(--color-control-white)
 }
 
 #library {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
   grid-auto-rows: max-content;
   gap: 7px;
+  width: -webkit-fill-available;
   overflow-y: auto;
+  overflow-x: hidden;
 }
 
 .library-instance {
@@ -84,11 +88,13 @@
 }
 
 #library-list {
-  /* display: none; */
+  display: none;
   flex-direction: column;
   gap: 3px;
   font-weight: 600;
+  width: -webkit-fill-available;
   color: var(--color-control-white);
+  overflow-y: auto;
 }
 
 .library-row {
