@@ -130,7 +130,6 @@ export async function searchMovie(term, page) {
   url.searchParams.append('query', term)
   url.searchParams.append('page', page)
   url.searchParams.append('include_adult', false)
-  console.log(term)
   return await apiGet(url)
 }
 

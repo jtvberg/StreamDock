@@ -38,5 +38,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
     getHeaderHeight: heightObj => ipcRenderer.invoke('set-header-height', heightObj),
     setIsMac: bool => ipcRenderer.once('is-mac', bool),
     getAppInfo: appInfo => ipcRenderer.once('app-info', appInfo),
-    sendLibrary: library => ipcRenderer.on('send-library', library)
+    sendLibrary: library => ipcRenderer.on('send-library', library),
+    getMovies: dir => ipcRenderer.send('get-movies', dir),
+    getTv: dir => ipcRenderer.send('get-tv', dir)
 })

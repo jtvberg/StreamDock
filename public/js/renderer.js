@@ -155,6 +155,8 @@ const applySettings = () => {
     root.style.setProperty('--color-system-accent', color)
     root.style.setProperty('--color-system-accent-trans', color.substring(0, 7) + '80')
   })
+
+  window.electronAPI.getMovies('/Users/jtvberg/Desktop/Movies')
 }
 
 // helper funtion to create element from html string
@@ -952,10 +954,11 @@ const loadLibrary = library => {
   })
   $library.appendChild(fragTiles)
   $libraryList.appendChild(fragList)
+  $libraryMovieBtn.style.backgroundColor = getComputedStyle(document.documentElement).getPropertyValue('--color-control-darkgray')
 }
 
 // get metadata for library items
-async function getLibraryMetadata(library, type = 'movie') {
+async function getLibraryMetadata(library, type) {
   const libraryWithMetadata = JSON.parse(localStorage.getItem('library')) || []
   if (libraryWithMetadata.length > 0) {
     loadLibrary(libraryWithMetadata)
@@ -1126,6 +1129,16 @@ $librarySortNewBtn.addEventListener('click', () => sortLibrary('new'))
 
 $librarySortTitleBtn.addEventListener('click', () => sortLibrary('title'))
 
+$libraryMovieBtn.addEventListener('click', () => {
+  $libraryMovieBtn.style.backgroundColor = getComputedStyle(document.documentElement).getPropertyValue('--color-control-darkgray')
+  $libraryTvBtn.style.backgroundColor = ''
+})
+
+$libraryTvBtn.addEventListener('click', () => {
+  $libraryTvBtn.style.backgroundColor = getComputedStyle(document.documentElement).getPropertyValue('--color-control-darkgray')
+  $libraryMovieBtn.style.backgroundColor = ''
+})
+
 $header.addEventListener('mouseenter', expandHeader)
 
 $header.addEventListener('contextmenu', window.electronAPI.winHide)
@@ -1159,7 +1172,7 @@ $headerPanels.forEach(el => el.addEventListener('contextmenu', e => e.stopPropag
 
 document.onkeydown = e => e.key === 'Escape' ? onDragMouseUp() : null
 
-window.electronAPI.sendLibrary((e, library) => getLibraryMetadata(library))
+window.electronAPI.sendLibrary((e, library) => getLibraryMetadata(library, library[0].type))
 
 window.electronAPI.logData((e, data) => logOutput(data))
 

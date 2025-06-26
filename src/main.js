@@ -204,7 +204,6 @@ const createWindow = () => {
   // on header view load send is mac to renderer
   headerView.webContents.on('did-finish-load', () => {
     headerView.webContents.send('is-mac', isMac)
-    getLibrary()
   })
 
   // on closing of main window, send window location to renderer and close all windows
@@ -574,8 +573,8 @@ const sendLogData = log => {
   headerView.webContents.send('log-data', log)
 }
 
-async function getLibrary() {
-  const dir = '/Users/jtvberg/Desktop/Movies'
+async function getLibrary(dir, type) {
+  console.log(`getLibrary: ${dir} (${type})`)
   const files = await fs.readdir(dir)
   const videoExts = ['.mp4', '.mkv', '.avi', '.mov', '.webm']
   const library = []
@@ -585,6 +584,7 @@ async function getLibrary() {
     const filePath = path.join(dir, file)
     const stat = await fs.stat(filePath)
     library.push({
+      type,
       title: path.basename(file, ext),
       url: `file://${filePath}`,
       timestamp: stat.birthtimeMs
@@ -729,4 +729,20 @@ ipcMain.handle('set-header-height', async (e) => {
 ipcMain.on('request-trusted-click', async (e, selector) => {
   const webContents = e.sender
   await performTrustedClick(webContents, selector)
+})
+
+ipcMain.on('get-movies', async (e, dir) => {
+  try {
+    await getLibrary(dir, 'movie')
+  } catch (err) {
+    console.error(`get-movies error: ${err.message}`)
+  }
+})
+
+ipcMain.on('get-tv', async (e, dir) => {
+  try {
+    await getLibrary(dir, 'tv')
+  } catch (err) {
+    console.error(`get-tv error: ${err.message}`)
+  }
 })
