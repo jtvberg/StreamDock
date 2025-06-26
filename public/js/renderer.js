@@ -120,6 +120,8 @@ const applySettings = () => {
 
   getBookmarks()
 
+  loadLibraryFromStorage()
+
   changeHomeLayout()
 
   toggleOntop(getWinLock() === 'true')
@@ -155,8 +157,6 @@ const applySettings = () => {
     root.style.setProperty('--color-system-accent', color)
     root.style.setProperty('--color-system-accent-trans', color.substring(0, 7) + '80')
   })
-
-  window.electronAPI.getMovies('/Users/jtvberg/Desktop/Movies')
 }
 
 // helper funtion to create element from html string
@@ -954,16 +954,24 @@ const loadLibrary = library => {
   })
   $library.appendChild(fragTiles)
   $libraryList.appendChild(fragList)
-  $libraryMovieBtn.style.backgroundColor = getComputedStyle(document.documentElement).getPropertyValue('--color-control-darkgray')
 }
 
-// get metadata for library items
-async function getLibraryMetadata(library, type) {
+// load library directory
+const loadLibraryDir = (dir = '/Users/jtvberg/Desktop/Movies') => {
+  window.electronAPI.getMovies(dir)
+}
+
+// load library from local storage
+const loadLibraryFromStorage = () => {
   const libraryWithMetadata = JSON.parse(localStorage.getItem('library')) || []
   if (libraryWithMetadata.length > 0) {
     loadLibrary(libraryWithMetadata)
     return;
   }
+}
+
+// get metadata for library items
+async function getLibraryMetadata(library, type) {
   console.log('Fetching Metadata for Library Items...')
 
   for (const item of library) {
@@ -1129,14 +1137,38 @@ $librarySortNewBtn.addEventListener('click', () => sortLibrary('new'))
 
 $librarySortTitleBtn.addEventListener('click', () => sortLibrary('title'))
 
+const filterLibrary = type => {
+  const library = JSON.parse(localStorage.getItem('library')) || []
+  const filteredLibrary = library.filter(li => li.type === type)
+  $library.replaceChildren([])
+  $libraryList.replaceChildren([])
+  if (!type) {
+    loadLibrary(library)
+  } else {
+    loadLibrary(filteredLibrary)
+  }
+}
+
 $libraryMovieBtn.addEventListener('click', () => {
-  $libraryMovieBtn.style.backgroundColor = getComputedStyle(document.documentElement).getPropertyValue('--color-control-darkgray')
-  $libraryTvBtn.style.backgroundColor = ''
+  $libraryTvBtn.classList.remove('toggled-bg')
+  if ($libraryMovieBtn.classList.contains('toggled-bg')) {
+    $libraryMovieBtn.classList.remove('toggled-bg')
+    filterLibrary()
+  } else {
+    $libraryMovieBtn.classList.add('toggled-bg')
+    filterLibrary('movie')
+  }
 })
 
 $libraryTvBtn.addEventListener('click', () => {
-  $libraryTvBtn.style.backgroundColor = getComputedStyle(document.documentElement).getPropertyValue('--color-control-darkgray')
-  $libraryMovieBtn.style.backgroundColor = ''
+  $libraryMovieBtn.classList.remove('toggled-bg')
+  if ($libraryTvBtn.classList.contains('toggled-bg')) {
+    $libraryTvBtn.classList.remove('toggled-bg')
+    filterLibrary()
+  } else {
+    $libraryTvBtn.classList.add('toggled-bg')
+    filterLibrary('tv')
+  }
 })
 
 $header.addEventListener('mouseenter', expandHeader)
