@@ -587,7 +587,7 @@ async function getLibrary() {
     library.push({
       title: path.basename(file, ext),
       url: `file://${filePath}`,
-      timestamp: stat.mtime
+      timestamp: stat.birthtimeMs
     })
   }
   headerView.webContents.send('send-library', library)

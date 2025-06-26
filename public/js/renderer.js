@@ -1,6 +1,6 @@
 // Imports
 import { getStreams, setStreams, getNewStreamId, getLastStream, getPrefs, setLastStream, getWinBounds, setWinBounds, getWinLock, setWinLock, getWinRatio, setWinRatio, getDefaultAgent } from "./util/settings.js"
-import { searchTitle } from './util/tmdb.js'
+import { searchMovie, searchTv } from './util/tmdb.js'
 import locs from '../res/loc.json' with { type: 'json' }
 
 // Constants
@@ -65,6 +65,8 @@ const $bookmarkSortTitleBtn = document.querySelector('#bookmark-sort-title-btn')
 const $bookmarkSortHostBtn = document.querySelector('#bookmark-sort-host-btn')
 const $bookmarkNewLinkBtn = document.querySelector('#bookmark-newlink-btn')
 const $libraryListBtn = document.querySelector('#library-list-btn')
+const $libraryMovieBtn = document.querySelector('#library-movie-btn')
+const $libraryTvBtn = document.querySelector('#library-tv-btn')
 const $librarySortOldBtn = document.querySelector('#library-sort-old-btn')
 const $librarySortNewBtn = document.querySelector('#library-sort-new-btn')
 const $librarySortTitleBtn = document.querySelector('#library-sort-title-btn')
@@ -96,7 +98,7 @@ const loadStreams = () => {
     loadStreamPanel(stream)
   })
   setStreams(streams)
-  logOutput('Streams Updated')
+  // logOutput('Streams Updated')
   loadStreamPanel({
     active: true,
     glyph: '+',
@@ -370,7 +372,7 @@ const updateStreams = stream => {
     streams.push(stream)
   }
   setStreams(streams)
-  logOutput('Streams Updated')
+  // logOutput('Streams Updated')
   loadStreamPanel(stream)
   repaintStreamBar()
 }
@@ -400,7 +402,7 @@ const reorderStreams = () => {
   streams.forEach((s, i) => s.order = i + 1)
   // Save to local storage
   setStreams(streams)
-  logOutput('Streams Updated')
+  // logOutput('Streams Updated')
 }
 
 // reload stream bar elements
@@ -678,7 +680,7 @@ const osHeader = isMac => {
 
 // apply preference updates
 const updatePref = (id, val) => {
-  logOutput(`Preference ${id} Updated`)
+  // logOutput(`Preference ${id} Updated`)
   switch (id) {
     case 'pref-fullscreen':
       window.electronAPI.winFullscreen(val)
@@ -809,7 +811,7 @@ const addBookmark = bookmarkObj => {
   const bookmarks = JSON.parse(localStorage.getItem('bookmarks')) || []
   bookmarks.push(bookmarkObj)
   localStorage.setItem('bookmarks', JSON.stringify(bookmarks))
-  logOutput('Bookmark Added')
+  // logOutput('Bookmark Added')
 }
 
 // delete bookmark by timestamp
@@ -824,7 +826,7 @@ const deleteBookmark = timestamp => {
   })
   const bookmarks = JSON.parse(localStorage.getItem('bookmarks'))
   localStorage.setItem('bookmarks', JSON.stringify(bookmarks.filter(bm => bm.timestamp !== timestamp)))
-  logOutput('Bookmark Deleted')
+  // logOutput('Bookmark Deleted')
 }
 
 // get bookmarks from local storage
@@ -887,14 +889,14 @@ const sortBookmarks = order => {
 // create a library tile
 const createLibraryTile = libraryObj => {
   const result = libraryObj.metadata
+  const cleanTitle = result.title || result.name || libraryObj.title || 'Unknown Title'
   const tmdbImagePath = 'https://image.tmdb.org/t/p/original'
-  console.log(libraryObj)
   const poster = result.poster_path ? `${tmdbImagePath}${result.poster_path}` : null
   const resultTile = elementFromHtml(`<div class="result-tile"></div>`)
   const resultPoster = elementFromHtml(`<img class="result-poster" src="${poster}"></img>`)
   const resultDetails = elementFromHtml(`<div class="result-details"></div>`)
-  const resultTitle = elementFromHtml(`<div class="result-title" title="${result.title || result.name}">${result.title || result.name}</div>`)
-  const resultYear = elementFromHtml(`<div class="result-year" title="${getYear(result.release_date || result.first_air_date)}">(${getYear(result.release_date || result.first_air_date)})</div>`)
+  const resultTitle = elementFromHtml(`<div class="result-title" title="${cleanTitle}">${cleanTitle}</div>`)
+  const resultYear = elementFromHtml(`<div class="result-year" title="${libraryObj.releaseYear}">(${libraryObj.releaseYear})</div>`)
 
   resultDetails.appendChild(resultTitle)
   resultDetails.appendChild(resultYear)
@@ -904,14 +906,15 @@ const createLibraryTile = libraryObj => {
   return resultTile
 }
 
-function getYear(input) {
+// get year from date input
+const getYear = input => {
   const year = new Date(input).getFullYear()
   return isNaN(year) ? 'NA' : year
 }
 
 // create a library list item
 const createLibraryListItem = libraryObj => {
-  const cleanTitle = libraryObj.title.trim()
+  const cleanTitle = `${libraryObj.metadata.title || libraryObj.metadata.name || libraryObj.title} (${libraryObj.releaseYear})`
   const path = libraryObj.url.replace('file://', '')
   const frag = document.createDocumentFragment()
   const libraryListItem = elementFromHtml(`<div class="library-row" data-ts="${libraryObj.timestamp}" title="${cleanTitle}"></div>`)
@@ -952,47 +955,62 @@ const loadLibrary = library => {
 }
 
 // get metadata for library items
-async function getLibraryMetadata(library) {
-  const libraryWithMetadata = []
+async function getLibraryMetadata(library, type = 'movie') {
+  const libraryWithMetadata = JSON.parse(localStorage.getItem('library')) || []
+  if (libraryWithMetadata.length > 0) {
+    loadLibrary(libraryWithMetadata)
+    return;
+  }
+  console.log('Fetching Metadata for Library Items...')
+
   for (const item of library) {
-    const searchTerm = item.title.replace(/[._]/g, ' ')
-    const searchResult = await searchTitle(searchTerm, 1)
+    const searchTerm = item.title
+    let searchResult = {}
+    if (type === 'movie') {
+      searchResult = await searchMovie(searchTerm, 1)
+    } else {
+      searchResult = await searchTv(searchTerm, 1)
+    }
     let metadata = {}
+    let releaseYear
     if (searchResult && searchResult.results && searchResult.results.length > 0) {
       metadata = searchResult.results[0]
+      releaseYear = getYear(metadata.release_date || metadata.first_air_date || 'NA')
     }
-    libraryWithMetadata.push({ ...item, metadata })
+    libraryWithMetadata.push({ ...item, releaseYear, metadata })
   }
+  localStorage.setItem('library', JSON.stringify(libraryWithMetadata))
   loadLibrary(libraryWithMetadata)
 }
 
 // sort library by order param
 const sortLibrary = order => {
-  // const bookmarks = JSON.parse(localStorage.getItem('bookmarks')) || []
-  // switch (order) {
-  //   case 'old':
-  //     // sort boomarks by timestamp ascending
-  //     bookmarks.sort((a, b) => a.timestamp - b.timestamp)
-  //     break
-  //   case 'new':
-  //     // sort boomarks by timestamp descending
-  //     bookmarks.sort((a, b) => b.timestamp - a.timestamp)
-  //     break
-  //   case 'title':
-  //     // sort boomarks by title ascending
-  //     bookmarks.sort((a, b) => getCleanTitle(a.title) < getCleanTitle(b.title) ? -1 : 1)
-  //     break
-  //   case 'host':
-  //     // sort boomarks by host ascending
-  //     bookmarks.sort((a, b) => getCleanHost(a.url) < getCleanHost(b.url) ? -1 : 1)
-  //     break
-  //   default:
-  //     bookmarks.sort((a, b) => a.timestamp - b.timestamp)
-  //     break
-  // }
-  // $bookmarks.replaceChildren([])
-  // $bookmarkList.replaceChildren([])
-  // loadBookmarks(bookmarks)
+  const library = JSON.parse(localStorage.getItem('library')) || []
+  console.log('Sorting Library by:', order)
+  switch (order) {
+    case 'old':
+      // sort library by timestamp ascending
+      library.sort((a, b) => a.releaseYear - b.releaseYear)
+      break
+    case 'new':
+      // sort library by timestamp descending
+      library.sort((a, b) => b.releaseYear - a.releaseYear)
+      break
+    case 'title':
+      // sort library by title ascending
+      library.sort((a, b) => getCleanTitle(a.title) < getCleanTitle(b.title) ? -1 : 1)
+      break
+    // case 'dir':
+    //   // sort library by dir ascending
+    //   library.sort((a, b) => a.url < b.url ? -1 : 1)
+    //   break
+    default:
+      library.sort((a, b) => a.releaseYear - b.releaseYear)
+      break
+  }
+  $library.replaceChildren([])
+  $libraryList.replaceChildren([])
+  loadLibrary(library)
 }
 
 // add flash animation class

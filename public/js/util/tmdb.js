@@ -123,6 +123,27 @@ export async function searchTitle(term, page) {
   return await apiGet(url)
 }
 
+export async function searchMovie(term, page) {
+  const url = new URL(`${getHost()}/3/search/movie`)
+  url.searchParams.append('api_key', getApiKey())
+  url.searchParams.append('language', getLangLoc())
+  url.searchParams.append('query', term)
+  url.searchParams.append('page', page)
+  url.searchParams.append('include_adult', false)
+  console.log(term)
+  return await apiGet(url)
+}
+
+export async function searchTv(term, page) {
+  const url = new URL(`${getHost()}/3/search/tv`)
+  url.searchParams.append('api_key', getApiKey())
+  url.searchParams.append('language', getLangLoc())
+  url.searchParams.append('query', term)
+  url.searchParams.append('page', page)
+  url.searchParams.append('include_adult', false)
+  return await apiGet(url)
+}
+
 export async function getTrendingTitles(time, page) {
   const url = new URL(`${getHost()}/3/trending/all/${time}`)
   url.searchParams.append('api_key', getApiKey())
