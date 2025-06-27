@@ -70,6 +70,7 @@ const $libraryTvBtn = document.querySelector('#library-tv-btn')
 const $librarySortOldBtn = document.querySelector('#library-sort-old-btn')
 const $librarySortNewBtn = document.querySelector('#library-sort-new-btn')
 const $librarySortTitleBtn = document.querySelector('#library-sort-title-btn')
+const $librarySortPathBtn = document.querySelector('#library-sort-path-btn')
 
 // Vars
 let headerCollapsed = 0
@@ -1011,10 +1012,10 @@ const sortLibrary = order => {
       // sort library by title ascending
       library.sort((a, b) => getCleanTitle(a.title) < getCleanTitle(b.title) ? -1 : 1)
       break
-    // case 'dir':
-    //   // sort library by dir ascending
-    //   library.sort((a, b) => a.url < b.url ? -1 : 1)
-    //   break
+    case 'path':
+      // sort library by dir ascending
+      library.sort((a, b) => a.url < b.url ? -1 : 1)
+      break
     default:
       library.sort((a, b) => a.releaseYear - b.releaseYear)
       break
@@ -1022,6 +1023,19 @@ const sortLibrary = order => {
   $library.replaceChildren([])
   $libraryList.replaceChildren([])
   loadLibrary(library)
+}
+
+// filter library by type
+const filterLibrary = type => {
+  const library = JSON.parse(localStorage.getItem('library')) || []
+  const filteredLibrary = library.filter(li => li.type === type)
+  $library.replaceChildren([])
+  $libraryList.replaceChildren([])
+  if (!type) {
+    loadLibrary(library)
+  } else {
+    loadLibrary(filteredLibrary)
+  }
 }
 
 // add flash animation class
@@ -1137,17 +1151,7 @@ $librarySortNewBtn.addEventListener('click', () => sortLibrary('new'))
 
 $librarySortTitleBtn.addEventListener('click', () => sortLibrary('title'))
 
-const filterLibrary = type => {
-  const library = JSON.parse(localStorage.getItem('library')) || []
-  const filteredLibrary = library.filter(li => li.type === type)
-  $library.replaceChildren([])
-  $libraryList.replaceChildren([])
-  if (!type) {
-    loadLibrary(library)
-  } else {
-    loadLibrary(filteredLibrary)
-  }
-}
+$librarySortPathBtn.addEventListener('click', () => sortLibrary('path'))
 
 $libraryMovieBtn.addEventListener('click', () => {
   $libraryTvBtn.classList.remove('toggled-bg')
