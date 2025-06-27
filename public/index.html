@@ -44,6 +44,7 @@
           <button class="settings-nav-btn fas fa-sliders" data-layout="prefs" title="Preferences"></button>
           <button class="settings-nav-btn fas fa-play" data-layout="service" title="Service-Specific Preferences"></button>
           <button class="settings-nav-btn fas fa-magnifying-glass" data-layout="search" title="Search Settings"></button>
+          <button class="settings-nav-btn fas fa-folder-open" data-layout="library" title="Local File Settings"></button>
           <button class="settings-nav-btn fas fa-screwdriver-wrench" data-layout="advanced" title="Advanced"></button>
           <button class="settings-nav-btn fas fa-info-circle" data-layout="about" title="About"></button>
           <div class="btn-divider"></div>
@@ -70,6 +71,11 @@
         <div id="search-layout" class="settings-layout">
           <div class="settings-layout-header">
             <div class="settings-heading">Search Settings</div>
+          </div>
+        </div>
+        <div id="library-layout" class="settings-layout">
+          <div class="settings-layout-header">
+            <div class="settings-heading">Library Settings</div>
           </div>
         </div>
         <div id="advanced-layout" class="settings-layout">
@@ -99,7 +105,7 @@
         <div id="home-nav">
           <button class="home-nav-btn fas fa-book-bookmark" data-layout="bookmark" title="Bookmarks"></button>
           <button id="search-nav-btn" class="home-nav-btn fas fa-magnifying-glass" data-layout="search" title="Search"></button>
-          <button class="home-nav-btn fas fa-file-video" data-layout="library" title="Library"></button>
+          <button id="library-nav-btn" class="home-nav-btn fas fa-file-video" data-layout="library" title="Library"></button>
           <div class="btn-divider"></div>
           <button id="bookmark-list-btn" class="home-layout-btn fas fa-list-ul" data-layout="bookmark" title="List View"></button>
           <button id="bookmark-sort-old-btn" class="home-layout-btn home-nav-comp-btn" data-layout="bookmark" title="Sort Oldest to Newest">

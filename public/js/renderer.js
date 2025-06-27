@@ -23,6 +23,8 @@ const $servicePrefs = document.querySelector('#service-layout')
 const $advancedLayout = document.querySelector('#advanced-layout')
 const $searchLayout = document.querySelector('#search-layout')
 const $searchNavBtn = document.querySelector('#search-nav-btn')
+const $libraryLayout = document.querySelector('#library-layout')
+const $libraryNavBtn = document.querySelector('#library-nav-btn')
 const $streamsLayout = document.querySelector('#streams-layout')
 const $streamsEdit = document.querySelector('#streams-edit')
 const $streamDoneBtn = document.querySelector('#stream-done-btn')
@@ -495,6 +497,9 @@ const loadSettingsPanel = pref => {
     case 'search':
       $searchLayout.appendChild(frag)
       break
+    case 'library':
+      $libraryLayout.appendChild(frag)
+      break
     case 'advanced':
       $advancedLayout.appendChild(frag)
       break
@@ -691,6 +696,9 @@ const updatePref = (id, val) => {
     case 'search-show':
       toggleSearch(val)
       break
+    case 'library-show':
+      toggleLibrary(val)
+      break
     case 'back-btn':
       $backBtn.style.display = val ? 'none' : ''
       break
@@ -727,6 +735,16 @@ const toggleSearch = bool => {
     $searchNavBtn.style.display = 'none'
     document.querySelectorAll('.search').forEach(el => el.disabled = true)
     $aboutAttribution.textContent = ''
+    changeHomeLayout()
+  }
+}
+
+const toggleLibrary = bool => {
+  if (bool) {
+    $libraryNavBtn.style.display = ''
+  } else {
+    $libraryNavBtn.style.display = 'none'
+    changeHomeLayout()
   }
 }
 

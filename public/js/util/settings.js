@@ -249,6 +249,15 @@ export const getPrefs = () => {
       true
     ),
     new Pref(
+      'library-show',
+      'library',
+      'checkbox',
+      'Show Library',
+      'Show library panel in homescreen',
+      false,
+      true
+    ),
+    new Pref(
       'service-ad',
       'service',
       'checkbox',
