@@ -173,9 +173,7 @@ const createWindow = () => {
   // on stream view load get url, remove scrollbars, show stream, load scripts
   streamView.webContents.on('did-finish-load', () => {
     const cleanUrl = validUrl(getCurrentUrl())
-    if (cleanUrl) {
-      domain = cleanUrl.hostname
-    }
+    domain = cleanUrl ? cleanUrl.hostname : null
     removeScrollbars(streamView)
     showStream(true, streamView)
     loadScripts(streamView, domain)
@@ -358,6 +356,9 @@ const setFacetViewBounds = width => facetView.setBounds({ x: 0, y: 0, width, hei
 
 // open url in streamView and send stream opened message to renderer
 const openUrl = url => {
+  if (!validUrl(url)) {
+    return
+  }
   sendLogData(`Open URL: ${url}`)
   streamView.webContents.loadURL(url)
   showStream(true)
@@ -379,6 +380,7 @@ const validUrl = url => {
   let valid
   try {
     valid = new URL(url)
+    if (valid.protocol === 'file:') facetView.webContents.send('is-netflix', false)
   } catch (err) {
     sendLogData(`Invalid URL: ${url}`)
     return false
@@ -507,8 +509,6 @@ const openNewin = url => {
           closeBtn.addEventListener('mouseleave', () => closeBtn.style.opacity = '0');
           document.body.appendChild(closeBtn);
           ` : ''}
-
-          console.log('child window UI elements created');
         } catch (err) {
           console.error('Error creating child window UI elements:', err);
         }
@@ -574,7 +574,6 @@ const sendLogData = log => {
 }
 
 async function getLibrary(dir, type) {
-  console.log(`getLibrary: ${dir} (${type})`)
   const files = await fs.readdir(dir)
   const videoExts = ['.mp4', '.mkv', '.avi', '.mov', '.webm']
   const library = []
@@ -595,10 +594,8 @@ async function getLibrary(dir, type) {
 
 async function performTrustedClick(webContents, selector) {
   if (!webContents || webContents.isDestroyed()) {
-    console.log(`performTrustedClick: webContents for ${selector} is not available or destroyed.`)
     return false
   }
-  console.log(`Attempting trusted click for selector: ${selector}`)
   try {
     const rect = await webContents.executeJavaScript(`
       (() => {
@@ -619,14 +616,11 @@ async function performTrustedClick(webContents, selector) {
     `);
 
     if (rect && rect.found) {
-      console.log(`Element ${selector} found at x: ${rect.x}, y: ${rect.y}. Sending input events.`)
       await webContents.sendInputEvent({ type: 'mouseDown', button: 'left', x: rect.x, y: rect.y, clickCount: 1 })
       await new Promise(resolve => setTimeout(resolve, 30))
       await webContents.sendInputEvent({ type: 'mouseUp', button: 'left', x: rect.x, y: rect.y, clickCount: 1 })
-      console.log(`Trusted click sequence sent to: ${selector}`)
       return true
     } else {
-      console.log(`Element ${selector} not found or not visible for trusted click.`)
       return false
     }
   } catch (error) {
@@ -643,7 +637,7 @@ app.whenReady().then(async () => {
   app.focus({ steal: true })
   if (isDev) {
     // mainWin.webContents.openDevTools({ mode: 'detach' })
-    headerView.webContents.openDevTools({ mode: 'detach' })
+    // headerView.webContents.openDevTools({ mode: 'detach' })
     // streamView.webContents.openDevTools({ mode: 'detach' })
     // facetView.webContents.openDevTools({ mode: 'detach' })
   } else {

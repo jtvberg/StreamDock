@@ -958,6 +958,7 @@ const loadLibrary = library => {
 }
 
 // load library directory
+// TODO
 const loadLibraryDir = (dir = '/Users/jtvberg/Desktop/Movies') => {
   window.electronAPI.getMovies(dir)
 }
@@ -972,6 +973,7 @@ const loadLibraryFromStorage = () => {
 }
 
 // get metadata for library items
+// TODO
 async function getLibraryMetadata(library, type) {
   console.log('Fetching Metadata for Library Items...')
 
