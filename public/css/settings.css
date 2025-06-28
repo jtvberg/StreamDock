@@ -12,6 +12,8 @@
   overflow-y: auto;
   margin: 0px auto;
   padding: 0px 5px;
+  width: -webkit-fill-available;
+  max-width: 600px;
 }
 
 .settings-nav-btn {
@@ -146,11 +148,48 @@
 
 #streams-layout {
   position: relative;
+  max-width: 100%;
 }
 
-#advanced-layout {
-  width: 100%;
-  max-width: 1200px;
+#library-add-btn {
+  height: 26px;
+  width: 26px;
+  margin-block: 5px;
+}
+
+#library-add-btn:hover {
+  background-color: var(--color-system-accent);
+}
+
+.library-directory-btn {
+  height: 22px;
+  width: 22px;
+  border-radius: 3px;
+  text-align: center;
+  line-height: 22px;
+}
+
+.library-directory-btn:hover {
+  background-color: var(--color-system-accent);
+}
+
+.library-directory {
+  display: grid;
+  grid-template-columns: 60px 1fr auto auto auto;
+  border-radius: 5px;
+  align-items: center;
+  margin: 5px;
+  padding: 5px;
+  gap: 5px;
+  width: -webkit-fill-available;
+}
+
+.library-directory:hover {
+  background-color: var(--color-system-accent-trans);
+}
+
+.library-directory-delete-btn:hover {
+  background-color: var(--color-control-red);
 }
 
 #about-info {
@@ -208,7 +247,7 @@
 }
 
 .settings-control:hover {
-  background-color: var(--color-system-accent-trans);
+  background-color: var(--color-control-lightgray-trans);
 }
 
 .settings-toggle {

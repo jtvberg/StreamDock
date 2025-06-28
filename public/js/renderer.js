@@ -143,6 +143,8 @@ const applySettings = () => {
     window.electronAPI.lastStream((e, url) => setLastStream(url))
   }
 
+  loadLibraryDirectoryPanel()
+
   loadClearDataPanel()
 
   window.electronAPI.defaultAgent(getDefaultAgent())
@@ -510,6 +512,56 @@ const loadSettingsPanel = pref => {
       $advancedLayout.appendChild(frag)
       break
   }
+}
+
+// load library directory panel
+const loadLibraryDirectoryPanel = () => {
+  const dir = [
+    {
+      type: 'Movie',
+      path: '/path/to/library1'
+    },
+    {
+      type: 'TV',
+      path: '/path/to/library2'
+    },
+    {
+      type: 'Movie',
+      path: '/path/to/library3'
+    }
+  ]
+  const frag = document.createDocumentFragment()
+  const title = elementFromHtml(`<div class="settings-control">Library Directories</div>`)
+  const pane = elementFromHtml(`<div class="library-directories-pane"></div>`)
+  const addBtn = elementFromHtml(`<button id="library-add-btn" class="fa fa-plus"></button>`)
+  addBtn.addEventListener('click', () => {
+    const path = prompt('Enter library directory path:')
+    if (path) {
+      addLibraryDirectory(path, 'movie')
+    }
+  })
+  dir.forEach(d => {
+    const libDir = elementFromHtml(`<div class="library-directory"></div>`)
+    const libDirType = elementFromHtml(`<div class="library-directory-type">${d.type}</div>`)
+    const libDirPath = elementFromHtml(`<div class="library-directory-path" title="${d.path}">${d.path}</div>`)
+    const libDirRescan = elementFromHtml('<div class="library-directory-btn fas fa-rotate-left" title="Scan for New Files"></div>')    
+    const libDirRefresh = elementFromHtml('<div class="library-directory-btn fas fa-arrows-rotate" title="Refresh all Metadata"></div>')
+    const libDirDel = elementFromHtml('<div class="library-directory-btn library-directory-delete-btn fas fa-xmark" title="Delete Entry"></div>')
+    libDir.appendChild(libDirType)
+    libDir.appendChild(libDirPath)
+    libDir.appendChild(libDirRescan)
+    libDir.appendChild(libDirRefresh)
+    libDir.appendChild(libDirDel)
+    pane.appendChild(libDir)
+  })
+  pane.appendChild(addBtn)
+  title.appendChild(pane)
+  frag.appendChild(title)
+  $libraryLayout.appendChild(frag)
+}
+
+const addLibraryDirectory = (path, type) => {
+
 }
 
 // load clear data elements
