@@ -64,7 +64,6 @@ let headerView = null
 let streamView = null
 let facetView = null
 let domain = null
-let defaultAgent = null
 let ratioLocked = false
 let isPlaying = false
 let resumePlaying = false
@@ -573,7 +572,22 @@ const sendLogData = log => {
   headerView.webContents.send('log-data', log)
 }
 
-async function getLibrary(dir, type) {
+const openDirectoryDialog = async (title, properties = ['openDirectory']) => {
+  const { canceled, filePaths } = await dialog.showOpenDialog({
+    title,
+    properties,
+    filters: [
+      { name: 'Directories', extensions: [] }
+    ]
+  })
+  if (canceled || filePaths.length === 0) {
+    return null
+  }
+  return filePaths[0]
+}
+
+// get library from directory and type (movies or tv)
+const getLibrary = async (dir, type) => {
   const files = await fs.readdir(dir)
   const videoExts = ['.mp4', '.mkv', '.avi', '.mov', '.webm']
   const library = []
@@ -592,7 +606,7 @@ async function getLibrary(dir, type) {
   headerView.webContents.send('send-library', library)
 }
 
-async function performTrustedClick(webContents, selector) {
+const performTrustedClick = async (webContents, selector) => {
   if (!webContents || webContents.isDestroyed()) {
     return false
   }

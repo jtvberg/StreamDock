@@ -535,10 +535,8 @@ const loadLibraryDirectoryPanel = () => {
   const pane = elementFromHtml(`<div class="library-directories-pane"></div>`)
   const addBtn = elementFromHtml(`<button id="library-add-btn" class="fa fa-plus"></button>`)
   addBtn.addEventListener('click', () => {
-    const path = prompt('Enter library directory path:')
-    if (path) {
-      addLibraryDirectory(path, 'movie')
-    }
+    // open file dialog on button click
+
   })
   dir.forEach(d => {
     const libDir = elementFromHtml(`<div class="library-directory"></div>`)
@@ -547,6 +545,18 @@ const loadLibraryDirectoryPanel = () => {
     const libDirRescan = elementFromHtml('<div class="library-directory-btn fas fa-rotate-left" title="Scan for New Files"></div>')    
     const libDirRefresh = elementFromHtml('<div class="library-directory-btn fas fa-arrows-rotate" title="Refresh all Metadata"></div>')
     const libDirDel = elementFromHtml('<div class="library-directory-btn library-directory-delete-btn fas fa-xmark" title="Delete Entry"></div>')
+    libDirRescan.addEventListener('click', () => {
+      // Trigger a rescan of the library directory
+      console.log(`Rescanning library directory: ${d.path}`)
+    })
+    libDirRefresh.addEventListener('click', () => {
+      // Trigger a refresh of the library directory metadata
+      console.log(`Refreshing library directory metadata: ${d.path}`)
+    })
+    libDirDel.addEventListener('click', () => {
+      // Trigger a delete of the library directory
+      console.log(`Deleting library directory: ${d.path}`)
+    })
     libDir.appendChild(libDirType)
     libDir.appendChild(libDirPath)
     libDir.appendChild(libDirRescan)
@@ -1044,7 +1054,7 @@ const loadLibraryFromStorage = () => {
 
 // get metadata for library items
 // TODO
-async function getLibraryMetadata(library, type) {
+const getLibraryMetadata = async (library, type) => {
   console.log('Fetching Metadata for Library Items...')
 
   for (const item of library) {

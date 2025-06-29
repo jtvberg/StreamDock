@@ -258,6 +258,15 @@ export const getPrefs = () => {
       true
     ),
     new Pref(
+      'library-scan',
+      'library',
+      'checkbox',
+      'Automatic Scan',
+      'Automatically scan library for new content on startup',
+      false,
+      true
+    ),   
+    new Pref(
       'service-ad',
       'service',
       'checkbox',
