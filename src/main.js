@@ -1,5 +1,5 @@
 // Imports
-const { app, BrowserWindow, WebContentsView, Tray, Menu, nativeTheme, components, ipcMain, screen, systemPreferences, clipboard } = require('electron')
+const { app, BrowserWindow, WebContentsView, Tray, Menu, nativeTheme, components, ipcMain, screen, systemPreferences, clipboard, dialog } = require('electron')
 const { version, productName, author, repository, bugs } = require('../package.json')
 const path = require('path')
 const menu = require('./util/menu')
@@ -754,4 +754,13 @@ ipcMain.on('get-tv', async (e, dir) => {
   } catch (err) {
     console.error(`get-tv error: ${err.message}`)
   }
+})
+
+ipcMain.handle('open-directory-dialog', async () => {
+  const { canceled, filePaths } = await dialog.showOpenDialog({
+    title: 'Select Library Directory',
+    properties: ['openDirectory']
+  })
+  if (canceled || filePaths.length === 0) return null
+  return filePaths[0]
 })

@@ -521,13 +521,21 @@ const loadLibraryDirectoryPanel = () => {
   const frag = document.createDocumentFragment()
   const title = elementFromHtml(`<div class="settings-control">Library Directories</div>`)
   const pane = elementFromHtml(`<div id="library-directories-pane"></div>`)
-  const addBtn = elementFromHtml(`<button id="library-add-btn" class="fa fa-plus"></button>`)
-  addBtn.addEventListener('click', () => {
-    // TODO: open file dialog on button click
-    // pass the selected directory to addLibraryDirectory
-    const path = '/Users/jtvberg/Desktop/Movies'
-    const type = 'movie'
-    addLibraryDirectory(dirs, path, type)
+  const addMovieBtn = elementFromHtml(`<button id="library-add-btn" class="fa fa-film" title="Add Movie Directory"></button>`)
+  addMovieBtn.addEventListener('click', async () => {
+    const selectedDir = await window.electronAPI.openDirectoryDialog()
+    if (selectedDir) {
+      const type = 'movie'
+      addLibraryDirectory(dirs, selectedDir, type)
+    }
+  })
+  const addTvBtn = elementFromHtml(`<button id="library-add-btn" class="fa fa-tv" title="Add TV Directory"></button>`)
+  addTvBtn.addEventListener('click', async () => {
+    const selectedDir = await window.electronAPI.openDirectoryDialog()
+    if (selectedDir) {
+      const type = 'tv'
+      addLibraryDirectory(dirs, selectedDir, type)
+    }
   })
   dirs.forEach(dir => {
     const libDir = elementFromHtml(`<div class="library-directory"></div>`)
@@ -537,35 +545,35 @@ const loadLibraryDirectoryPanel = () => {
     const libDirRefresh = elementFromHtml('<div class="library-directory-btn fas fa-arrows-rotate" title="Refresh all Metadata"></div>')
     const libDirDel = elementFromHtml('<div class="library-directory-btn library-directory-delete-btn fas fa-xmark" title="Delete Entry"></div>')
     libDirRescan.addEventListener('click', () => {
-      // TODO: Trigger a rescan of the library directory
+      // trigger a rescan of the library directory
       console.log(`Rescanning library directory: ${dir.path}`)
-      // Look for new files in the directory and remove any items that no longer exist
+      // look for new files in the directory and remove any items that no longer exist
       loadLibraryDir(dir.path, dir.type)
     })
     libDirRefresh.addEventListener('click', () => {
-      // Trigger a refresh of the library directory metadata
+      // trigger a refresh of the library directory metadata
       console.log(`Refreshing library directory metadata: ${dir.path}`)
-      // Drop items from local storage libarary with path and save
+      // drop items from local storage libarary with path and save
       const library = JSON.parse(localStorage.getItem('library')) || []
       const updatedLibrary = library.filter(item => item.path !== dir.path)
       localStorage.setItem('library', JSON.stringify(updatedLibrary))
-      // Load the library directory again
+      // load the library directory again
       loadLibraryDir(dir.path, dir.type)
     })
     libDirDel.addEventListener('click', () => {
-      // Trigger a delete of the library directory
+      // trigger a delete of the library directory
       console.log(`Deleting library directory: ${dir.path}`)
-      // Remove the directory from local storage
+      // remove the directory from local storage
       const dirs = JSON.parse(localStorage.getItem('directories')) || []
       dirs.splice(dirs.findIndex(d => d.path === dir.path), 1)
       localStorage.setItem('directories', JSON.stringify(dirs))
-      // Remove library items with path from storage
+      // remove library items with path from storage
       const library = JSON.parse(localStorage.getItem('library')) || []
       const updatedLibrary = library.filter(item => item.path !== dir.path)
       localStorage.setItem('library', JSON.stringify(updatedLibrary))
-      // Reload library directory panel
+      // reload library directory panel
       loadLibraryDirectoryPanel()
-      // Reload library items
+      // reload library items
       $library.replaceChildren([])
       $libraryList.replaceChildren([])
       loadLibraryFromStorage()
@@ -577,13 +585,14 @@ const loadLibraryDirectoryPanel = () => {
     libDir.appendChild(libDirDel)
     pane.appendChild(libDir)
   })
-  pane.appendChild(addBtn)
+  pane.appendChild(addMovieBtn)
+  pane.appendChild(addTvBtn)
   title.appendChild(pane)
   frag.appendChild(title)
   $libraryLayout.appendChild(frag)
 }
 
-// Add directory to library directory storage, panel and load library directory
+// add directory to library directory storage, panel and load library directory
 const addLibraryDirectory = (dirs, path, type) => {
   if (!dirs.some(entry => entry.path === path)) {
     dirs.push({
@@ -670,7 +679,7 @@ const loadLibrary = library => {
 
 // load library directory
 const loadLibraryDir = (dir, type) => {
-  type = 'movie' ? window.electronAPI.getMovies(dir) : window.electronAPI.getTvShows(dir)
+  type === 'movie' ? window.electronAPI.getMovies(dir) : window.electronAPI.getTv(dir)
 }
 
 // load library from local storage
@@ -684,8 +693,7 @@ const loadLibraryFromStorage = () => {
 
 // get metadata for library items
 const getLibraryMetadata = async (library, type, dir) => {
-  console.log('Fetching Metadata for Library Items...')
-  console.log(`Directory: ${dir}, Type: ${type}`)
+  console.log(`Fetching metadata for Directory: ${dir}, Type: ${type}`)
   const libraryWithMetadata = JSON.parse(localStorage.getItem('library')) || []
   // remove items from libraryWithMetadata that have the same path but are not in the current library
   for (const entry of libraryWithMetadata) {
@@ -694,9 +702,8 @@ const getLibraryMetadata = async (library, type, dir) => {
     }
   }
   for (const item of library) {
-    // Check if item already has metadata
+    // check if item already has metadata
     if (libraryWithMetadata.some(entry => entry.url === item.url)) {
-      // console.log(`Metadata for ${item.title} already exists, skipping...`)
       continue
     }
     const searchTerm = item.title
@@ -721,7 +728,6 @@ const getLibraryMetadata = async (library, type, dir) => {
 // sort library by order param
 const sortLibrary = order => {
   const library = JSON.parse(localStorage.getItem('library')) || []
-  console.log('Sorting Library by:', order)
   switch (order) {
     case 'old':
       // sort library by timestamp ascending

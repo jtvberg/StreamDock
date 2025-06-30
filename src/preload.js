@@ -40,5 +40,6 @@ contextBridge.exposeInMainWorld('electronAPI', {
     getAppInfo: appInfo => ipcRenderer.once('app-info', appInfo),
     sendLibrary: library => ipcRenderer.on('send-library', library),
     getMovies: dir => ipcRenderer.send('get-movies', dir),
-    getTv: dir => ipcRenderer.send('get-tv', dir)
+    getTv: dir => ipcRenderer.send('get-tv', dir),
+    openDirectoryDialog: () => ipcRenderer.invoke('open-directory-dialog')
 })
