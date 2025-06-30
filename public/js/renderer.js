@@ -515,7 +515,6 @@ const loadSettingsPanel = pref => {
 }
 
 // load library directory panel
-// TODO: add file dialog to select directory
 const loadLibraryDirectoryPanel = () => {
   document.querySelector('#library-directories-pane')?.parentElement.remove()
   const dirs = JSON.parse(localStorage.getItem('directories')) || []
@@ -524,7 +523,7 @@ const loadLibraryDirectoryPanel = () => {
   const pane = elementFromHtml(`<div id="library-directories-pane"></div>`)
   const addBtn = elementFromHtml(`<button id="library-add-btn" class="fa fa-plus"></button>`)
   addBtn.addEventListener('click', () => {
-    // open file dialog on button click
+    // TODO: open file dialog on button click
     // pass the selected directory to addLibraryDirectory
     const path = '/Users/jtvberg/Desktop/Movies'
     const type = 'movie'
@@ -538,9 +537,10 @@ const loadLibraryDirectoryPanel = () => {
     const libDirRefresh = elementFromHtml('<div class="library-directory-btn fas fa-arrows-rotate" title="Refresh all Metadata"></div>')
     const libDirDel = elementFromHtml('<div class="library-directory-btn library-directory-delete-btn fas fa-xmark" title="Delete Entry"></div>')
     libDirRescan.addEventListener('click', () => {
-      // Trigger a rescan of the library directory
+      // TODO: Trigger a rescan of the library directory
       console.log(`Rescanning library directory: ${dir.path}`)
-      // Look for new files in the directory
+      // Look for new files in the directory and remove any items that no longer exist
+      loadLibraryDir(dir.path, dir.type)
     })
     libDirRefresh.addEventListener('click', () => {
       // Trigger a refresh of the library directory metadata
@@ -567,6 +567,7 @@ const loadLibraryDirectoryPanel = () => {
       loadLibraryDirectoryPanel()
       // Reload library items
       $library.replaceChildren([])
+      $libraryList.replaceChildren([])
       loadLibraryFromStorage()
     })
     libDir.appendChild(libDirType)
@@ -661,6 +662,8 @@ const loadLibrary = library => {
     fragTiles.appendChild(createLibraryTile(li))
     fragList.appendChild(createLibraryListItem(li))
   })
+  $library.replaceChildren([])
+  $libraryList.replaceChildren([])
   $library.appendChild(fragTiles)
   $libraryList.appendChild(fragList)
 }
@@ -680,10 +683,22 @@ const loadLibraryFromStorage = () => {
 }
 
 // get metadata for library items
-const getLibraryMetadata = async (library, type) => {
+const getLibraryMetadata = async (library, type, dir) => {
   console.log('Fetching Metadata for Library Items...')
+  console.log(`Directory: ${dir}, Type: ${type}`)
   const libraryWithMetadata = JSON.parse(localStorage.getItem('library')) || []
+  // remove items from libraryWithMetadata that have the same path but are not in the current library
+  for (const entry of libraryWithMetadata) {
+    if (entry.path === dir && !library.includes(entry.url)) {
+      libraryWithMetadata.splice(libraryWithMetadata.indexOf(entry), 1)
+    }
+  }
   for (const item of library) {
+    // Check if item already has metadata
+    if (libraryWithMetadata.some(entry => entry.url === item.url)) {
+      // console.log(`Metadata for ${item.title} already exists, skipping...`)
+      continue
+    }
     const searchTerm = item.title
     let searchResult = {}
     if (type === 'movie') {
@@ -697,9 +712,7 @@ const getLibraryMetadata = async (library, type) => {
       metadata = searchResult.results[0]
       releaseYear = getYear(metadata.release_date || metadata.first_air_date || 'NA')
     }
-    if (!libraryWithMetadata.some(entry => entry.url === item.url)) {
-      libraryWithMetadata.push({ ...item, releaseYear, metadata })
-    }
+    libraryWithMetadata.push({ ...item, releaseYear, metadata })
   }
   localStorage.setItem('library', JSON.stringify(libraryWithMetadata))
   loadLibrary(libraryWithMetadata)
@@ -975,6 +988,7 @@ const toggleSearch = bool => {
   }
 }
 
+// toggle library UI elements
 const toggleLibrary = bool => {
   if (bool) {
     $libraryNavBtn.style.display = ''
@@ -1313,7 +1327,7 @@ $headerPanels.forEach(el => el.addEventListener('contextmenu', e => e.stopPropag
 
 document.onkeydown = e => e.key === 'Escape' ? onDragMouseUp() : null
 
-window.electronAPI.sendLibrary((e, library) => getLibraryMetadata(library, library[0].type))
+window.electronAPI.sendLibrary((e, library) => getLibraryMetadata(library, library[0].type, library[0].path))
 
 window.electronAPI.logData((e, data) => logOutput(data))
 

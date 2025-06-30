@@ -139,7 +139,7 @@ const createWindow = () => {
   mainWin.contentView.addChildView(facetView)
   mainWin.contentView.addChildView(headerView)
 
-  // TODO: fix 31
+  // update streamView and facetView bounds on main window resize
   mainWin.on('resize', () => {
     const wb = mainWin.getBounds()
     const hb = headerView.getBounds()
