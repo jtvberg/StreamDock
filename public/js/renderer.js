@@ -518,7 +518,7 @@ const loadSettingsPanel = pref => {
 // TODO: add file dialog to select directory
 const loadLibraryDirectoryPanel = () => {
   document.querySelector('#library-directories-pane')?.parentElement.remove()
-  const dir = JSON.parse(localStorage.getItem('directories')) || []
+  const dirs = JSON.parse(localStorage.getItem('directories')) || []
   const frag = document.createDocumentFragment()
   const title = elementFromHtml(`<div class="settings-control">Library Directories</div>`)
   const pane = elementFromHtml(`<div id="library-directories-pane"></div>`)
@@ -528,9 +528,9 @@ const loadLibraryDirectoryPanel = () => {
     // pass the selected directory to addLibraryDirectory
     const path = '/Users/jtvberg/Desktop/Movies'
     const type = 'movie'
-    addLibraryDirectory(dir, path, type)
+    addLibraryDirectory(dirs, path, type)
   })
-  dir.forEach(dir => {
+  dirs.forEach(dir => {
     const libDir = elementFromHtml(`<div class="library-directory"></div>`)
     const libDirType = elementFromHtml(`<div class="library-directory-type">${dir.type}</div>`)
     const libDirPath = elementFromHtml(`<div class="library-directory-path" title="${dir.path}">${dir.path}</div>`)
@@ -540,14 +540,34 @@ const loadLibraryDirectoryPanel = () => {
     libDirRescan.addEventListener('click', () => {
       // Trigger a rescan of the library directory
       console.log(`Rescanning library directory: ${dir.path}`)
+      // Look for new files in the directory
     })
     libDirRefresh.addEventListener('click', () => {
       // Trigger a refresh of the library directory metadata
       console.log(`Refreshing library directory metadata: ${dir.path}`)
+      // Drop items from local storage libarary with path and save
+      const library = JSON.parse(localStorage.getItem('library')) || []
+      const updatedLibrary = library.filter(item => item.path !== dir.path)
+      localStorage.setItem('library', JSON.stringify(updatedLibrary))
+      // Load the library directory again
+      loadLibraryDir(dir.path, dir.type)
     })
     libDirDel.addEventListener('click', () => {
       // Trigger a delete of the library directory
       console.log(`Deleting library directory: ${dir.path}`)
+      // Remove the directory from local storage
+      const dirs = JSON.parse(localStorage.getItem('directories')) || []
+      dirs.splice(dirs.findIndex(d => d.path === dir.path), 1)
+      localStorage.setItem('directories', JSON.stringify(dirs))
+      // Remove library items with path from storage
+      const library = JSON.parse(localStorage.getItem('library')) || []
+      const updatedLibrary = library.filter(item => item.path !== dir.path)
+      localStorage.setItem('library', JSON.stringify(updatedLibrary))
+      // Reload library directory panel
+      loadLibraryDirectoryPanel()
+      // Reload library items
+      $library.replaceChildren([])
+      loadLibraryFromStorage()
     })
     libDir.appendChild(libDirType)
     libDir.appendChild(libDirPath)
@@ -563,13 +583,13 @@ const loadLibraryDirectoryPanel = () => {
 }
 
 // Add directory to library directory storage, panel and load library directory
-const addLibraryDirectory = (dir, path, type) => {
-  if (!dir.some(entry => entry.path === path)) {
-    dir.push({
+const addLibraryDirectory = (dirs, path, type) => {
+  if (!dirs.some(entry => entry.path === path)) {
+    dirs.push({
       path,
       type
     })
-    localStorage.setItem('directories', JSON.stringify(dir))
+    localStorage.setItem('directories', JSON.stringify(dirs))
     loadLibraryDirectoryPanel()
     loadLibraryDir(path, type)
   } else {

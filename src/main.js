@@ -599,6 +599,7 @@ const getLibrary = async (dir, type) => {
     library.push({
       type,
       title: path.basename(file, ext),
+      path: dir,
       url: `file://${filePath}`,
       timestamp: stat.birthtimeMs
     })
@@ -651,7 +652,7 @@ app.whenReady().then(async () => {
   app.focus({ steal: true })
   if (isDev) {
     // mainWin.webContents.openDevTools({ mode: 'detach' })
-    // headerView.webContents.openDevTools({ mode: 'detach' })
+    headerView.webContents.openDevTools({ mode: 'detach' })
     // streamView.webContents.openDevTools({ mode: 'detach' })
     // facetView.webContents.openDevTools({ mode: 'detach' })
   } else {
