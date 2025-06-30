@@ -192,6 +192,10 @@
   background-color: var(--color-control-red);
 }
 
+.library-directory-type {
+  text-transform: capitalize;
+}
+
 #about-info {
   display: flex;
   flex-direction: column;

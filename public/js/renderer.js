@@ -515,47 +515,39 @@ const loadSettingsPanel = pref => {
 }
 
 // load library directory panel
+// TODO: add file dialog to select directory
 const loadLibraryDirectoryPanel = () => {
-  const dir = [
-    {
-      type: 'Movie',
-      path: '/path/to/library1'
-    },
-    {
-      type: 'TV',
-      path: '/path/to/library2'
-    },
-    {
-      type: 'Movie',
-      path: '/path/to/library3'
-    }
-  ]
+  document.querySelector('#library-directories-pane')?.parentElement.remove()
+  const dir = JSON.parse(localStorage.getItem('directories')) || []
   const frag = document.createDocumentFragment()
   const title = elementFromHtml(`<div class="settings-control">Library Directories</div>`)
-  const pane = elementFromHtml(`<div class="library-directories-pane"></div>`)
+  const pane = elementFromHtml(`<div id="library-directories-pane"></div>`)
   const addBtn = elementFromHtml(`<button id="library-add-btn" class="fa fa-plus"></button>`)
   addBtn.addEventListener('click', () => {
     // open file dialog on button click
-
+    // pass the selected directory to addLibraryDirectory
+    const path = '/Users/jtvberg/Desktop/Movies'
+    const type = 'movie'
+    addLibraryDirectory(dir, path, type)
   })
-  dir.forEach(d => {
+  dir.forEach(dir => {
     const libDir = elementFromHtml(`<div class="library-directory"></div>`)
-    const libDirType = elementFromHtml(`<div class="library-directory-type">${d.type}</div>`)
-    const libDirPath = elementFromHtml(`<div class="library-directory-path" title="${d.path}">${d.path}</div>`)
+    const libDirType = elementFromHtml(`<div class="library-directory-type">${dir.type}</div>`)
+    const libDirPath = elementFromHtml(`<div class="library-directory-path" title="${dir.path}">${dir.path}</div>`)
     const libDirRescan = elementFromHtml('<div class="library-directory-btn fas fa-rotate-left" title="Scan for New Files"></div>')    
     const libDirRefresh = elementFromHtml('<div class="library-directory-btn fas fa-arrows-rotate" title="Refresh all Metadata"></div>')
     const libDirDel = elementFromHtml('<div class="library-directory-btn library-directory-delete-btn fas fa-xmark" title="Delete Entry"></div>')
     libDirRescan.addEventListener('click', () => {
       // Trigger a rescan of the library directory
-      console.log(`Rescanning library directory: ${d.path}`)
+      console.log(`Rescanning library directory: ${dir.path}`)
     })
     libDirRefresh.addEventListener('click', () => {
       // Trigger a refresh of the library directory metadata
-      console.log(`Refreshing library directory metadata: ${d.path}`)
+      console.log(`Refreshing library directory metadata: ${dir.path}`)
     })
     libDirDel.addEventListener('click', () => {
       // Trigger a delete of the library directory
-      console.log(`Deleting library directory: ${d.path}`)
+      console.log(`Deleting library directory: ${dir.path}`)
     })
     libDir.appendChild(libDirType)
     libDir.appendChild(libDirPath)
@@ -570,8 +562,170 @@ const loadLibraryDirectoryPanel = () => {
   $libraryLayout.appendChild(frag)
 }
 
-const addLibraryDirectory = (path, type) => {
+// Add directory to library directory storage, panel and load library directory
+const addLibraryDirectory = (dir, path, type) => {
+  if (!dir.some(entry => entry.path === path)) {
+    dir.push({
+      path,
+      type
+    })
+    localStorage.setItem('directories', JSON.stringify(dir))
+    loadLibraryDirectoryPanel()
+    loadLibraryDir(path, type)
+  } else {
+    alert(`Directory ${path} already exists in library.`)
+  }
+}
 
+// create a library tile
+const createLibraryTile = libraryObj => {
+  const result = libraryObj.metadata
+  const cleanTitle = result.title || result.name || libraryObj.title || 'Unknown Title'
+  const tmdbImagePath = 'https://image.tmdb.org/t/p/original'
+  const poster = result.poster_path ? `${tmdbImagePath}${result.poster_path}` : null
+  const resultTile = elementFromHtml(`<div class="result-tile"></div>`)
+  const resultPoster = elementFromHtml(`<img class="result-poster" src="${poster}"></img>`)
+  const resultDetails = elementFromHtml(`<div class="result-details"></div>`)
+  const resultTitle = elementFromHtml(`<div class="result-title" title="${cleanTitle}">${cleanTitle}</div>`)
+  const resultYear = elementFromHtml(`<div class="result-year" title="${libraryObj.releaseYear}">(${libraryObj.releaseYear})</div>`)
+
+  resultDetails.appendChild(resultTitle)
+  resultDetails.appendChild(resultYear)
+  resultTile.appendChild(resultDetails)
+  poster ? resultTile.appendChild(resultPoster) : null
+  resultTile.addEventListener('click', () => window.electronAPI.openUrl(libraryObj.url))
+  return resultTile
+}
+
+// get year from date input
+const getYear = input => {
+  const year = new Date(input).getFullYear()
+  return isNaN(year) ? 'NA' : year
+}
+
+// create a library list item
+const createLibraryListItem = libraryObj => {
+  const cleanTitle = `${libraryObj.metadata.title || libraryObj.metadata.name || libraryObj.title} (${libraryObj.releaseYear})`
+  const path = libraryObj.url.replace('file://', '')
+  const frag = document.createDocumentFragment()
+  const libraryListItem = elementFromHtml(`<div class="library-row" data-ts="${libraryObj.timestamp}" title="${cleanTitle}"></div>`)
+  const libraryListTitle = elementFromHtml(`<div class="library-cell">${cleanTitle}</div>`)
+  const libraryListPath = elementFromHtml(`<div class="library-cell">${path}</div>`)
+  const libraryListTime = elementFromHtml(`<div class="library-cell library-cell-right">${new Date(libraryObj.timestamp).toLocaleString()}</div>`)
+  libraryListItem.appendChild(libraryListTitle)
+  libraryListItem.appendChild(libraryListPath)
+  libraryListItem.appendChild(libraryListTime)
+  libraryListItem.addEventListener('click', () => window.electronAPI.openUrl(libraryObj.url))
+  frag.appendChild(libraryListItem)
+  return frag
+}
+
+// toggle bookmark list view
+const libraryListView = () => {
+  if ($libraryListBtn.classList.contains('toggled-bg')) {
+    $libraryListBtn.classList.remove('toggled-bg')
+    $library.style.display = ''
+    $libraryList.style.display = ''
+  } else {
+    $libraryListBtn.classList.add('toggled-bg')
+    $library.style.display = 'none'
+    $libraryList.style.display = 'flex'
+  }
+}
+
+// load library
+const loadLibrary = library => {
+  const fragTiles = document.createDocumentFragment()
+  const fragList = document.createDocumentFragment()
+  library.forEach(li => {
+    fragTiles.appendChild(createLibraryTile(li))
+    fragList.appendChild(createLibraryListItem(li))
+  })
+  $library.appendChild(fragTiles)
+  $libraryList.appendChild(fragList)
+}
+
+// load library directory
+const loadLibraryDir = (dir, type) => {
+  type = 'movie' ? window.electronAPI.getMovies(dir) : window.electronAPI.getTvShows(dir)
+}
+
+// load library from local storage
+const loadLibraryFromStorage = () => {
+  const libraryWithMetadata = JSON.parse(localStorage.getItem('library')) || []
+  if (libraryWithMetadata.length > 0) {
+    loadLibrary(libraryWithMetadata)
+    return;
+  }
+}
+
+// get metadata for library items
+const getLibraryMetadata = async (library, type) => {
+  console.log('Fetching Metadata for Library Items...')
+  const libraryWithMetadata = JSON.parse(localStorage.getItem('library')) || []
+  for (const item of library) {
+    const searchTerm = item.title
+    let searchResult = {}
+    if (type === 'movie') {
+      searchResult = await searchMovie(searchTerm, 1)
+    } else {
+      searchResult = await searchTv(searchTerm, 1)
+    }
+    let metadata = {}
+    let releaseYear
+    if (searchResult && searchResult.results && searchResult.results.length > 0) {
+      metadata = searchResult.results[0]
+      releaseYear = getYear(metadata.release_date || metadata.first_air_date || 'NA')
+    }
+    if (!libraryWithMetadata.some(entry => entry.url === item.url)) {
+      libraryWithMetadata.push({ ...item, releaseYear, metadata })
+    }
+  }
+  localStorage.setItem('library', JSON.stringify(libraryWithMetadata))
+  loadLibrary(libraryWithMetadata)
+}
+
+// sort library by order param
+const sortLibrary = order => {
+  const library = JSON.parse(localStorage.getItem('library')) || []
+  console.log('Sorting Library by:', order)
+  switch (order) {
+    case 'old':
+      // sort library by timestamp ascending
+      library.sort((a, b) => a.releaseYear - b.releaseYear)
+      break
+    case 'new':
+      // sort library by timestamp descending
+      library.sort((a, b) => b.releaseYear - a.releaseYear)
+      break
+    case 'title':
+      // sort library by title ascending
+      library.sort((a, b) => getCleanTitle(a.title) < getCleanTitle(b.title) ? -1 : 1)
+      break
+    case 'path':
+      // sort library by dir ascending
+      library.sort((a, b) => a.url < b.url ? -1 : 1)
+      break
+    default:
+      library.sort((a, b) => a.releaseYear - b.releaseYear)
+      break
+  }
+  $library.replaceChildren([])
+  $libraryList.replaceChildren([])
+  loadLibrary(library)
+}
+
+// filter library by type
+const filterLibrary = type => {
+  const library = JSON.parse(localStorage.getItem('library')) || []
+  const filteredLibrary = library.filter(li => li.type === type)
+  $library.replaceChildren([])
+  $libraryList.replaceChildren([])
+  if (!type) {
+    loadLibrary(library)
+  } else {
+    loadLibrary(filteredLibrary)
+  }
 }
 
 // load clear data elements
@@ -967,157 +1121,6 @@ const sortBookmarks = order => {
   $bookmarks.replaceChildren([])
   $bookmarkList.replaceChildren([])
   loadBookmarks(bookmarks)
-}
-
-// create a library tile
-const createLibraryTile = libraryObj => {
-  const result = libraryObj.metadata
-  const cleanTitle = result.title || result.name || libraryObj.title || 'Unknown Title'
-  const tmdbImagePath = 'https://image.tmdb.org/t/p/original'
-  const poster = result.poster_path ? `${tmdbImagePath}${result.poster_path}` : null
-  const resultTile = elementFromHtml(`<div class="result-tile"></div>`)
-  const resultPoster = elementFromHtml(`<img class="result-poster" src="${poster}"></img>`)
-  const resultDetails = elementFromHtml(`<div class="result-details"></div>`)
-  const resultTitle = elementFromHtml(`<div class="result-title" title="${cleanTitle}">${cleanTitle}</div>`)
-  const resultYear = elementFromHtml(`<div class="result-year" title="${libraryObj.releaseYear}">(${libraryObj.releaseYear})</div>`)
-
-  resultDetails.appendChild(resultTitle)
-  resultDetails.appendChild(resultYear)
-  resultTile.appendChild(resultDetails)
-  poster ? resultTile.appendChild(resultPoster) : null
-  resultTile.addEventListener('click', () => window.electronAPI.openUrl(libraryObj.url))
-  return resultTile
-}
-
-// get year from date input
-const getYear = input => {
-  const year = new Date(input).getFullYear()
-  return isNaN(year) ? 'NA' : year
-}
-
-// create a library list item
-const createLibraryListItem = libraryObj => {
-  const cleanTitle = `${libraryObj.metadata.title || libraryObj.metadata.name || libraryObj.title} (${libraryObj.releaseYear})`
-  const path = libraryObj.url.replace('file://', '')
-  const frag = document.createDocumentFragment()
-  const libraryListItem = elementFromHtml(`<div class="library-row" data-ts="${libraryObj.timestamp}" title="${cleanTitle}"></div>`)
-  const libraryListTitle = elementFromHtml(`<div class="library-cell">${cleanTitle}</div>`)
-  const libraryListPath = elementFromHtml(`<div class="library-cell">${path}</div>`)
-  const libraryListTime = elementFromHtml(`<div class="library-cell library-cell-right">${new Date(libraryObj.timestamp).toLocaleString()}</div>`)
-  libraryListItem.appendChild(libraryListTitle)
-  libraryListItem.appendChild(libraryListPath)
-  libraryListItem.appendChild(libraryListTime)
-  libraryListItem.addEventListener('click', () => window.electronAPI.openUrl(libraryObj.url))
-  frag.appendChild(libraryListItem)
-  return frag
-}
-
-// toggle bookmark list view
-const libraryListView = () => {
-  if ($libraryListBtn.classList.contains('toggled-bg')) {
-    $libraryListBtn.classList.remove('toggled-bg')
-    $library.style.display = ''
-    $libraryList.style.display = ''
-  } else {
-    $libraryListBtn.classList.add('toggled-bg')
-    $library.style.display = 'none'
-    $libraryList.style.display = 'flex'
-  }
-}
-
-// load library
-const loadLibrary = library => {
-  const fragTiles = document.createDocumentFragment()
-  const fragList = document.createDocumentFragment()
-  library.forEach(li => {
-    fragTiles.appendChild(createLibraryTile(li))
-    fragList.appendChild(createLibraryListItem(li))
-  })
-  $library.appendChild(fragTiles)
-  $libraryList.appendChild(fragList)
-}
-
-// load library directory
-// TODO
-const loadLibraryDir = (dir = '/Users/jtvberg/Desktop/Movies') => {
-  window.electronAPI.getMovies(dir)
-}
-
-// load library from local storage
-const loadLibraryFromStorage = () => {
-  const libraryWithMetadata = JSON.parse(localStorage.getItem('library')) || []
-  if (libraryWithMetadata.length > 0) {
-    loadLibrary(libraryWithMetadata)
-    return;
-  }
-}
-
-// get metadata for library items
-// TODO
-const getLibraryMetadata = async (library, type) => {
-  console.log('Fetching Metadata for Library Items...')
-
-  for (const item of library) {
-    const searchTerm = item.title
-    let searchResult = {}
-    if (type === 'movie') {
-      searchResult = await searchMovie(searchTerm, 1)
-    } else {
-      searchResult = await searchTv(searchTerm, 1)
-    }
-    let metadata = {}
-    let releaseYear
-    if (searchResult && searchResult.results && searchResult.results.length > 0) {
-      metadata = searchResult.results[0]
-      releaseYear = getYear(metadata.release_date || metadata.first_air_date || 'NA')
-    }
-    libraryWithMetadata.push({ ...item, releaseYear, metadata })
-  }
-  localStorage.setItem('library', JSON.stringify(libraryWithMetadata))
-  loadLibrary(libraryWithMetadata)
-}
-
-// sort library by order param
-const sortLibrary = order => {
-  const library = JSON.parse(localStorage.getItem('library')) || []
-  console.log('Sorting Library by:', order)
-  switch (order) {
-    case 'old':
-      // sort library by timestamp ascending
-      library.sort((a, b) => a.releaseYear - b.releaseYear)
-      break
-    case 'new':
-      // sort library by timestamp descending
-      library.sort((a, b) => b.releaseYear - a.releaseYear)
-      break
-    case 'title':
-      // sort library by title ascending
-      library.sort((a, b) => getCleanTitle(a.title) < getCleanTitle(b.title) ? -1 : 1)
-      break
-    case 'path':
-      // sort library by dir ascending
-      library.sort((a, b) => a.url < b.url ? -1 : 1)
-      break
-    default:
-      library.sort((a, b) => a.releaseYear - b.releaseYear)
-      break
-  }
-  $library.replaceChildren([])
-  $libraryList.replaceChildren([])
-  loadLibrary(library)
-}
-
-// filter library by type
-const filterLibrary = type => {
-  const library = JSON.parse(localStorage.getItem('library')) || []
-  const filteredLibrary = library.filter(li => li.type === type)
-  $library.replaceChildren([])
-  $libraryList.replaceChildren([])
-  if (!type) {
-    loadLibrary(library)
-  } else {
-    loadLibrary(filteredLibrary)
-  }
 }
 
 // add flash animation class
