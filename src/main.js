@@ -362,6 +362,7 @@ const openUrl = url => {
   streamView.webContents.loadURL(url)
   showStream(true)
   headerView.webContents.send('stream-opened')
+  if (url.startsWith('file:')) makeFullWindow()
 }
 
 // toggle streamView visibility
@@ -385,6 +386,18 @@ const validUrl = url => {
     return false
   }
   return valid
+}
+
+const makeFullWindow = () => {
+    streamView.webContents.executeJavaScript(`
+      (()=>{
+        const video = document.querySelector('video')
+        if (video) {
+          video.style.width = '100%'
+          video.style.height = '100%'
+        }
+      })()
+    `)
 }
 
 // get system preference for accent color and send to renderers
@@ -652,7 +665,7 @@ app.whenReady().then(async () => {
   app.focus({ steal: true })
   if (isDev) {
     // mainWin.webContents.openDevTools({ mode: 'detach' })
-    headerView.webContents.openDevTools({ mode: 'detach' })
+    // headerView.webContents.openDevTools({ mode: 'detach' })
     // streamView.webContents.openDevTools({ mode: 'detach' })
     // facetView.webContents.openDevTools({ mode: 'detach' })
   } else {

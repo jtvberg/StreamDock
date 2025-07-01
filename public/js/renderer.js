@@ -151,7 +151,6 @@ const applySettings = () => {
 
   window.electronAPI.updateHeaderHeight(headerCollapsed)
 
-  window.electronAPI.openUrl(getLastStream())
 
   window.electronAPI.winGetLoc((e, bounds) => setWinBounds(bounds))
 
@@ -162,6 +161,8 @@ const applySettings = () => {
     root.style.setProperty('--color-system-accent', color)
     root.style.setProperty('--color-system-accent-trans', color.substring(0, 7) + '80')
   })
+
+  window.electronAPI.openUrl(getLastStream())
 }
 
 // helper funtion to create element from html string
@@ -607,6 +608,12 @@ const addLibraryDirectory = (dirs, path, type) => {
   }
 }
 
+// get year from date input
+const getYear = input => {
+  const year = new Date(input).getFullYear()
+  return isNaN(year) ? 'NA' : year
+}
+
 // create a library tile
 const createLibraryTile = libraryObj => {
   const result = libraryObj.metadata
@@ -625,12 +632,6 @@ const createLibraryTile = libraryObj => {
   poster ? resultTile.appendChild(resultPoster) : null
   resultTile.addEventListener('click', () => window.electronAPI.openUrl(libraryObj.url))
   return resultTile
-}
-
-// get year from date input
-const getYear = input => {
-  const year = new Date(input).getFullYear()
-  return isNaN(year) ? 'NA' : year
 }
 
 // create a library list item
