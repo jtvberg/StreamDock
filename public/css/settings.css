@@ -151,13 +151,11 @@
   max-width: 100%;
 }
 
-#library-add-btn {
-  height: 26px;
-  width: 26px;
-  margin-block: 5px;
+.library-add-btn {
+  margin: 5px;
 }
 
-#library-add-btn:hover {
+.library-add-btn:hover {
   background-color: var(--color-system-accent);
 }
 
@@ -270,13 +268,19 @@
 }
 
 .settings-label {
-  margin: auto 0px;
+  margin: 7px 0px;
   line-height: 1;
 }
 
 .settings-muted {
   grid-column-start: 1;
   grid-column-end: 3;
+}
+
+.settings-input,
+.settings-select {
+  margin-top: 1px;
+  margin-bottom: 10px;
 }
 
 @keyframes keyframes1 {

@@ -424,14 +424,13 @@ const loadSettingsPanel = pref => {
   if (!pref.live) return
   const frag = document.createDocumentFragment()
   const ele = elementFromHtml(`<div class="settings-control" title="${pref.description.split('(')[0].trim()}"></div>`)
-  const lbl = elementFromHtml(`<div>${pref.label}</div>`)
+  const lbl = elementFromHtml(`<div class="settings-label">${pref.label}</div>`)
   const ipt = elementFromHtml(`<input id="${pref.id}" type="${pref.type}">${pref.label}</input>`)
   const desc = elementFromHtml(`<div class="text-muted">${pref.description}</div>`)
   switch (pref.type) {
     case 'checkbox':
       desc.classList.add('settings-muted')
       ele.classList.add('settings-toggle')
-      lbl.classList.add('settings-label')
       ele.appendChild(lbl)
       ipt.classList.add('toggle')
       ipt.checked = pref.state()
@@ -446,6 +445,7 @@ const loadSettingsPanel = pref => {
     case 'text':
       ele.classList.add('settings-text')
       ipt.classList.add(pref.category)
+      ipt.classList.add('settings-input')
       ipt.setAttribute('value', pref.state() || pref.defaults)
       ipt.addEventListener('change', e => {
         if (e.target.value.length === 0) {
@@ -458,7 +458,7 @@ const loadSettingsPanel = pref => {
       ele.append(desc)
       break
     case 'select':
-      const sel = elementFromHtml(`<select id="${pref.id}" class="${pref.category}" ></select>`)
+      const sel = elementFromHtml(`<select id="${pref.id}" class="${pref.category} settings-select" ></select>`)
       ele.classList.add('settings-text')
       // this is a little dumb but room for other select custom logic
       switch (pref.id) {
@@ -520,9 +520,11 @@ const loadLibraryDirectoryPanel = () => {
   document.querySelector('#library-directories-pane')?.parentElement.remove()
   const dirs = JSON.parse(localStorage.getItem('directories')) || []
   const frag = document.createDocumentFragment()
-  const title = elementFromHtml(`<div class="settings-control">Library Directories</div>`)
+  const header = elementFromHtml(`<div class="settings-control"></div>`)
+  const title = elementFromHtml(`<div class="settings-label">Library Directories</div>`)
+  const desc = elementFromHtml(`<div class="text-muted settings-muted">Add, remove and update library directories</div>`)
   const pane = elementFromHtml(`<div id="library-directories-pane"></div>`)
-  const addMovieBtn = elementFromHtml(`<button id="library-add-btn" class="fa fa-film" title="Add Movie Directory"></button>`)
+  const addMovieBtn = elementFromHtml(`<button class="library-add-btn fa fa-film" title="Add Movie Directory"></button>`)
   addMovieBtn.addEventListener('click', async () => {
     const selectedDir = await window.electronAPI.openDirectoryDialog()
     if (selectedDir) {
@@ -530,7 +532,7 @@ const loadLibraryDirectoryPanel = () => {
       addLibraryDirectory(dirs, selectedDir, type)
     }
   })
-  const addTvBtn = elementFromHtml(`<button id="library-add-btn" class="fa fa-tv" title="Add TV Directory"></button>`)
+  const addTvBtn = elementFromHtml(`<button class="library-add-btn fa fa-tv" title="Add TV Directory"></button>`)
   addTvBtn.addEventListener('click', async () => {
     const selectedDir = await window.electronAPI.openDirectoryDialog()
     if (selectedDir) {
@@ -588,8 +590,10 @@ const loadLibraryDirectoryPanel = () => {
   })
   pane.appendChild(addMovieBtn)
   pane.appendChild(addTvBtn)
-  title.appendChild(pane)
-  frag.appendChild(title)
+  header.appendChild(title)
+  header.appendChild(desc)
+  header.appendChild(pane)
+  frag.appendChild(header)
   $libraryLayout.appendChild(frag)
 }
 
@@ -786,7 +790,8 @@ const loadClearDataPanel = () => {
   }
 
   const frag = document.createDocumentFragment()
-  const title = elementFromHtml(`<div class="settings-control">Clear StreamDock Data</div>`)
+  const header = elementFromHtml(`<div class="settings-control"></div>`)
+  const title = elementFromHtml(`<div class="settings-label">Clear StreamDock Data</div>`)
   const pane = elementFromHtml(`<div class="clear-data-pane"></div>`)
   const et = elementFromHtml(`<div class="clear-data-warn fas fa-triangle-exclamation"></div>`)
   pane.appendChild(et)
@@ -801,8 +806,9 @@ const loadClearDataPanel = () => {
   pane.appendChild(btns)
   const dc = elementFromHtml(`<div class="clear-data-disclaimer">This will reset the app as if it was freshly installed and restart. This will log you out of all services and delete all bookmarks and updated settings. This cannot be undone! Click and hold the button until it fills to activate.</div>`)
   pane.appendChild(dc)
-  title.appendChild(pane)
-  frag.appendChild(title)
+  header.appendChild(title)
+  header.appendChild(pane)
+  frag.appendChild(header)
   $advancedLayout.appendChild(frag)
 }
 
