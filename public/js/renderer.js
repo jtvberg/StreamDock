@@ -685,6 +685,8 @@ const loadLibrary = library => {
 // load library directory
 const loadLibraryDir = (dir, type) => {
   type === 'movie' ? window.electronAPI.getMovies(dir) : window.electronAPI.getTv(dir)
+  $libraryTvBtn.classList.remove('toggled-bg')
+  $libraryMovieBtn.classList.remove('toggled-bg')
 }
 
 // load library from local storage
