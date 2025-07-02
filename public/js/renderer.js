@@ -143,6 +143,11 @@ const applySettings = () => {
     window.electronAPI.lastStream((e, url) => setLastStream(url))
   }
 
+  if (prefs.find(pref => pref.id === 'library-scan').state()) {
+    console.log('Auto-scanning library directories for new files...')
+    rescanAllLibraryDirs()
+  }
+
   loadLibraryDirectoryPanel()
 
   loadClearDataPanel()
@@ -150,7 +155,6 @@ const applySettings = () => {
   window.electronAPI.defaultAgent(getDefaultAgent())
 
   window.electronAPI.updateHeaderHeight(headerCollapsed)
-
 
   window.electronAPI.winGetLoc((e, bounds) => setWinBounds(bounds))
 
@@ -772,6 +776,12 @@ const filterLibrary = type => {
   } else {
     loadLibrary(filteredLibrary)
   }
+}
+
+// rescan all library directories
+const rescanAllLibraryDirs = () => {
+  const dirs = JSON.parse(localStorage.getItem('directories')) || []
+  dirs.forEach(dir => loadLibraryDir(dir.path, dir.type))
 }
 
 // load clear data elements
