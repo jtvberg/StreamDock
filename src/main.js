@@ -585,20 +585,6 @@ const sendLogData = log => {
   headerView.webContents.send('log-data', log)
 }
 
-const openDirectoryDialog = async (title, properties = ['openDirectory']) => {
-  const { canceled, filePaths } = await dialog.showOpenDialog({
-    title,
-    properties,
-    filters: [
-      { name: 'Directories', extensions: [] }
-    ]
-  })
-  if (canceled || filePaths.length === 0) {
-    return null
-  }
-  return filePaths[0]
-}
-
 // get library from directory and type (movies or tv)
 const getLibrary = async (dir, type) => {
   const files = await fs.readdir(dir)
@@ -777,3 +763,4 @@ ipcMain.handle('open-directory-dialog', async () => {
   if (canceled || filePaths.length === 0) return null
   return filePaths[0]
 })
+

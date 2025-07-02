@@ -643,9 +643,9 @@ const createLibraryListItem = libraryObj => {
   const cleanTitle = `${libraryObj.metadata.title || libraryObj.metadata.name || libraryObj.title} (${libraryObj.releaseYear})`
   const path = libraryObj.url.replace('file://', '')
   const frag = document.createDocumentFragment()
-  const libraryListItem = elementFromHtml(`<div class="library-row" data-ts="${libraryObj.timestamp}" title="${cleanTitle}"></div>`)
-  const libraryListTitle = elementFromHtml(`<div class="library-cell">${cleanTitle}</div>`)
-  const libraryListPath = elementFromHtml(`<div class="library-cell">${path}</div>`)
+  const libraryListItem = elementFromHtml(`<div class="library-row" data-ts="${libraryObj.timestamp}"></div>`)
+  const libraryListTitle = elementFromHtml(`<div class="library-cell" title="${cleanTitle}">${cleanTitle}</div>`)
+  const libraryListPath = elementFromHtml(`<div class="library-cell" title="${path}">${path}</div>`)
   const libraryListTime = elementFromHtml(`<div class="library-cell library-cell-right">${new Date(libraryObj.timestamp).toLocaleString()}</div>`)
   libraryListItem.appendChild(libraryListTitle)
   libraryListItem.appendChild(libraryListPath)
