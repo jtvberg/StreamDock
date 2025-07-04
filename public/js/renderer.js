@@ -533,7 +533,7 @@ const loadLibraryDirectoryPanel = () => {
     const selectedDir = await window.electronAPI.openDirectoryDialog()
     if (selectedDir) {
       const type = 'movie'
-      addLibraryDirectory(dirs, selectedDir, type)
+      addLibraryDirectory(selectedDir, type)
     }
   })
   const addTvBtn = elementFromHtml(`<button class="library-add-btn fa fa-tv" title="Add TV Directory"></button>`)
@@ -541,7 +541,7 @@ const loadLibraryDirectoryPanel = () => {
     const selectedDir = await window.electronAPI.openDirectoryDialog()
     if (selectedDir) {
       const type = 'tv'
-      addLibraryDirectory(dirs, selectedDir, type)
+      addLibraryDirectory(selectedDir, type)
     }
   })
   dirs.forEach(dir => {
@@ -551,6 +551,21 @@ const loadLibraryDirectoryPanel = () => {
     const libDirRescan = elementFromHtml('<div class="library-directory-btn fas fa-rotate-left" title="Scan for New Files"></div>')    
     const libDirRefresh = elementFromHtml('<div class="library-directory-btn fas fa-arrows-rotate" title="Refresh all Metadata"></div>')
     const libDirDel = elementFromHtml('<div class="library-directory-btn library-directory-delete-btn fas fa-xmark" title="Delete Entry"></div>')
+    const libDirStatus = elementFromHtml(`<div class="library-directory-status fas" title="${dir.status}"></div>`)
+    switch (dir.status) {
+      case 'new':
+        libDirStatus.classList.add('fa-file')
+        break
+      case 'pending':
+        libDirStatus.classList.add('fa-hourglass-half')
+        break
+      case 'complete':
+        libDirStatus.classList.add('fa-check', 'green')
+        break
+      case 'error':
+        libDirStatus.classList.add('fa-triangle-exclamation', 'yellow')
+        break
+    }
     libDirRescan.addEventListener('click', () => {
       // trigger a rescan of the library directory
       console.log(`Rescanning library directory: ${dir.path}`)
@@ -585,6 +600,7 @@ const loadLibraryDirectoryPanel = () => {
       $libraryList.replaceChildren([])
       loadLibraryFromStorage()
     })
+    libDir.appendChild(libDirStatus)
     libDir.appendChild(libDirType)
     libDir.appendChild(libDirPath)
     libDir.appendChild(libDirRescan)
@@ -602,11 +618,13 @@ const loadLibraryDirectoryPanel = () => {
 }
 
 // add directory to library directory storage, panel and load library directory
-const addLibraryDirectory = (dirs, path, type) => {
+const addLibraryDirectory = (path, type) => {
+  const dirs = JSON.parse(localStorage.getItem('directories')) || []
   if (!dirs.some(entry => entry.path === path)) {
     dirs.push({
       path,
-      type
+      type,
+      status: 'new'
     })
     localStorage.setItem('directories', JSON.stringify(dirs))
     loadLibraryDirectoryPanel()
@@ -624,15 +642,15 @@ const getYear = input => {
 
 // create a library tile
 const createLibraryTile = libraryObj => {
-  const result = libraryObj.metadata
-  const cleanTitle = result.title || result.name || libraryObj.title || 'Unknown Title'
+  const cleanTitle = libraryObj.metadata?.title || libraryObj.metadata?.name || libraryObj.title || 'Unknown Title'
+  const cleanYear = libraryObj.releaseYear === undefined ? '' : `(${libraryObj.releaseYear})`
   const tmdbImagePath = 'https://image.tmdb.org/t/p/original'
-  const poster = result.poster_path ? `${tmdbImagePath}${result.poster_path}` : null
+  const poster = libraryObj.metadata?.poster_path ? `${tmdbImagePath}${libraryObj.metadata?.poster_path}` : null
   const resultTile = elementFromHtml(`<div class="result-tile"></div>`)
   const resultPoster = elementFromHtml(`<img class="result-poster" src="${poster}"></img>`)
   const resultDetails = elementFromHtml(`<div class="result-details"></div>`)
   const resultTitle = elementFromHtml(`<div class="result-title" title="${cleanTitle}">${cleanTitle}</div>`)
-  const resultYear = elementFromHtml(`<div class="result-year" title="${libraryObj.releaseYear}">(${libraryObj.releaseYear})</div>`)
+  const resultYear = elementFromHtml(`<div class="result-year" title="${cleanYear}">${cleanYear}</div>`)
 
   resultDetails.appendChild(resultTitle)
   resultDetails.appendChild(resultYear)
@@ -644,7 +662,8 @@ const createLibraryTile = libraryObj => {
 
 // create a library list item
 const createLibraryListItem = libraryObj => {
-  const cleanTitle = `${libraryObj.metadata.title || libraryObj.metadata.name || libraryObj.title} (${libraryObj.releaseYear})`
+  const cleanYear = libraryObj.releaseYear === undefined ? '' : `(${libraryObj.releaseYear})`
+  const cleanTitle = `${libraryObj.metadata?.title || libraryObj.metadata?.name || libraryObj.title} ${cleanYear}`
   const path = libraryObj.url.replace('file://', '')
   const frag = document.createDocumentFragment()
   const libraryListItem = elementFromHtml(`<div class="library-row" data-ts="${libraryObj.timestamp}"></div>`)
@@ -673,7 +692,7 @@ const libraryListView = () => {
 }
 
 // load library
-const loadLibrary = library => {
+const loadLibraryUi = library => {
   const fragTiles = document.createDocumentFragment()
   const fragList = document.createDocumentFragment()
   library.forEach(li => {
@@ -697,32 +716,112 @@ const loadLibraryDir = (dir, type) => {
 const loadLibraryFromStorage = () => {
   const libraryWithMetadata = JSON.parse(localStorage.getItem('library')) || []
   if (libraryWithMetadata.length > 0) {
-    loadLibrary(libraryWithMetadata)
+    loadLibraryUi(libraryWithMetadata)
     return;
   }
 }
 
-// get metadata for library items
-const getLibraryMetadata = async (library, type, dir) => {
-  console.log(`Fetching metadata for Directory: ${dir}, Type: ${type}`)
-  const libraryWithMetadata = JSON.parse(localStorage.getItem('library')) || []
-  // remove items from libraryWithMetadata that have the same path but are not in the current library
-  for (const entry of libraryWithMetadata) {
+// metadata load error handler
+const handleMetadataError = (dir, error) => {
+  if (error === 1) {
+    console.log(`TMDB API Error: No API key provided`)
+    alert('TMDB API Error: No API key provided. Please set your TMDB API key in the search settings.')
+    setLibraryDirStatus(dir, 'error')
+  } else if (error === -1) {
+    console.log(`TMDB API Error`)
+    setLibraryDirStatus(dir, 'error')
+  }
+}
+
+// set directory metadata status
+const setLibraryDirStatus = (dir, status) => {
+  console.log(`Setting status for directory: ${dir} to ${status}`)
+  const dirs = JSON.parse(localStorage.getItem('directories')) || []
+  const dirIndex = dirs.findIndex(d => d.path === dir)
+  if (dirIndex > -1) {
+    dirs[dirIndex].status = status
+    localStorage.setItem('directories', JSON.stringify(dirs))
+    // update library directory panel
+    const libDir = document.querySelector(`.library-directory-path[title="${dir}"]`)
+    if (libDir) {
+      const statusIcon = libDir.parentElement.querySelector('.library-directory-status')
+      if (statusIcon) {
+        statusIcon.classList.remove('fa-file', 'fa-hourglass-half', 'fa-check', 'fa-triangle-exclamation', 'green', 'yellow')
+        switch (status) {
+          case 'new':
+            statusIcon.classList.add('fa-file')
+            break
+          case 'pending':
+            statusIcon.classList.add('fa-hourglass-half')
+            break
+          case 'complete':
+            statusIcon.classList.add('fa-check', 'green')
+            break
+          case 'error':
+            statusIcon.classList.add('fa-triangle-exclamation', 'yellow')
+            break
+        }
+      }
+    }
+  } else {
+    console.error(`Directory ${dir} not found in library directories`)
+  }
+}
+
+const addLibraryItems = (library, type, dir) => {
+  const localLibrary = JSON.parse(localStorage.getItem('library')) || []
+  // remove items from local library that no longer exist in the directory
+  for (const entry of localLibrary) {
     if (entry.path === dir && !library.includes(entry.url)) {
-      libraryWithMetadata.splice(libraryWithMetadata.indexOf(entry), 1)
+      localLibrary.splice(localLibrary.indexOf(entry), 1)
     }
   }
   for (const item of library) {
-    // check if item already has metadata
-    if (libraryWithMetadata.some(entry => entry.url === item.url)) {
+    // check if item already exists in local library
+    if (localLibrary.some(entry => entry.url === item.url)) {
+      continue
+    }
+    localLibrary.push(item)
+  }
+  localStorage.setItem('library', JSON.stringify(localLibrary))
+
+  if (getPrefs().find(pref => pref.id === 'library-meta').state()) {
+    console.log(`Fetching metadata for Directory: ${dir}, Type: ${type}`)
+    getLibraryMetadata(type, dir)
+  } else {
+    setLibraryDirStatus(dir, 'new')
+    loadLibraryUi(localLibrary)
+  }
+}
+
+// get metadata for library items
+const getLibraryMetadata = async (type, dir) => {
+  setLibraryDirStatus(dir, 'pending')
+  let error = false
+  console.log(`Fetching metadata for Directory: ${dir}, Type: ${type}`)
+  const library = JSON.parse(localStorage.getItem('library')) || []
+  const libraryWithMetadata = []
+  for (const item of library) {
+    if (item.path !== dir) {
+      libraryWithMetadata.push(item)
       continue
     }
     const searchTerm = item.title
-    let searchResult = {}
-    if (type === 'movie') {
-      searchResult = await searchMovie(searchTerm, 1)
-    } else {
-      searchResult = await searchTv(searchTerm, 1)
+    console.log(`Searching for metadata for: ${searchTerm}`)
+    const searchResult = type === 'movie'
+      ? await searchMovie(searchTerm, 1)
+      : await searchTv(searchTerm, 1)
+    
+    if (searchResult === 1) {
+      handleMetadataError(dir, 1)
+      error = true
+      return
+    }
+    if (searchResult === -1) {
+      handleMetadataError(dir, -1)
+      error = true
+      libraryWithMetadata.push(item)
+      continue
     }
     let metadata = {}
     let releaseYear
@@ -732,8 +831,11 @@ const getLibraryMetadata = async (library, type, dir) => {
     }
     libraryWithMetadata.push({ ...item, releaseYear, metadata })
   }
+  if (!error) {
+    setLibraryDirStatus(dir, 'complete')
+  }
   localStorage.setItem('library', JSON.stringify(libraryWithMetadata))
-  loadLibrary(libraryWithMetadata)
+  loadLibraryUi(libraryWithMetadata)
 }
 
 // sort library by order param
@@ -762,7 +864,7 @@ const sortLibrary = order => {
   }
   $library.replaceChildren([])
   $libraryList.replaceChildren([])
-  loadLibrary(library)
+  loadLibraryUi(library)
 }
 
 // filter library by type
@@ -772,9 +874,9 @@ const filterLibrary = type => {
   $library.replaceChildren([])
   $libraryList.replaceChildren([])
   if (!type) {
-    loadLibrary(library)
+    loadLibraryUi(library)
   } else {
-    loadLibrary(filteredLibrary)
+    loadLibraryUi(filteredLibrary)
   }
 }
 
@@ -1352,7 +1454,7 @@ $headerPanels.forEach(el => el.addEventListener('contextmenu', e => e.stopPropag
 
 document.onkeydown = e => e.key === 'Escape' ? onDragMouseUp() : null
 
-window.electronAPI.sendLibrary((e, library) => getLibraryMetadata(library, library[0].type, library[0].path))
+window.electronAPI.sendLibrary((e, library) => addLibraryItems(library, library[0].type, library[0].path))
 
 window.electronAPI.logData((e, data) => logOutput(data))
 

@@ -1,3 +1,11 @@
+.green {
+  color: var(--color-control-green);
+}
+
+.yellow {
+  color: var(--color-control-yellow);
+}
+
 .settings-layout-header {
   display: flex;
   align-items: center;
@@ -173,7 +181,7 @@
 
 .library-directory {
   display: grid;
-  grid-template-columns: 60px 1fr auto auto auto;
+  grid-template-columns: 22px 60px 1fr auto auto auto;
   border-radius: 5px;
   align-items: center;
   margin: 5px;
@@ -192,6 +200,11 @@
 
 .library-directory-type {
   text-transform: capitalize;
+}
+
+.library-directory-type,
+.library-directory-path {
+  line-height: 100%;
 }
 
 #about-info {

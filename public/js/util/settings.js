@@ -265,7 +265,16 @@ export const getPrefs = () => {
       'Automatically scan library for new content on startup',
       false,
       true
-    ),   
+    ),
+    new Pref(
+      'library-meta',
+      'library',
+      'checkbox',
+      'Fetch Metadata',
+      'Attempt to get metadata from TMDB for library content (API key required)',
+      false,
+      true
+    ),
     new Pref(
       'service-ad',
       'service',

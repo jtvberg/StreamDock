@@ -37,6 +37,7 @@ function showResponse(response) {
 
 async function apiGet(url) {
   try {
+    if (getApiKey() === '') { return 1 }
     const response = await fetch(url, {
       method: 'GET',
       dataType: 'json',
@@ -46,13 +47,14 @@ async function apiGet(url) {
       return await response.json()
     }
     else {
-      return 0
+      return -1
     }
-  } catch (err) { return 0 }
+  } catch (err) { return -1 }
 }
 
 async function apiPost(url, body) {
   try {
+    if (getApiKey() === '') { return 1 }
     const response = await fetch(url, {
       method: 'POST',
       dataType: 'json',
@@ -63,9 +65,9 @@ async function apiPost(url, body) {
       return await response.json()
     }
     else {
-      return 0
+      return -1
     }
-  } catch (err) { return 0 }
+  } catch (err) { return -1 }
 }
 
 async function getRequestToken() {
