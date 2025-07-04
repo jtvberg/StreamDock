@@ -640,6 +640,12 @@ const getYear = input => {
   return isNaN(year) ? 'NA' : year
 }
 
+// get int date from date input
+const getDate = input => {
+  const date = new Date(input)
+  return isNaN(date) ? 'NA' : date.getTime()
+}
+
 // create a library tile
 const createLibraryTile = libraryObj => {
   const cleanTitle = libraryObj.metadata?.title || libraryObj.metadata?.name || libraryObj.title || 'Unknown Title'
@@ -825,11 +831,13 @@ const getLibraryMetadata = async (type, dir) => {
     }
     let metadata = {}
     let releaseYear
+    let releaseDate
     if (searchResult && searchResult.results && searchResult.results.length > 0) {
       metadata = searchResult.results[0]
       releaseYear = getYear(metadata.release_date || metadata.first_air_date || 'NA')
+      releaseDate = getDate(metadata.release_date || metadata.first_air_date || 'NA')
     }
-    libraryWithMetadata.push({ ...item, releaseYear, metadata })
+    libraryWithMetadata.push({ ...item, releaseYear, releaseDate, metadata })
   }
   if (!error) {
     setLibraryDirStatus(dir, 'complete')
@@ -844,11 +852,11 @@ const sortLibrary = order => {
   switch (order) {
     case 'old':
       // sort library by timestamp ascending
-      library.sort((a, b) => a.releaseYear - b.releaseYear)
+      library.sort((a, b) => a.releaseDate - b.releaseDate)
       break
     case 'new':
       // sort library by timestamp descending
-      library.sort((a, b) => b.releaseYear - a.releaseYear)
+      library.sort((a, b) => b.releaseDate - a.releaseDate)
       break
     case 'title':
       // sort library by title ascending
@@ -859,7 +867,7 @@ const sortLibrary = order => {
       library.sort((a, b) => a.url < b.url ? -1 : 1)
       break
     default:
-      library.sort((a, b) => a.releaseYear - b.releaseYear)
+      library.sort((a, b) => a.releaseDate - b.releaseDate)
       break
   }
   $library.replaceChildren([])
