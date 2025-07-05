@@ -551,19 +551,23 @@ const loadLibraryDirectoryPanel = () => {
     const libDirRescan = elementFromHtml('<div class="library-directory-btn fas fa-rotate-left" title="Scan for New Files"></div>')    
     const libDirRefresh = elementFromHtml('<div class="library-directory-btn fas fa-arrows-rotate" title="Refresh all Metadata"></div>')
     const libDirDel = elementFromHtml('<div class="library-directory-btn library-directory-delete-btn fas fa-xmark" title="Delete Entry"></div>')
-    const libDirStatus = elementFromHtml(`<div class="library-directory-status fas" title="${dir.status}"></div>`)
+    const libDirStatus = elementFromHtml(`<div class="library-directory-status fas"></div>`)
     switch (dir.status) {
-      case 'new':
+      case 'file':
         libDirStatus.classList.add('fa-file')
+        libDirStatus.title = 'File Loaded'
         break
       case 'pending':
         libDirStatus.classList.add('fa-hourglass-half')
+        libDirStatus.title = 'Pending Metadata'
         break
       case 'complete':
         libDirStatus.classList.add('fa-check', 'green')
+        libDirStatus.title = 'Metadata Complete'
         break
       case 'error':
         libDirStatus.classList.add('fa-triangle-exclamation', 'yellow')
+        libDirStatus.title = 'Metadata Error'
         break
     }
     libDirRescan.addEventListener('click', () => {
@@ -624,7 +628,7 @@ const addLibraryDirectory = (path, type) => {
     dirs.push({
       path,
       type,
-      status: 'new'
+      status: 'file'
     })
     localStorage.setItem('directories', JSON.stringify(dirs))
     loadLibraryDirectoryPanel()
@@ -754,17 +758,21 @@ const setLibraryDirStatus = (dir, status) => {
       if (statusIcon) {
         statusIcon.classList.remove('fa-file', 'fa-hourglass-half', 'fa-check', 'fa-triangle-exclamation', 'green', 'yellow')
         switch (status) {
-          case 'new':
+          case 'file':
             statusIcon.classList.add('fa-file')
+            statusIcon.title = 'File Loaded'
             break
           case 'pending':
             statusIcon.classList.add('fa-hourglass-half')
+            statusIcon.title = 'Pending Metadata'
             break
           case 'complete':
             statusIcon.classList.add('fa-check', 'green')
+            statusIcon.title = 'Metadata Complete'
             break
           case 'error':
             statusIcon.classList.add('fa-triangle-exclamation', 'yellow')
+            statusIcon.title = 'Metadata Error'
             break
         }
       }
@@ -795,7 +803,7 @@ const addLibraryItems = async (library, type, dir) => {
   if (getPrefs().find(pref => pref.id === 'library-meta').state()) {
     await getLibraryMetadata(type, dir)
   } else {
-    setLibraryDirStatus(dir, 'new')
+    setLibraryDirStatus(dir, 'file')
     loadLibraryUi(filtered)
   }
 }
