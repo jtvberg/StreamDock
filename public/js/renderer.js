@@ -552,24 +552,6 @@ const loadLibraryDirectoryPanel = () => {
     const libDirRefresh = elementFromHtml('<div class="library-directory-btn fas fa-arrows-rotate" title="Refresh all Metadata"></div>')
     const libDirDel = elementFromHtml('<div class="library-directory-btn library-directory-delete-btn fas fa-xmark" title="Delete Entry"></div>')
     const libDirStatus = elementFromHtml(`<div class="library-directory-status fas"></div>`)
-    switch (dir.status) {
-      case 'file':
-        libDirStatus.classList.add('fa-file')
-        libDirStatus.title = 'File Loaded'
-        break
-      case 'pending':
-        libDirStatus.classList.add('fa-hourglass-half')
-        libDirStatus.title = 'Pending Metadata'
-        break
-      case 'complete':
-        libDirStatus.classList.add('fa-check', 'green')
-        libDirStatus.title = 'Metadata Complete'
-        break
-      case 'error':
-        libDirStatus.classList.add('fa-triangle-exclamation', 'yellow')
-        libDirStatus.title = 'Metadata Error'
-        break
-    }
     libDirRescan.addEventListener('click', () => {
       // trigger a rescan of the library directory
       console.log(`Rescanning library directory: ${dir.path}`)
@@ -604,7 +586,7 @@ const loadLibraryDirectoryPanel = () => {
       $libraryList.replaceChildren([])
       loadLibraryFromStorage()
     })
-    libDir.appendChild(libDirStatus)
+    libDir.appendChild(updateLibraryDirStatus(libDirStatus, dir.status))
     libDir.appendChild(libDirType)
     libDir.appendChild(libDirPath)
     libDir.appendChild(libDirRescan)
@@ -756,30 +738,36 @@ const setLibraryDirStatus = (dir, status) => {
     if (libDir) {
       const statusIcon = libDir.parentElement.querySelector('.library-directory-status')
       if (statusIcon) {
-        statusIcon.classList.remove('fa-file', 'fa-hourglass-half', 'fa-check', 'fa-triangle-exclamation', 'green', 'yellow')
-        switch (status) {
-          case 'file':
-            statusIcon.classList.add('fa-file')
-            statusIcon.title = 'File Loaded'
-            break
-          case 'pending':
-            statusIcon.classList.add('fa-hourglass-half')
-            statusIcon.title = 'Pending Metadata'
-            break
-          case 'complete':
-            statusIcon.classList.add('fa-check', 'green')
-            statusIcon.title = 'Metadata Complete'
-            break
-          case 'error':
-            statusIcon.classList.add('fa-triangle-exclamation', 'yellow')
-            statusIcon.title = 'Metadata Error'
-            break
-        }
+        updateLibraryDirStatus(statusIcon, status)
       }
     }
   } else {
     console.error(`Directory ${dir} not found in library directories`)
   }
+}
+
+// update library directory status icon
+const updateLibraryDirStatus = (ele, status) => {
+  ele.classList.remove('fa-file', 'fa-hourglass-half', 'fa-check', 'fa-triangle-exclamation', 'green', 'yellow')
+  switch (status) {
+    case 'file':
+      ele.classList.add('fa-file')
+      ele.title = 'File Loaded'
+      break
+    case 'pending':
+      ele.classList.add('fa-hourglass-half')
+      ele.title = 'Pending Metadata'
+      break
+    case 'complete':
+      ele.classList.add('fa-check', 'green')
+      ele.title = 'Metadata Complete'
+      break
+    case 'error':
+      ele.classList.add('fa-triangle-exclamation', 'yellow')
+      ele.title = 'Metadata Error'
+      break
+  }
+  return ele
 }
 
 const addLibraryItems = async (library, type, dir) => {
