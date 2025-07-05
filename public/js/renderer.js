@@ -807,8 +807,14 @@ const getLibraryMetadata = async (type, dir) => {
   console.log(`Fetching metadata for Directory: ${dir}, Type: ${type}`)
   const library = JSON.parse(localStorage.getItem('library')) || []
   const libraryWithMetadata = []
+
   for (const item of library) {
-    if (item.path !== dir || item.type !== type) {
+    // skip items not in this dir/type OR already have metadata
+    if (
+      item.path !== dir ||
+      item.type !== type ||
+      (item.metadata && Object.keys(item.metadata).length > 0)
+    ) {
       libraryWithMetadata.push(item)
       continue
     }
