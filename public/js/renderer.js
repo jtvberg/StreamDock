@@ -774,29 +774,29 @@ const setLibraryDirStatus = (dir, status) => {
   }
 }
 
-const addLibraryItems = (library, type, dir) => {
+const addLibraryItems = async (library, type, dir) => {
   const localLibrary = JSON.parse(localStorage.getItem('library')) || []
   // remove items from local library that no longer exist in the directory
-  for (const entry of localLibrary) {
-    if (entry.path === dir && !library.includes(entry.url)) {
-      localLibrary.splice(localLibrary.indexOf(entry), 1)
-    }
-  }
+  const filtered = localLibrary.filter(entry =>
+    entry.path !== dir
+    || library.some(item => item.url === entry.url)
+  )
+
+  // add any new items from `library`
   for (const item of library) {
-    // check if item already exists in local library
-    if (localLibrary.some(entry => entry.url === item.url)) {
-      continue
+    if (!filtered.some(entry => entry.url === item.url)) {
+      filtered.push(item)
     }
-    localLibrary.push(item)
   }
-  localStorage.setItem('library', JSON.stringify(localLibrary))
+
+  // persist & continue
+  localStorage.setItem('library', JSON.stringify(filtered))
 
   if (getPrefs().find(pref => pref.id === 'library-meta').state()) {
-    console.log(`Fetching metadata for Directory: ${dir}, Type: ${type}`)
-    getLibraryMetadata(type, dir)
+    await getLibraryMetadata(type, dir)
   } else {
     setLibraryDirStatus(dir, 'new')
-    loadLibraryUi(localLibrary)
+    loadLibraryUi(filtered)
   }
 }
 
@@ -808,7 +808,7 @@ const getLibraryMetadata = async (type, dir) => {
   const library = JSON.parse(localStorage.getItem('library')) || []
   const libraryWithMetadata = []
   for (const item of library) {
-    if (item.path !== dir) {
+    if (item.path !== dir || item.type !== type) {
       libraryWithMetadata.push(item)
       continue
     }
