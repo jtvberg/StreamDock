@@ -549,9 +549,12 @@ const loadLibraryDirectoryPanel = () => {
     const libDirType = elementFromHtml(`<div class="library-directory-type">${dir.type}</div>`)
     const libDirPath = elementFromHtml(`<div class="library-directory-path" title="${dir.path}">${dir.path}</div>`)
     const libDirRescan = elementFromHtml('<div class="library-directory-btn fas fa-rotate-left" title="Scan for New Files"></div>')    
-    const libDirRefresh = elementFromHtml('<div class="library-directory-btn fas fa-arrows-rotate" title="Refresh all Metadata"></div>')
+    const libDirRefresh = elementFromHtml('<div class="library-directory-btn library-directory-refresh fas fa-arrows-rotate" title="Refresh all Metadata"></div>')
     const libDirDel = elementFromHtml('<div class="library-directory-btn library-directory-delete-btn fas fa-xmark" title="Delete Entry"></div>')
     const libDirStatus = elementFromHtml(`<div class="library-directory-status fas"></div>`)
+    if (!getPrefs().find(pref => pref.id === 'library-meta').state()) {
+      libDirRefresh.classList.add('disabled') 
+    }
     libDirRescan.addEventListener('click', () => {
       // trigger a rescan of the library directory
       console.log(`Rescanning library directory: ${dir.path}`)
@@ -1084,6 +1087,13 @@ const updatePref = (id, val) => {
       break
     case 'library-show':
       toggleLibrary(val)
+      break
+    case 'library-meta':
+      if (val) {
+        document.querySelectorAll('.library-directory-refresh').forEach(btn => btn.classList.remove('disabled'))
+      } else {
+        document.querySelectorAll('.library-directory-refresh').forEach(btn => btn.classList.add('disabled'))
+      }
       break
     case 'back-btn':
       $backBtn.style.display = val ? 'none' : ''

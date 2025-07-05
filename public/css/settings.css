@@ -179,6 +179,11 @@
   background-color: var(--color-system-accent);
 }
 
+.disabled {
+  color: var(--color-control-lightgray);
+  pointer-events: none;
+}
+
 .library-directory {
   display: grid;
   grid-template-columns: 22px 60px 1fr auto auto auto;
