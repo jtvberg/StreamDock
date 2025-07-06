@@ -565,6 +565,9 @@ const loadLibraryDirectoryPanel = () => {
       loadLibraryDir(dir.path, dir.type)
     })
     libDirRefresh.addEventListener('click', () => {
+      if (!confirm(`Are you sure you want to refresh all metadata for:\n${dir.path}?\nThis will remove and reload all metadata for this directory.`)) {
+        return
+      }
       // trigger a refresh of the library directory metadata
       console.log(`Refreshing library directory metadata: ${dir.path}`)
       // drop items from local storage libarary with path and save
@@ -575,6 +578,9 @@ const loadLibraryDirectoryPanel = () => {
       loadLibraryDir(dir.path, dir.type)
     })
     libDirDel.addEventListener('click', () => {
+      if (!confirm(`Are you sure you want to delete the library directory:\n${dir.path}?`)) {
+        return
+      }
       // trigger a delete of the library directory
       console.log(`Deleting library directory: ${dir.path}`)
       // remove the directory from local storage
@@ -770,7 +776,7 @@ const updateLibraryDirStatus = (ele, status) => {
       break
     case 'pending':
       ele.classList.add('fa-hourglass-half')
-      ele.title = 'Pending Metadata'
+      ele.title = 'Load Pending'
       break
     case 'complete':
       ele.classList.add('fa-check', 'green')

@@ -168,11 +168,11 @@
 }
 
 .library-directory-btn {
-  height: 22px;
-  width: 22px;
+  height: 23px;
+  width: 23px;
   border-radius: 3px;
   text-align: center;
-  line-height: 22px;
+  line-height: 23px;
 }
 
 .library-directory-btn:hover {
