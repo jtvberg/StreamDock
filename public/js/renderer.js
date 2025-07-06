@@ -1,10 +1,12 @@
 // Imports
 import { getStreams, setStreams, getNewStreamId, getLastStream, getPrefs, setLastStream, getWinBounds, setWinBounds, getWinLock, setWinLock, getWinRatio, setWinRatio, getDefaultAgent } from "./util/settings.js"
 import { searchMovie, searchTv } from './util/tmdb.js'
+import { cacheImage, getCachedImage } from "./util/imageCache.js"
 import locs from '../res/loc.json' with { type: 'json' }
 
 // Constants
 const streams = getStreams()
+const tmdbImagePath = 'https://image.tmdb.org/t/p/original'
 
 // Element references
 const $header = document.querySelector('#header')
@@ -84,6 +86,7 @@ let dragStream
 let dragLeave
 let headerTimeOut
 let editMode = false
+let libraryLoadLock = Promise.resolve()
 
 // Functions
 const headerDim = await window.electronAPI.getHeaderHeight()
@@ -636,17 +639,26 @@ const getDate = input => {
 }
 
 // create a library tile
-const createLibraryTile = libraryObj => {
+const createLibraryTile = async libraryObj => {
   const cleanTitle = libraryObj.metadata?.title || libraryObj.metadata?.name || libraryObj.title || 'Unknown Title'
   const cleanYear = libraryObj.releaseYear === undefined ? '' : `(${libraryObj.releaseYear})`
-  const tmdbImagePath = 'https://image.tmdb.org/t/p/original'
-  const poster = libraryObj.metadata?.poster_path ? `${tmdbImagePath}${libraryObj.metadata?.poster_path}` : null
+  let poster = libraryObj.metadata?.poster_path ? `${tmdbImagePath}${libraryObj.metadata?.poster_path}` : null
+
+  if (libraryObj.metadata?.poster_path) {
+    poster = `${tmdbImagePath}${libraryObj.metadata.poster_path}`
+    try {
+      const cached = await getCachedImage(libraryObj.metadata.poster_path)
+      if (cached) poster = cached
+    } catch (e) {
+      console.log('Image cache error', e)
+    }
+  }
+
   const resultTile = elementFromHtml(`<div class="result-tile"></div>`)
   const resultPoster = elementFromHtml(`<img class="result-poster" src="${poster}"></img>`)
   const resultDetails = elementFromHtml(`<div class="result-details"></div>`)
   const resultTitle = elementFromHtml(`<div class="result-title" title="${cleanTitle}">${cleanTitle}</div>`)
   const resultYear = elementFromHtml(`<div class="result-year" title="${cleanYear}">${cleanYear}</div>`)
-
   resultDetails.appendChild(resultTitle)
   resultDetails.appendChild(resultYear)
   resultTile.appendChild(resultDetails)
@@ -687,13 +699,12 @@ const libraryListView = () => {
 }
 
 // load library
-const loadLibraryUi = library => {
+const loadLibraryUi = async library => {
   const fragTiles = document.createDocumentFragment()
   const fragList = document.createDocumentFragment()
-  library.forEach(li => {
-    fragTiles.appendChild(createLibraryTile(li))
-    fragList.appendChild(createLibraryListItem(li))
-  })
+  const tileNodes = await Promise.all(library.map(li => createLibraryTile(li)))
+  tileNodes.forEach(node => fragTiles.appendChild(node))
+  library.forEach(li => fragList.appendChild(createLibraryListItem(li)))
   $library.replaceChildren([])
   $libraryList.replaceChildren([])
   $library.appendChild(fragTiles)
@@ -774,28 +785,37 @@ const updateLibraryDirStatus = (ele, status) => {
 }
 
 const addLibraryItems = async (library, type, dir) => {
-  const localLibrary = JSON.parse(localStorage.getItem('library')) || []
-  // remove items from local library that no longer exist in the directory
-  const filtered = localLibrary.filter(entry =>
-    entry.path !== dir
-    || library.some(item => item.url === entry.url)
-  )
+  // one load at a time
+  await libraryLoadLock
+  let resolveLock
+  libraryLoadLock = new Promise(res => resolveLock = res)
 
-  // add any new items from `library`
-  for (const item of library) {
-    if (!filtered.some(entry => entry.url === item.url)) {
-      filtered.push(item)
+  try {
+    const localLibrary = JSON.parse(localStorage.getItem('library')) || []
+    // remove items from local library that no longer exist in the directory
+    const filtered = localLibrary.filter(entry =>
+      entry.path !== dir
+      || library.some(item => item.url === entry.url)
+    )
+
+    // add any new items from `library`
+    for (const item of library) {
+      if (!filtered.some(entry => entry.url === item.url)) {
+        filtered.push(item)
+      }
     }
-  }
 
-  // persist & continue
-  localStorage.setItem('library', JSON.stringify(filtered))
+    // persist & continue
+    localStorage.setItem('library', JSON.stringify(filtered))
 
-  if (getPrefs().find(pref => pref.id === 'library-meta').state()) {
-    await getLibraryMetadata(type, dir)
-  } else {
-    setLibraryDirStatus(dir, 'file')
-    loadLibraryUi(filtered)
+    if (getPrefs().find(pref => pref.id === 'library-meta').state()) {
+      await getLibraryMetadata(type, dir)
+    } else {
+      setLibraryDirStatus(dir, 'file')
+      loadLibraryUi(filtered)
+    }
+  } finally {
+    resolveLock()
   }
 }
 
@@ -841,6 +861,10 @@ const getLibraryMetadata = async (type, dir) => {
       metadata = searchResult.results[0]
       releaseYear = getYear(metadata.release_date || metadata.first_air_date || 'NA')
       releaseDate = getDate(metadata.release_date || metadata.first_air_date || 'NA')
+      if (metadata.poster_path && getPrefs().find(pref => pref.id === 'library-cache').state()) {
+        const posterUrl = `${tmdbImagePath}${metadata.poster_path}`
+        cacheImage(posterUrl, metadata.poster_path)
+      }
     }
     libraryWithMetadata.push({ ...item, releaseYear, releaseDate, metadata })
   }

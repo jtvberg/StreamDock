@@ -276,6 +276,15 @@ export const getPrefs = () => {
       true
     ),
     new Pref(
+      'library-cache',
+      'library',
+      'checkbox',
+      'Cache Backdrop Images',
+      'Cache backdrop images from TMDB for library content (API key required)',
+      false,
+      true
+    ),    
+    new Pref(
       'service-ad',
       'service',
       'checkbox',
