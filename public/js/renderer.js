@@ -1171,6 +1171,8 @@ const toggleLibrary = bool => {
     $libraryNavBtn.style.display = ''
   } else {
     $libraryNavBtn.style.display = 'none'
+    getPrefs().find(pref => pref.id === 'library-scan').update(false)
+    document.querySelector('#library-scan').checked = false
     changeHomeLayout()
   }
 }
