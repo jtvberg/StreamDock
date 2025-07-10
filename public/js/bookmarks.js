@@ -88,7 +88,7 @@ const addBookmark = bookmarkObj => {
   const bookmarks = JSON.parse(localStorage.getItem('bookmarks')) || []
   bookmarks.push(bookmarkObj)
   localStorage.setItem('bookmarks', JSON.stringify(bookmarks))
-  logOutput('Bookmark Added')
+  // logOutput('Bookmark Added')
 }
 
 // delete bookmark by timestamp

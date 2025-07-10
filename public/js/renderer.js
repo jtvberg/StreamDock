@@ -80,7 +80,7 @@ const loadStreams = () => {
     loadStreamPanel(stream)
   })
   setStreams(streams)
-  logOutput('Streams Updated')
+  // logOutput('Streams Updated')
   loadStreamPanel({
     active: true,
     glyph: '+',
@@ -119,7 +119,7 @@ const applySettings = () => {
   }
 
   if (prefs.find(pref => pref.id === 'library-scan').state()) {
-    logOutput('Auto-scanning library directories for new files...')
+    // logOutput('Auto-scanning library directories for new files...')
     rescanAllLibraryDirs()
   }
 
@@ -533,7 +533,7 @@ const loadLibraryDirectoryPanel = () => {
     }
     libDirRescan.addEventListener('click', () => {
       // trigger a rescan of the library directory
-      logOutput(`Rescanning library directory: ${dir.path}`)
+      // logOutput(`Rescanning library directory: ${dir.path}`)
       // look for new files in the directory and remove any items that no longer exist
       loadLibraryDir(dir.path, dir.type)
     })
@@ -542,7 +542,7 @@ const loadLibraryDirectoryPanel = () => {
         return
       }
       // trigger a refresh of the library directory metadata
-      logOutput(`Refreshing library directory metadata: ${dir.path}`)
+      // logOutput(`Refreshing library directory metadata: ${dir.path}`)
       // drop items from local storage libarary with path and save
       const library = JSON.parse(localStorage.getItem('library')) || []
       const updatedLibrary = library.filter(item => item.path !== dir.path)
@@ -555,7 +555,7 @@ const loadLibraryDirectoryPanel = () => {
         return
       }
       // trigger a delete of the library directory
-      logOutput(`Deleting library directory: ${dir.path}`)
+      // logOutput(`Deleting library directory: ${dir.path}`)
       // remove the directory from local storage
       const dirs = JSON.parse(localStorage.getItem('directories')) || []
       dirs.splice(dirs.findIndex(d => d.path === dir.path), 1)

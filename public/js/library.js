@@ -31,7 +31,7 @@ const createLibraryTile = async libraryObj => {
       const cached = await getCachedImage(libraryObj.metadata.poster_path)
       if (cached) poster = cached
     } catch (e) {
-      logOutput('Image cache error', e)
+      // logOutput('Image cache error', e)
     }
   }
 
@@ -111,18 +111,18 @@ export const loadLibraryFromStorage = () => {
 // metadata load error handler
 const handleMetadataError = (dir, error) => {
   if (error === 1) {
-    logOutput(`TMDB API Error: No API key provided`)
+    // logOutput(`TMDB API Error: No API key provided`)
     alert('TMDB API Error: No API key provided. Please set your TMDB API key in the search settings.')
     setLibraryDirStatus(dir, 'error')
   } else if (error === -1) {
-    logOutput(`TMDB API Error`)
+    // logOutput(`TMDB API Error`)
     setLibraryDirStatus(dir, 'error')
   }
 }
 
 // set directory metadata status
 const setLibraryDirStatus = (dir, status) => {
-  logOutput(`Setting status for directory: ${dir} to ${status}`)
+  // logOutput(`Setting status for directory: ${dir} to ${status}`)
   const dirs = JSON.parse(localStorage.getItem('directories')) || []
   const dirIndex = dirs.findIndex(d => d.path === dir)
   if (dirIndex > -1) {
@@ -137,7 +137,7 @@ const setLibraryDirStatus = (dir, status) => {
       }
     }
   } else {
-    logOutput(`Directory ${dir} not found in library directories`)
+    // logOutput(`Directory ${dir} not found in library directories`)
   }
 }
 
@@ -204,7 +204,7 @@ const addLibraryItems = async (library, type, dir) => {
 const getLibraryMetadata = async (type, dir) => {
   setLibraryDirStatus(dir, 'pending')
   let error = false
-  logOutput(`Fetching metadata for Directory: ${dir}, Type: ${type}`)
+  // logOutput(`Fetching metadata for Directory: ${dir}, Type: ${type}`)
   const library = JSON.parse(localStorage.getItem('library')) || []
   const libraryWithMetadata = []
 
@@ -219,7 +219,7 @@ const getLibraryMetadata = async (type, dir) => {
       continue
     }
     const searchTerm = item.title
-    logOutput(`Searching for metadata for: ${searchTerm}`)
+    // logOutput(`Searching for metadata for: ${searchTerm}`)
     const searchResult = type === 'movie'
       ? await searchMovie(searchTerm, 1)
       : await searchTv(searchTerm, 1)
