@@ -2,8 +2,9 @@
 import { searchMovie, searchTv } from './util/tmdb.js'
 import { cacheImage, getCachedImage } from "./util/imageCache.js"
 import { getPrefs } from "./util/settings.js"
+import { getYear, getDate, getCleanTitle, elementFromHtml, logOutput } from "./util/helpers.js"
 
-
+// Element references
 const tmdbImagePath = 'https://image.tmdb.org/t/p/original'
 const $library = document.querySelector('#library')
 const $libraryList = document.querySelector('#library-list')
@@ -15,33 +16,8 @@ const $librarySortNewBtn = document.querySelector('#library-sort-new-btn')
 const $librarySortTitleBtn = document.querySelector('#library-sort-title-btn')
 const $librarySortPathBtn = document.querySelector('#library-sort-path-btn')
 
-
+// Vars
 let libraryLoadLock = Promise.resolve()
-
-// helper funtion to create element from html string
-const elementFromHtml = html => {
-  const parser = new DOMParser()
-  const template = document.createElement('template')
-  template.innerHTML = parser.parseFromString(html.trim(), "text/html").body.innerHTML
-  return template.content.firstElementChild
-}
-
-// get year from date input
-const getYear = input => {
-  const year = new Date(input).getFullYear()
-  return isNaN(year) ? 'NA' : year
-}
-
-// get int date from date input
-const getDate = input => {
-  const date = new Date(input)
-  return isNaN(date) ? 'NA' : date.getTime()
-}
-
-// remove special characters from title
-const getCleanTitle = title => {
-  return title.replaceAll(/["'&<>]/g, '')
-}
 
 // create a library tile
 const createLibraryTile = async libraryObj => {
@@ -55,7 +31,7 @@ const createLibraryTile = async libraryObj => {
       const cached = await getCachedImage(libraryObj.metadata.poster_path)
       if (cached) poster = cached
     } catch (e) {
-      console.log('Image cache error', e)
+      logOutput('Image cache error', e)
     }
   }
 
@@ -124,7 +100,7 @@ export const loadLibraryDir = (dir, type) => {
 }
 
 // load library from local storage
-const loadLibraryFromStorage = () => {
+export const loadLibraryFromStorage = () => {
   const libraryWithMetadata = JSON.parse(localStorage.getItem('library')) || []
   if (libraryWithMetadata.length > 0) {
     loadLibraryUi(libraryWithMetadata)
@@ -135,18 +111,18 @@ const loadLibraryFromStorage = () => {
 // metadata load error handler
 const handleMetadataError = (dir, error) => {
   if (error === 1) {
-    console.log(`TMDB API Error: No API key provided`)
+    logOutput(`TMDB API Error: No API key provided`)
     alert('TMDB API Error: No API key provided. Please set your TMDB API key in the search settings.')
     setLibraryDirStatus(dir, 'error')
   } else if (error === -1) {
-    console.log(`TMDB API Error`)
+    logOutput(`TMDB API Error`)
     setLibraryDirStatus(dir, 'error')
   }
 }
 
 // set directory metadata status
 const setLibraryDirStatus = (dir, status) => {
-  console.log(`Setting status for directory: ${dir} to ${status}`)
+  logOutput(`Setting status for directory: ${dir} to ${status}`)
   const dirs = JSON.parse(localStorage.getItem('directories')) || []
   const dirIndex = dirs.findIndex(d => d.path === dir)
   if (dirIndex > -1) {
@@ -161,7 +137,7 @@ const setLibraryDirStatus = (dir, status) => {
       }
     }
   } else {
-    console.error(`Directory ${dir} not found in library directories`)
+    logOutput(`Directory ${dir} not found in library directories`)
   }
 }
 
@@ -228,7 +204,7 @@ const addLibraryItems = async (library, type, dir) => {
 const getLibraryMetadata = async (type, dir) => {
   setLibraryDirStatus(dir, 'pending')
   let error = false
-  console.log(`Fetching metadata for Directory: ${dir}, Type: ${type}`)
+  logOutput(`Fetching metadata for Directory: ${dir}, Type: ${type}`)
   const library = JSON.parse(localStorage.getItem('library')) || []
   const libraryWithMetadata = []
 
@@ -243,7 +219,7 @@ const getLibraryMetadata = async (type, dir) => {
       continue
     }
     const searchTerm = item.title
-    console.log(`Searching for metadata for: ${searchTerm}`)
+    logOutput(`Searching for metadata for: ${searchTerm}`)
     const searchResult = type === 'movie'
       ? await searchMovie(searchTerm, 1)
       : await searchTv(searchTerm, 1)
@@ -362,4 +338,5 @@ $libraryTvBtn.addEventListener('click', () => {
 
 window.electronAPI.sendLibrary((e, library) => addLibraryItems(library, library[0].type, library[0].path))
 
+// Setup
 loadLibraryFromStorage()

@@ -34,12 +34,6 @@ const $modalTmdbLogo = document.querySelector('#modal-tmdb-logo')
 const $modalProviders = document.querySelector('#modal-providers')
 
 // Functions
-const elementFromHtml = html => {
-  const template = document.createElement('template')
-  template.innerHTML = html.trim()
-  return template.content.firstElementChild
-}
-
 const getTrending = async (time = 'week', page = 1) => {
   if (page === 1) { clearResults() }
   const response = await getTrendingTitles(time, page)
@@ -190,11 +184,6 @@ const showDetails = async (id, media_type) => {
     frag.appendChild(pe)
     $modalProviders.appendChild(frag)
   })
-}
-
-function getYear(input) {
-  const year = new Date(input).getFullYear()
-  return isNaN(year) ? 'NA' : year
 }
 
 function getPosterPath(input) {

@@ -1,10 +1,12 @@
 // Imports
 import { getStreams, setStreams, getNewStreamId, getLastStream, getPrefs, setLastStream, getWinBounds, setWinBounds, getWinLock, setWinLock, getWinRatio, setWinRatio, getDefaultAgent } from "./util/settings.js"
+import { rescanAllLibraryDirs, updateLibraryDirStatus, loadLibraryDir, loadLibraryFromStorage } from "./library.js"
+import { elementFromHtml, logOutput, elementRemoveFlash } from "./util/helpers.js"
 import locs from '../res/loc.json' with { type: 'json' }
-import { rescanAllLibraryDirs, updateLibraryDirStatus, loadLibraryDir } from "./library.js"
 
 // Constants
 const streams = getStreams()
+const headerDim = await window.electronAPI.getHeaderHeight()
 
 // Element references
 const $header = document.querySelector('#header')
@@ -13,8 +15,6 @@ const $dragWin = document.querySelector('#drag-win')
 const $headerControls = document.querySelector('#header-controls')
 const $streamControls = document.querySelector('#stream-controls')
 const $prefsBtn = document.querySelector('#prefs-btn')
-const $bookmarks = document.querySelector('#bookmarks')
-const $bookmarkList = document.querySelector('#bookmark-list')
 const $headerPanels = document.querySelectorAll('.header-panels')
 const $prefsLayout = document.querySelector('#prefs-layout')
 const $servicePrefs = document.querySelector('#service-layout')
@@ -30,7 +30,6 @@ const $minBtn = document.querySelector('#min-btn')
 const $maxBtn = document.querySelector('#max-btn')
 const $backBtn = document.querySelector('#back-btn')
 const $homeBtn = document.querySelector('#home-btn')
-const $bookmarkBtn = document.querySelector('#bookmark-btn')
 const $constrainBtn = document.querySelector('#constrain-btn')
 const $newinBtn = document.querySelector('#newin-btn')
 const $linkBtn = document.querySelector('#link-btn')
@@ -56,12 +55,6 @@ const $appControls = document.querySelector('#app-controls')
 const $winControl = document.querySelectorAll('.win-control')
 const $winControls = document.querySelector('#win-controls')
 const $openDevTools = document.querySelector('#open-devtools-btn')
-const $bookmarkListBtn = document.querySelector('#bookmark-list-btn')
-const $bookmarkSortOldBtn = document.querySelector('#bookmark-sort-old-btn')
-const $bookmarkSortNewBtn = document.querySelector('#bookmark-sort-new-btn')
-const $bookmarkSortTitleBtn = document.querySelector('#bookmark-sort-title-btn')
-const $bookmarkSortHostBtn = document.querySelector('#bookmark-sort-host-btn')
-const $bookmarkNewLinkBtn = document.querySelector('#bookmark-newlink-btn')
 const $library = document.querySelector('#library')
 const $libraryList = document.querySelector('#library-list')
 const $libraryLayout = document.querySelector('#library-layout')
@@ -78,13 +71,6 @@ let dragLeave
 let headerTimeOut
 let editMode = false
 
-// Functions
-const headerDim = await window.electronAPI.getHeaderHeight()
-
-const logOutput = log => {
-  console.log(`${new Date().toLocaleString()}: ${log}\n`)
-}
-
 // create stream element for stream bar, stream edit panel and append add new stream element
 const loadStreams = () => {
   $streamControls.replaceChildren([])
@@ -94,7 +80,7 @@ const loadStreams = () => {
     loadStreamPanel(stream)
   })
   setStreams(streams)
-  // logOutput('Streams Updated')
+  logOutput('Streams Updated')
   loadStreamPanel({
     active: true,
     glyph: '+',
@@ -113,8 +99,6 @@ const applySettings = () => {
   headerExpanded = headerDim.height
 
   loadStreams()
-
-  getBookmarks()
 
   changeHomeLayout()
 
@@ -135,7 +119,7 @@ const applySettings = () => {
   }
 
   if (prefs.find(pref => pref.id === 'library-scan').state()) {
-    console.log('Auto-scanning library directories for new files...')
+    logOutput('Auto-scanning library directories for new files...')
     rescanAllLibraryDirs()
   }
 
@@ -158,14 +142,6 @@ const applySettings = () => {
   })
 
   window.electronAPI.openUrl(getLastStream())
-}
-
-// helper funtion to create element from html string
-const elementFromHtml = html => {
-  const parser = new DOMParser()
-  const template = document.createElement('template')
-  template.innerHTML = parser.parseFromString(html.trim(), "text/html").body.innerHTML
-  return template.content.firstElementChild
 }
 
 // create stream element for stream bar and stream edit panel
@@ -414,6 +390,15 @@ const repaintStreamBar = () => {
   streams.forEach(stream => loadStreamBar(stream))
 }
 
+// restore missing default streams
+const restoreStreams = () => {
+  getStreams(true).forEach(s => {
+    streams.find(c => c.url === s.url) ? null : streams.push(s)
+  })
+  reorderStreams()
+  loadStreams()
+}
+
 // load settings panel
 const loadSettingsPanel = pref => {
   if (!pref.live) return
@@ -548,7 +533,7 @@ const loadLibraryDirectoryPanel = () => {
     }
     libDirRescan.addEventListener('click', () => {
       // trigger a rescan of the library directory
-      console.log(`Rescanning library directory: ${dir.path}`)
+      logOutput(`Rescanning library directory: ${dir.path}`)
       // look for new files in the directory and remove any items that no longer exist
       loadLibraryDir(dir.path, dir.type)
     })
@@ -557,7 +542,7 @@ const loadLibraryDirectoryPanel = () => {
         return
       }
       // trigger a refresh of the library directory metadata
-      console.log(`Refreshing library directory metadata: ${dir.path}`)
+      logOutput(`Refreshing library directory metadata: ${dir.path}`)
       // drop items from local storage libarary with path and save
       const library = JSON.parse(localStorage.getItem('library')) || []
       const updatedLibrary = library.filter(item => item.path !== dir.path)
@@ -570,7 +555,7 @@ const loadLibraryDirectoryPanel = () => {
         return
       }
       // trigger a delete of the library directory
-      console.log(`Deleting library directory: ${dir.path}`)
+      logOutput(`Deleting library directory: ${dir.path}`)
       // remove the directory from local storage
       const dirs = JSON.parse(localStorage.getItem('directories')) || []
       dirs.splice(dirs.findIndex(d => d.path === dir.path), 1)
@@ -868,177 +853,6 @@ const toggleLibrary = bool => {
   }
 }
 
-// restore missing default streams
-const restoreStreams = () => {
-  getStreams(true).forEach(s => {
-    streams.find(c => c.url === s.url) ? null : streams.push(s)
-  })
-  reorderStreams()
-  loadStreams()
-}
-
-// create a bookmark tile
-const createBookmarkTile = bookmarkObj => {
-  const cleanTitle = getCleanTitle(bookmarkObj.title)
-  const frag = document.createDocumentFragment()
-  const bookmark = elementFromHtml(`<div class="bookmark-instance" data-ts="${bookmarkObj.timestamp}" title="${cleanTitle}"></div>`)
-  const image = elementFromHtml(`<img class="bookmark-image" src="${bookmarkObj.img}">`)
-  const deleteBtn = elementFromHtml(`<div class="fas fa-xmark bookmark-delete"></div>`)
-  deleteBtn.addEventListener('click', e => {
-    e.stopImmediatePropagation()
-    deleteBookmark(bookmarkObj.timestamp)
-  })
-  const linkBtn = elementFromHtml(`<div class="fas fa-link bookmark-link"></div>`)
-  linkBtn.addEventListener('click', e => {
-    e.stopImmediatePropagation()
-    copyLink(e, bookmarkObj.url)
-  })
-  const title = elementFromHtml(`<div class="bookmark-title">${cleanTitle}</div>`)
-  bookmark.appendChild(image)
-  bookmark.appendChild(deleteBtn)
-  bookmark.appendChild(linkBtn)
-  bookmark.appendChild(title)
-  bookmark.addEventListener('click', () => window.electronAPI.openUrl(bookmarkObj.url))
-  frag.appendChild(bookmark)
-  return frag
-}
-
-// create a boookmark list item
-const createBookmarkListItem = bookmarkObj => {
-  const cleanTitle = getCleanTitle(bookmarkObj.title)
-  const frag = document.createDocumentFragment()
-  const bookmarkListItem = elementFromHtml(`<div class="bookmark-row" data-ts="${bookmarkObj.timestamp}" title="${cleanTitle}"></div>`)
-  const bookmarkListTitle = elementFromHtml(`<div class="bookmark-cell">${cleanTitle}</div>`)
-  const bookmarkListHost = elementFromHtml(`<div class="bookmark-cell">${getCleanHost(bookmarkObj.url)}</div>`)
-  const bookmarkListTime = elementFromHtml(`<div class="bookmark-cell bookmark-cell-right">${new Date(bookmarkObj.timestamp).toLocaleString()}</div>`)
-  const bookmarkListLink = elementFromHtml(`<div class="fas fa-link bookmark-cell-link"></div>`)
-  const bookmarkListDelete = elementFromHtml(`<div class="fas fa-xmark bookmark-cell-delete"></div>`)
-  bookmarkListItem.appendChild(bookmarkListTitle)
-  bookmarkListItem.appendChild(bookmarkListHost)
-  bookmarkListItem.appendChild(bookmarkListTime)
-  bookmarkListItem.appendChild(bookmarkListLink)
-  bookmarkListItem.appendChild(bookmarkListDelete)
-  bookmarkListItem.addEventListener('click', () => window.electronAPI.openUrl(bookmarkObj.url))
-  bookmarkListLink.addEventListener('click', e => {
-    e.stopImmediatePropagation()
-    copyLink(e, bookmarkObj.url, true)
-  })
-  bookmarkListDelete.addEventListener('click', e => {
-    e.stopImmediatePropagation()
-    deleteBookmark(bookmarkObj.timestamp)
-  })
-  frag.appendChild(bookmarkListItem)
-  return frag
-}
-
-// toggle bookmark list view
-const bookmarkListView = () => {
-  if ($bookmarkListBtn.classList.contains('toggled-bg')) {
-    $bookmarkListBtn.classList.remove('toggled-bg')
-    $bookmarks.style.display = ''
-    $bookmarkList.style.display = ''
-  } else {
-    $bookmarkListBtn.classList.add('toggled-bg')
-    $bookmarks.style.display = 'none'
-    $bookmarkList.style.display = 'flex'
-  }
-}
-
-// add bookmark to UI and local storage
-const addBookmark = bookmarkObj => {
-  $bookmarks.appendChild(createBookmarkTile(bookmarkObj))
-  $bookmarkList.appendChild(createBookmarkListItem(bookmarkObj))
-  elementAddFlash($homeBtn)
-  const bookmarks = JSON.parse(localStorage.getItem('bookmarks')) || []
-  bookmarks.push(bookmarkObj)
-  localStorage.setItem('bookmarks', JSON.stringify(bookmarks))
-  // logOutput('Bookmark Added')
-}
-
-// delete bookmark by timestamp
-const deleteBookmark = timestamp => {
-  document.querySelectorAll('.bookmark-instance, .bookmark-row').forEach(bm => {
-    if (bm.dataset.ts == timestamp) {
-      bm.classList.add('element-fadeout')
-      setTimeout(() => {
-        bm.remove()
-      }, 300)
-    }
-  })
-  const bookmarks = JSON.parse(localStorage.getItem('bookmarks'))
-  localStorage.setItem('bookmarks', JSON.stringify(bookmarks.filter(bm => bm.timestamp !== timestamp)))
-  // logOutput('Bookmark Deleted')
-}
-
-// get bookmarks from local storage
-const getBookmarks = () => {
-  const bookmarks = JSON.parse(localStorage.getItem('bookmarks')) || []
-  loadBookmarks(bookmarks)
-}
-
-// load bookmarks from array
-const loadBookmarks = bookmarks => {
-  const fragTiles = document.createDocumentFragment()
-  const fragList = document.createDocumentFragment()
-  bookmarks.forEach(bm => {
-    fragTiles.appendChild(createBookmarkTile(bm))
-    fragList.appendChild(createBookmarkListItem(bm))
-  })
-  $bookmarks.appendChild(fragTiles)
-  $bookmarkList.appendChild(fragList)
-}
-
-// remove www. from host
-const getCleanHost = url => {
-  return new URL(url).hostname.replace('www.', '')
-}
-
-// remove special characters from title
-const getCleanTitle = title => {
-  return title.replaceAll(/["'&<>]/g, '')
-}
-
-// sort bookmarks by order param
-const sortBookmarks = order => {
-  const bookmarks = JSON.parse(localStorage.getItem('bookmarks')) || []
-  switch (order) {
-    case 'old':
-      // sort boomarks by timestamp ascending
-      bookmarks.sort((a, b) => a.timestamp - b.timestamp)
-      break
-    case 'new':
-      // sort boomarks by timestamp descending
-      bookmarks.sort((a, b) => b.timestamp - a.timestamp)
-      break
-    case 'title':
-      // sort boomarks by title ascending
-      bookmarks.sort((a, b) => getCleanTitle(a.title) < getCleanTitle(b.title) ? -1 : 1)
-      break
-    case 'host':
-      // sort boomarks by host ascending
-      bookmarks.sort((a, b) => getCleanHost(a.url) < getCleanHost(b.url) ? -1 : 1)
-      break
-    default:
-      bookmarks.sort((a, b) => a.timestamp - b.timestamp)
-      break
-  }
-  $bookmarks.replaceChildren([])
-  $bookmarkList.replaceChildren([])
-  loadBookmarks(bookmarks)
-}
-
-// add flash animation class
-const elementAddFlash = el => {
-  el.classList.add('element-flash')
-  el.addEventListener('animationend', elementRemoveFlash)
-}
-
-// remove flash animation class
-const elementRemoveFlash = e => {
-  e.target.removeEventListener('animationend', elementRemoveFlash)
-  e.target.classList.remove('element-flash')
-}
-
 // load about panel details
 const loadAbout = appInfo => {
   $aboutName.textContent = appInfo.name
@@ -1047,21 +861,6 @@ const loadAbout = appInfo => {
   $aboutRepoBtn.dataset.link = appInfo.repository
   $aboutEmailBtn.dataset.link = appInfo.email
   $aboutBugBtn.dataset.link = appInfo.bugs
-}
-
-// copy link to clipboard and display 'copied' message
-const copyLink = (e, link, alt = false) => {
-  navigator.clipboard.writeText(link)
-  const frag = document.createDocumentFragment()
-  const copied = elementFromHtml(`<div class="copied" style="left:${alt ? e.clientX - 50 : e.clientX}px; top:${e.clientY - 30}px;">Copied!</div>`)
-  frag.appendChild(copied)
-  document.body.appendChild(frag)
-  setTimeout(() => {
-    copied.classList.add('element-fadeout')
-    setTimeout(() => {
-      copied.remove()
-    }, 800)
-  }, 600)
 }
 
 // Events
@@ -1118,21 +917,6 @@ $homeBtn.addEventListener('animationend', elementRemoveFlash)
 
 $openDevTools.addEventListener('click', window.electronAPI.openDevTools)
 
-$bookmarkBtn.addEventListener('click', window.electronAPI.createBookmark)
-
-$bookmarkListBtn.addEventListener('click', bookmarkListView)
-
-$bookmarkSortOldBtn.addEventListener('click', () => sortBookmarks('old'))
-
-$bookmarkSortNewBtn.addEventListener('click', () => sortBookmarks('new'))
-
-$bookmarkSortHostBtn.addEventListener('click', () => sortBookmarks('host'))
-
-$bookmarkSortTitleBtn.addEventListener('click', () => sortBookmarks('title'))
-
-$bookmarkNewLinkBtn.addEventListener('click', async () => window.electronAPI.urlToBookmark(`${await navigator.clipboard.readText()}`))
-
-
 $header.addEventListener('mouseenter', expandHeader)
 
 $header.addEventListener('contextmenu', window.electronAPI.winHide)
@@ -1166,13 +950,9 @@ $headerPanels.forEach(el => el.addEventListener('contextmenu', e => e.stopPropag
 
 document.onkeydown = e => e.key === 'Escape' ? onDragMouseUp() : null
 
-window.electronAPI.logData((e, data) => logOutput(data))
-
 window.electronAPI.hideHeader(collaspeHeader)
 
 window.electronAPI.winStopdrag(onDragMouseUp)
-
-window.electronAPI.sendBookmark((e, bookmarkObj) => addBookmark(bookmarkObj))
 
 window.electronAPI.streamOpened(() => togglePanel($homeBtn, true))
 
@@ -1180,4 +960,3 @@ window.electronAPI.getAppInfo((e, appInfo) => loadAbout(appInfo))
 
 // Setup
 applySettings()
-
