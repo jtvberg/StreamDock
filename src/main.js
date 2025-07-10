@@ -362,7 +362,11 @@ const openUrl = url => {
   streamView.webContents.loadURL(url)
   showStream(true)
   headerView.webContents.send('stream-opened')
-  if (url.startsWith('file:')) makeFullWindow()
+  if (url.startsWith('file:')) {
+    makeFullWindow()
+    setVideoTime(3600)
+    getVideoTime()
+  }
 }
 
 // toggle streamView visibility
@@ -388,16 +392,44 @@ const validUrl = url => {
   return valid
 }
 
+// inject js to max video in window
 const makeFullWindow = () => {
-    streamView.webContents.executeJavaScript(`
-      (()=>{
+  streamView.webContents.executeJavaScript(`
+    (()=>{
+      const video = document.querySelector('video')
+      if (video) {
+        video.style.width = '100%'
+        video.style.height = '100%'
+      }
+    })()
+  `)
+}
+
+// inject js to get video time
+const getVideoTime = () => {
+  streamView.webContents.executeJavaScript(`
+    (()=>{
+      const video = document.querySelector('video')
+      if (video) {
+        console.log(video.currentTime)
+      } else {
         const video = document.querySelector('video')
-        if (video) {
-          video.style.width = '100%'
-          video.style.height = '100%'
-        }
-      })()
-    `)
+        console.log(video.currentTime)
+      }
+    })()
+  `)
+}
+
+// inject js to set video time
+const setVideoTime = (time = 0) => {
+  streamView.webContents.executeJavaScript(`
+    (()=>{
+      const video = document.querySelector('video')
+      if (video) {
+        video.currentTime = ${time}
+      }
+    })()
+  `)
 }
 
 // get system preference for accent color and send to renderers
@@ -606,6 +638,7 @@ const getLibrary = async (dir, type) => {
   headerView.webContents.send('send-library', library)
 }
 
+// perform a trusted click on an element in the webContents
 const performTrustedClick = async (webContents, selector) => {
   if (!webContents || webContents.isDestroyed()) {
     return false
@@ -651,8 +684,8 @@ app.whenReady().then(async () => {
   app.focus({ steal: true })
   if (isDev) {
     // mainWin.webContents.openDevTools({ mode: 'detach' })
-    headerView.webContents.openDevTools({ mode: 'detach' })
-    // streamView.webContents.openDevTools({ mode: 'detach' })
+    // headerView.webContents.openDevTools({ mode: 'detach' })
+    streamView.webContents.openDevTools({ mode: 'detach' })
     // facetView.webContents.openDevTools({ mode: 'detach' })
   } else {
     const updater = require('./util/updater')
