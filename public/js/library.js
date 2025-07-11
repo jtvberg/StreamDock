@@ -218,7 +218,7 @@ const getLibraryMetadata = async (type, dir) => {
       libraryWithMetadata.push(item)
       continue
     }
-    const searchTerm = item.title
+    const searchTerm = getCleanTitle(item.title)
     // logOutput(`Searching for metadata for: ${searchTerm}`)
     const searchResult = type === 'movie'
       ? await searchMovie(searchTerm, 1)
@@ -239,7 +239,10 @@ const getLibraryMetadata = async (type, dir) => {
     let releaseYear
     let releaseDate
     if (searchResult && searchResult.results && searchResult.results.length > 0) {
-      metadata = searchResult.results[0]
+      // sorth the results by popularity first
+      searchResult.results.sort((a, b) => b.popularity - a.popularity)
+      // find the first result that is exact match to search term === item.title
+      metadata = searchResult.results.find(result => getCleanTitle(result.title || result.name) === searchTerm) || searchResult.results[0]
       releaseYear = getYear(metadata.release_date || metadata.first_air_date || 'NA')
       releaseDate = getDate(metadata.release_date || metadata.first_air_date || 'NA')
       if (metadata.poster_path && getPrefs().find(pref => pref.id === 'library-cache').state()) {

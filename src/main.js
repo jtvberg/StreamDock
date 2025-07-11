@@ -684,8 +684,8 @@ app.whenReady().then(async () => {
   app.focus({ steal: true })
   if (isDev) {
     // mainWin.webContents.openDevTools({ mode: 'detach' })
-    // headerView.webContents.openDevTools({ mode: 'detach' })
-    streamView.webContents.openDevTools({ mode: 'detach' })
+    headerView.webContents.openDevTools({ mode: 'detach' })
+    // streamView.webContents.openDevTools({ mode: 'detach' })
     // facetView.webContents.openDevTools({ mode: 'detach' })
   } else {
     const updater = require('./util/updater')
