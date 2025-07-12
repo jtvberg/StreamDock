@@ -1,5 +1,6 @@
 // Imports
 import { searchMovie, searchTv } from './util/tmdb.js'
+import { showDetails } from './search.js'
 import { cacheImage, getCachedImage } from "./util/imageCache.js"
 import { getPrefs } from "./util/settings.js"
 import { getYear, getDate, getCleanTitle, elementFromHtml, logOutput } from "./util/helpers.js"
@@ -44,7 +45,8 @@ const createLibraryTile = async libraryObj => {
   resultDetails.appendChild(resultYear)
   resultTile.appendChild(resultDetails)
   poster ? resultTile.appendChild(resultPoster) : null
-  resultTile.addEventListener('click', () => window.electronAPI.openUrl(libraryObj.url))
+  // resultTile.addEventListener('click', () => window.electronAPI.openUrl(libraryObj.url))
+  resultTile.addEventListener('click', () => showDetails(libraryObj.metadata?.id, libraryObj.type))
   return resultTile
 }
 
@@ -61,7 +63,8 @@ const createLibraryListItem = libraryObj => {
   libraryListItem.appendChild(libraryListTitle)
   libraryListItem.appendChild(libraryListPath)
   libraryListItem.appendChild(libraryListTime)
-  libraryListItem.addEventListener('click', () => window.electronAPI.openUrl(libraryObj.url))
+  // libraryListItem.addEventListener('click', () => window.electronAPI.openUrl(libraryObj.url))
+  libraryListItem.addEventListener('click', () => showDetails(libraryObj.metadata?.id, libraryObj.type))
   frag.appendChild(libraryListItem)
   return frag
 }

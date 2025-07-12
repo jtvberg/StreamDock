@@ -1,6 +1,7 @@
 // Imports
 import { searchTitle, getTrendingTitles, getDiscoveryTitles, getRecommendedTitles, getTitleDetails } from './util/tmdb.js'
 import { getPrefs } from "./util/settings.js"
+import { getYear, elementFromHtml, logOutput } from "./util/helpers.js"
 
 // Constants
 const tmdbImagePath = 'https://image.tmdb.org/t/p/original'
@@ -143,7 +144,7 @@ const clearResults = () => {
   $searchResults.replaceChildren([])
 }
 
-const showDetails = async (id, media_type) => {
+export const showDetails = async (id, media_type) => {
   showError(false)
   const result = await getTitleDetails(id, media_type)
   if (result === 0) {
