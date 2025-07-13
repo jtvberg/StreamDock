@@ -96,7 +96,7 @@
   flex-direction: column;
   font-size: 1.4rem;
   padding: 3px;
-  max-width: 100%;
+  width: 100%;
   height: 100%;
 }
 
@@ -121,6 +121,20 @@
 
 .result-tile:hover > .result-poster {
   opacity: 0;
+  pointer-events: none;
+}
+
+.result-play {
+  position: absolute;
+  bottom: 5%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: var(--color-control-white);
+  transition: color 200ms ease-out;
+}
+
+.result-play:hover {
+  color: var(--color-system-accent);
 }
 
 #modal {

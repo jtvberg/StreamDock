@@ -41,12 +41,17 @@ const createLibraryTile = async libraryObj => {
   const resultDetails = elementFromHtml(`<div class="result-details"></div>`)
   const resultTitle = elementFromHtml(`<div class="result-title" title="${cleanTitle}">${cleanTitle}</div>`)
   const resultYear = elementFromHtml(`<div class="result-year" title="${cleanYear}">${cleanYear}</div>`)
+  const resultPlayBtn = elementFromHtml(`<div class="result-play fas fa-2x fa-play result-play"></div>`)
   resultDetails.appendChild(resultTitle)
   resultDetails.appendChild(resultYear)
+  resultDetails.appendChild(resultPlayBtn)
   resultTile.appendChild(resultDetails)
   poster ? resultTile.appendChild(resultPoster) : null
-  // resultTile.addEventListener('click', () => window.electronAPI.openUrl(libraryObj.url))
-  resultTile.addEventListener('click', () => showDetails(libraryObj.metadata?.id, libraryObj.type))
+  resultPlayBtn.addEventListener('click', e => {
+    e.stopImmediatePropagation()
+    window.electronAPI.openUrl(libraryObj.url)
+  })
+  resultTile.addEventListener('click', e => showDetails(libraryObj.metadata?.id, libraryObj.type))
   return resultTile
 }
 
@@ -57,13 +62,18 @@ const createLibraryListItem = libraryObj => {
   const path = libraryObj.url.replace('file://', '')
   const frag = document.createDocumentFragment()
   const libraryListItem = elementFromHtml(`<div class="library-row" data-ts="${libraryObj.timestamp}"></div>`)
+  const libraryListPlay = elementFromHtml(`<div class="fas fa-play library-list-play"></div>`)
   const libraryListTitle = elementFromHtml(`<div class="library-cell" title="${cleanTitle}">${cleanTitle}</div>`)
   const libraryListPath = elementFromHtml(`<div class="library-cell" title="${path}">${path}</div>`)
   const libraryListTime = elementFromHtml(`<div class="library-cell library-cell-right">${new Date(libraryObj.timestamp).toLocaleString()}</div>`)
+  libraryListItem.appendChild(libraryListPlay)
   libraryListItem.appendChild(libraryListTitle)
   libraryListItem.appendChild(libraryListPath)
   libraryListItem.appendChild(libraryListTime)
-  // libraryListItem.addEventListener('click', () => window.electronAPI.openUrl(libraryObj.url))
+  libraryListPlay.addEventListener('click', e => {
+    e.stopImmediatePropagation()
+    window.electronAPI.openUrl(libraryObj.url)
+  })
   libraryListItem.addEventListener('click', () => showDetails(libraryObj.metadata?.id, libraryObj.type))
   frag.appendChild(libraryListItem)
   return frag

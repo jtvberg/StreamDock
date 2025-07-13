@@ -99,13 +99,23 @@
 
 .library-row {
   display: grid;
-  grid-template-columns: 1fr 2fr 230px;
+  grid-template-columns: auto 1fr 2fr 230px;
   gap: 8px;
   align-items: center;
   font-size: 1.2rem;
   padding: 3px 6px;
   border-radius: 5px;
   transition: background-color 200ms ease-out;
+}
+
+.library-list-play {
+  padding-top: 1px;
+  color: var(--color-control-white);
+  transition: color 200ms ease-out;
+}
+
+.library-list-play:hover {
+  color: var(--color-system-accent);
 }
 
 .library-row:hover {
