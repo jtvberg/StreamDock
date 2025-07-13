@@ -364,7 +364,7 @@ const openUrl = url => {
   headerView.webContents.send('stream-opened')
   if (url.startsWith('file:')) {
     makeFullWindow()
-    setVideoTime(3600)
+    setVideoTime(0) // TODO: set video time to last known time
     getVideoTime()
   }
 }
