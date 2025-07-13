@@ -49,7 +49,7 @@ const createLibraryTile = async libraryObj => {
   poster ? resultTile.appendChild(resultPoster) : null
   resultPlayBtn.addEventListener('click', e => {
     e.stopImmediatePropagation()
-    window.electronAPI.openUrl(libraryObj.url)
+    playLibraryItem(libraryObj.url)
   })
   resultTile.addEventListener('click', e => showDetails(libraryObj.metadata?.id, libraryObj.type))
   return resultTile
@@ -72,11 +72,18 @@ const createLibraryListItem = libraryObj => {
   libraryListItem.appendChild(libraryListTime)
   libraryListPlay.addEventListener('click', e => {
     e.stopImmediatePropagation()
-    window.electronAPI.openUrl(libraryObj.url)
+    playLibraryItem(libraryObj.url)
   })
   libraryListItem.addEventListener('click', () => showDetails(libraryObj.metadata?.id, libraryObj.type))
   frag.appendChild(libraryListItem)
   return frag
+}
+
+const playLibraryItem = (url) => {
+  const library = JSON.parse(localStorage.getItem('library')) || []
+  const item = library.find(li => li.url === url)
+  const time = item.lastPlayTime || 0
+  window.electronAPI.openUrl(url, time)
 }
 
 // toggle bookmark list view
@@ -353,6 +360,18 @@ $libraryTvBtn.addEventListener('click', () => {
 })
 
 window.electronAPI.sendLibrary((e, library) => addLibraryItems(library, library[0].type, library[0].path))
+
+window.electronAPI.setVideoTime((e, urlTime) => {
+  const library = JSON.parse(localStorage.getItem('library')) || []
+  const item = library.find(li => li.url === urlTime.url)
+  if (item) {
+    item.lastPlayTime = urlTime.time
+    localStorage.setItem('library', JSON.stringify(library))
+    logOutput(`Set video time for ${urlTime.url} to ${urlTime.time}`)
+  } else {
+    logOutput(`No library item found for URL: ${urlTime.url}`)
+  }
+})
 
 // Setup
 loadLibraryFromStorage()

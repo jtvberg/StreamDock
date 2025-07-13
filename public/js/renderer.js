@@ -141,7 +141,21 @@ const applySettings = () => {
     root.style.setProperty('--color-system-accent-trans', color.substring(0, 7) + '80')
   })
 
-  window.electronAPI.openUrl(getLastStream())
+  openLastUrl()
+}
+
+// open last URL if it exists and get time from local storage if file URL
+const openLastUrl = () => {
+  const url = getLastStream()
+  let time = 0
+  if (url.startsWith('file:')) {
+    const library = JSON.parse(localStorage.getItem('library')) || []
+    const item = library.find(li => li.url === url)
+    if (item) {
+      time = item.lastPlayTime || 0
+    }
+  }
+  window.electronAPI.openUrl(url, time)
 }
 
 // create stream element for stream bar and stream edit panel

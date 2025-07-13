@@ -8,7 +8,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
     updateHeaderHeight: height => ipcRenderer.send('update-header-height', height),
     facetWidth: width => ipcRenderer.send('update-facets-width', width),
     urlToBookmark: url => ipcRenderer.send('url-to-bookmark', url),
-    openUrl: url => ipcRenderer.send('open-url', url),
+    openUrl: (url, time) => ipcRenderer.send('open-url', { url, time }),
     openNewin: () => ipcRenderer.send('open-newin'),
     openLink: () => ipcRenderer.send('open-link'),
     openDevTools: () => ipcRenderer.send('open-devtools'),
@@ -41,5 +41,6 @@ contextBridge.exposeInMainWorld('electronAPI', {
     sendLibrary: library => ipcRenderer.on('send-library', library),
     getMovies: dir => ipcRenderer.send('get-movies', dir),
     getTv: dir => ipcRenderer.send('get-tv', dir),
+    setVideoTime: (urlTime) => ipcRenderer.on('set-video-time', urlTime),
     openDirectoryDialog: () => ipcRenderer.invoke('open-directory-dialog')
 })

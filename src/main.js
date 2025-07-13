@@ -204,9 +204,10 @@ const createWindow = () => {
   })
 
   // on closing of main window, send window location to renderer and close all windows
-  mainWin.on('close', () => {
+  mainWin.on('close', async () => {
     headerView.webContents.send('win-getloc', mainWin.getBounds())
     headerView.webContents.send('last-stream', getCurrentUrl())
+    await saveVideoTime(getCurrentUrl())
     windows.delete(mainWin)
     windows.forEach(win => win.close())
   })
@@ -354,18 +355,19 @@ const setHeaderViewBounds = height => headerView.setBounds({ x: 0, y: 0, width: 
 const setFacetViewBounds = width => facetView.setBounds({ x: 0, y: 0, width, height: mainWin.getBounds().height + 2 })
 
 // open url in streamView and send stream opened message to renderer
-const openUrl = url => {
+const openUrl = (url, time = 0) => {
   if (!validUrl(url)) {
     return
   }
+  saveVideoTime(getCurrentUrl())
   sendLogData(`Open URL: ${url}`)
   streamView.webContents.loadURL(url)
   showStream(true)
+  headerView.webContents.send('last-stream', url)
   headerView.webContents.send('stream-opened')
   if (url.startsWith('file:')) {
     makeFullWindow()
-    setVideoTime(0) // TODO: set video time to last known time
-    getVideoTime()
+    setVideoTime(time)
   }
 }
 
@@ -406,18 +408,19 @@ const makeFullWindow = () => {
 }
 
 // inject js to get video time
-const getVideoTime = () => {
-  streamView.webContents.executeJavaScript(`
-    (()=>{
-      const video = document.querySelector('video')
-      if (video) {
-        console.log(video.currentTime)
-      } else {
-        const video = document.querySelector('video')
-        console.log(video.currentTime)
-      }
-    })()
-  `)
+const getVideoTime = async () => {
+  try {
+    const currentTime = await streamView.webContents.executeJavaScript(`
+      (() => {
+        const video = document.querySelector('video');
+        return video ? video.currentTime : 0;
+      })();
+    `)
+    return currentTime
+  } catch (error) {
+    sendLogData(`Error getting video time: ${error.message}`)
+    return null
+  }
 }
 
 // inject js to set video time
@@ -430,6 +433,17 @@ const setVideoTime = (time = 0) => {
       }
     })()
   `)
+}
+
+// send video time to renderer and save it
+const saveVideoTime = async (url) => {
+  if (!url.startsWith('file:')) return
+  getVideoTime().then(time => {
+    if (time !== null) {
+      urlTime = { url, time }
+      headerView.webContents.send('set-video-time', urlTime)
+    }
+  })
 }
 
 // get system preference for accent color and send to renderers
@@ -632,6 +646,7 @@ const getLibrary = async (dir, type) => {
       title: path.basename(file, ext),
       path: dir,
       url: `file://${filePath}`,
+      lastPlayTime: 0,
       timestamp: stat.birthtimeMs
     })
   }
@@ -693,6 +708,14 @@ app.whenReady().then(async () => {
   }
 })
 
+// run code prior to app quitting
+// app.on('before-quit', async (e) => {
+//   e.preventDefault()
+//   await saveVideoTime(getCurrentUrl())
+//   app.exit()
+// })
+
+// on all windows closed, save video time and quit app
 app.on('window-all-closed', async () => app.quit())
 
 // IPC channels
@@ -730,7 +753,7 @@ ipcMain.on('win-move', (e, { mouseX, mouseY }) => {
   }
 })
 
-ipcMain.on('open-url', (e, url) => openUrl(url))
+ipcMain.on('open-url', (e, { url, time }) => openUrl(url, time))
 
 ipcMain.on('create-bookmark', () => createBookmark(streamView))
 
