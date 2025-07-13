@@ -3,8 +3,12 @@ import { getPrefs } from "./settings.js"
 let requestToken = ''
 let sessionId = ''
 
-function getHost() {
+export function getHost() {
   return 'https://api.themoviedb.org'
+}
+
+export function getImagePath() {
+  return 'https://image.tmdb.org/t/p/original'
 }
 
 function getApiKey() {

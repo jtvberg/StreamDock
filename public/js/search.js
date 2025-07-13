@@ -2,10 +2,11 @@
 import { searchTitle, getTrendingTitles, getDiscoveryTitles, getRecommendedTitles, getTitleDetails } from './util/tmdb.js'
 import { getPrefs } from "./util/settings.js"
 import { getYear, elementFromHtml, logOutput } from "./util/helpers.js"
+import { getImagePath, getHost } from './util/tmdb.js'
 
 // Constants
-const tmdbImagePath = 'https://image.tmdb.org/t/p/original'
-const tmdbTitlePath = 'https://www.themoviedb.org/'
+const tmdbImagePath = getImagePath()
+const tmdbTitlePath = getHost()
 
 // Element references
 const $searchHotBtn = document.querySelector('#search-hot-btn')

@@ -4,9 +4,10 @@ import { showDetails } from './search.js'
 import { cacheImage, getCachedImage } from "./util/imageCache.js"
 import { getPrefs } from "./util/settings.js"
 import { getYear, getDate, getCleanTitle, elementFromHtml, logOutput } from "./util/helpers.js"
+import { getImagePath } from './util/tmdb.js'
 
 // Element references
-const tmdbImagePath = 'https://image.tmdb.org/t/p/original'
+const tmdbImagePath = getImagePath()
 const $library = document.querySelector('#library')
 const $libraryList = document.querySelector('#library-list')
 const $libraryListBtn = document.querySelector('#library-list-btn')
