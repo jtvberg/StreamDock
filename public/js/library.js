@@ -59,12 +59,11 @@ const createLibraryTile = async libraryObj => {
 const createLibraryListItem = libraryObj => {
   const cleanYear = libraryObj.releaseYear === undefined ? '' : `(${libraryObj.releaseYear})`
   const cleanTitle = `${libraryObj.metadata?.title || libraryObj.metadata?.name || libraryObj.title} ${cleanYear}`
-  const path = libraryObj.url.replace('file://', '')
   const frag = document.createDocumentFragment()
   const libraryListItem = elementFromHtml(`<div class="library-row" data-ts="${libraryObj.timestamp}"></div>`)
   const libraryListPlay = elementFromHtml(`<div class="fas fa-play library-list-play"></div>`)
   const libraryListTitle = elementFromHtml(`<div class="library-cell" title="${cleanTitle}">${cleanTitle}</div>`)
-  const libraryListPath = elementFromHtml(`<div class="library-cell" title="${path}">${path}</div>`)
+  const libraryListPath = elementFromHtml(`<div class="library-cell" title="${libraryObj.path}">${libraryObj.path}</div>`)
   const libraryListTime = elementFromHtml(`<div class="library-cell library-cell-right">${new Date(libraryObj.timestamp).toLocaleString()}</div>`)
   libraryListItem.appendChild(libraryListPlay)
   libraryListItem.appendChild(libraryListTitle)
@@ -144,7 +143,7 @@ const handleMetadataError = (dir, error) => {
 const setLibraryDirStatus = (dir, status) => {
   // logOutput(`Setting status for directory: ${dir} to ${status}`)
   const dirs = JSON.parse(localStorage.getItem('directories')) || []
-  const dirIndex = dirs.findIndex(d => d.path === dir)
+  const dirIndex = dirs.findIndex(d => d.dir === dir)
   if (dirIndex > -1) {
     dirs[dirIndex].status = status
     localStorage.setItem('directories', JSON.stringify(dirs))
@@ -157,7 +156,7 @@ const setLibraryDirStatus = (dir, status) => {
       }
     }
   } else {
-    // logOutput(`Directory ${dir} not found in library directories`)
+    logOutput(`Directory ${dir} not found in library directories`)
   }
 }
 
@@ -190,12 +189,12 @@ const addLibraryItems = async (library, type, dir) => {
   await libraryLoadLock
   let resolveLock
   libraryLoadLock = new Promise(res => resolveLock = res)
-
+  logOutput(`Adding library items from directory: ${dir}, Type: ${type}`)
   try {
     const localLibrary = JSON.parse(localStorage.getItem('library')) || []
     // remove items from local library that no longer exist in the directory
     const filtered = localLibrary.filter(entry =>
-      entry.path !== dir
+      entry.dir !== dir
       || library.some(item => item.url === entry.url)
     )
 
@@ -231,7 +230,7 @@ const getLibraryMetadata = async (type, dir) => {
   for (const item of library) {
     // skip items not in this dir/type OR already have metadata
     if (
-      item.path !== dir ||
+      item.dir !== dir ||
       item.type !== type ||
       (item.metadata && Object.keys(item.metadata).length > 0)
     ) {
@@ -324,7 +323,7 @@ const filterLibrary = type => {
 // rescan all library directories
 export const rescanAllLibraryDirs = () => {
   const dirs = JSON.parse(localStorage.getItem('directories')) || []
-  dirs.forEach(dir => loadLibraryDir(dir.path, dir.type))
+  dirs.forEach(dir => loadLibraryDir(dir.dir, dir.type))
 }
 
 $libraryListBtn.addEventListener('click', libraryListView)
@@ -359,7 +358,7 @@ $libraryTvBtn.addEventListener('click', () => {
   }
 })
 
-window.electronAPI.sendLibrary((e, library) => addLibraryItems(library, library[0].type, library[0].path))
+window.electronAPI.sendLibrary((e, library) => addLibraryItems(library, library[0].type, library[0].dir))
 
 window.electronAPI.setVideoTime((e, urlTime) => {
   const library = JSON.parse(localStorage.getItem('library')) || []

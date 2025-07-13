@@ -644,7 +644,8 @@ const getLibrary = async (dir, type) => {
     library.push({
       type,
       title: path.basename(file, ext),
-      path: dir,
+      dir: dir,
+      path: filePath,
       url: encodeURI(`file://${filePath}`),
       lastPlayTime: 0,
       timestamp: stat.birthtimeMs

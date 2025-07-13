@@ -537,7 +537,7 @@ const loadLibraryDirectoryPanel = () => {
   dirs.forEach(dir => {
     const libDir = elementFromHtml(`<div class="library-directory"></div>`)
     const libDirType = elementFromHtml(`<div class="library-directory-type">${dir.type}</div>`)
-    const libDirPath = elementFromHtml(`<div class="library-directory-path" title="${dir.path}">${dir.path}</div>`)
+    const libDirPath = elementFromHtml(`<div class="library-directory-path" title="${dir.dir}">${dir.dir}</div>`)
     const libDirRescan = elementFromHtml('<div class="library-directory-btn fas fa-rotate-left" title="Scan for New Files"></div>')    
     const libDirRefresh = elementFromHtml('<div class="library-directory-btn library-directory-refresh fas fa-arrows-rotate" title="Refresh all Metadata"></div>')
     const libDirDel = elementFromHtml('<div class="library-directory-btn library-directory-delete-btn fas fa-xmark" title="Delete Entry"></div>')
@@ -547,36 +547,36 @@ const loadLibraryDirectoryPanel = () => {
     }
     libDirRescan.addEventListener('click', () => {
       // trigger a rescan of the library directory
-      // logOutput(`Rescanning library directory: ${dir.path}`)
+      // logOutput(`Rescanning library directory: ${dir.dir}`)
       // look for new files in the directory and remove any items that no longer exist
-      loadLibraryDir(dir.path, dir.type)
+      loadLibraryDir(dir.dir, dir.type)
     })
     libDirRefresh.addEventListener('click', () => {
-      if (!confirm(`Are you sure you want to refresh all metadata for:\n${dir.path}?\nThis will remove and reload all metadata for this directory.`)) {
+      if (!confirm(`Are you sure you want to refresh all metadata for:\n${dir.dir}?\nThis will remove and reload all metadata for this directory.`)) {
         return
       }
       // trigger a refresh of the library directory metadata
-      // logOutput(`Refreshing library directory metadata: ${dir.path}`)
-      // drop items from local storage libarary with path and save
+      // logOutput(`Refreshing library directory metadata: ${dir.dir}`)
+      // drop items from local storage libarary with dir and save
       const library = JSON.parse(localStorage.getItem('library')) || []
-      const updatedLibrary = library.filter(item => item.path !== dir.path)
+      const updatedLibrary = library.filter(item => item.dir !== dir.dir)
       localStorage.setItem('library', JSON.stringify(updatedLibrary))
       // load the library directory again
-      loadLibraryDir(dir.path, dir.type)
+      loadLibraryDir(dir.dir, dir.type)
     })
     libDirDel.addEventListener('click', () => {
-      if (!confirm(`Are you sure you want to delete the library directory:\n${dir.path}?`)) {
+      if (!confirm(`Are you sure you want to delete the library directory:\n${dir.dir}?`)) {
         return
       }
       // trigger a delete of the library directory
-      // logOutput(`Deleting library directory: ${dir.path}`)
+      // logOutput(`Deleting library directory: ${dir.dir}`)
       // remove the directory from local storage
       const dirs = JSON.parse(localStorage.getItem('directories')) || []
-      dirs.splice(dirs.findIndex(d => d.path === dir.path), 1)
+      dirs.splice(dirs.findIndex(d => d.dir === dir.dir), 1)
       localStorage.setItem('directories', JSON.stringify(dirs))
-      // remove library items with path from storage
+      // remove library items with dir from storage
       const library = JSON.parse(localStorage.getItem('library')) || []
-      const updatedLibrary = library.filter(item => item.path !== dir.path)
+      const updatedLibrary = library.filter(item => item.dir !== dir.dir)
       localStorage.setItem('library', JSON.stringify(updatedLibrary))
       // reload library directory panel
       loadLibraryDirectoryPanel()
@@ -603,19 +603,19 @@ const loadLibraryDirectoryPanel = () => {
 }
 
 // add directory to library directory storage, panel and load library directory
-const addLibraryDirectory = (path, type) => {
+const addLibraryDirectory = (dir, type) => {
   const dirs = JSON.parse(localStorage.getItem('directories')) || []
-  if (!dirs.some(entry => entry.path === path)) {
+  if (!dirs.some(entry => entry.dir === dir)) {
     dirs.push({
-      path,
+      dir,
       type,
       status: 'file'
     })
     localStorage.setItem('directories', JSON.stringify(dirs))
     loadLibraryDirectoryPanel()
-    loadLibraryDir(path, type)
+    loadLibraryDir(dir, type)
   } else {
-    alert(`Directory ${path} already exists in library.`)
+    alert(`Directory ${dir} already exists in library.`)
   }
 }
 
