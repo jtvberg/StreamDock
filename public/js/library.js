@@ -305,7 +305,14 @@ const sortLibrary = order => {
   }
   $library.replaceChildren([])
   $libraryList.replaceChildren([])
-  loadLibraryUi(library)
+  localStorage.setItem('library', JSON.stringify(library))
+  let type = null
+  if ($libraryMovieBtn.classList.contains('toggled-bg')) {
+    type = 'movie'
+  } else if ($libraryTvBtn.classList.contains('toggled-bg')) {
+    type = 'tv'
+  }
+  filterLibrary(type)
 }
 
 // filter library by type
