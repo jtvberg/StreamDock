@@ -392,9 +392,9 @@ window.electronAPI.setVideoTime((e, urlTime) => {
   if (item) {
     item.lastPlayTime = urlTime.time
     localStorage.setItem('library', JSON.stringify(library))
-    logOutput(`Set video time for ${urlTime.url} to ${urlTime.time}`)
+    // logOutput(`Set video time for ${urlTime.url} to ${urlTime.time}`)
   } else {
-    logOutput(`No library item found for URL: ${urlTime.url}`)
+    // logOutput(`No library item found for URL: ${urlTime.url}`)
   }
 })
 

@@ -301,7 +301,7 @@ const showWin = () => {
 const loadScripts = (bv = streamView, host) => {
   headerView.webContents.executeJavaScript('({...localStorage});', true).then(response => {
     facetView.webContents.send('is-netflix', false)
-    sendLogData(`Using Hostname: ${host}`)
+    // sendLogData(`Using Hostname: ${host}`)
     switch (host) {
       case 'www.youtube.com':
         response['service-ad'] === 'true' ? ytAdsSkip(bv) : ytAdSkipRem(bv)

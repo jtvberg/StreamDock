@@ -25,9 +25,7 @@ export const getDate = input => {
 
 // remove special characters from title
 export const getCleanTitle = title => {
-  logOutput(`Cleaning title: ${title}, Cleaned: ${title.trim().split('.')[0].replaceAll(/["'&<>]/g, '')}`)
   return title.trim().split('.')[0].replaceAll(/["'&<>]/g, '')
-  // return title.replaceAll(/["'&<>.]/g, '')
 }
 
 // remove www. from host
