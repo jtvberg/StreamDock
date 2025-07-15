@@ -7,6 +7,10 @@ export function getHost() {
   return 'https://api.themoviedb.org'
 }
 
+export function getTitlePath() {
+  return 'https://www.themoviedb.org/'
+}
+
 export function getImagePath() {
   return 'https://image.tmdb.org/t/p/original'
 }
