@@ -136,6 +136,18 @@
   color: var(--color-system-accent);
 }
 
+.result-episode {
+  position: absolute;
+  bottom: 5%;
+  right: 5%;
+  padding-inline: 7px;
+  padding-block: 2px;
+  font-size: 1.4rem;
+  color: var(--color-control-white);
+  background-color: var(--color-control-darkgray);
+  border-radius: 5px;
+}
+
 #modal {
   display: flex;
   flex-direction: column;

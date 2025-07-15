@@ -45,18 +45,18 @@ const createLibraryTile = async libraryObj => {
   const resultPlayBtn = elementFromHtml(`<div class="result-play fas fa-2x fa-play result-play"></div>`)
   resultDetails.appendChild(resultTitle)
   resultDetails.appendChild(resultYear)
+  resultDetails.appendChild(resultPlayBtn)
+  resultTile.appendChild(resultDetails)
+  poster ? resultTile.appendChild(resultPoster) : null
   if (libraryObj.type === 'tv' ) {
     const match = libraryObj.title.match(/s(\d{1,2})e(\d{1,2})/i)
     if (match) {
       const season = parseInt(match[1]) || ''
       const episode = parseInt(match[2]) || ''
       const resultEpisode = elementFromHtml(`<div class="result-episode" title="Season:${season} Episode:${episode}">s${season}e${episode}</div>`)
-      resultDetails.appendChild(resultEpisode)
+      resultTile.appendChild(resultEpisode)
     }
   }
-  resultDetails.appendChild(resultPlayBtn)
-  resultTile.appendChild(resultDetails)
-  poster ? resultTile.appendChild(resultPoster) : null
   resultPlayBtn.addEventListener('click', e => {
     e.stopImmediatePropagation()
     playLibraryItem(libraryObj.url)
@@ -67,8 +67,17 @@ const createLibraryTile = async libraryObj => {
 
 // create a library list item
 const createLibraryListItem = libraryObj => {
+  let season = ''
+  let episode = ''
+  if (libraryObj.type === 'tv' ) {
+    const match = libraryObj.title.match(/s(\d{1,2})e(\d{1,2})/i)
+    if (match) {
+      season = `s${parseInt(match[1])}` || ''
+      episode = `e${parseInt(match[2])}` || ''
+    }
+  }
   const cleanYear = libraryObj.releaseYear === undefined ? '' : `(${libraryObj.releaseYear})`
-  const cleanTitle = `${libraryObj.metadata?.title || libraryObj.metadata?.name || libraryObj.title} ${cleanYear}`
+  const cleanTitle = `${libraryObj.metadata?.title || libraryObj.metadata?.name || libraryObj.title} ${season}${episode} ${cleanYear}`
   const frag = document.createDocumentFragment()
   const libraryListItem = elementFromHtml(`<div class="library-row" data-ts="${libraryObj.timestamp}"></div>`)
   const libraryListPlay = elementFromHtml(`<div class="fas fa-play library-list-play"></div>`)
