@@ -584,6 +584,7 @@ const loadLibraryDirectoryPanel = () => {
       $library.replaceChildren([])
       $libraryList.replaceChildren([])
       loadLibraryFromStorage()
+      removeLastStream()
     })
     libDir.appendChild(updateLibraryDirStatus(libDirStatus, dir.status))
     libDir.appendChild(libDirType)
@@ -600,6 +601,22 @@ const loadLibraryDirectoryPanel = () => {
   header.appendChild(pane)
   frag.appendChild(header)
   $libraryLayout.appendChild(frag)
+}
+
+// if file URL is removed from library, remove last stream if it matches
+const removeLastStream = () => {
+  const lastStream = getLastStream()
+  if (lastStream) {
+    const library = JSON.parse(localStorage.getItem('library')) || []
+    const item = library.find(li => li.url === lastStream)
+    if (!item) {
+      setLastStream('')
+      openLastUrl()
+    }
+    logOutput(`Removed last stream: ${lastStream}`)
+  } else {
+    logOutput('No last stream to remove.')
+  }
 }
 
 // add directory to library directory storage, panel and load library directory
