@@ -35,6 +35,15 @@ export const getCleanHost = url => {
   return new URL(url).hostname.replace('www.', '')
 }
 
+// get season and episode from title string
+export const getSeasonEpisode = string => {
+  const match = string.match(/S(\d+)E(\d+)/i)
+  if (match) {
+    return match
+  }
+  return ''
+}
+
 // add flash animation class
 export const elementAddFlash = el => {
   el.classList.add('element-flash')

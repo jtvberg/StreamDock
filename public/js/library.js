@@ -3,7 +3,7 @@ import { searchMovie, searchTv } from './util/tmdb.js'
 import { showDetails } from './search.js'
 import { cacheImage, getCachedImage } from "./util/imageCache.js"
 import { getPrefs } from "./util/settings.js"
-import { getYear, getDate, getCleanTitle, elementFromHtml, logOutput } from "./util/helpers.js"
+import { getYear, getDate, getCleanTitle, elementFromHtml, getSeasonEpisode, logOutput } from "./util/helpers.js"
 import { getImagePath } from './util/tmdb.js'
 
 // Element references
@@ -49,7 +49,7 @@ const createLibraryTile = async libraryObj => {
   resultTile.appendChild(resultDetails)
   poster ? resultTile.appendChild(resultPoster) : null
   if (libraryObj.type === 'tv' ) {
-    const match = libraryObj.title.match(/s(\d{1,2})e(\d{1,2})/i)
+    const match = getSeasonEpisode(libraryObj.title)
     if (match) {
       const season = parseInt(match[1]) || ''
       const episode = parseInt(match[2]) || ''
@@ -70,7 +70,7 @@ const createLibraryListItem = libraryObj => {
   let season = ''
   let episode = ''
   if (libraryObj.type === 'tv' ) {
-    const match = libraryObj.title.match(/s(\d{1,2})e(\d{1,2})/i)
+    const match = getSeasonEpisode(libraryObj.title)
     if (match) {
       season = `s${parseInt(match[1])}` || ''
       episode = `e${parseInt(match[2])}` || ''
