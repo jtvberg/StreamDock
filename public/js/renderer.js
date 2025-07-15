@@ -559,7 +559,7 @@ const loadLibraryDirectoryPanel = () => {
       // logOutput(`Refreshing library directory metadata: ${dir.dir}`)
       // drop items from local storage libarary with dir and save
       const library = JSON.parse(localStorage.getItem('library')) || []
-      const updatedLibrary = library.filter(item => item.dir !== dir.dir)
+      const updatedLibrary = library.filter(item => !item.path.startsWith(dir.dir))
       localStorage.setItem('library', JSON.stringify(updatedLibrary))
       // load the library directory again
       loadLibraryDir(dir.dir, dir.type)
@@ -576,7 +576,7 @@ const loadLibraryDirectoryPanel = () => {
       localStorage.setItem('directories', JSON.stringify(dirs))
       // remove library items with dir from storage
       const library = JSON.parse(localStorage.getItem('library')) || []
-      const updatedLibrary = library.filter(item => item.dir !== dir.dir)
+      const updatedLibrary = library.filter(item => !item.path.startsWith(dir.dir))
       localStorage.setItem('library', JSON.stringify(updatedLibrary))
       // reload library directory panel
       loadLibraryDirectoryPanel()

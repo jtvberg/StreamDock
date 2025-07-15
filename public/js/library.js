@@ -45,6 +45,15 @@ const createLibraryTile = async libraryObj => {
   const resultPlayBtn = elementFromHtml(`<div class="result-play fas fa-2x fa-play result-play"></div>`)
   resultDetails.appendChild(resultTitle)
   resultDetails.appendChild(resultYear)
+  if (libraryObj.type === 'tv' ) {
+    const match = libraryObj.title.match(/s(\d{1,2})e(\d{1,2})/i)
+    if (match) {
+      const season = parseInt(match[1]) || ''
+      const episode = parseInt(match[2]) || ''
+      const resultEpisode = elementFromHtml(`<div class="result-episode" title="Season:${season} Episode:${episode}">s${season}e${episode}</div>`)
+      resultDetails.appendChild(resultEpisode)
+    }
+  }
   resultDetails.appendChild(resultPlayBtn)
   resultTile.appendChild(resultDetails)
   poster ? resultTile.appendChild(resultPoster) : null
@@ -231,7 +240,7 @@ const getLibraryMetadata = async (type, dir) => {
   for (const item of library) {
     // skip items not in this dir/type OR already have metadata
     if (
-      item.dir !== dir ||
+      !item.path.startsWith(dir) ||
       item.type !== type ||
       (item.metadata && Object.keys(item.metadata).length > 0)
     ) {
@@ -366,7 +375,7 @@ $libraryTvBtn.addEventListener('click', () => {
   }
 })
 
-window.electronAPI.sendLibrary((e, library) => addLibraryItems(library, library[0].type, library[0].dir))
+window.electronAPI.sendLibrary((e, libraryObj) => addLibraryItems(libraryObj.library, libraryObj.type, libraryObj.dir))
 
 window.electronAPI.setVideoTime((e, urlTime) => {
   const library = JSON.parse(localStorage.getItem('library')) || []

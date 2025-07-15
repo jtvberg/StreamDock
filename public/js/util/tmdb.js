@@ -153,6 +153,16 @@ export async function searchTv(term, page) {
   return await apiGet(url)
 }
 
+export async function getEpisode(series, season, episode) {
+  const url = new URL(`${getHost()}/3/tv`)
+  url.searchParams.append('api_key', getApiKey())
+  url.searchParams.append('language', getLangLoc())
+  url.searchParams.append('series_id', series)
+  url.searchParams.append('season_number', season)
+  url.searchParams.append('episode_number', episode)
+  return await apiGet(url)
+}
+
 export async function getTrendingTitles(time, page) {
   const url = new URL(`${getHost()}/3/trending/all/${time}`)
   url.searchParams.append('api_key', getApiKey())

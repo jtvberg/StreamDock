@@ -38,9 +38,9 @@ contextBridge.exposeInMainWorld('electronAPI', {
     getHeaderHeight: heightObj => ipcRenderer.invoke('set-header-height', heightObj),
     setIsMac: bool => ipcRenderer.once('is-mac', bool),
     getAppInfo: appInfo => ipcRenderer.once('app-info', appInfo),
-    sendLibrary: library => ipcRenderer.on('send-library', library),
+    sendLibrary: libraryObj => ipcRenderer.on('send-library', libraryObj),
     getMovies: dir => ipcRenderer.send('get-movies', dir),
     getTv: dir => ipcRenderer.send('get-tv', dir),
-    setVideoTime: (urlTime) => ipcRenderer.on('set-video-time', urlTime),
+    setVideoTime: urlTime => ipcRenderer.on('set-video-time', urlTime),
     openDirectoryDialog: () => ipcRenderer.invoke('open-directory-dialog')
 })

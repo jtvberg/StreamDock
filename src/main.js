@@ -632,26 +632,41 @@ const sendLogData = log => {
 }
 
 // get library from directory and type (movies or tv)
-const getLibrary = async (dir, type) => {
-  const files = await fs.readdir(dir)
+const getLibrary = async (dir, type, recursive = true) => {
   const videoExts = ['.mp4', '.mkv', '.avi', '.mov', '.webm']
   const library = []
-  for (const file of files) {
-    const ext = path.extname(file).toLowerCase()
-    if (!videoExts.includes(ext)) continue
-    const filePath = path.join(dir, file)
-    const stat = await fs.stat(filePath)
-    library.push({
-      type,
-      title: path.basename(file, ext),
-      dir: dir,
-      path: filePath,
-      url: encodeURI(`file://${filePath}`),
-      lastPlayTime: 0,
-      timestamp: stat.birthtimeMs
-    })
+
+  const processDirectory = async (currentDir) => {
+    try {
+      const files = await fs.readdir(currentDir, { withFileTypes: true })
+      for (const file of files) {
+        const filePath = path.join(currentDir, file.name)
+        if (recursive && file.isDirectory()) {
+          await processDirectory(filePath)
+        } else if (file.isFile()) {
+          const ext = path.extname(file.name).toLowerCase()
+          if (videoExts.includes(ext)) {
+            const stat = await fs.stat(filePath)
+            library.push({
+              type,
+              title: path.basename(file.name, ext),
+              dir: currentDir,
+              path: filePath,
+              url: encodeURI(`file://${filePath}`),
+              lastPlayTime: 0,
+              timestamp: stat.birthtimeMs
+            })
+          }
+        }
+      }
+    } catch (err) {
+      sendLogData(`Error reading directory ${currentDir}: ${err.message}`)
+    }
   }
-  headerView.webContents.send('send-library', library)
+
+  await processDirectory(dir)
+  const libraryObj = { library, type, dir }
+  headerView.webContents.send('send-library', libraryObj)
 }
 
 // perform a trusted click on an element in the webContents
