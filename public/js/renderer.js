@@ -678,7 +678,7 @@ const changeSettingsLayout = (el = $settingsNavBtn[0]) => {
 }
 
 // change home layout based on button clicked
-const changeHomeLayout = (el = $homeNavBtn[0]) => {
+export const changeHomeLayout = (el = $homeNavBtn[0]) => {
   $homeNavBtn.forEach(el => el.style.backgroundColor = '')
   el.style.backgroundColor = getComputedStyle(document.documentElement).getPropertyValue('--color-control-darkgray')
   $homeLayout.forEach(lo => lo.style.display = 'none')

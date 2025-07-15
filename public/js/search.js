@@ -3,6 +3,7 @@ import { searchTitle, getTrendingTitles, getDiscoveryTitles, getRecommendedTitle
 import { getPrefs } from "./util/settings.js"
 import { getYear, elementFromHtml, logOutput } from "./util/helpers.js"
 import { getImagePath, getTitlePath } from './util/tmdb.js'
+import { changeHomeLayout } from './renderer.js'
 
 // Constants
 const tmdbImagePath = getImagePath()
@@ -51,6 +52,7 @@ const getDiscovery = async (media_type, page = 1) => {
 }
 
 const getRecommendations = async (id, media_type, page = 1) => {
+  changeHomeLayout(document.querySelector('#search-nav-btn'))
   if (page === 1) { clearResults() }
   const response = await getRecommendedTitles(id, media_type, page)
   const queryObj = { query: 'recommendations', id, media_type }
@@ -79,7 +81,7 @@ const parseResponse = (response, queryObj) => {
     showError(true)
     return
   }
-  response.total_results === 0 ? noResults(true) : console.log(`${response.total_results} results found`)
+  response.total_results === 0 ? noResults(true) : logOutput(`${response.total_results} results found`)
   $searchClearBtn.style.visibility = ''
   appendResults(response.results, queryObj)
   if (response.total_pages > response.page) {
