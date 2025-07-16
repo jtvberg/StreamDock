@@ -373,10 +373,10 @@ const openUrl = (url, time = 0) => {
 
 // open external player with url
 const openExternalPlayer = (url) => {
-  // logOutput(`Opening video in external player: ${url}`)
+  sendLogData(`Opening video in external player: ${url}`)
   // open file:// urls in default video player
-  if (url.startsWith('file:')) {
-    const filePath = url.replace('file://', '')
+  if (url.startsWith('/')) {
+    const filePath = `file://${url}`
     require('child_process').exec(`open "${filePath}"`)
   } else {
     // open http/https urls in default browser (not implemented)

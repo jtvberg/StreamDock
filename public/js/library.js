@@ -104,7 +104,7 @@ const playLibraryItem = (url) => {
   const time = item.lastPlayTime || 0
   if (getPrefs().find(pref => pref.id === 'library-external').state()) {
     // logOutput(`Opening video in external player: ${url}`)
-    window.electronAPI.openExternalPlayer(url)
+    window.electronAPI.openExternalPlayer(item.path)
   } else {
     // logOutput(`Opening video in StreamDock: ${url}`)
     window.electronAPI.openUrl(url, time)
