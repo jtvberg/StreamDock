@@ -371,6 +371,19 @@ const openUrl = (url, time = 0) => {
   }
 }
 
+// open external player with url
+const openExternalPlayer = (url) => {
+  // logOutput(`Opening video in external player: ${url}`)
+  // open file:// urls in default video player
+  if (url.startsWith('file:')) {
+    const filePath = url.replace('file://', '')
+    require('child_process').exec(`open "${filePath}"`)
+  } else {
+    // open http/https urls in default browser (not implemented)
+    require('electron').shell.openExternal(url)
+  }
+}
+
 // toggle streamView visibility
 const showStream = bool => {
   if (bool) {
@@ -770,6 +783,8 @@ ipcMain.on('win-move', (e, { mouseX, mouseY }) => {
 })
 
 ipcMain.on('open-url', (e, { url, time }) => openUrl(url, time))
+
+ipcMain.on('open-external-player', (e, url) => openExternalPlayer(url))
 
 ipcMain.on('create-bookmark', () => createBookmark(streamView))
 

@@ -9,6 +9,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
     facetWidth: width => ipcRenderer.send('update-facets-width', width),
     urlToBookmark: url => ipcRenderer.send('url-to-bookmark', url),
     openUrl: (url, time) => ipcRenderer.send('open-url', { url, time }),
+    openExternalPlayer: url => ipcRenderer.send('open-external-player', url),
     openNewin: () => ipcRenderer.send('open-newin'),
     openLink: () => ipcRenderer.send('open-link'),
     openDevTools: () => ipcRenderer.send('open-devtools'),

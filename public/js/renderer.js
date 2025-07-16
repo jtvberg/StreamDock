@@ -550,6 +550,7 @@ const loadLibraryDirectoryPanel = () => {
       // logOutput(`Rescanning library directory: ${dir.dir}`)
       // look for new files in the directory and remove any items that no longer exist
       loadLibraryDir(dir.dir, dir.type)
+      removeLastStream()
     })
     libDirRefresh.addEventListener('click', () => {
       if (!confirm(`Are you sure you want to refresh all metadata for:\n${dir.dir}?\nThis will remove and reload all metadata for this directory.`)) {
@@ -563,6 +564,7 @@ const loadLibraryDirectoryPanel = () => {
       localStorage.setItem('library', JSON.stringify(updatedLibrary))
       // load the library directory again
       loadLibraryDir(dir.dir, dir.type)
+      removeLastStream()
     })
     libDirDel.addEventListener('click', () => {
       if (!confirm(`Are you sure you want to delete the library directory:\n${dir.dir}?`)) {

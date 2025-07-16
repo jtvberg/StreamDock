@@ -283,6 +283,15 @@ export const getPrefs = () => {
       'Cache backdrop images from TMDB for library content (API key required)',
       false,
       true
+    ),
+    new Pref(
+      'library-external',
+      'library',
+      'checkbox',
+      'Open Video in External Player',
+      'Attempt to open videos in external player (if available)',
+      false,
+      true
     ),    
     new Pref(
       'service-ad',

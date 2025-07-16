@@ -97,11 +97,18 @@ const createLibraryListItem = libraryObj => {
   return frag
 }
 
+// play library item
 const playLibraryItem = (url) => {
   const library = JSON.parse(localStorage.getItem('library')) || []
   const item = library.find(li => li.url === url)
   const time = item.lastPlayTime || 0
-  window.electronAPI.openUrl(url, time)
+  if (getPrefs().find(pref => pref.id === 'library-external').state()) {
+    // logOutput(`Opening video in external player: ${url}`)
+    window.electronAPI.openExternalPlayer(url)
+  } else {
+    // logOutput(`Opening video in StreamDock: ${url}`)
+    window.electronAPI.openUrl(url, time)
+  }
 }
 
 // toggle bookmark list view
@@ -203,6 +210,7 @@ export const updateLibraryDirStatus = (ele, status) => {
   return ele
 }
 
+// add library items from renderer process
 const addLibraryItems = async (library, type, dir) => {
   // one load at a time
   await libraryLoadLock
