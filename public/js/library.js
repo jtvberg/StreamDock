@@ -220,10 +220,7 @@ const addLibraryItems = async (library, type, dir) => {
   try {
     const localLibrary = JSON.parse(localStorage.getItem('library')) || []
     // remove items from local library that no longer exist in the directory
-    const filtered = localLibrary.filter(entry =>
-      entry.dir !== dir
-      || library.some(item => item.url === entry.url)
-    )
+    const filtered = localLibrary.filter(entry => !entry.path.startsWith(dir) || library.some(item => item.url === entry.url))
 
     // add any new items from `library`
     for (const item of library) {
