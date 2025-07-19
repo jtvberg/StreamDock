@@ -56,6 +56,7 @@ const appInfo = {
   repository,
   bugs: bugs.url
 }
+const chromeUserAgent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36';
 
 // Vars
 let mainWin = null
@@ -118,7 +119,7 @@ const createWindow = () => {
   // create browser view for streams
   streamView = new WebContentsView({
     webPreferences: {
-      preload: path.join(__dirname, 'preload.js'),
+      preload: path.join(__dirname, 'preload.js')
     }
   })
 
@@ -146,27 +147,6 @@ const createWindow = () => {
     streamView.setBounds({ x: 0, y: 0, width: wb.width, height: wb.height })
     facetView.setBounds({ x: 0, y: 0, width: facetView.getBounds().width, height: wb.height + 2 })
     setHeaderViewBounds(hb.height > headerCollapsed ? wb.height : hb.height)
-  })
-
-  // on steam view navigation check if url is valid and set userAgent
-  streamView.webContents.on('did-start-navigation', () => {
-    const cleanUrl = validUrl(getCurrentUrl())
-    if (cleanUrl) {
-      headerView.webContents.executeJavaScript('localStorage.getItem("pref-agent");', true).then(response => {
-        const { getStreams } = require('../public/js/util/settings')
-        const streamHostnames = getStreams(true).map(stream => {
-          try {
-            return new URL(stream.url).hostname
-          } catch {
-            return null
-          }
-        }).filter(Boolean)
-        if (streamHostnames.includes(cleanUrl.hostname) || response === null || response.trim() === '""') { 
-          return 
-        }
-        streamView.webContents.userAgent = cleanUrl.hostname === googleAuthHost ? 'Chrome' : response
-      })
-    }
   })
 
   // on stream view load get url, remove scrollbars, show stream, load scripts
@@ -361,7 +341,7 @@ const openUrl = (url, time = 0) => {
   }
   saveVideoTime(getCurrentUrl())
   sendLogData(`Open URL: ${url}`)
-  streamView.webContents.loadURL(url)
+  streamView.webContents.loadURL(url, { userAgent: chromeUserAgent })
   showStream(true)
   headerView.webContents.send('last-stream', url)
   headerView.webContents.send('stream-opened')
@@ -729,20 +709,13 @@ app.whenReady().then(async () => {
   if (isDev) {
     // mainWin.webContents.openDevTools({ mode: 'detach' })
     headerView.webContents.openDevTools({ mode: 'detach' })
-    // streamView.webContents.openDevTools({ mode: 'detach' })
+    streamView.webContents.openDevTools({ mode: 'detach' })
     // facetView.webContents.openDevTools({ mode: 'detach' })
   } else {
     const updater = require('./util/updater')
     setTimeout(updater, 3000)
   }
 })
-
-// run code prior to app quitting
-// app.on('before-quit', async (e) => {
-//   e.preventDefault()
-//   await saveVideoTime(getCurrentUrl())
-//   app.exit()
-// })
 
 // on all windows closed, save video time and quit app
 app.on('window-all-closed', async () => app.quit())

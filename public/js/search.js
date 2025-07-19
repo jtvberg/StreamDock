@@ -1,7 +1,7 @@
 // Imports
 import { searchTitle, getTrendingTitles, getDiscoveryTitles, getRecommendedTitles, getTitleDetails } from './util/tmdb.js'
 import { getPrefs } from "./util/settings.js"
-import { getYear, elementFromHtml, logOutput } from "./util/helpers.js"
+import { getYear, elementFromHtml } from "./util/helpers.js"
 import { getImagePath, getTitlePath } from './util/tmdb.js'
 import { changeHomeLayout } from './renderer.js'
 
@@ -81,7 +81,7 @@ const parseResponse = (response, queryObj) => {
     showError(true)
     return
   }
-  response.total_results === 0 ? noResults(true) : logOutput(`${response.total_results} results found`)
+  response.total_results === 0 ? noResults(true) : console.log(`${response.total_results} results found`)
   $searchClearBtn.style.visibility = ''
   appendResults(response.results, queryObj)
   if (response.total_pages > response.page) {

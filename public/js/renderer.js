@@ -1,7 +1,7 @@
 // Imports
 import { getStreams, setStreams, getNewStreamId, getLastStream, getPrefs, setLastStream, getWinBounds, setWinBounds, getWinLock, setWinLock, getWinRatio, setWinRatio, getDefaultAgent } from "./util/settings.js"
 import { rescanAllLibraryDirs, updateLibraryDirStatus, loadLibraryDir, loadLibraryFromStorage } from "./library.js"
-import { elementFromHtml, logOutput, elementRemoveFlash } from "./util/helpers.js"
+import { elementFromHtml, elementRemoveFlash } from "./util/helpers.js"
 import locs from '../res/loc.json' with { type: 'json' }
 
 // Constants
@@ -80,7 +80,7 @@ const loadStreams = () => {
     loadStreamPanel(stream)
   })
   setStreams(streams)
-  // logOutput('Streams Updated')
+  // console.log('Streams Updated')
   loadStreamPanel({
     active: true,
     glyph: '+',
@@ -119,7 +119,7 @@ const applySettings = () => {
   }
 
   if (prefs.find(pref => pref.id === 'library-scan').state()) {
-    // logOutput('Auto-scanning library directories for new files...')
+    // console.log('Auto-scanning library directories for new files...')
     rescanAllLibraryDirs()
   }
 
@@ -365,7 +365,7 @@ const updateStreams = stream => {
     streams.push(stream)
   }
   setStreams(streams)
-  // logOutput('Streams Updated')
+  // console.log('Streams Updated')
   loadStreamPanel(stream)
   repaintStreamBar()
 }
@@ -395,7 +395,7 @@ const reorderStreams = () => {
   streams.forEach((s, i) => s.order = i + 1)
   // Save to local storage
   setStreams(streams)
-  // logOutput('Streams Updated')
+  // console.log('Streams Updated')
 }
 
 // reload stream bar elements
@@ -547,7 +547,7 @@ const loadLibraryDirectoryPanel = () => {
     }
     libDirRescan.addEventListener('click', () => {
       // trigger a rescan of the library directory
-      // logOutput(`Rescanning library directory: ${dir.dir}`)
+      // console.log(`Rescanning library directory: ${dir.dir}`)
       // look for new files in the directory and remove any items that no longer exist
       loadLibraryDir(dir.dir, dir.type)
       removeLastStream()
@@ -557,7 +557,7 @@ const loadLibraryDirectoryPanel = () => {
         return
       }
       // trigger a refresh of the library directory metadata
-      // logOutput(`Refreshing library directory metadata: ${dir.dir}`)
+      // console.log(`Refreshing library directory metadata: ${dir.dir}`)
       // drop items from local storage libarary with dir and save
       const library = JSON.parse(localStorage.getItem('library')) || []
       const updatedLibrary = library.filter(item => !item.path.startsWith(dir.dir))
@@ -571,7 +571,7 @@ const loadLibraryDirectoryPanel = () => {
         return
       }
       // trigger a delete of the library directory
-      // logOutput(`Deleting library directory: ${dir.dir}`)
+      // console.log(`Deleting library directory: ${dir.dir}`)
       // remove the directory from local storage
       const dirs = JSON.parse(localStorage.getItem('directories')) || []
       dirs.splice(dirs.findIndex(d => d.dir === dir.dir), 1)
@@ -615,9 +615,9 @@ const removeLastStream = () => {
       setLastStream('')
       openLastUrl()
     }
-    logOutput(`Removed last stream: ${lastStream}`)
+    console.log(`Removed last stream: ${lastStream}`)
   } else {
-    logOutput('No last stream to remove.')
+    console.log('No last stream to remove.')
   }
 }
 
@@ -816,7 +816,7 @@ const osHeader = isMac => {
 
 // apply preference updates
 const updatePref = (id, val) => {
-  // logOutput(`Preference ${id} Updated`)
+  // console.log(`Preference ${id} Updated`)
   switch (id) {
     case 'pref-fullscreen':
       window.electronAPI.winFullscreen(val)
@@ -881,7 +881,7 @@ const toggleLibrary = bool => {
   } else {
     $libraryNavBtn.style.display = 'none'
     getPrefs().find(pref => pref.id === 'library-scan').update(false)
-    document.querySelector('#library-scan').checked = false
+    document.querySelector('#library-scan') ? document.querySelector('#library-scan').checked = false : null
     changeHomeLayout()
   }
 }

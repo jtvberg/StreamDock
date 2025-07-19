@@ -135,21 +135,30 @@ export const getStreams = defaults => {
     ),
     new Stream(
       true,
-      'K',
-      'Crackle',
-      'https://www.crackle.com/',
-      '#ff611d',
-      '#0d0d0d',
-      14
-    ),
-    new Stream(
-      true,
       'C',
       'Crunchyroll',
       'https://beta.crunchyroll.com/',
       '#ff5202',
       '#ffffff',
       15
+    ),
+    new Stream(
+      true,
+      'P',
+      'Plex',
+      'https://app.plex.tv/desktop/#!/',
+      '#e5a00f',
+      '#000000',
+      16
+    ),
+    new Stream(
+      true,
+      'S',
+      'Spotify',
+      'https://open.spotify.com',
+      '#1ed760ff',
+      '#000000',
+      17
     )
   ]
   return defaults ? streams : JSON.parse(localStorage.getItem('streams')) || streams

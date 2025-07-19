@@ -3,7 +3,7 @@ import { searchMovie, searchTv } from './util/tmdb.js'
 import { showDetails } from './search.js'
 import { cacheImage, getCachedImage } from "./util/imageCache.js"
 import { getPrefs } from "./util/settings.js"
-import { getYear, getDate, getCleanTitle, elementFromHtml, getSeasonEpisode, logOutput } from "./util/helpers.js"
+import { getYear, getDate, getCleanTitle, elementFromHtml, getSeasonEpisode } from "./util/helpers.js"
 import { getImagePath } from './util/tmdb.js'
 
 // Element references
@@ -33,7 +33,7 @@ const createLibraryTile = async libraryObj => {
       const cached = await getCachedImage(libraryObj.metadata.poster_path)
       if (cached) poster = cached
     } catch (e) {
-      // logOutput('Image cache error', e)
+      // console.log('Image cache error', e)
     }
   }
 
@@ -103,10 +103,10 @@ const playLibraryItem = (url) => {
   const item = library.find(li => li.url === url)
   const time = item.lastPlayTime || 0
   if (getPrefs().find(pref => pref.id === 'library-external').state()) {
-    // logOutput(`Opening video in external player: ${url}`)
+    // console.log(`Opening video in external player: ${url}`)
     window.electronAPI.openExternalPlayer(item.path)
   } else {
-    // logOutput(`Opening video in StreamDock: ${url}`)
+    // console.log(`Opening video in StreamDock: ${url}`)
     window.electronAPI.openUrl(url, time)
   }
 }
@@ -156,18 +156,18 @@ export const loadLibraryFromStorage = () => {
 // metadata load error handler
 const handleMetadataError = (dir, error) => {
   if (error === 1) {
-    // logOutput(`TMDB API Error: No API key provided`)
+    // console.log(`TMDB API Error: No API key provided`)
     alert('TMDB API Error: No API key provided. Please set your TMDB API key in the search settings.')
     setLibraryDirStatus(dir, 'error')
   } else if (error === -1) {
-    // logOutput(`TMDB API Error`)
+    // console.log(`TMDB API Error`)
     setLibraryDirStatus(dir, 'error')
   }
 }
 
 // set directory metadata status
 const setLibraryDirStatus = (dir, status) => {
-  // logOutput(`Setting status for directory: ${dir} to ${status}`)
+  // console.log(`Setting status for directory: ${dir} to ${status}`)
   const dirs = JSON.parse(localStorage.getItem('directories')) || []
   const dirIndex = dirs.findIndex(d => d.dir === dir)
   if (dirIndex > -1) {
@@ -182,7 +182,7 @@ const setLibraryDirStatus = (dir, status) => {
       }
     }
   } else {
-    logOutput(`Directory ${dir} not found in library directories`)
+    console.log(`Directory ${dir} not found in library directories`)
   }
 }
 
@@ -216,7 +216,7 @@ const addLibraryItems = async (library, type, dir) => {
   await libraryLoadLock
   let resolveLock
   libraryLoadLock = new Promise(res => resolveLock = res)
-  logOutput(`Adding library items from directory: ${dir}, Type: ${type}`)
+  console.log(`Adding library items from directory: ${dir}, Type: ${type}`)
   try {
     const localLibrary = JSON.parse(localStorage.getItem('library')) || []
     // remove items from local library that no longer exist in the directory
@@ -247,7 +247,7 @@ const addLibraryItems = async (library, type, dir) => {
 const getLibraryMetadata = async (type, dir) => {
   setLibraryDirStatus(dir, 'pending')
   let error = false
-  // logOutput(`Fetching metadata for Directory: ${dir}, Type: ${type}`)
+  // console.log(`Fetching metadata for Directory: ${dir}, Type: ${type}`)
   const library = JSON.parse(localStorage.getItem('library')) || []
   const libraryWithMetadata = []
 
@@ -262,7 +262,7 @@ const getLibraryMetadata = async (type, dir) => {
       continue
     }
     const searchTerm = getCleanTitle(item.title)
-    // logOutput(`Searching for metadata for: ${searchTerm}`)
+    // console.log(`Searching for metadata for: ${searchTerm}`)
     const searchResult = type === 'movie'
       ? await searchMovie(searchTerm, 1)
       : await searchTv(searchTerm, 1)
@@ -300,6 +300,45 @@ const getLibraryMetadata = async (type, dir) => {
   }
   localStorage.setItem('library', JSON.stringify(libraryWithMetadata))
   loadLibraryUi(libraryWithMetadata)
+  if (type === 'tv') {
+    console.log(groupSeasonsEpisodes(libraryWithMetadata))
+  }
+}
+
+// group seasons and episodes for TV shows
+const groupSeasonsEpisodes = library => {
+  const shows = {}
+
+  library.forEach(item => {
+    if (item.type === 'tv' && item.metadata?.id) {
+      const showId = item.metadata.id
+      if (!shows[showId]) {
+        shows[showId] = {}
+      }
+
+      const match = getSeasonEpisode(item.title)
+      let season, episode
+      if (match) {
+        season = parseInt(match[1], 10) || 0
+        episode = parseInt(match[2], 10) || 0
+      } else {
+        season = 0
+        episode = 0
+      }
+      if (!shows[showId][season]) {
+        shows[showId][season] = []
+      }
+      shows[showId][season].push({ ...item, season, episode })
+    }
+  })
+
+  for (const showId in shows) {
+    for (const season in shows[showId]) {
+      shows[showId][season].sort((a, b) => a.episode - b.episode)
+    }
+  }
+
+  return shows
 }
 
 // sort library by order param
@@ -397,9 +436,9 @@ window.electronAPI.setVideoTime((e, urlTime) => {
   if (item) {
     item.lastPlayTime = urlTime.time
     localStorage.setItem('library', JSON.stringify(library))
-    // logOutput(`Set video time for ${urlTime.url} to ${urlTime.time}`)
+    // console.log(`Set video time for ${urlTime.url} to ${urlTime.time}`)
   } else {
-    // logOutput(`No library item found for URL: ${urlTime.url}`)
+    // console.log(`No library item found for URL: ${urlTime.url}`)
   }
 })
 

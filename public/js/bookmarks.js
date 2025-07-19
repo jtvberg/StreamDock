@@ -1,5 +1,5 @@
 // Imports
-import { getCleanTitle, getCleanHost, elementAddFlash, elementFromHtml, copyLink, logOutput } from "./util/helpers.js"
+import { getCleanTitle, getCleanHost, elementAddFlash, elementFromHtml, copyLink } from "./util/helpers.js"
 
 // Element references
 const $homeBtn = document.querySelector('#home-btn')
@@ -88,7 +88,7 @@ const addBookmark = bookmarkObj => {
   const bookmarks = JSON.parse(localStorage.getItem('bookmarks')) || []
   bookmarks.push(bookmarkObj)
   localStorage.setItem('bookmarks', JSON.stringify(bookmarks))
-  // logOutput('Bookmark Added')
+  // console.log('Bookmark Added')
 }
 
 // delete bookmark by timestamp
@@ -103,7 +103,7 @@ const deleteBookmark = timestamp => {
   })
   const bookmarks = JSON.parse(localStorage.getItem('bookmarks'))
   localStorage.setItem('bookmarks', JSON.stringify(bookmarks.filter(bm => bm.timestamp !== timestamp)))
-  // logOutput('Bookmark Deleted')
+  // console.log('Bookmark Deleted')
 }
 
 // get bookmarks from local storage
