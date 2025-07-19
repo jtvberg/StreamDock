@@ -67,7 +67,7 @@ let domain = null
 let ratioLocked = false
 let isPlaying = false
 let resumePlaying = false
-let chromeUserAgent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36';
+let defaultAgent = ''
 
 // load reload module in dev
 if (isDev) {
@@ -353,7 +353,8 @@ const openUrl = (url, time = 0) => {
   if (url.host === googleAuthHost) {
     streamView.webContents.loadURL(url)
   } else {
-    streamView.webContents.loadURL(url, { userAgent: chromeUserAgent })
+    sendLogData(`Loading URL with: ${defaultAgent}`)
+    streamView.webContents.loadURL(url, { userAgent: defaultAgent })
   }
   showStream(true)
   headerView.webContents.send('last-stream', url)
@@ -545,7 +546,7 @@ const openNewin = url => {
   if (url.host === googleAuthHost) {
     child.loadURL(url)
   } else {
-    child.loadURL(url, { userAgent: chromeUserAgent })
+    child.loadURL(url, { userAgent: defaultAgent })
   }
   child.once('ready-to-show', () => {
     windows.add(child)

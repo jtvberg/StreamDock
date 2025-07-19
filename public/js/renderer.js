@@ -1,5 +1,5 @@
 // Imports
-import { getStreams, setStreams, getNewStreamId, getLastStream, getPrefs, setLastStream, getWinBounds, setWinBounds, getWinLock, setWinLock, getWinRatio, setWinRatio, getDefaultAgent } from "./util/settings.js"
+import { getStreams, setStreams, getNewStreamId, getLastStream, getPrefs, setLastStream, getWinBounds, setWinBounds, getWinLock, setWinLock, getWinRatio, setWinRatio } from "./util/settings.js"
 import { rescanAllLibraryDirs, updateLibraryDirStatus, loadLibraryDir, loadLibraryFromStorage } from "./library.js"
 import { elementFromHtml, elementRemoveFlash } from "./util/helpers.js"
 import locs from '../res/loc.json' with { type: 'json' }
@@ -127,7 +127,7 @@ const applySettings = () => {
 
   loadClearDataPanel()
 
-  window.electronAPI.defaultAgent(getDefaultAgent())
+  window.electronAPI.defaultAgent(getPrefs().find(pref => pref.id === 'pref-agent').state())
 
   window.electronAPI.updateHeaderHeight(headerCollapsed)
 
@@ -446,6 +446,7 @@ const loadSettingsPanel = pref => {
           e.target.value = pref.defaults
         }
         pref.update(e.target.value)
+        updatePref(pref.id, e.target.value)
       })
       ele.appendChild(lbl)
       ele.appendChild(ipt)
@@ -818,6 +819,10 @@ const osHeader = isMac => {
 const updatePref = (id, val) => {
   // console.log(`Preference ${id} Updated`)
   switch (id) {
+    case 'pref-agent':
+      console.log(`R-Default User Agent Updated: ${val}`)
+      window.electronAPI.defaultAgent(val)
+      break
     case 'pref-fullscreen':
       window.electronAPI.winFullscreen(val)
       break

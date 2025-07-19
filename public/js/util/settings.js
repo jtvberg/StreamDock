@@ -405,8 +405,6 @@ export const getPrefs = () => {
   return prefs
 }
 
-export const getDefaultAgent = () => getPrefs().find(pref => pref.id === 'pref-agent').defaults
-
 export const getLastStream = () => localStorage.getItem('last-stream') || getStreams()[0].url
 
 export const setLastStream = url => localStorage.setItem('last-stream', url)
