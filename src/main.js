@@ -56,7 +56,6 @@ const appInfo = {
   repository,
   bugs: bugs.url
 }
-const chromeUserAgent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36';
 
 // Vars
 let mainWin = null
@@ -68,6 +67,7 @@ let domain = null
 let ratioLocked = false
 let isPlaying = false
 let resumePlaying = false
+let chromeUserAgent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36';
 
 // load reload module in dev
 if (isDev) {
@@ -156,6 +156,15 @@ const createWindow = () => {
     removeScrollbars(streamView)
     showStream(true, streamView)
     loadScripts(streamView, domain)
+  })
+
+  // on google login redirect, set user agent to empty string to prevent login issues
+  streamView.webContents.on('did-navigate', () => {
+    const cleanUrl = validUrl(getCurrentUrl())
+    if (cleanUrl.host === googleAuthHost) {
+      sendLogData(`Opening Google Auth URL: ${cleanUrl}`)
+      streamView.webContents.userAgent = ''
+    }
   })
 
   // check if call for new window matches google auth host and if so, allow otherwise deny
@@ -341,7 +350,11 @@ const openUrl = (url, time = 0) => {
   }
   saveVideoTime(getCurrentUrl())
   sendLogData(`Open URL: ${url}`)
-  streamView.webContents.loadURL(url, { userAgent: chromeUserAgent })
+  if (url.host === googleAuthHost) {
+    streamView.webContents.loadURL(url)
+  } else {
+    streamView.webContents.loadURL(url, { userAgent: chromeUserAgent })
+  }
   showStream(true)
   headerView.webContents.send('last-stream', url)
   headerView.webContents.send('stream-opened')
@@ -529,7 +542,11 @@ const openNewin = url => {
   if (isLinux) {
     child.setIcon(path.join(__dirname, '../public/res/icon.png'))
   }
-  child.loadURL(url)
+  if (url.host === googleAuthHost) {
+    child.loadURL(url)
+  } else {
+    child.loadURL(url, { userAgent: chromeUserAgent })
+  }
   child.once('ready-to-show', () => {
     windows.add(child)
     child.show()
