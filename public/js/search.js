@@ -148,7 +148,7 @@ const clearResults = () => {
   $searchResults.replaceChildren([])
 }
 
-export const showDetails = async (id, media_type, season = 0, episode = 0) => {
+export const showDetails = async (id, media_type, season = -1, episode = -1) => {
   if (id === undefined || id === null) return
   showError(false)
   const result = await getTitleDetails(id, media_type)
@@ -158,7 +158,7 @@ export const showDetails = async (id, media_type, season = 0, episode = 0) => {
     return
   }
   let episodeDetails = null
-  if (media_type === 'tv' && season > 0 && episode > 0) {
+  if (media_type === 'tv' && Number.isInteger(season) && Number.isInteger(episode) && season >= 0 && episode >= 0) {
     episodeDetails = await getEpisode(id, season, episode)
   }
   $modalPosterContainer.style.display = ''
@@ -175,7 +175,7 @@ export const showDetails = async (id, media_type, season = 0, episode = 0) => {
     $modalPosterContainer.style.display = 'none'
     $modalNoposter.style.display = 'flex'
   }
-  $modalTitle.textContent = getTitle(episodeDetails || result)
+  $modalTitle.textContent = `${getTitle(episodeDetails || result)} (${getYear(episodeDetails?.air_date || result.first_air_date || result.release_date) || ''})`
   $modalRating.textContent = getRating(result, media_type, loc)
   $modalMedia.textContent = getMedia(episodeDetails || result, media_type)
   $modalGenre.textContent = getGenre(result)
@@ -205,7 +205,7 @@ function getStillPath(input) {
 }
 
 function getTitle(input) {
-  return `${input.title || input.name || ''} (${getYear(input.release_date || input.first_air_date || input.air_date) || ''})`
+  return `${input.title || input.name || ''}`
 }
 
 function getRating(input, media_type, loc) {
@@ -269,7 +269,7 @@ function getCast(input) {
 function getSeasonInfo(input) {
   let season = 'TV'
   try {
-    season = `S:${input.season_number || input.number_of_seasons || 'NA'} E:${input.episode_number || input.number_of_episodes || 'NA'}`
+    season = `S:${input.season_number ?? input.number_of_seasons ?? 'NA'} E:${input.episode_number ?? input.number_of_episodes ?? 'NA'}`
   } catch (err) { console.log(`No season info found for id ${input.id}`) }
   return season
 }

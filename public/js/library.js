@@ -48,15 +48,19 @@ const createLibraryTile = async libraryObj => {
   resultDetails.appendChild(resultPlayBtn)
   resultTile.appendChild(resultDetails)
   poster ? resultTile.appendChild(resultPoster) : null
-  if (libraryObj.type === 'tv' && libraryObj.season) {
-    const resultEpisode = elementFromHtml(`<div class="result-episode" title="Season:${libraryObj.season} Episode:${libraryObj.episode}">s${libraryObj.season}e${libraryObj.episode}</div>`)
+  const s = Number.isInteger(libraryObj.season) ? libraryObj.season : null
+  const ep = Number.isInteger(libraryObj.episode) ? libraryObj.episode : null
+  if (libraryObj.type === 'tv' && Number.isInteger(s) && Number.isInteger(ep)) {
+    const resultEpisode = elementFromHtml(`<div class="result-episode" title="Season:${s} Episode:${ep}">s${s}e${ep}</div>`)
     resultTile.appendChild(resultEpisode)
   }
   resultPlayBtn.addEventListener('click', e => {
     e.stopImmediatePropagation()
     playLibraryItem(libraryObj.url)
   })
-  resultTile.addEventListener('click', e => showDetails(libraryObj.metadata?.id, libraryObj.type, libraryObj.season ? libraryObj.season : 0, libraryObj.episode ? libraryObj.episode : 0))
+  resultTile.addEventListener('click', e => {
+    showDetails(libraryObj.metadata?.id, libraryObj.type, s, ep)
+  })
   return resultTile
 }
 
