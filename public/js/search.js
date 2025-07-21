@@ -148,6 +148,7 @@ const clearResults = () => {
 }
 
 export const showDetails = async (id, media_type, season = 0, episode = 0) => {
+  if (id === undefined || id === null) return
   showError(false)
   const result = await getTitleDetails(id, media_type)
   if (result === -1) {
@@ -166,7 +167,7 @@ export const showDetails = async (id, media_type, season = 0, episode = 0) => {
   $modal.dataset.id = id
   $modal.dataset.media_type = media_type
   $modal.dataset.url = `${tmdbTitlePath}${media_type}/${id}`
-  const posterPath = getPosterPath(result)
+  const posterPath = episodeDetails ? getStillPath(episodeDetails) : getPosterPath(result)
   if (posterPath) { 
     $modalPoster.src = posterPath
   } else {
@@ -196,6 +197,10 @@ export const showDetails = async (id, media_type, season = 0, episode = 0) => {
 
 function getPosterPath(input) {
   return input.poster_path ? `${tmdbImagePath}${input.poster_path}` : null
+}
+
+function getStillPath(input) {
+  return input.still_path ? `${tmdbImagePath}${input.still_path}` : null
 }
 
 function getTitle(input) {
