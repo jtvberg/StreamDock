@@ -1,5 +1,5 @@
 // Imports
-import { searchMovie, searchTv } from './util/tmdb.js'
+import { searchMovie, searchTv, getSeason } from './util/tmdb.js'
 import { showDetails } from './search.js'
 import { cacheImage, getCachedImage } from "./util/imageCache.js"
 import { getPrefs } from "./util/settings.js"
@@ -48,20 +48,15 @@ const createLibraryTile = async libraryObj => {
   resultDetails.appendChild(resultPlayBtn)
   resultTile.appendChild(resultDetails)
   poster ? resultTile.appendChild(resultPoster) : null
-  if (libraryObj.type === 'tv' ) {
-    const match = getSeasonEpisode(libraryObj.title)
-    if (match) {
-      const season = parseInt(match[1]) || ''
-      const episode = parseInt(match[2]) || ''
-      const resultEpisode = elementFromHtml(`<div class="result-episode" title="Season:${season} Episode:${episode}">s${season}e${episode}</div>`)
-      resultTile.appendChild(resultEpisode)
-    }
+  if (libraryObj.type === 'tv' && libraryObj.season) {
+    const resultEpisode = elementFromHtml(`<div class="result-episode" title="Season:${libraryObj.season} Episode:${libraryObj.episode}">s${libraryObj.season}e${libraryObj.episode}</div>`)
+    resultTile.appendChild(resultEpisode)
   }
   resultPlayBtn.addEventListener('click', e => {
     e.stopImmediatePropagation()
     playLibraryItem(libraryObj.url)
   })
-  resultTile.addEventListener('click', e => showDetails(libraryObj.metadata?.id, libraryObj.type))
+  resultTile.addEventListener('click', e => showDetails(libraryObj.metadata?.id, libraryObj.type, libraryObj.season ? libraryObj.season : 0, libraryObj.episode ? libraryObj.episode : 0))
   return resultTile
 }
 
@@ -216,7 +211,7 @@ const addLibraryItems = async (library, type, dir) => {
   await libraryLoadLock
   let resolveLock
   libraryLoadLock = new Promise(res => resolveLock = res)
-  console.log(`Adding library items from directory: ${dir}, Type: ${type}`)
+  // console.log(`Adding library items from directory: ${dir}, Type: ${type}`)
   try {
     const localLibrary = JSON.parse(localStorage.getItem('library')) || []
     // remove items from local library that no longer exist in the directory
@@ -225,6 +220,13 @@ const addLibraryItems = async (library, type, dir) => {
     // add any new items from `library`
     for (const item of library) {
       if (!filtered.some(entry => entry.url === item.url)) {
+        if (type === 'tv') {
+          const match = getSeasonEpisode(item.title)
+          if (match) {
+            item.season = parseInt(match[1]) || 0
+            item.episode = parseInt(match[2]) || 0
+          }
+        }
         filtered.push(item)
       }
     }
@@ -286,6 +288,20 @@ const getLibraryMetadata = async (type, dir) => {
       searchResult.results.sort((a, b) => b.popularity - a.popularity)
       // find the first result that is exact match to search term === item.title
       metadata = searchResult.results.find(result => getCleanTitle(result.title || result.name) === searchTerm) || searchResult.results[0]
+      if (type === 'tv' && item.season) {
+        const seasonData = await getSeason(metadata.id, item.season)
+        if (seasonData === 1) {
+          handleMetadataError(dir, 1)
+          error = true
+          continue
+        }
+        if (seasonData === -1) {
+          handleMetadataError(dir, -1)
+          error = true
+          continue
+        }
+        metadata.poster_path = seasonData?.poster_path || metadata.poster_path
+      }
       releaseYear = getYear(metadata.release_date || metadata.first_air_date || 'NA')
       releaseDate = getDate(metadata.release_date || metadata.first_air_date || 'NA')
       if (metadata.poster_path && getPrefs().find(pref => pref.id === 'library-cache').state()) {

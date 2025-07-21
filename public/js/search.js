@@ -1,5 +1,5 @@
 // Imports
-import { searchTitle, getTrendingTitles, getDiscoveryTitles, getRecommendedTitles, getTitleDetails } from './util/tmdb.js'
+import { searchTitle, getTrendingTitles, getDiscoveryTitles, getRecommendedTitles, getTitleDetails, getEpisode } from './util/tmdb.js'
 import { getPrefs } from "./util/settings.js"
 import { getYear, elementFromHtml } from "./util/helpers.js"
 import { getImagePath, getTitlePath } from './util/tmdb.js'
@@ -147,13 +147,17 @@ const clearResults = () => {
   $searchResults.replaceChildren([])
 }
 
-export const showDetails = async (id, media_type) => {
+export const showDetails = async (id, media_type, season = 0, episode = 0) => {
   showError(false)
   const result = await getTitleDetails(id, media_type)
-  if (result === 0) {
+  if (result === -1) {
     clearResults()
     showError(true)
     return
+  }
+  let episodeDetails = null
+  if (media_type === 'tv' && season > 0 && episode > 0) {
+    episodeDetails = await getEpisode(id, season, episode)
   }
   $modalPoster.style.display = ''
   $modalNoposter.style.display = ''
@@ -169,16 +173,16 @@ export const showDetails = async (id, media_type) => {
     $modalPoster.style.display = 'none'
     $modalNoposter.style.display = 'flex'
   }
-  $modalTitle.textContent = getTitle(result)
+  $modalTitle.textContent = getTitle(episodeDetails || result)
   $modalRating.textContent = getRating(result, media_type, loc)
-  $modalMedia.textContent = getMedia(result, media_type)
+  $modalMedia.textContent = getMedia(episodeDetails || result, media_type)
   $modalGenre.textContent = getGenre(result)
-  $modalRuntime.textContent = getRuntime(result)
+  $modalRuntime.textContent = getRuntime(episodeDetails || result)
   $modalLanguage.textContent = getLanguage(result)
   const tagline = getTagline(result)
   $modalTagline.style.display = ''
   tagline === `""` ? $modalTagline.style.display = 'none' : $modalTagline.textContent = tagline
-  $modalOverview.textContent = getOverview(result)
+  $modalOverview.textContent = getOverview(episodeDetails || result)
   $modalCast.textContent = getCast(result)
   $modalProviders.replaceChildren([])
   getProviders(result, loc).forEach(p => {
@@ -195,7 +199,7 @@ function getPosterPath(input) {
 }
 
 function getTitle(input) {
-  return `${input.title || input.name || ''} (${getYear(input.release_date || input.first_air_date) || ''})`
+  return `${input.title || input.name || ''} (${getYear(input.release_date || input.first_air_date || input.air_date) || ''})`
 }
 
 function getRating(input, media_type, loc) {
@@ -259,7 +263,7 @@ function getCast(input) {
 function getSeasonInfo(input) {
   let season = 'TV'
   try {
-    season = `S:${input.number_of_seasons === undefined ? 'NA' : input.number_of_seasons} E:${input.number_of_episodes === undefined ? 'NA' : input.number_of_episodes }`
+    season = `S:${input.season_number || input.number_of_seasons || 'NA'} E:${input.episode_number || input.number_of_episodes || 'NA'}`
   } catch (err) { console.log(`No season info found for id ${input.id}`) }
   return season
 }
