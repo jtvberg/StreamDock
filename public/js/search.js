@@ -28,6 +28,7 @@ const $modalRuntime = document.querySelector('#modal-runtime')
 const $modalLanguage = document.querySelector('#modal-language')
 const $modalBookmark = document.querySelector('#modal-bookmark')
 const $modalRecommendations = document.querySelector('#modal-recommendations')
+const $modalPosterContainer = document.querySelector('#modal-poster-container')
 const $modalPoster = document.querySelector('#modal-poster')
 const $modalNoposter = document.querySelector('#modal-noposter')
 const $modalTagline = document.querySelector('#modal-tagline')
@@ -160,7 +161,7 @@ export const showDetails = async (id, media_type, season = 0, episode = 0) => {
   if (media_type === 'tv' && season > 0 && episode > 0) {
     episodeDetails = await getEpisode(id, season, episode)
   }
-  $modalPoster.style.display = ''
+  $modalPosterContainer.style.display = ''
   $modalNoposter.style.display = ''
   const loc = getPrefs().find(pref => pref.id === 'search-loc').state()
   $searchOverlay.style.display = 'flex'
@@ -171,7 +172,7 @@ export const showDetails = async (id, media_type, season = 0, episode = 0) => {
   if (posterPath) { 
     $modalPoster.src = posterPath
   } else {
-    $modalPoster.style.display = 'none'
+    $modalPosterContainer.style.display = 'none'
     $modalNoposter.style.display = 'flex'
   }
   $modalTitle.textContent = getTitle(episodeDetails || result)
@@ -196,7 +197,7 @@ export const showDetails = async (id, media_type, season = 0, episode = 0) => {
 }
 
 function getPosterPath(input) {
-  return input.poster_path ? `${tmdbImagePath}${input.poster_path}` : null
+  return input.backdrop_path ? `${tmdbImagePath}${input.backdrop_path}` : null
 }
 
 function getStillPath(input) {
@@ -247,7 +248,7 @@ function getLanguage(input) {
   return input.original_language ? input.original_language.toUpperCase() : 'NA'
 }
 
-function getTagline(input) {
+function getTagline(input) { // TODO: remove quotes from tagline
   return input.tagline ? `"${input.tagline}"` : `""` 
 }
 
