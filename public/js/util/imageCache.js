@@ -14,12 +14,20 @@ export async function cacheImage(url, key) {
 export async function getCachedImage(key) {
   const db = await openDB()
   const tx = db.transaction('images', 'readonly')
-  const blob = await tx.objectStore('images').get(key)
+  const store = tx.objectStore('images')
+  const request = store.get(key)
   db.close()
-  if (blob instanceof Blob) {
-    return URL.createObjectURL(blob)
-  }
-  return null
+  return new Promise((resolve) => {
+    request.onsuccess = () => {
+      const blob = request.result
+      if (blob instanceof Blob) {
+        resolve(URL.createObjectURL(blob))
+      } else {
+        resolve(null)
+      }
+    }
+    request.onerror = () => resolve(null)
+  })
 }
 
 // open (or create) the IndexedDB

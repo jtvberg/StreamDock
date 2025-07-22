@@ -4,6 +4,7 @@ import { getPrefs } from "./util/settings.js"
 import { getYear, elementFromHtml } from "./util/helpers.js"
 import { getImagePath, getTitlePath } from './util/tmdb.js'
 import { changeHomeLayout } from './renderer.js'
+import { cacheImage, getCachedImage } from "./util/imageCache.js"
 
 // Constants
 const tmdbImagePath = getImagePath()
@@ -168,9 +169,21 @@ export const showDetails = async (id, media_type, season = -1, episode = -1) => 
   $modal.dataset.id = id
   $modal.dataset.media_type = media_type
   $modal.dataset.url = `${tmdbTitlePath}${media_type}/${id}`
-  const posterPath = episodeDetails ? getStillPath(episodeDetails) : getPosterPath(result)
-  if (posterPath) { 
-    $modalPoster.src = posterPath
+  const posterUrl = episodeDetails ? getStillUrl(episodeDetails) : getPosterUrl(result)
+  const posterPath = episodeDetails ? episodeDetails.still_path : result.backdrop_path
+  if (posterUrl) {
+    const cachedPoster = await getCachedImage(posterPath)
+    if (cachedPoster) {
+      $modalPoster.src = cachedPoster
+    } else {
+      cacheImage(posterUrl, posterPath).then(cached => {
+        if (cached) {
+          $modalPoster.src = cached
+        } else {
+          $modalPoster.src = posterUrl
+        }
+      })
+    }
   } else {
     $modalPosterContainer.style.display = 'none'
     $modalNoposter.style.display = 'flex'
@@ -196,11 +209,11 @@ export const showDetails = async (id, media_type, season = -1, episode = -1) => 
   })
 }
 
-function getPosterPath(input) {
+function getPosterUrl(input) {
   return input.backdrop_path ? `${tmdbImagePath}${input.backdrop_path}` : null
 }
 
-function getStillPath(input) {
+function getStillUrl(input) {
   return input.still_path ? `${tmdbImagePath}${input.still_path}` : null
 }
 

@@ -288,8 +288,8 @@ export const getPrefs = () => {
       'library-cache',
       'library',
       'checkbox',
-      'Cache Backdrop Images',
-      'Cache backdrop images from TMDB for library content (API key required)',
+      'Cache Poster & Backdrop Images',
+      'Cache poster & backdrop images from TMDB for library content (API key required)',
       false,
       true
     ),
