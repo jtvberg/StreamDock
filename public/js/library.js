@@ -5,6 +5,7 @@ import { cacheImage, getCachedImage } from "./util/imageCache.js"
 import { getPrefs } from "./util/settings.js"
 import { getYear, getDate, getCleanTitle, elementFromHtml, getSeasonEpisode } from "./util/helpers.js"
 import { getImagePath } from './util/tmdb.js'
+import { removeLastStream } from './renderer.js'
 
 // Element references
 const tmdbImagePath = getImagePath()
@@ -148,7 +149,6 @@ export const loadLibraryFromStorage = () => {
   const libraryWithMetadata = JSON.parse(localStorage.getItem('library')) || []
   if (libraryWithMetadata.length > 0) {
     loadLibraryUi(libraryWithMetadata)
-    return;
   }
 }
 
@@ -237,6 +237,9 @@ const addLibraryItems = async (library, type, dir) => {
 
     // persist & continue
     localStorage.setItem('library', JSON.stringify(filtered))
+
+    // remove last stream if it matches any of the new items
+    removeLastStream()
 
     if (getPrefs().find(pref => pref.id === 'library-meta').state()) {
       await getLibraryMetadata(type, dir)
