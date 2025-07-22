@@ -152,6 +152,9 @@ const clearResults = () => {
 export const showDetails = async (id, media_type, season = -1, episode = -1) => {
   if (id === undefined || id === null) return
   showError(false)
+  $modalPosterContainer.style.display = 'none'
+  $modalNoposter.style.display = 'flex'
+  $modalPoster.src = ""
   const result = await getTitleDetails(id, media_type)
   if (result === -1) {
     clearResults()
@@ -162,8 +165,6 @@ export const showDetails = async (id, media_type, season = -1, episode = -1) => 
   if (media_type === 'tv' && Number.isInteger(season) && Number.isInteger(episode) && season >= 0 && episode >= 0) {
     episodeDetails = await getEpisode(id, season, episode)
   }
-  $modalPosterContainer.style.display = ''
-  $modalNoposter.style.display = ''
   const loc = getPrefs().find(pref => pref.id === 'search-loc').state()
   $searchOverlay.style.display = 'flex'
   $modal.dataset.id = id
@@ -184,9 +185,8 @@ export const showDetails = async (id, media_type, season = -1, episode = -1) => 
         }
       })
     }
-  } else {
-    $modalPosterContainer.style.display = 'none'
-    $modalNoposter.style.display = 'flex'
+    $modalPosterContainer.style.display = ''
+    $modalNoposter.style.display = ''
   }
   $modalTitle.textContent = `${getTitle(episodeDetails || result)} (${getYear(episodeDetails?.air_date || result.first_air_date || result.release_date) || ''})`
   $modalRating.textContent = getRating(result, media_type, loc)
