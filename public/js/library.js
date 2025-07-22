@@ -60,7 +60,7 @@ const createLibraryTile = async libraryObj => {
     playLibraryItem(libraryObj.url)
   })
   resultTile.addEventListener('click', e => {
-    showDetails(libraryObj.metadata?.id, libraryObj.type, s, ep)
+    showDetails(libraryObj.metadata?.id, libraryObj.type, true, s, ep)
   })
   return resultTile
 }

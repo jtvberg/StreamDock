@@ -149,7 +149,7 @@ const clearResults = () => {
   $searchResults.replaceChildren([])
 }
 
-export const showDetails = async (id, media_type, season = -1, episode = -1) => {
+export const showDetails = async (id, media_type, local = false, season = -1, episode = -1) => {
   if (id === undefined || id === null) return
   showError(false)
   $modalPosterContainer.style.display = 'none'
@@ -173,17 +173,21 @@ export const showDetails = async (id, media_type, season = -1, episode = -1) => 
   const posterUrl = episodeDetails ? getStillUrl(episodeDetails) : getPosterUrl(result)
   const posterPath = episodeDetails ? episodeDetails.still_path : result.backdrop_path
   if (posterUrl) {
-    const cachedPoster = await getCachedImage(posterPath)
-    if (cachedPoster) {
-      $modalPoster.src = cachedPoster
+    if (local) {
+      const cachedPoster = await getCachedImage(posterPath)
+      if (cachedPoster) {
+        $modalPoster.src = cachedPoster
+      } else {
+        cacheImage(posterUrl, posterPath).then(cached => {
+          if (cached) {
+            $modalPoster.src = cached
+          } else {
+            $modalPoster.src = posterUrl
+          }
+        })
+      }
     } else {
-      cacheImage(posterUrl, posterPath).then(cached => {
-        if (cached) {
-          $modalPoster.src = cached
-        } else {
-          $modalPoster.src = posterUrl
-        }
-      })
+      $modalPoster.src = posterUrl
     }
     $modalPosterContainer.style.display = ''
     $modalNoposter.style.display = ''
