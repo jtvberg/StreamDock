@@ -265,6 +265,7 @@
   flex-direction: column;
   gap: 3px;
   overflow-y: auto;
+  width: -webkit-fill-available;
 }
 
 #modal-tagline {

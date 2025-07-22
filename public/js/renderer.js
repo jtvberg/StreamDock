@@ -613,12 +613,12 @@ export const removeLastStream = () => {
     if (!item) {
       setLastStream('')
       openLastUrl()
-      console.log(`Removed last stream: ${lastStream}`)
+      // console.log(`Removed last stream: ${lastStream}`)
       return
     }
-    console.log(`Last stream still exists: ${lastStream}`)
+    // console.log(`Last stream still exists: ${lastStream}`)
   } else {
-    console.log('No last stream to remove.')
+    // console.log('No last stream to remove.')
   }
 }
 

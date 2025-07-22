@@ -248,8 +248,8 @@ function getLanguage(input) {
   return input.original_language ? input.original_language.toUpperCase() : 'NA'
 }
 
-function getTagline(input) { // TODO: remove quotes from tagline
-  return input.tagline ? `"${input.tagline}"` : `""` 
+function getTagline(input) {
+  return input.tagline ? `"${input.tagline.replace(/["]+/g, '')}"` : `""` 
 }
 
 function getOverview(input) {
