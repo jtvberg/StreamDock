@@ -607,7 +607,7 @@ const loadLibraryDirectoryPanel = () => {
 // if file URL is removed from library, remove last stream if it matches
 export const removeLastStream = () => {
   const lastStream = getLastStream()
-  if (lastStream) {
+  if (lastStream && lastStream.startsWith('file:')) {
     const library = JSON.parse(localStorage.getItem('library')) || []
     const item = library.find(li => li.url === lastStream)
     if (!item) {
