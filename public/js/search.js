@@ -254,8 +254,14 @@ function getGenre(input) {
 function getRuntime(input) {
   let formattedTime = 'NA'
   try {
-    const time = input.runtime || input.last_episode_to_air.runtime || input.episode_run_time[0]
-    const formatTime = (n) => `${n / 60 ^ 0}:` + ('0' + n % 60).slice(-2)
+    const time = input.runtime || input.last_episode_to_air?.runtime || input.episode_run_time?.[0]
+    const formatTime = (n) => {
+      if (typeof n !== 'number' || isNaN(n)) return 'NA'
+      const mins = n % 60
+      const hrs = Math.floor(n / 60)
+      if (isNaN(hrs) || isNaN(mins)) return 'NA'
+      return `${hrs}:${('0' + mins).slice(-2)}`
+    }
     formattedTime = formatTime(time)
   } catch (err) { console.log(`No duration found`) }
   return formattedTime
