@@ -28,13 +28,13 @@
   },
   "license": "MIT",
   "devDependencies": {
-    "@electron/notarize": "^3.0.1",
-    "electron": "github:castlabs/electron-releases#v36.4.0+wvcus",
+    "@electron/notarize": "^3.0.2",
+    "electron": "github:castlabs/electron-releases#v37.2.5+wvcus",
     "electron-builder": "^26.0.12",
     "electron-reloader": "^1.2.3"
   },
   "dependencies": {
-    "@fortawesome/fontawesome-free": "^6.7.2",
+    "@fortawesome/fontawesome-free": "^7.0.0",
     "electron-updater": "^6.6.2"
   },
   "build": {
