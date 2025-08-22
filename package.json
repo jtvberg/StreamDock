@@ -9,7 +9,7 @@
     "debug": "electron --inspect=7171 .",
     "break": "electron --inspect-brk=7171 .",
     "buildMacTest": "CSC_IDENTITY_AUTO_DISCOVERY=false electron-builder -m --arm64",
-    "buildMac": "electron-builder -m",
+    "buildMac": "source .env && electron-builder -m",
     "buildWin": "electron-builder -w",
     "buildLinux": "electron-builder -l"
   },
