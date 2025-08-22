@@ -2,7 +2,7 @@
  New release (2.2.0)
  - Bumps all packages to latest versions (except FA)
  - Fixes Peacock and should now allow a broader set of streaming services I haven't ever used (including Spotify)
- - Add a local player: you can now turn this on in settings, add directories, and then access these videos in the Home screen. If you have entered a TMDB API key, it will also go get some basic data about the movie or TV show including poster art. As of right now, if it finds the wrong metadata for a title, there is really no option to fix that. I am working on a scheme to select the correct metadata. In the meantime, make sure the file names are the correct title. Example: Airplane 2 is actually Airplane II (great film). The former will get you Airplane 2025 (really?) from TMDB. In some cases, there is nothing you can do. 
+ - Added a local player: you can now turn this on in settings, add directories, and then access these videos in the home screen. If you have entered a TMDB API key, it will also go get some basic data about the movie or TV show including poster art. As of right now, if it finds the wrong metadata for a title, there is really no option to fix that. I am working on a scheme to select the correct metadata. In the meantime, make sure the file names are the correct title. Example: Airplane 2 is actually Airplane II (great film). The former will get you Airplane 2025 (really?) from TMDB. In some cases, there is nothing you can do. 
  - I tweaked the search results detail modal a bit
 
 # Dev Update
