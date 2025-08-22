@@ -8,7 +8,7 @@
     "start": "electron --trace-warnings .",
     "debug": "electron --inspect=7171 .",
     "break": "electron --inspect-brk=7171 .",
-    "buildMacTest": "electron-builder -m --arm64",
+    "buildMacTest": "CSC_IDENTITY_AUTO_DISCOVERY=false electron-builder -m --arm64",
     "buildMac": "electron-builder -m",
     "buildWin": "electron-builder -w",
     "buildLinux": "electron-builder -l"
@@ -28,7 +28,6 @@
   },
   "license": "MIT",
   "devDependencies": {
-    "@electron/notarize": "^3.0.2",
     "electron": "github:castlabs/electron-releases#v37.2.5+wvcus",
     "electron-builder": "^26.0.12",
     "electron-reloader": "^1.2.3"
@@ -61,7 +60,8 @@
             "arm64"
           ]
         }
-      ]
+      ],
+      "notarize": true
     },
     "win": {
       "target": [
