@@ -2,6 +2,7 @@
  New release (2.2.0)
  - Bumps all packages to latest versions (except FA)
  - Fixes Peacock and should now allow a broader set of streaming services I haven't ever used (including Spotify)
+ - I switched to using electron-builder's notarization. There is now a .env file you need to generate (there is an example.env file for guidance.) Build scripts have been updated accordingly.
  - Added a local player: you can now turn this on in settings, add directories, and then access these videos in the home screen. If you have entered a TMDB API key, it will also go get some basic data about the movie or TV show including poster art. As of right now, if it finds the wrong metadata for a title, there is really no option to fix that. I am working on a scheme to select the correct metadata. In the meantime, make sure the file names are the correct title. Example: Airplane 2 is actually Airplane II (great film). The former will get you Airplane 2025 (really?) from TMDB. In some cases, there is nothing you can do. More info on this at the bottom.
  - I tweaked the search results detail modal a bit
 
