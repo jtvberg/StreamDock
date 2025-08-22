@@ -1,12 +1,10 @@
 # Release Update
- New release addresses some service scripts that were no longer working. There was a bug where child windows for YouTube were no longer draggable as a result of the same TrustedHTML issue. This has since been fixed but did not make the 2.1.0 release.
+ New release (2.2.0) bumps all packages to latest and fixes Peacock and should now allow a broader set of streaming services I haven't ever used (including Spotify). I also added a local player to the app... you can now turn this on in settings, add directories, and then access these videos in the Home screen. If you have entered a TMDB API key, it will also go get some basic data about the movie or TV show including poster art. It then stores this info locally, including poster images (if you turn that on.) You can view details of a title just like search (when online.) As of right now, if it finds the wrong metadata for a title, there is really no option to fix that. I am working on a scheme to select the correct metadata. In the meantime, make sure the file names are the correct title. Example: Airplane 2 is actually Airplane II (great film). The former will get you Airplane 2025 (really?) from TMDB. In some cases, there is nothing you can do. Also, as it is, episodes work if you name them with a '.s01e01' after the name (it's not case sensitive and it doesn't need to be 2 digits.) Supports mp4, mov, avi, mkv and webm.
 
 # Dev Update
- I added a local player to the app... you can now turn this on in settings, add directories, and then access these videos in the Home screen. If you have entered a TMDB API key, it will also go get some basic data about the movie or TV show including poster art. It then stores this info locally, including poster images if you turn that on. You can view details of a title just like search (when online.) As of right now, if it finds the wrong metadata for a title, there is really no option to fix that. I am working on a scheme to select the correct metadata. In the meantime, make sure the file names are the correct title. Example: Airplane 2 is actually Airplane II (great film). The former will get you Airplane 2025 (really?) from TMDB. In some cases, there is nothing you can do. Also, as it is, episodes work if you name them with a .s01e01 after the name (it's not case sensitive and it doesn't need to be 2 digits.) I made some updates to how the results return which greatly improves accuracy but occasionally, you will get the wrong metadata for the same title. Supports mp4, mov, avi, mkv and webm. Once I get the metadata selection sorted and maybe an episodes to seasons combined view, I will post a new release.
+ Once I get the metadata selection sorted for local files and maybe an episodes to seasons combined view, I will post a another release.
 
- Also, Peacock works!
-
-# StreamDock 2.0.0, The Sequel!
+# StreamDock 2.0.0, The Sequel! (Old News)
  It took two years and a lack of focus to get 1.0.0 out the door and upon completion I looked at what I had wrought and wept.
  What a mess. It worked. I would say it worked well but it needed some serious refactoring. So serious that I just started from scratch.
 
@@ -77,7 +75,8 @@
 
 ## Building
  The code builds for Mac, Windows and Linux.
- There are also some build scripts in place (NOTE: You may want to disable notarization in the mac build script while testing your build as this can take a long time.)
+ There are also some build scripts in place (NOTE: The buildMacTest script is in place to skip building for multiple environments and notarization.)
+ You need to create a .env file. There is an example.env file for guidance.
 
 ## Releases / Known Issues
  Bookmarks and settings from older versions of StreamDock will not show up properly in 2.0.0+
@@ -139,3 +138,14 @@ NOTE: On some services there are scenarios where an option to skip something doe
  - There are also 3 quick search buttons: Popular films and TV shows that can be streamed and then 1 more for trending titles over the last week (but may not be on a stream service yet)
  
  NOTE: Some price of admission: to use search in the home screen you will need to enable 'show search' in the search settings and provide an API key. This requires you create a free account on TMDB and generate the v3 key.
+
+## Local File Support
+ You can now play local files in StreamDock.
+ - First turn on 'Show Library' feature in settings
+ - If you have a TMDB API key entered, StreamDock will attempt to find the title and add metadata as it adds the files to the home screen if you have 'Fetch Metadata' turned on
+ - You can also toggle poster/backdrop caching so the show up offline
+ - Add directories to scan (be sure to pick media type TV/Movie as this drives TMDB lookups)
+ - There are also options to rescan a directory on startup to see if anything new has been added
+ - On each directory entry there are options to rescan or completely refresh all files and metadata
+ - There are status symbols at the front of each directory entry to give you a status of file/metadata/errors for loads
+ 
