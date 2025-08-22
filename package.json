@@ -9,7 +9,7 @@
     "debug": "electron --inspect=7171 .",
     "break": "electron --inspect-brk=7171 .",
     "buildMacTest": "electron-builder -m --arm64",
-    "buildMac": "electron-builder -m --x64 --arm64",
+    "buildMac": "electron-builder -m",
     "buildWin": "electron-builder -w",
     "buildLinux": "electron-builder -l"
   },
@@ -52,7 +52,13 @@
     "afterPack": "./build/afterPack.js",
     "afterSign": "./build/afterSign.js",
     "mac": {
-      "category": "public.app-category.video"
+      "category": "public.app-category.video",
+      "target": [
+        {
+          "target": "dmg",
+          "arch": "universal"
+        }
+      ]
     },
     "win": {
       "target": [
@@ -60,7 +66,7 @@
           "target": "nsis",
           "arch": [
             "x64",
-            "ia32"
+            "arm64"
           ]
         }
       ],
