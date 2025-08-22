@@ -1,5 +1,9 @@
 # Release Update
- New release (2.2.0) bumps all packages to latest and fixes Peacock and should now allow a broader set of streaming services I haven't ever used (including Spotify). I also added a local player to the app... you can now turn this on in settings, add directories, and then access these videos in the Home screen. If you have entered a TMDB API key, it will also go get some basic data about the movie or TV show including poster art. It then stores this info locally, including poster images (if you turn that on.) You can view details of a title just like search (when online.) As of right now, if it finds the wrong metadata for a title, there is really no option to fix that. I am working on a scheme to select the correct metadata. In the meantime, make sure the file names are the correct title. Example: Airplane 2 is actually Airplane II (great film). The former will get you Airplane 2025 (really?) from TMDB. In some cases, there is nothing you can do. Also, as it is, episodes work if you name them with a '.s01e01' after the name (it's not case sensitive and it doesn't need to be 2 digits.) Supports mp4, mov, avi, mkv and webm. I tweaked the search results detail modal a bit.
+ New release (2.2.0)
+ - Bumps all packages to latest versions (except FA)
+ - Fixes Peacock and should now allow a broader set of streaming services I haven't ever used (including Spotify)
+ - Add a local player: you can now turn this on in settings, add directories, and then access these videos in the Home screen. If you have entered a TMDB API key, it will also go get some basic data about the movie or TV show including poster art. As of right now, if it finds the wrong metadata for a title, there is really no option to fix that. I am working on a scheme to select the correct metadata. In the meantime, make sure the file names are the correct title. Example: Airplane 2 is actually Airplane II (great film). The former will get you Airplane 2025 (really?) from TMDB. In some cases, there is nothing you can do. 
+ - I tweaked the search results detail modal a bit
 
 # Dev Update
  Once I get the metadata selection sorted for local files and maybe an episodes to seasons combined view, I will post a another release.
@@ -148,4 +152,6 @@ NOTE: On some services there are scenarios where an option to skip something doe
  - There are also options to rescan a directory on startup to see if anything new has been added
  - On each directory entry there are options to rescan or completely refresh all files and metadata
  - There are status symbols at the front of each directory entry to give you a status of file/metadata/errors for loads
+ - Show episodes work if you name them with a '.s01e01' after the name (it's not case sensitive and it doesn't need to be 2 digits)
+ - Supports mp4, mov, avi, mkv and webm
  
