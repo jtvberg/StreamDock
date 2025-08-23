@@ -7,7 +7,7 @@
  - I tweaked the search results detail modal a bit
 
 # Dev Update
- Once I get the metadata selection sorted for local files and maybe an episodes to seasons combined view, I will post a another release.
+ Once I get the metadata selection sorted for local files and maybe an episodes to seasons combined view, I will post a another release. I also need to add Peacock scripts now that it is reliably working.
 
 # StreamDock 2.0.0, The Sequel! (Old News)
  It took two years and a lack of focus to get 1.0.0 out the door and upon completion I looked at what I had wrought and wept.
@@ -93,9 +93,8 @@
 
  The auto-update should prompt you as new releases come out and then, post download, prompt you to install/restart. Sometimes, it won't do the restart. If you wait a minute and exit the app completely, it should automatically restart the new version.
 
- Four Issues:
+ Three Issues:
  - Dragging a window around might still on occasion make the mouse 'stick' to the header. This should be much more rare than in previous versions. You can still hit escape to disconnect it
- - I investigated further but Peacock is still broken.
  - Hulu will resume playing when minimized to tray after a short amount of time. If you pause it before you minimize to tray, it does not. I have not found a root cause for this and it only happens on Hulu. This may have been around for quite some time.
  - If you open a Netlfix child window, playing a video will likely give you an error. This is beacuse you have 2 windows open in the same 'browser'. If you close the Netflix session in the main window, the child will play
 
