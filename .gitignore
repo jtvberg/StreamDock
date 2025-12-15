@@ -5,3 +5,7 @@ private/
 test*
 temp*
 .env*
+
+.github/*
+!.github/workflows/
+!.github/workflows/**
