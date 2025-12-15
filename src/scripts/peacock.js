@@ -18,8 +18,8 @@ function pcRecapSkipRem(bv) {
 // Peacock recap skip click
 function pcRecapSkipClick() {
   try {
-    if (document.querySelector('.playback-controls__skip--button') != undefined) {
-      document.querySelector('.playback-controls__skip--button').click()
+    if (document.querySelector('.design-system-button__skip') != undefined) {
+      document.querySelector('.design-system-button__skip').click()
       console.log('recap skip')
     }
   } catch(err) { console.error(err) }
@@ -31,7 +31,7 @@ function pcRecapSkipMut() {
     console.log('recap mut')
     obsPcRecap = new MutationObserver((ml) => {
       for(const mut of ml) {
-        if (mut.type === 'childList' && mut.addedNodes[0]?.classList?.contains('playback-controls__skip--button')) {
+        if (mut.type === 'childList' && mut.addedNodes[0]?.classList?.contains('design-system-button__skip')) {
           pcRecapSkipClick()
         }
       }
@@ -43,7 +43,7 @@ function pcRecapSkipMut() {
 function pcRecapSkipObs() {
   try {
     console.log('recap obs')
-    obsPcRecap.observe(document.querySelector('.primary-layout__content'), { childList: true, subtree: true })
+    obsPcRecap.observe(document.querySelector('#mainContainer'), { childList: true, subtree: true })
   } catch (err) { console.error(err) }
 }
 
@@ -77,8 +77,8 @@ function pcEpisodeNextRem(bv) {
 // Peacock next episode click
 function pcEpisodeNextClick() {
   try {
-    if (document.querySelector('.playback-binge__image') != undefined) {
-      document.querySelector('.playback-binge__image').click()
+    if (document.querySelector('.playback-binge__card') != undefined) {
+      document.querySelector('.playback-binge__card').click()
       console.log('next episode')
     }
   } catch(err) { console.error(err) }
@@ -102,7 +102,7 @@ function pcEpisodeNextMut() {
 function pcEpisodeNextObs() {
   try {
     console.log('next obs')
-    obsPcNext.observe(document.querySelector('.primary-layout__content'), { childList: true, subtree: true })
+    obsPcNext.observe(document.querySelector('#mainContainer'), { childList: true, subtree: true })
   } catch (err) { console.error(err) }
 }
 

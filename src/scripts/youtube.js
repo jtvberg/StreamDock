@@ -2,7 +2,7 @@
 let obsYtAds = null;
 
 // YouTube ad script injection
-function ytAdsSkip(bv) {
+function ytAdSkip(bv) {
   bv.webContents.executeJavaScript('try { let obsYtAds = null; } catch(err) { console.error("Error declaring obsYtAds in page:", err); }')
     .then(() => bv.webContents.executeJavaScript(`(${ytAdSkipObserverSetup.toString()})()`))
     .then(() => bv.webContents.executeJavaScript(`(${ytAdSkipObserveStart.toString()})()`))
@@ -88,6 +88,6 @@ function ytAdSkipObserveDisconnect() {
 }
 
 module.exports = {
-  ytAdsSkip,
+  ytAdSkip,
   ytAdSkipRem
 };

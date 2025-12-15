@@ -4,7 +4,7 @@ const { version, productName, author, repository, bugs } = require('../package.j
 const path = require('path')
 const menu = require('./util/menu')
 const fs = require('fs').promises
-const { ytAdsSkip, ytAdSkipRem } = require('./scripts/youtube')
+const { ytAdSkip, ytAdSkipRem } = require('./scripts/youtube')
 const { amzUpgradeDismiss,
   amzPreviewSkip,
   amzPrevewSkipRem,
@@ -293,7 +293,7 @@ const loadScripts = (bv = streamView, host) => {
     // sendLogData(`Using Hostname: ${host}`)
     switch (host) {
       case 'www.youtube.com':
-        response['service-ad'] === 'true' ? ytAdsSkip(bv) : ytAdSkipRem(bv)
+        response['service-ad'] === 'true' ? ytAdSkip(bv) : ytAdSkipRem(bv)
         break
       case 'www.netflix.com':
         response['service-rs'] === 'true' ? nfRecapSkip(bv) : nfRecapSkipRem(bv)
