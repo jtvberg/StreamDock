@@ -156,7 +156,7 @@ export const getStreams = defaults => {
       'S',
       'Spotify',
       'https://open.spotify.com',
-      '#1ed760ff',
+      '#1ed760',
       '#000000',
       17
     )
