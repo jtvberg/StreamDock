@@ -1,5 +1,5 @@
 // Imports
-import { searchMovie, searchTv, getSeason } from './util/tmdb.js'
+import { searchMovie, searchTv, getSeason, getEpisode } from './util/tmdb.js'
 import { showDetails } from './search.js'
 import { cacheImage, getCachedImage } from "./util/imageCache.js"
 import { getPrefs } from "./util/settings.js"
@@ -507,19 +507,23 @@ const getLibraryMetadata = async (type, dir) => {
       searchResult.results.sort((a, b) => b.popularity - a.popularity)
       // find the first result that is exact match to search term === item.title
       metadata = searchResult.results.find(result => getCleanTitle(result.title || result.name) === searchTerm) || searchResult.results[0]
-      if (type === 'tv' && item.season) {
+      if (type === 'tv' && item.season && item.episode) {
         const seasonData = await getSeason(metadata.id, item.season)
-        if (seasonData === 1) {
-          handleMetadataError(dir, 1)
-          error = true
-          continue
-        }
-        if (seasonData === -1) {
-          handleMetadataError(dir, -1)
+        if (seasonData === 1 || seasonData === -1) {
+          handleMetadataError(dir, seasonData)
           error = true
           continue
         }
         metadata.poster_path = seasonData?.poster_path || metadata.poster_path
+        
+        // get episode-specific air date
+        const episodeData = await getEpisode(metadata.id, item.season, item.episode)
+        if (episodeData && episodeData.air_date) {
+          metadata.first_air_date = episodeData.air_date
+        } else if (seasonData?.air_date) {
+          // fallback to season air date
+          metadata.first_air_date = seasonData.air_date
+        }
       }
       releaseYear = getYear(metadata.release_date || metadata.first_air_date || 'NA')
       releaseDate = getDate(metadata.release_date || metadata.first_air_date || 'NA')
