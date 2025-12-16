@@ -22,6 +22,21 @@ const $librarySortPathBtn = document.querySelector('#library-sort-path-btn')
 
 // Vars
 let libraryLoadLock = Promise.resolve()
+let currentSortOrder = 'title' // Track current sort: 'old', 'new', 'title', 'path'
+
+// get sortable value with fallbacks
+const getSortValue = (item, field) => {
+  switch (field) {
+    case 'title':
+      return getCleanTitle(item.metadata?.title || item.metadata?.name || item.title)
+    case 'date':
+      return Number(item.releaseDate) || 253402300800000
+    case 'path':
+      return item.path || item.url
+    default:
+      return ''
+  }
+}
 
 // create a season group tile
 const createSeasonGroupTile = async (showId, season, episodes) => {
@@ -258,29 +273,71 @@ const loadLibraryUi = async library => {
     // group TV shows by season
     const grouped = groupSeasonsEpisodes(library)
     const groupedShowIds = new Set()
+    const mixedItems = []
 
-    for (const showId in grouped) {
-      for (const season in grouped[showId]) {
-        grouped[showId][season].forEach(ep => groupedShowIds.add(ep.url))
-      }
-    }
-
+    // add groups - use first episode's values for sorting
     for (const showId in grouped) {
       for (const season in grouped[showId]) {
         const episodes = grouped[showId][season]
-        const groupTile = await createSeasonGroupTile(showId, season, episodes)
-        fragTiles.appendChild(groupTile)
-        const groupListItem = createSeasonGroupListItem(showId, season, episodes)
-        fragList.appendChild(groupListItem)
+        const firstEpisode = episodes[0]
+        grouped[showId][season].forEach(ep => groupedShowIds.add(ep.url))
+        
+        mixedItems.push({
+          isGroup: true,
+          showId,
+          season,
+          episodes,
+          sortTitle: firstEpisode.metadata?.name || firstEpisode.title,
+          sortDate: firstEpisode.releaseDate || 253402300800000,
+          sortPath: firstEpisode.path || firstEpisode.url
+        })
       }
     }
 
-    // add ungrouped items (movies and TV without metadata)
+    // add ungrouped items
     const ungroupedItems = library.filter(item => !groupedShowIds.has(item.url))
-    const ungroupedTileNodes = await Promise.all(ungroupedItems.map(li => createLibraryTile(li)))
-    ungroupedTileNodes.forEach(node => fragTiles.appendChild(node))
-    ungroupedItems.forEach(li => fragList.appendChild(createLibraryListItem(li)))
+    ungroupedItems.forEach(item => {
+      mixedItems.push({
+        isGroup: false,
+        item,
+        sortTitle: getSortValue(item, 'title'),
+        sortDate: getSortValue(item, 'date'),
+        sortPath: getSortValue(item, 'path')
+      })
+    })
+
+    // sort mixed items based on current sort order
+    mixedItems.sort((a, b) => {
+      switch (currentSortOrder) {
+        case 'old':
+          return a.sortDate - b.sortDate
+        case 'new':
+          return b.sortDate - a.sortDate
+        case 'title':
+          return getCleanTitle(a.sortTitle) < getCleanTitle(b.sortTitle) ? -1 : 1
+        case 'path':
+          return a.sortPath < b.sortPath ? -1 : 1
+        default:
+          return 0
+      }
+    })
+
+    // render in sorted order
+    for (const mixedItem of mixedItems) {
+      if (mixedItem.isGroup) {
+        const groupTile = await createSeasonGroupTile(mixedItem.showId, mixedItem.season, mixedItem.episodes)
+        fragTiles.appendChild(groupTile)
+        const groupListItem = createSeasonGroupListItem(mixedItem.showId, mixedItem.season, mixedItem.episodes)
+        fragList.appendChild(groupListItem)
+      } else {
+        const tile = await createLibraryTile(mixedItem.item)
+        fragTiles.appendChild(tile)
+        const listItem = createLibraryListItem(mixedItem.item)
+        fragList.appendChild(listItem)
+      }
+    }
   } else {
+    // ungrouped: render library as-is (already sorted)
     const tileNodes = await Promise.all(library.map(li => createLibraryTile(li)))
     tileNodes.forEach(node => fragTiles.appendChild(node))
     library.forEach(li => fragList.appendChild(createLibraryListItem(li)))
@@ -478,9 +535,6 @@ const getLibraryMetadata = async (type, dir) => {
   }
   localStorage.setItem('library', JSON.stringify(libraryWithMetadata))
   loadLibraryUi(libraryWithMetadata)
-  if (type === 'tv') {
-    console.log(groupSeasonsEpisodes(libraryWithMetadata))
-  }
 }
 
 // group seasons and episodes for TV shows
@@ -521,31 +575,47 @@ const groupSeasonsEpisodes = library => {
 
 // sort library by order param
 const sortLibrary = order => {
+  currentSortOrder = order
   const library = JSON.parse(localStorage.getItem('library')) || []
+  
   switch (order) {
     case 'old':
-      // sort library by timestamp ascending
-      library.sort((a, b) => a.releaseDate - b.releaseDate)
+      // sort by date ascending (oldest first)
+      library.sort((a, b) => getSortValue(a, 'date') - getSortValue(b, 'date'))
       break
     case 'new':
-      // sort library by timestamp descending
-      library.sort((a, b) => b.releaseDate - a.releaseDate)
+      // sort by date descending (newest first)
+      library.sort((a, b) => getSortValue(b, 'date') - getSortValue(a, 'date'))
       break
     case 'title':
-      // sort library by title ascending
-      library.sort((a, b) => getCleanTitle(a.title) < getCleanTitle(b.title) ? -1 : 1)
+      // sort by title ascending
+      library.sort((a, b) => {
+        const titleA = getSortValue(a, 'title')
+        const titleB = getSortValue(b, 'title')
+        return titleA < titleB ? -1 : 1
+      })
       break
     case 'path':
-      // sort library by dir ascending
-      library.sort((a, b) => a.url < b.url ? -1 : 1)
+      // sort by path ascending
+      library.sort((a, b) => {
+        const pathA = getSortValue(a, 'path')
+        const pathB = getSortValue(b, 'path')
+        return pathA < pathB ? -1 : 1
+      })
       break
     default:
-      library.sort((a, b) => a.releaseDate - b.releaseDate)
+      library.sort((a, b) => {
+        const titleA = getSortValue(a, 'title')
+        const titleB = getSortValue(b, 'title')
+        return titleA < titleB ? -1 : 1
+      })
       break
   }
+  
   $library.replaceChildren([])
   $libraryList.replaceChildren([])
   localStorage.setItem('library', JSON.stringify(library))
+  
   let type = null
   if ($libraryMovieBtn.classList.contains('toggled-bg')) {
     type = 'movie'
