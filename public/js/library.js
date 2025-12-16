@@ -14,6 +14,7 @@ const $libraryList = document.querySelector('#library-list')
 const $libraryListBtn = document.querySelector('#library-list-btn')
 const $libraryMovieBtn = document.querySelector('#library-movie-btn')
 const $libraryTvBtn = document.querySelector('#library-tv-btn')
+const $libraryGroupBtn = document.querySelector('#library-group-btn')
 const $librarySortOldBtn = document.querySelector('#library-sort-old-btn')
 const $librarySortNewBtn = document.querySelector('#library-sort-new-btn')
 const $librarySortTitleBtn = document.querySelector('#library-sort-title-btn')
@@ -21,6 +22,129 @@ const $librarySortPathBtn = document.querySelector('#library-sort-path-btn')
 
 // Vars
 let libraryLoadLock = Promise.resolve()
+
+// create a season group tile
+const createSeasonGroupTile = async (showId, season, episodes) => {
+  const firstEpisode = episodes[0]
+  const cleanTitle = firstEpisode.metadata?.name || 'Unknown Show'
+  const cleanYear = firstEpisode.releaseYear === undefined ? '' : `(${firstEpisode.releaseYear})`
+  let poster = firstEpisode.metadata?.poster_path ? `${tmdbImagePath}${firstEpisode.metadata?.poster_path}` : null
+
+  if (firstEpisode.metadata?.poster_path) {
+    poster = `${tmdbImagePath}${firstEpisode.metadata.poster_path}`
+    try {
+      const cached = await getCachedImage(firstEpisode.metadata.poster_path)
+      if (cached) poster = cached
+    } catch (e) {
+      // console.log('Image cache error', e)
+    }
+  }
+
+  const resultTile = elementFromHtml(`<div class="season-group-tile" data-show-id="${showId}" data-season="${season}" data-expanded="false"></div>`)
+  const resultPoster = elementFromHtml(`<img class="result-poster" src="${poster}"></img>`)
+  const resultDetails = elementFromHtml(`<div class="result-details"></div>`)
+  const resultCaret = elementFromHtml(`<div class="season-group-caret fas fa-caret-right"></div>`)
+  const resultTitle = elementFromHtml(`<div class="result-title" title="${cleanTitle}">${cleanTitle}</div>`)
+  const resultYear = elementFromHtml(`<div class="result-year" title="Season ${season}">Season ${season}</div>`)
+  const resultCountBadge = elementFromHtml(`<div class="episode-count-badge">${episodes.length}</div>`)
+  
+  resultDetails.appendChild(resultCaret)
+  resultDetails.appendChild(resultTitle)
+  resultDetails.appendChild(resultYear)
+  resultDetails.appendChild(resultCountBadge)
+  resultTile.appendChild(resultDetails)
+  poster ? resultTile.appendChild(resultPoster) : null
+
+  // Click entire tile to expand/collapse
+  resultTile.addEventListener('click', () => {
+    toggleSeasonGroup(resultTile, episodes, false)
+  })
+
+  return resultTile
+}
+
+// create a season group list item
+const createSeasonGroupListItem = (showId, season, episodes) => {
+  const firstEpisode = episodes[0]
+  const cleanTitle = firstEpisode.metadata?.name || 'Unknown Show'
+  const frag = document.createDocumentFragment()
+  const libraryListItem = elementFromHtml(`<div class="season-group-row library-row" data-show-id="${showId}" data-season="${season}" data-expanded="false"></div>`)
+  const libraryCaret = elementFromHtml(`<div class="season-group-caret fas fa-plus"></div>`)
+  const libraryListTitle = elementFromHtml(`<div class="library-cell" title="${cleanTitle} - Season ${season} (${episodes.length} episodes)">${cleanTitle} - Season ${season} (${episodes.length} episodes)</div>`)
+  const libraryListPath = elementFromHtml(`<div class="library-cell"></div>`)
+  const libraryListTime = elementFromHtml(`<div class="library-cell library-cell-right"></div>`)
+  
+  libraryListItem.appendChild(libraryCaret)
+  libraryListItem.appendChild(libraryListTitle)
+  libraryListItem.appendChild(libraryListPath)
+  libraryListItem.appendChild(libraryListTime)
+
+  // Click entire row to expand/collapse
+  libraryListItem.addEventListener('click', () => {
+    toggleSeasonGroup(libraryListItem, episodes, true)
+  })
+
+  frag.appendChild(libraryListItem)
+  return frag
+}
+
+// toggle season group expand/collapse
+const toggleSeasonGroup = async (container, episodes, isListView) => {
+  const isExpanded = container.dataset.expanded === 'true'
+  const caret = container.querySelector('.season-group-caret')
+
+  if (isExpanded) {
+    container.dataset.expanded = 'false'
+    if (isListView) {
+      caret.classList.remove('fa-minus')
+      caret.classList.add('fa-plus')
+    } else {
+      caret.classList.remove('fa-caret-down')
+      caret.classList.add('fa-caret-right')
+    }
+    removeEpisodes(container)
+  } else {
+    container.dataset.expanded = 'true'
+    if (isListView) {
+      caret.classList.remove('fa-plus')
+      caret.classList.add('fa-minus')
+    } else {
+      caret.classList.remove('fa-caret-right')
+      caret.classList.add('fa-caret-down')
+    }
+    await insertEpisodes(container, episodes, isListView)
+  }
+}
+
+// insert episodes after group container
+const insertEpisodes = async (container, episodes, isListView) => {
+  let currentElement = container
+  
+  for (const episode of episodes) {
+    let episodeElement
+    if (isListView) {
+      const frag = createLibraryListItem(episode)
+      episodeElement = frag.firstElementChild
+      episodeElement.classList.add('nested-episode-row')
+    } else {
+      episodeElement = await createLibraryTile(episode)
+      episodeElement.classList.add('nested-episode-tile')
+    }
+    episodeElement.dataset.seasonEpisode = 'true'
+    currentElement.insertAdjacentElement('afterend', episodeElement)
+    currentElement = episodeElement
+  }
+}
+
+// remove episodes after group container
+const removeEpisodes = (container) => {
+  let nextElement = container.nextElementSibling
+  while (nextElement && nextElement.dataset.seasonEpisode === 'true') {
+    const toRemove = nextElement
+    nextElement = nextElement.nextElementSibling
+    toRemove.remove()
+  }
+}
 
 // create a library tile
 const createLibraryTile = async libraryObj => {
@@ -126,11 +250,42 @@ const libraryListView = () => {
 
 // load library
 const loadLibraryUi = async library => {
+  const isGrouped = localStorage.getItem('library-group-season') === 'true'
   const fragTiles = document.createDocumentFragment()
   const fragList = document.createDocumentFragment()
-  const tileNodes = await Promise.all(library.map(li => createLibraryTile(li)))
-  tileNodes.forEach(node => fragTiles.appendChild(node))
-  library.forEach(li => fragList.appendChild(createLibraryListItem(li)))
+
+  if (isGrouped) {
+    // group TV shows by season
+    const grouped = groupSeasonsEpisodes(library)
+    const groupedShowIds = new Set()
+
+    for (const showId in grouped) {
+      for (const season in grouped[showId]) {
+        grouped[showId][season].forEach(ep => groupedShowIds.add(ep.url))
+      }
+    }
+
+    for (const showId in grouped) {
+      for (const season in grouped[showId]) {
+        const episodes = grouped[showId][season]
+        const groupTile = await createSeasonGroupTile(showId, season, episodes)
+        fragTiles.appendChild(groupTile)
+        const groupListItem = createSeasonGroupListItem(showId, season, episodes)
+        fragList.appendChild(groupListItem)
+      }
+    }
+
+    // add ungrouped items (movies and TV without metadata)
+    const ungroupedItems = library.filter(item => !groupedShowIds.has(item.url))
+    const ungroupedTileNodes = await Promise.all(ungroupedItems.map(li => createLibraryTile(li)))
+    ungroupedTileNodes.forEach(node => fragTiles.appendChild(node))
+    ungroupedItems.forEach(li => fragList.appendChild(createLibraryListItem(li)))
+  } else {
+    const tileNodes = await Promise.all(library.map(li => createLibraryTile(li)))
+    tileNodes.forEach(node => fragTiles.appendChild(node))
+    library.forEach(li => fragList.appendChild(createLibraryListItem(li)))
+  }
+
   $library.replaceChildren([])
   $libraryList.replaceChildren([])
   $library.appendChild(fragTiles)
@@ -406,6 +561,14 @@ const filterLibrary = type => {
   const filteredLibrary = library.filter(li => li.type === type)
   $library.replaceChildren([])
   $libraryList.replaceChildren([])
+  
+  // disable group button if movie filter is active
+  if (type === 'movie') {
+    $libraryGroupBtn.disabled = true
+  } else {
+    $libraryGroupBtn.disabled = false
+  }
+  
   if (!type) {
     loadLibraryUi(library)
   } else {
@@ -451,6 +614,24 @@ $libraryTvBtn.addEventListener('click', () => {
   }
 })
 
+$libraryGroupBtn.addEventListener('click', () => {
+  if ($libraryGroupBtn.classList.contains('toggled-bg')) {
+    $libraryGroupBtn.classList.remove('toggled-bg')
+    localStorage.setItem('library-group-season', 'false')
+  } else {
+    $libraryGroupBtn.classList.add('toggled-bg')
+    localStorage.setItem('library-group-season', 'true')
+  }
+  // reload library with new grouping state
+  let type = null
+  if ($libraryMovieBtn.classList.contains('toggled-bg')) {
+    type = 'movie'
+  } else if ($libraryTvBtn.classList.contains('toggled-bg')) {
+    type = 'tv'
+  }
+  filterLibrary(type)
+})
+
 window.electronAPI.sendLibrary((e, libraryObj) => addLibraryItems(libraryObj.library, libraryObj.type, libraryObj.dir))
 
 window.electronAPI.setVideoTime((e, urlTime) => {
@@ -465,5 +646,8 @@ window.electronAPI.setVideoTime((e, urlTime) => {
   }
 })
 
-// Setup
+// setup
+if (localStorage.getItem('library-group-season') === 'true') {
+  $libraryGroupBtn.classList.add('toggled-bg')
+}
 loadLibraryFromStorage()

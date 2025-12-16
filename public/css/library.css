@@ -10,7 +10,7 @@
   grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
   grid-auto-rows: max-content;
   gap: 7px;
-  width: -webkit-fill-available;
+  width: stretch;
   overflow-y: auto;
   overflow-x: hidden;
 }
@@ -92,7 +92,7 @@
   flex-direction: column;
   gap: 3px;
   font-weight: 600;
-  width: -webkit-fill-available;
+  width: stretch;
   color: var(--color-control-white);
   overflow-y: auto;
 }
@@ -123,9 +123,10 @@
 }
 
 .library-cell {
+  display: -webkit-box;
+  line-clamp: 1;
   -webkit-line-clamp: 1;
   -webkit-box-orient: vertical;
-  display: -webkit-box;
   overflow: hidden;
 }
 
@@ -140,4 +141,73 @@
 
 .library-cell-link:hover {
   color: var(--color-system-accent);
+}
+
+.season-group-tile {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--color-control-darkgray);
+  border: 2px solid transparent;
+  border-radius: 5px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: border-color 200ms ease-out;
+  aspect-ratio: 2/3;
+}
+
+.season-group-tile:hover {
+  border-color: var(--color-system-accent);
+}
+
+.season-group-caret {
+  display: inline;
+  margin-right: 5px;
+  font-size: 0.9rem;
+  transition: transform 200ms ease-out;
+}
+
+.episode-count-badge {
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 30px;
+  height: 30px;
+  padding: 0 8px;
+  font-size: 1rem;
+  font-weight: bold;
+  color: var(--color-control-white);
+  background-color: var(--color-control-black-trans);
+  border-radius: 15px;
+  transition: all 200ms ease-out;
+}
+
+.season-group-tile:hover .episode-count-badge {
+  background-color: var(--color-system-accent);
+  transform: scale(1.1);
+}
+
+.nested-episode-tile {
+  border-left: 8px solid var(--color-system-accent-trans);
+}
+
+.nested-episode-tile > .result-poster {
+  border-radius: 0px 5px 5px 0px;
+}
+
+.season-group-row {
+  cursor: pointer;
+}
+
+.season-group-row .season-group-caret {
+  margin-right: 8px;
+}
+
+.nested-episode-row {
+  padding-left: 30px;
+  border-left: 3px solid var(--color-system-accent-trans);
+  margin-left: 10px;
 }
