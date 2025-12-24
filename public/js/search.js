@@ -77,7 +77,7 @@ const showError = (bool) => {
 
 const parseResponse = (response, queryObj) => {
   showError(false)
-  if (response <= 0) {
+  if (response <= 1) {
     clearResults()
     showError(true)
     return

@@ -57,13 +57,11 @@ const createSeasonGroupTile = async (showId, season, episodes) => {
   const resultTile = elementFromHtml(`<div class="season-group-tile" data-show-id="${showId}" data-season="${season}" data-expanded="false"></div>`)
   const resultPoster = elementFromHtml(`<img class="result-poster" src="${poster}"></img>`)
   const resultDetails = elementFromHtml(`<div class="result-details season-group-details"></div>`)
-  // const resultCaret = elementFromHtml(`<div class="season-group-caret fas fa-caret-right"></div>`)
   const resultTitle = elementFromHtml(`<div class="result-title" title="${cleanTitle}">${cleanTitle}</div>`)
   const resultSeason = elementFromHtml(`<div class="result-year">Season ${season}</div>`)
   const resultCount = elementFromHtml(`<div class="result-year">${episodes.length} Episode${episodes.length !== 1 ? 's' : ''}</div>`)
   const resultCountBadge = elementFromHtml(`<div class="episode-count-badge">${episodes.length}</div>`)
   
-  // resultDetails.appendChild(resultCaret)
   resultDetails.appendChild(resultTitle)
   resultDetails.appendChild(resultSeason)
   resultDetails.appendChild(resultCount)
