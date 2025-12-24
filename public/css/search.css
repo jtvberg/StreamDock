@@ -97,6 +97,7 @@
   font-size: 1.1rem;
   padding-inline: 3px;
   height: -webkit-fill-available;
+  width: -webkit-fill-available;
 }
 
 .result-poster {
