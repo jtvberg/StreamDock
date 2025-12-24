@@ -118,6 +118,7 @@
 }
 
 .bookmark-cell {
+  line-clamp: 1;
   -webkit-line-clamp: 1;
   -webkit-box-orient: vertical;
   display: -webkit-box;

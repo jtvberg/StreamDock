@@ -123,10 +123,8 @@
 }
 
 .library-cell {
-  display: -webkit-box;
-  line-clamp: 1;
-  -webkit-line-clamp: 1;
-  -webkit-box-orient: vertical;
+  white-space: nowrap;
+  text-overflow: ellipsis;
   overflow: hidden;
 }
 
@@ -162,7 +160,7 @@
 
 .season-group-caret {
   display: inline;
-  margin-right: 5px;
+  margin-right: 2px;
   font-size: 0.9rem;
   transition: transform 200ms ease-out;
 }
@@ -190,6 +188,11 @@
   transform: scale(1.1);
 }
 
+.season-group-tile:hover .result-poster {
+  opacity: 0.1;
+  pointer-events: none;
+}
+
 .nested-episode-tile {
   border-left: 8px solid var(--color-system-accent-trans);
 }
@@ -202,12 +205,8 @@
   cursor: pointer;
 }
 
-.season-group-row .season-group-caret {
-  margin-right: 8px;
-}
-
 .nested-episode-row {
-  padding-left: 30px;
+  padding-left: 14px;
   border-left: 3px solid var(--color-system-accent-trans);
   margin-left: 10px;
 }

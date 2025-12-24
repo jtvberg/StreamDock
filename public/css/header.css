@@ -108,6 +108,7 @@
   display: none;
   overflow: hidden;
   margin: 5px;
+  margin-top: 1px;
 }
 
 .lin-control {
@@ -135,6 +136,7 @@
   display: flex;
   flex-flow: column;
   gap: 5px;
+  width: 30px;
   user-select: none;
   margin-right: 6px;
 }

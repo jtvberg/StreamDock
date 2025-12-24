@@ -42,7 +42,6 @@ const getSortValue = (item, field) => {
 const createSeasonGroupTile = async (showId, season, episodes) => {
   const firstEpisode = episodes[0]
   const cleanTitle = firstEpisode.metadata?.name || 'Unknown Show'
-  const cleanYear = firstEpisode.releaseYear === undefined ? '' : `(${firstEpisode.releaseYear})`
   let poster = firstEpisode.metadata?.poster_path ? `${tmdbImagePath}${firstEpisode.metadata?.poster_path}` : null
 
   if (firstEpisode.metadata?.poster_path) {
@@ -57,15 +56,17 @@ const createSeasonGroupTile = async (showId, season, episodes) => {
 
   const resultTile = elementFromHtml(`<div class="season-group-tile" data-show-id="${showId}" data-season="${season}" data-expanded="false"></div>`)
   const resultPoster = elementFromHtml(`<img class="result-poster" src="${poster}"></img>`)
-  const resultDetails = elementFromHtml(`<div class="result-details"></div>`)
-  const resultCaret = elementFromHtml(`<div class="season-group-caret fas fa-caret-right"></div>`)
+  const resultDetails = elementFromHtml(`<div class="result-details season-group-details"></div>`)
+  // const resultCaret = elementFromHtml(`<div class="season-group-caret fas fa-caret-right"></div>`)
   const resultTitle = elementFromHtml(`<div class="result-title" title="${cleanTitle}">${cleanTitle}</div>`)
-  const resultYear = elementFromHtml(`<div class="result-year" title="Season ${season}">Season ${season}</div>`)
+  const resultSeason = elementFromHtml(`<div class="result-year">Season ${season}</div>`)
+  const resultCount = elementFromHtml(`<div class="result-year">${episodes.length} Episode${episodes.length !== 1 ? 's' : ''}</div>`)
   const resultCountBadge = elementFromHtml(`<div class="episode-count-badge">${episodes.length}</div>`)
   
-  resultDetails.appendChild(resultCaret)
+  // resultDetails.appendChild(resultCaret)
   resultDetails.appendChild(resultTitle)
-  resultDetails.appendChild(resultYear)
+  resultDetails.appendChild(resultSeason)
+  resultDetails.appendChild(resultCount)
   resultDetails.appendChild(resultCountBadge)
   resultTile.appendChild(resultDetails)
   poster ? resultTile.appendChild(resultPoster) : null
@@ -113,9 +114,6 @@ const toggleSeasonGroup = async (container, episodes, isListView) => {
     if (isListView) {
       caret.classList.remove('fa-minus')
       caret.classList.add('fa-plus')
-    } else {
-      caret.classList.remove('fa-caret-down')
-      caret.classList.add('fa-caret-right')
     }
     removeEpisodes(container)
   } else {
@@ -123,9 +121,6 @@ const toggleSeasonGroup = async (container, episodes, isListView) => {
     if (isListView) {
       caret.classList.remove('fa-plus')
       caret.classList.add('fa-minus')
-    } else {
-      caret.classList.remove('fa-caret-right')
-      caret.classList.add('fa-caret-down')
     }
     await insertEpisodes(container, episodes, isListView)
   }
