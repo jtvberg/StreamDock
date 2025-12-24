@@ -7,8 +7,9 @@
  - I tweaked the search results detail modal a bit
 
 # Dev Update
- Peacock skip recap and auto-binge are now working.
- Once I get the metadata selection sorted for local files and maybe an episodes to seasons combined view, I will post a another release.
+ Peacock skip recap and auto-binge are now working!
+ Episodes can now be stacked into seasons!
+ Once I get the metadata selection sorted for local files, I will post a another release.
 
 # StreamDock 2.0.0, The Sequel! (Old News)
  It took two years and a lack of focus to get 1.0.0 out the door and upon completion I looked at what I had wrought and wept.
