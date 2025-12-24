@@ -29,7 +29,6 @@ const $modalRuntime = document.querySelector('#modal-runtime')
 const $modalLanguage = document.querySelector('#modal-language')
 const $modalBookmark = document.querySelector('#modal-bookmark')
 const $modalRecommendations = document.querySelector('#modal-recommendations')
-const $modalPosterContainer = document.querySelector('#modal-poster-container')
 const $modalPoster = document.querySelector('#modal-poster')
 const $modalNoposter = document.querySelector('#modal-noposter')
 const $modalTagline = document.querySelector('#modal-tagline')
@@ -78,7 +77,7 @@ const showError = (bool) => {
 
 const parseResponse = (response, queryObj) => {
   showError(false)
-  if (response === 0) {
+  if (response <= 0) {
     clearResults()
     showError(true)
     return
@@ -120,6 +119,7 @@ const loadNextPage = (page, queryObj) => {
 const appendResults = (results, queryObj) => {
   const frag = document.createDocumentFragment()
   results.forEach(result => {
+    if (result.media_type === 'person') return // TODO: bandaid
     frag.appendChild(createResultTile(result, queryObj.media_type))
   })
   $searchResults.appendChild(frag)
@@ -152,13 +152,11 @@ const clearResults = () => {
 export const showDetails = async (id, media_type, local = false, season = -1, episode = -1) => {
   if (id === undefined || id === null) return
   showError(false)
-  $modalPosterContainer.style.display = 'none'
-  $modalNoposter.style.display = 'flex'
+  $modalPoster.style.display = 'none'
   $modalPoster.src = ""
   const result = await getTitleDetails(id, media_type)
   if (result === -1) {
-    clearResults()
-    showError(true)
+    alert("Unable to show details for this item. Check your internet connection or API key settings.")
     return
   }
   let episodeDetails = null
@@ -189,8 +187,7 @@ export const showDetails = async (id, media_type, local = false, season = -1, ep
     } else {
       $modalPoster.src = posterUrl
     }
-    $modalPosterContainer.style.display = ''
-    $modalNoposter.style.display = ''
+    $modalPoster.style.display = ''
   }
   $modalTitle.textContent = `${getTitle(episodeDetails || result)} (${getYear(episodeDetails?.air_date || result.first_air_date || result.release_date) || ''})`
   $modalRating.textContent = getRating(result, media_type, loc)
@@ -283,7 +280,9 @@ function getCast(input) {
   let cast = ''
   try {
     input.credits.cast.filter(c => c.order < 8).forEach(n => {
-      cast += `${n.name}, `
+      if (n.name && n.name !== '') {
+        cast += `${n.name}, `
+      }
     })
   } catch (err) { console.log(`No cast found for id ${input.id}`) }
   return cast === '' ? 'NA' : cast.slice(0, -2)

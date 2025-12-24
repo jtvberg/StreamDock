@@ -167,7 +167,7 @@
           <div id="search-error">
             <div class="result-glyph fas fa-exclamation-triangle"></div>
             <div>Error</div>
-            <div>Check your connection and make sure your API key is set.</div>
+            <div>Check your internet connection or API key settings.</div>
           </div>
           <div id="search-results">
           </div>
@@ -193,11 +193,13 @@
               </div>
             </div>
             <div id="modal-body">
-              <div id="modal-poster-overlay"></div>
               <div id="modal-poster-container">
-                <img id="modal-poster"></img>
+                <div id="modal-poster-overlay"></div>
+                <img id="modal-poster" src="" alt=""></img>
+                <div id="modal-noposter">
+                  <div class="noposter fa fa-ban"></div>
+                </div>
               </div>
-              <div id="modal-noposter" class="fa fa-ban"></div>
               <div id="modal-content">
                 <div id="modal-tagline"></div>
                 <div class="modal-heading">Overview</div>
