@@ -215,7 +215,6 @@ const createWindow = () => {
 
   // on main window ready set OS specific settings and send app info to renderer
   mainWin.on('ready-to-show', () => {
-    console.log('Main Window Ready')
     headerView.webContents.send('app-info', appInfo)
     if (!isLinux) {
       setAccent()
