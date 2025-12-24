@@ -76,6 +76,18 @@ if (isDev) {
   } catch { }
 }
 
+// subscribe to system accent color changes
+if (isMac) {
+  systemPreferences.subscribeNotification('AppleAquaColorVariantChanged', () => {
+    setTimeout(setAccent, 100)
+  })
+}
+if (isWindows) {
+  systemPreferences.on('accent-color-changed', () => {
+    setAccent()
+  })
+}
+
 // disable hardware acceleration
 app.disableHardwareAcceleration()
 
@@ -203,19 +215,10 @@ const createWindow = () => {
 
   // on main window ready set OS specific settings and send app info to renderer
   mainWin.on('ready-to-show', () => {
+    console.log('Main Window Ready')
     headerView.webContents.send('app-info', appInfo)
     if (!isLinux) {
       setAccent()
-    }
-    if (isMac) {
-      systemPreferences.subscribeNotification('AppleColorPreferencesChangedNotification', () => {
-        setAccent()
-      })
-    }
-    if (isWindows) {
-      systemPreferences.on('accent-color-changed', () => {
-        setAccent()
-      })
     }
   })
 
@@ -455,8 +458,13 @@ const saveVideoTime = async (url) => {
 
 // get system preference for accent color and send to renderers
 const setAccent = () => {
-  headerView.webContents.send('set-accent', `#${systemPreferences.getAccentColor()}`)
-  facetView.webContents.send('set-accent', `#${systemPreferences.getAccentColor()}`)
+  const accentColor = `#${systemPreferences.getAccentColor()}`
+  if (headerView?.webContents && !headerView.webContents.isDestroyed()) {
+    headerView.webContents.send('set-accent', accentColor)
+  }
+  if (facetView?.webContents && !facetView.webContents.isDestroyed()) {
+    facetView.webContents.send('set-accent', accentColor)
+  }
 }
 
 // navigate back in view if possible
