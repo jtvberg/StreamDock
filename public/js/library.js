@@ -226,7 +226,11 @@ const createLibraryListItem = libraryObj => {
     e.stopImmediatePropagation()
     playLibraryItem(libraryObj.url)
   })
-  libraryListItem.addEventListener('click', () => showDetails(libraryObj.metadata?.id, libraryObj.type))
+  
+  const s = Number.isInteger(libraryObj.season) ? libraryObj.season : null
+  const ep = Number.isInteger(libraryObj.episode) ? libraryObj.episode : null
+  libraryListItem.addEventListener('click', () => showDetails(libraryObj.metadata?.id, libraryObj.type, true, s, ep))
+  
   frag.appendChild(libraryListItem)
   return frag
 }
