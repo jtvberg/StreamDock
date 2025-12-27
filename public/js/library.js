@@ -22,7 +22,8 @@ const $librarySortPathBtn = document.querySelector('#library-sort-path-btn')
 
 // Vars
 let libraryLoadLock = Promise.resolve()
-let currentSortOrder = 'title' // Track current sort: 'old', 'new', 'title', 'path'
+let currentSortOrder = 'title' // track current sort: 'old', 'new', 'title', 'path'
+let errorShown = false
 
 // get sortable value with fallbacks
 const getSortValue = (item, field) => {
@@ -347,7 +348,8 @@ const loadLibraryUi = async library => {
 }
 
 // load library directory
-export const loadLibraryDir = (dir, type) => {
+export const loadLibraryDir = (dir, type, silent = false) => {
+  errorShown = silent
   type === 'movie' ? window.electronAPI.getMovies(dir) : window.electronAPI.getTv(dir)
   $libraryTvBtn.classList.remove('toggled-bg')
   $libraryMovieBtn.classList.remove('toggled-bg')
@@ -463,6 +465,7 @@ const addLibraryItems = async (library, type, dir) => {
 
 // get metadata for library items
 const getLibraryMetadata = async (type, dir) => {
+  console.log(errorShown)
   setLibraryDirStatus(dir, 'pending')
   let error = false
   // console.log(`Fetching metadata for Directory: ${dir}, Type: ${type}`)
@@ -486,12 +489,18 @@ const getLibraryMetadata = async (type, dir) => {
       : await searchTv(searchTerm, 1)
     
     if (searchResult === 1) {
-      handleMetadataError(dir, 1)
+      if (!errorShown) {
+        handleMetadataError(dir, 1)
+        errorShown = true
+      }
       error = true
       return
     }
     if (searchResult === -1) {
-      handleMetadataError(dir, -1)
+      if (!errorShown) {
+        handleMetadataError(dir, -1)
+        errorShown = true
+      }
       error = true
       libraryWithMetadata.push(item)
       continue
@@ -507,7 +516,10 @@ const getLibraryMetadata = async (type, dir) => {
       if (type === 'tv' && item.season && item.episode) {
         const seasonData = await getSeason(metadata.id, item.season)
         if (seasonData === 1 || seasonData === -1) {
-          handleMetadataError(dir, seasonData)
+          if (!errorShown) {
+            handleMetadataError(dir, seasonData)
+            errorShown = true
+          }
           error = true
           continue
         }
@@ -650,7 +662,7 @@ const filterLibrary = type => {
 // rescan all library directories
 export const rescanAllLibraryDirs = () => {
   const dirs = JSON.parse(localStorage.getItem('directories')) || []
-  dirs.forEach(dir => loadLibraryDir(dir.dir, dir.type))
+  dirs.forEach(dir => loadLibraryDir(dir.dir, dir.type, true))
 }
 
 $libraryListBtn.addEventListener('click', libraryListView)
