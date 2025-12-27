@@ -59,11 +59,46 @@ const getRecommendations = async (id, media_type, page = 1) => {
   parseResponse(response, queryObj)
 }
 
-const getSearch = async (term, page = 1) => {
-  if (page === 1) { clearResults() }
+const getSearch = async (term, page = 1, accumulatedResults = [], pagesFetched = 0) => {
+  if (page === 1) { 
+    clearResults()
+    accumulatedResults = []
+    pagesFetched = 0
+  }
+  
   const response = await searchTitle(term, page)
+
+  if (response <= 1) {
+    const queryObj = { query: 'search', term }
+    parseResponse(response, queryObj)
+    return
+  }
+
+  const validResults = response.results?.filter(r => r.media_type !== 'person') || []
+  accumulatedResults.push(...validResults)
+  pagesFetched++
+  
+  const minResults = 20
+  const maxPagesFetched = 10
+
+  if (
+    accumulatedResults.length < minResults &&
+    response.page < response.total_pages &&
+    pagesFetched < maxPagesFetched
+  ) {
+    await getSearch(term, page + 1, accumulatedResults, pagesFetched)
+    return
+  }
+
+  const syntheticResponse = {
+    results: accumulatedResults,
+    total_results: accumulatedResults.length,
+    total_pages: response.total_pages,
+    page: page
+  }
+
   const queryObj = { query: 'search', term }
-  parseResponse(response, queryObj)
+  parseResponse(syntheticResponse, queryObj)
 }
 
 const noResults = (bool) => {
@@ -128,7 +163,6 @@ const loadNextPage = (page, queryObj) => {
 const appendResults = (results, queryObj) => {
   const frag = document.createDocumentFragment()
   results.forEach(result => {
-    if (result.media_type === 'person') return // TODO: bandaid
     frag.appendChild(createResultTile(result, queryObj.media_type))
   })
   $searchResults.appendChild(frag)
@@ -170,8 +204,7 @@ export const showDetails = async (id, media_type, local = false, season = -1, ep
   }
   if (result === 1) {
     alert("Unable to show details for this item: No API key found.")
-  }
-  if (result === -1) {
+  } else if (result === -1) {
     alert("Unable to show details for this item: Check your internet connection.")
   }
   let episodeDetails = null
