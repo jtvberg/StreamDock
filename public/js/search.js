@@ -149,15 +149,15 @@ const clearResults = () => {
   $searchResults.replaceChildren([])
 }
 
-export const showDetails = async (id, media_type, local = false, season = -1, episode = -1) => {
-  if (id === undefined || id === null) return
+export const showDetails = async (id, media_type, local = false, season = -1, episode = -1, cleanTitle = null) => {
+  // if (id === undefined || id === null) return
   showError(false)
   $modalPoster.style.display = 'none'
   $modalPoster.src = ""
   const result = await getTitleDetails(id, media_type)
   if (result === -1) {
-    alert("Unable to show details for this item. Check your internet connection or API key settings.")
-    return
+    alert("Unable to show details for this item. Check your internet connection or API key settings.") // TODO: this might be not in lib
+    // return
   }
   let episodeDetails = null
   if (media_type === 'tv' && Number.isInteger(season) && Number.isInteger(episode) && season >= 0 && episode >= 0) {
@@ -189,7 +189,8 @@ export const showDetails = async (id, media_type, local = false, season = -1, ep
     }
     $modalPoster.style.display = ''
   }
-  $modalTitle.textContent = `${getTitle(episodeDetails || result)} (${getYear(episodeDetails?.air_date || result.first_air_date || result.release_date) || ''})`
+  const title = cleanTitle ? cleanTitle : `${getTitle(episodeDetails || result)}`
+  $modalTitle.textContent = `${title} (${getYear(episodeDetails?.air_date || result.first_air_date || result.release_date) || ''})`
   $modalRating.textContent = getRating(result, media_type, loc)
   $modalMedia.textContent = getMedia(episodeDetails || result, media_type)
   $modalGenre.textContent = getGenre(result)

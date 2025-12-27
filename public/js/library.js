@@ -155,9 +155,16 @@ const removeEpisodes = (container) => {
   }
 }
 
+// get text inside parentheses
+const extractParentheses = str => {
+  const match = str.match(/\(([^)]+)\)/)
+  return match ? match[1] : ''
+}
+
 // create a library tile
 const createLibraryTile = async libraryObj => {
-  const cleanTitle = libraryObj.metadata?.title || libraryObj.metadata?.name || libraryObj.title || 'Unknown Title'
+  const parenthesesText = extractParentheses(libraryObj.title)
+  const cleanTitle = `${libraryObj.metadata?.title || libraryObj.metadata?.name || libraryObj.title || 'Unknown Title'} ${parenthesesText ? `- ${parenthesesText}` : ''}`
   const cleanYear = libraryObj.releaseYear === undefined ? '' : `(${libraryObj.releaseYear})`
   let poster = libraryObj.metadata?.poster_path ? `${tmdbImagePath}${libraryObj.metadata?.poster_path}` : null
 
@@ -193,7 +200,7 @@ const createLibraryTile = async libraryObj => {
     playLibraryItem(libraryObj.url)
   })
   resultTile.addEventListener('click', e => {
-    showDetails(libraryObj.metadata?.id, libraryObj.type, true, s, ep)
+    showDetails(libraryObj.metadata?.id, libraryObj.type, true, s, ep, cleanTitle)
   })
   return resultTile
 }
@@ -210,11 +217,13 @@ const createLibraryListItem = libraryObj => {
     }
   }
   const cleanYear = libraryObj.releaseYear === undefined ? '' : `(${libraryObj.releaseYear})`
-  const cleanTitle = `${libraryObj.metadata?.title || libraryObj.metadata?.name || libraryObj.title} ${season}${episode} ${cleanYear}`
+  const parenthesesText = extractParentheses(libraryObj.title)
+  const cleanTitle = `${libraryObj.metadata?.title || libraryObj.metadata?.name || libraryObj.title} ${season}${episode}${parenthesesText ? `- ${parenthesesText}` : ''}`
+  const fullTitle  = `${cleanTitle.trim()} ${cleanYear.trim()}`
   const frag = document.createDocumentFragment()
   const libraryListItem = elementFromHtml(`<div class="library-row" data-ts="${libraryObj.timestamp}"></div>`)
   const libraryListPlay = elementFromHtml(`<div class="fas fa-play library-list-play"></div>`)
-  const libraryListTitle = elementFromHtml(`<div class="library-cell" title="${cleanTitle}">${cleanTitle}</div>`)
+  const libraryListTitle = elementFromHtml(`<div class="library-cell" title="${fullTitle}">${fullTitle}</div>`)
   const libraryListPath = elementFromHtml(`<div class="library-cell" title="${libraryObj.path}">${libraryObj.path}</div>`)
   const libraryListTime = elementFromHtml(`<div class="library-cell library-cell-right">${new Date(libraryObj.timestamp).toLocaleString()}</div>`)
   libraryListItem.appendChild(libraryListPlay)
@@ -228,7 +237,7 @@ const createLibraryListItem = libraryObj => {
   
   const s = Number.isInteger(libraryObj.season) ? libraryObj.season : null
   const ep = Number.isInteger(libraryObj.episode) ? libraryObj.episode : null
-  libraryListItem.addEventListener('click', () => showDetails(libraryObj.metadata?.id, libraryObj.type, true, s, ep))
+  libraryListItem.addEventListener('click', () => showDetails(libraryObj.metadata?.id, libraryObj.type, true, s, ep, cleanTitle))
   
   frag.appendChild(libraryListItem)
   return frag
@@ -465,7 +474,6 @@ const addLibraryItems = async (library, type, dir) => {
 
 // get metadata for library items
 const getLibraryMetadata = async (type, dir) => {
-  console.log(errorShown)
   setLibraryDirStatus(dir, 'pending')
   let error = false
   // console.log(`Fetching metadata for Directory: ${dir}, Type: ${type}`)

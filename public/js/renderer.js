@@ -548,7 +548,7 @@ const loadLibraryDirectoryPanel = () => {
     }
     libDirRescan.addEventListener('click', () => {
       // trigger a rescan of the library directory
-      console.log(`Rescanning library directory: ${dir.dir}`)
+      // console.log(`Rescanning library directory: ${dir.dir}`)
       // look for new files in the directory and remove any items that no longer exist
       loadLibraryDir(dir.dir, dir.type)
     })

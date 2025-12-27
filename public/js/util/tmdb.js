@@ -43,6 +43,10 @@ function showResponse(response) {
   console.log(JSON.stringify(response))
 }
 
+const removeParentheses = str => {
+  return str.replace(/\s*\([^)]*\)/g, '').trim()
+}
+
 async function apiGet(url) {
   try {
     if (getApiKey() === '') { return 1 }
@@ -137,7 +141,7 @@ export async function searchMovie(term, page) {
   const url = new URL(`${getHost()}/3/search/movie`)
   url.searchParams.append('api_key', getApiKey())
   url.searchParams.append('language', getLangLoc())
-  url.searchParams.append('query', term)
+  url.searchParams.append('query', removeParentheses(term))
   url.searchParams.append('page', page)
   url.searchParams.append('include_adult', false)
   return await apiGet(url)
@@ -147,7 +151,7 @@ export async function searchTv(term, page) {
   const url = new URL(`${getHost()}/3/search/tv`)
   url.searchParams.append('api_key', getApiKey())
   url.searchParams.append('language', getLangLoc())
-  url.searchParams.append('query', term)
+  url.searchParams.append('query', removeParentheses(term))
   url.searchParams.append('page', page)
   url.searchParams.append('include_adult', false)
   return await apiGet(url)
