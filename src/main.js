@@ -539,7 +539,7 @@ const openNewin = url => {
     width: cw,
     minWidth: 672,
     minHeight: 378,
-    transparent: true,
+    transparent: false,
     fullscreenable: false,
     frame: false,
     titleBarStyle: isMac ? 'customButtonsOnHover' : 'hidden',
@@ -559,7 +559,8 @@ const openNewin = url => {
     windows.add(child)
     child.show()
   })
-  child.webContents.on('did-finish-load', () => {
+  child.webContents.on('dom-ready', () => {
+    console.log('Child window loaded ')
     child.webContents.executeJavaScript(`
       (() => {
         try {

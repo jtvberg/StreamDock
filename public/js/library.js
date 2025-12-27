@@ -70,7 +70,7 @@ const createSeasonGroupTile = async (showId, season, episodes) => {
   resultTile.appendChild(resultDetails)
   poster ? resultTile.appendChild(resultPoster) : null
 
-  // Click entire tile to expand/collapse
+  // click entire tile to expand/collapse
   resultTile.addEventListener('click', () => {
     toggleSeasonGroup(resultTile, episodes, false)
   })
@@ -94,7 +94,7 @@ const createSeasonGroupListItem = (showId, season, episodes) => {
   libraryListItem.appendChild(libraryListPath)
   libraryListItem.appendChild(libraryListTime)
 
-  // Click entire row to expand/collapse
+  // click entire row to expand/collapse
   libraryListItem.addEventListener('click', () => {
     toggleSeasonGroup(libraryListItem, episodes, true)
   })
