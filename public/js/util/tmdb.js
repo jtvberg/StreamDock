@@ -56,7 +56,11 @@ async function apiGet(url) {
       headers: { 'Content-Type': 'application/json' }
     })
     if (response?.ok) {
-      return await response.json()
+      const data = await response.json()
+      if (data.results && Array.isArray(data.results) && data.results.length === 0) {
+        return 0
+      }
+      return data
     }
     else {
       return -1
@@ -74,7 +78,11 @@ async function apiPost(url, body) {
       body: JSON.stringify(body)
     })
     if (response?.ok) {
-      return await response.json()
+      const data = await response.json()
+      if (data.results && Array.isArray(data.results) && data.results.length === 0) {
+        return 0
+      }
+      return data
     }
     else {
       return -1

@@ -30,7 +30,6 @@ const $modalLanguage = document.querySelector('#modal-language')
 const $modalBookmark = document.querySelector('#modal-bookmark')
 const $modalRecommendations = document.querySelector('#modal-recommendations')
 const $modalPoster = document.querySelector('#modal-poster')
-const $modalNoposter = document.querySelector('#modal-noposter')
 const $modalTagline = document.querySelector('#modal-tagline')
 const $modalOverview = document.querySelector('#modal-overview')
 const $modalCast = document.querySelector('#modal-cast')
@@ -77,10 +76,20 @@ const showError = (bool) => {
 
 const parseResponse = (response, queryObj) => {
   showError(false)
-  if (response <= 1) {
-    clearResults()
-    showError(true)
-    return
+  noResults(false)
+  switch (response) {
+    case 1:
+      showError(true)
+      clearResults()
+      return
+    case -1:
+      showError(true)
+      clearResults()
+      return
+    case 0:
+      noResults(true)
+      clearResults()
+      return
   }
   response.total_results === 0 ? noResults(true) : console.log(`${response.total_results} results found`)
   $searchClearBtn.style.visibility = ''
@@ -142,7 +151,6 @@ const createResultTile = (result, media_type = result.media_type) => {
 }
 
 const clearResults = () => {
-  noResults(false)
   $searchOverlay.style.display = ''
   $searchInput.value = ''
   $searchClearBtn.style.visibility = 'hidden'
@@ -150,14 +158,21 @@ const clearResults = () => {
 }
 
 export const showDetails = async (id, media_type, local = false, season = -1, episode = -1, cleanTitle = null) => {
-  // if (id === undefined || id === null) return
   showError(false)
   $modalPoster.style.display = 'none'
   $modalPoster.src = ""
-  const result = await getTitleDetails(id, media_type)
+  let result = {}
+  if (id === undefined || id === null) {
+    id = 0
+    alert("Unable to show details for this item: No ID found.")
+  } else {
+    result = await getTitleDetails(id, media_type)
+  }
+  if (result === 1) {
+    alert("Unable to show details for this item: No API key found.")
+  }
   if (result === -1) {
-    alert("Unable to show details for this item. Check your internet connection or API key settings.") // TODO: this might be not in lib
-    // return
+    alert("Unable to show details for this item: Check your internet connection.")
   }
   let episodeDetails = null
   if (media_type === 'tv' && Number.isInteger(season) && Number.isInteger(episode) && season >= 0 && episode >= 0) {
