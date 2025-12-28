@@ -30,6 +30,7 @@ const $modalLanguage = document.querySelector('#modal-language')
 const $modalBookmark = document.querySelector('#modal-bookmark')
 const $modalRecommendations = document.querySelector('#modal-recommendations')
 const $modalPoster = document.querySelector('#modal-poster')
+const $modalNoposter = document.querySelector('#modal-noposter')
 const $modalTagline = document.querySelector('#modal-tagline')
 const $modalOverview = document.querySelector('#modal-overview')
 const $modalCast = document.querySelector('#modal-cast')
@@ -194,6 +195,7 @@ const clearResults = () => {
 export const showDetails = async (id, media_type, local = false, season = -1, episode = -1, cleanTitle = null) => {
   showError(false)
   $modalPoster.style.display = 'none'
+  $modalNoposter.style.display = ''
   $modalPoster.src = ""
   let result = {}
   if (id === undefined || id === null) {
@@ -235,6 +237,7 @@ export const showDetails = async (id, media_type, local = false, season = -1, ep
     } else {
       $modalPoster.src = posterUrl
     }
+    $modalNoposter.style.display = 'none'
     $modalPoster.style.display = ''
   }
   const title = cleanTitle ? cleanTitle : `${getTitle(episodeDetails || result)}`

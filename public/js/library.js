@@ -517,10 +517,7 @@ const getLibraryMetadata = async (type, dir) => {
     let releaseYear
     let releaseDate
     if (searchResult && searchResult.results && searchResult.results.length > 0) {
-      // sorth the results by popularity first
-      searchResult.results.sort((a, b) => b.popularity - a.popularity)
-      // find the first result that is exact match to search term === item.title
-      metadata = searchResult.results.find(result => getCleanTitle(result.title || result.name) === searchTerm) || searchResult.results[0]
+      metadata = searchResult.results[0]
       if (type === 'tv' && item.season && item.episode) {
         const seasonData = await getSeason(metadata.id, item.season)
         if (seasonData === 1 || seasonData === -1) {
