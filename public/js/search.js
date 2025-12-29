@@ -39,6 +39,10 @@ const $modalProviders = document.querySelector('#modal-providers')
 const $modalCarouselLeft = document.querySelector('#modal-carousel-left')
 const $modalCarouselRight = document.querySelector('#modal-carousel-right')
 
+// Vars
+let currentResults = []
+let currentResultIndex = -1
+
 // Functions
 const getTrending = async (time = 'week', page = 1) => {
   if (page === 1) { clearResults() }
@@ -131,6 +135,11 @@ const parseResponse = (response, queryObj) => {
   }
   response.total_results === 0 ? noResults(true) : console.log(`${response.total_results} results found`)
   $searchClearBtn.style.visibility = ''
+  
+  if (response.results) {
+    currentResults = [...currentResults, ...response.results]
+  }
+  
   appendResults(response.results, queryObj)
   if (response.total_pages > response.page) {
     addNextPageBtn(response.page, queryObj)
@@ -147,6 +156,9 @@ const addNextPageBtn = (page, queryObj) => {
 
 const loadNextPage = (page, queryObj) => {
   document.querySelector('#next-page-btn').remove()
+  
+  const currentLength = currentResults.length
+  
   switch (queryObj.query) {
     case 'trending':
       getTrending(queryObj.time, page)
@@ -165,13 +177,13 @@ const loadNextPage = (page, queryObj) => {
 
 const appendResults = (results, queryObj) => {
   const frag = document.createDocumentFragment()
-  results.forEach(result => {
-    frag.appendChild(createResultTile(result, queryObj.media_type))
+  results.forEach((result, index) => {
+    frag.appendChild(createResultTile(result, queryObj.media_type, index))
   })
   $searchResults.appendChild(frag)
 }
 
-const createResultTile = (result, media_type = result.media_type) => {
+const createResultTile = (result, media_type = result.media_type, index) => {
   const poster = result.poster_path ? `${tmdbImagePath}${result.poster_path}` : null
   const resultTile = elementFromHtml(`<div class="result-tile"></div>`)
   const resultPoster = elementFromHtml(`<img class="result-poster" src="${poster}"></img>`)
@@ -183,7 +195,11 @@ const createResultTile = (result, media_type = result.media_type) => {
   resultDetails.appendChild(resultYear)
   resultTile.appendChild(resultDetails)
   poster ? resultTile.appendChild(resultPoster) : null
-  resultTile.addEventListener('click', () => showDetails(result.id, media_type))
+  resultTile.addEventListener('click', () => {
+    currentResultIndex = index
+    showDetails(result.id, media_type)
+    updateCarouselButtons()
+  })
   return resultTile
 }
 
@@ -192,20 +208,44 @@ const clearResults = () => {
   $searchInput.value = ''
   $searchClearBtn.style.visibility = 'hidden'
   $searchResults.replaceChildren([])
+  currentResults = []
+  currentResultIndex = -1
+}
+
+const updateCarouselButtons = () => {
+  if (currentResultIndex <= 0) {
+    $modalCarouselLeft.style.color = 'gray'
+    $modalCarouselLeft.style.cursor = 'default'
+  } else {
+    $modalCarouselLeft.style.color = ''
+    $modalCarouselLeft.style.cursor = 'pointer'
+  }
+
+  if (currentResultIndex >= currentResults.length - 1) {
+    $modalCarouselRight.style.color = 'gray'
+    $modalCarouselRight.style.cursor = 'default'
+  } else {
+    $modalCarouselRight.style.color = ''
+    $modalCarouselRight.style.cursor = 'pointer'
+  }
 }
 
 const showPrevious = () => {
-  // moving left or up the carousel if there are no more items
-  $modalCarouselLeft.style.color = 'gray'
-  // if there are items to the right or down, enable the right button
-  $modalCarouselRight.style.color = ''
+  if (currentResultIndex <= 0 || currentResults.length === 0) return
+  
+  currentResultIndex--
+  const result = currentResults[currentResultIndex]
+  showDetails(result.id, result.media_type)
+  updateCarouselButtons()
 }
 
 const showNext = () => {
-  // moving right or down the carousel if there are no more items
-  $modalCarouselRight.style.color = 'gray'
-  // if there are items to the left or up, enable the left button
-  $modalCarouselLeft.style.color = ''
+  if (currentResultIndex >= currentResults.length - 1 || currentResults.length === 0) return
+  
+  currentResultIndex++
+  const result = currentResults[currentResultIndex]
+  showDetails(result.id, result.media_type)
+  updateCarouselButtons()
 }
 
 export const showDetails = async (id, media_type, local = false, season = -1, episode = -1, cleanTitle = null) => {
@@ -276,6 +316,8 @@ export const showDetails = async (id, media_type, local = false, season = -1, ep
     frag.appendChild(pe)
     $modalProviders.appendChild(frag)
   })
+  
+  updateCarouselButtons()
 }
 
 function getPosterUrl(input) {
