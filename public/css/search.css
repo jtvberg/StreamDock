@@ -191,7 +191,17 @@
 }
 
 #modal-carousel-controls {
-  display: none;
+  display: flex;
+}
+
+#modal-carousel-left,
+#modal-carousel-right {
+  cursor: pointer;
+}
+
+#modal-carousel-left:hover,
+#modal-carousel-right:hover {
+  color: var(--color-system-accent);
 }
 
 #modal-title {

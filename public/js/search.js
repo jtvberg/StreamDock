@@ -36,6 +36,8 @@ const $modalOverview = document.querySelector('#modal-overview')
 const $modalCast = document.querySelector('#modal-cast')
 const $modalTmdbLogo = document.querySelector('#modal-tmdb-logo')
 const $modalProviders = document.querySelector('#modal-providers')
+const $modalCarouselLeft = document.querySelector('#modal-carousel-left')
+const $modalCarouselRight = document.querySelector('#modal-carousel-right')
 
 // Functions
 const getTrending = async (time = 'week', page = 1) => {
@@ -190,6 +192,20 @@ const clearResults = () => {
   $searchInput.value = ''
   $searchClearBtn.style.visibility = 'hidden'
   $searchResults.replaceChildren([])
+}
+
+const showPrevious = () => {
+  // moving left or up the carousel if there are no more items
+  $modalCarouselLeft.style.color = 'gray'
+  // if there are items to the right or down, enable the right button
+  $modalCarouselRight.style.color = ''
+}
+
+const showNext = () => {
+  // moving right or down the carousel if there are no more items
+  $modalCarouselRight.style.color = 'gray'
+  // if there are items to the left or up, enable the left button
+  $modalCarouselLeft.style.color = ''
 }
 
 export const showDetails = async (id, media_type, local = false, season = -1, episode = -1, cleanTitle = null) => {
@@ -376,3 +392,7 @@ $modalBookmark.addEventListener('click', () => window.electronAPI.urlToBookmark(
 $modalRecommendations.addEventListener('click', e => getRecommendations($modal.dataset.id, $modal.dataset.media_type, 1))
 
 $modalTmdbLogo.addEventListener('click', () => window.electronAPI.openUrl($modal.dataset.url))
+
+$modalCarouselLeft.addEventListener('click', () => showPrevious())
+
+$modalCarouselRight.addEventListener('click', () => showNext())
