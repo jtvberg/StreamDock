@@ -1,6 +1,6 @@
 // Imports
 import { searchMovie, searchTv, getSeason, getEpisode } from './util/tmdb.js'
-import { showDetails } from './search.js'
+import { showDetails, setCurrentResultElement } from './search.js'
 import { cacheImage, getCachedImage } from "./util/imageCache.js"
 import { getPrefs } from "./util/settings.js"
 import { getYear, getDate, getCleanTitle, elementFromHtml, getSeasonEpisode } from "./util/helpers.js"
@@ -195,11 +195,20 @@ const createLibraryTile = async libraryObj => {
     const resultEpisode = elementFromHtml(`<div class="result-episode" title="Season:${s} Episode:${ep}">s${s}e${ep}</div>`)
     resultTile.appendChild(resultEpisode)
   }
+  if (libraryObj.metadata?.id) {
+    resultTile.dataset.tmdbId = libraryObj.metadata.id
+    resultTile.dataset.mediaType = libraryObj.type
+    resultTile.dataset.season = s !== null ? s : ''
+    resultTile.dataset.episode = ep !== null ? ep : ''
+    resultTile.dataset.cleanTitle = cleanTitle
+    resultTile.dataset.isNavigable = 'true'
+  }
   resultPlayBtn.addEventListener('click', e => {
     e.stopImmediatePropagation()
     playLibraryItem(libraryObj.url)
   })
   resultTile.addEventListener('click', e => {
+    setCurrentResultElement(resultTile)
     showDetails(libraryObj.metadata?.id, libraryObj.type, true, s, ep, cleanTitle)
   })
   return resultTile
@@ -230,6 +239,14 @@ const createLibraryListItem = libraryObj => {
   libraryListItem.appendChild(libraryListTitle)
   libraryListItem.appendChild(libraryListPath)
   libraryListItem.appendChild(libraryListTime)
+  if (libraryObj.metadata?.id) {
+    libraryListItem.dataset.tmdbId = libraryObj.metadata.id
+    libraryListItem.dataset.mediaType = libraryObj.type
+    libraryListItem.dataset.season = season !== null ? season : ''
+    libraryListItem.dataset.episode = episode !== null ? episode : ''
+    libraryListItem.dataset.cleanTitle = cleanTitle
+    libraryListItem.dataset.isNavigable = 'true'
+  }
   libraryListPlay.addEventListener('click', e => {
     e.stopImmediatePropagation()
     playLibraryItem(libraryObj.url)
@@ -237,7 +254,10 @@ const createLibraryListItem = libraryObj => {
   
   const s = Number.isInteger(libraryObj.season) ? libraryObj.season : null
   const ep = Number.isInteger(libraryObj.episode) ? libraryObj.episode : null
-  libraryListItem.addEventListener('click', () => showDetails(libraryObj.metadata?.id, libraryObj.type, true, s, ep, cleanTitle))
+  libraryListItem.addEventListener('click', () => {
+    setCurrentResultElement(libraryListItem)
+    showDetails(libraryObj.metadata?.id, libraryObj.type, true, s, ep, cleanTitle)
+  })
   
   frag.appendChild(libraryListItem)
   return frag

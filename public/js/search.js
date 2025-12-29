@@ -40,8 +40,12 @@ const $modalCarouselLeft = document.querySelector('#modal-carousel-left')
 const $modalCarouselRight = document.querySelector('#modal-carousel-right')
 
 // Vars
-let currentResults = []
-let currentResultIndex = -1
+let currentResultElement = null
+
+// Export setter function for external access
+export const setCurrentResultElement = (element) => {
+  currentResultElement = element
+}
 
 // Functions
 const getTrending = async (time = 'week', page = 1) => {
@@ -137,10 +141,9 @@ const parseResponse = (response, queryObj) => {
   $searchClearBtn.style.visibility = ''
   
   if (response.results) {
-    currentResults = [...currentResults, ...response.results]
+    appendResults(response.results, queryObj)
   }
   
-  appendResults(response.results, queryObj)
   if (response.total_pages > response.page) {
     addNextPageBtn(response.page, queryObj)
   }
@@ -155,9 +158,7 @@ const addNextPageBtn = (page, queryObj) => {
 }
 
 const loadNextPage = (page, queryObj) => {
-  document.querySelector('#next-page-btn').remove()
-  
-  const currentLength = currentResults.length
+  document.querySelector('#next-page-btn')?.remove()
   
   switch (queryObj.query) {
     case 'trending':
@@ -195,8 +196,13 @@ const createResultTile = (result, media_type = result.media_type, index) => {
   resultDetails.appendChild(resultYear)
   resultTile.appendChild(resultDetails)
   poster ? resultTile.appendChild(resultPoster) : null
+
+  resultTile.dataset.tmdbId = result.id
+  resultTile.dataset.mediaType = media_type
+  resultTile.dataset.isNavigable = 'true'
+  
   resultTile.addEventListener('click', () => {
-    currentResultIndex = index
+    currentResultElement = resultTile
     showDetails(result.id, media_type)
     updateCarouselButtons()
   })
@@ -208,12 +214,14 @@ const clearResults = () => {
   $searchInput.value = ''
   $searchClearBtn.style.visibility = 'hidden'
   $searchResults.replaceChildren([])
-  currentResults = []
-  currentResultIndex = -1
+  currentResultElement = null
 }
 
 const updateCarouselButtons = () => {
-  if (currentResultIndex <= 0) {
+  const prevElement = getPreviousNavigable(currentResultElement)
+  const nextElement = getNextNavigable(currentResultElement)
+  
+  if (!prevElement) {
     $modalCarouselLeft.style.color = 'gray'
     $modalCarouselLeft.style.cursor = 'default'
   } else {
@@ -221,7 +229,7 @@ const updateCarouselButtons = () => {
     $modalCarouselLeft.style.cursor = 'pointer'
   }
 
-  if (currentResultIndex >= currentResults.length - 1) {
+  if (!nextElement) {
     $modalCarouselRight.style.color = 'gray'
     $modalCarouselRight.style.cursor = 'default'
   } else {
@@ -230,21 +238,49 @@ const updateCarouselButtons = () => {
   }
 }
 
+const getPreviousNavigable = (element) => {
+  if (!element) return null
+  let prev = element.previousElementSibling
+  while (prev) {
+    if (prev.dataset.isNavigable === 'true') return prev
+    prev = prev.previousElementSibling
+  }
+  return null
+}
+
+const getNextNavigable = (element) => {
+  if (!element) return null
+  let next = element.nextElementSibling
+  while (next) {
+    if (next.dataset.isNavigable === 'true') return next
+    next = next.nextElementSibling
+  }
+  return null
+}
+
 const showPrevious = () => {
-  if (currentResultIndex <= 0 || currentResults.length === 0) return
+  const prevElement = getPreviousNavigable(currentResultElement)
+  if (!prevElement) return
   
-  currentResultIndex--
-  const result = currentResults[currentResultIndex]
-  showDetails(result.id, result.media_type)
+  currentResultElement = prevElement
+  const season = prevElement.dataset.season ? parseInt(prevElement.dataset.season) : -1
+  const episode = prevElement.dataset.episode ? parseInt(prevElement.dataset.episode) : -1
+  const cleanTitle = prevElement.dataset.cleanTitle || null
+  const isLocal = prevElement.parentElement.id === 'library' || prevElement.parentElement.id === 'library-list'
+  showDetails(prevElement.dataset.tmdbId, prevElement.dataset.mediaType, isLocal, season, episode, cleanTitle)
   updateCarouselButtons()
 }
 
 const showNext = () => {
-  if (currentResultIndex >= currentResults.length - 1 || currentResults.length === 0) return
+  const nextElement = getNextNavigable(currentResultElement)
+  if (!nextElement) return
   
-  currentResultIndex++
-  const result = currentResults[currentResultIndex]
-  showDetails(result.id, result.media_type)
+  currentResultElement = nextElement
+  const season = nextElement.dataset.season ? parseInt(nextElement.dataset.season) : -1
+  const episode = nextElement.dataset.episode ? parseInt(nextElement.dataset.episode) : -1
+  const cleanTitle = nextElement.dataset.cleanTitle || null
+  const isLocal = nextElement.parentElement.id === 'library' || nextElement.parentElement.id === 'library-list'
+  showDetails(nextElement.dataset.tmdbId, nextElement.dataset.mediaType, isLocal, season, episode, cleanTitle)
   updateCarouselButtons()
 }
 
