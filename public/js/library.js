@@ -220,7 +220,8 @@ const createLibraryListItem = libraryObj => {
   const ep = Number.isInteger(libraryObj.episode) ? libraryObj.episode : null
   const cleanYear = libraryObj.releaseYear === undefined ? '' : `(${libraryObj.releaseYear})`
   const parenthesesText = extractParentheses(libraryObj.title)
-  const cleanTitle = `${libraryObj.metadata?.title || libraryObj.metadata?.name || libraryObj.title} s${s}e${ep}${parenthesesText ? `- ${parenthesesText}` : ''}`
+  const episode = (libraryObj.type === 'tv' && Number.isInteger(s) && Number.isInteger(ep)) ? ` s${s}e${ep}` : ''
+  const cleanTitle = `${libraryObj.metadata?.title || libraryObj.metadata?.name || libraryObj.title} ${episode}${parenthesesText ? `- ${parenthesesText}` : ''}`
   const fullTitle  = `${cleanTitle.trim()} ${cleanYear.trim()}`
   const frag = document.createDocumentFragment()
   const libraryListItem = elementFromHtml(`<div class="library-row" data-ts="${libraryObj.timestamp}"></div>`)
