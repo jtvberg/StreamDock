@@ -70,6 +70,8 @@ const createSeasonGroupTile = async (showId, season, episodes) => {
   resultTile.appendChild(resultDetails)
   poster ? resultTile.appendChild(resultPoster) : null
 
+  resultTile.dataset.isNavigable = 'false'
+
   // click entire tile to expand/collapse
   resultTile.addEventListener('click', () => {
     toggleSeasonGroup(resultTile, episodes, false)
@@ -93,6 +95,8 @@ const createSeasonGroupListItem = (showId, season, episodes) => {
   libraryListItem.appendChild(libraryListTitle)
   libraryListItem.appendChild(libraryListPath)
   libraryListItem.appendChild(libraryListTime)
+
+  libraryListItem.dataset.isNavigable = 'false'
 
   // click entire row to expand/collapse
   libraryListItem.addEventListener('click', () => {
@@ -193,14 +197,14 @@ const createLibraryTile = async libraryObj => {
     const resultEpisode = elementFromHtml(`<div class="result-episode" title="Season:${libraryObj.season} Episode:${libraryObj.episode}">s${libraryObj.season}e${libraryObj.episode}</div>`)
     resultTile.appendChild(resultEpisode)
   }
-  resultTile.dataset.libraryObj = libraryObj
+  resultTile.dataset.isLocal = 'true'
+  resultTile.dataset.isNavigable = 'true'
+  resultTile.dataset.cleanTitle = cleanTitle
   if (libraryObj.metadata?.id) {
-    resultTile.dataset.tmdbId = libraryObj.metadata.id
+    resultTile.dataset.id = libraryObj.metadata.id
     resultTile.dataset.mediaType = libraryObj.type
     resultTile.dataset.season = libraryObj.season
     resultTile.dataset.episode = libraryObj.episode
-    resultTile.dataset.cleanTitle = cleanTitle
-    resultTile.dataset.isNavigable = 'true'
   }
   resultPlayBtn.addEventListener('click', e => {
     e.stopImmediatePropagation()
@@ -230,14 +234,14 @@ const createLibraryListItem = libraryObj => {
   libraryListItem.appendChild(libraryListTitle)
   libraryListItem.appendChild(libraryListPath)
   libraryListItem.appendChild(libraryListTime)
-  libraryListItem.dataset.libraryObj = libraryObj
+  libraryListItem.dataset.isLocal = 'true'
+  libraryListItem.dataset.isNavigable = 'true'
+  libraryListItem.dataset.cleanTitle = cleanTitle
   if (libraryObj.metadata?.id) {
-    libraryListItem.dataset.tmdbId = libraryObj.metadata.id
+    libraryListItem.dataset.id = libraryObj.metadata.id
     libraryListItem.dataset.mediaType = libraryObj.type
     libraryListItem.dataset.season = libraryObj.season
     libraryListItem.dataset.episode = libraryObj.episode
-    libraryListItem.dataset.cleanTitle = cleanTitle
-    libraryListItem.dataset.isNavigable = 'true'
   }
   libraryListPlay.addEventListener('click', e => {
     e.stopImmediatePropagation()
@@ -451,6 +455,8 @@ const addLibraryItems = async (library, type, dir) => {
     for (const item of library) {
       if (!filtered.some(entry => entry.url === item.url)) {
         if (type === 'tv') {
+          item.season = 0
+          item.episode = 0
           const match = getSeasonEpisode(item.title)
           if (match) {
             item.season = parseInt(match[1]) || 0

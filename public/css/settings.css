@@ -203,10 +203,6 @@
   background-color: var(--color-control-red);
 }
 
-.library-directory-type {
-  text-transform: capitalize;
-}
-
 .library-directory-type,
 .library-directory-path {
   line-height: 100%;

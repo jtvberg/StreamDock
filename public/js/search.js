@@ -198,7 +198,7 @@ const createResultTile = (result, media_type = result.media_type) => {
   resultTile.appendChild(resultDetails)
   poster ? resultTile.appendChild(resultPoster) : null
 
-  resultTile.dataset.tmdbId = result.id
+  resultTile.dataset.id = result.id
   resultTile.dataset.mediaType = media_type
   resultTile.dataset.isNavigable = 'true'
   resultTile.dataset.url = `${tmdbTitlePath}${media_type}/${result.id}`
@@ -264,12 +264,12 @@ const showPrevious = () => {
   const prevElement = getPreviousNavigable(currentResultElement)
   if (!prevElement) return
   
-  currentResultElement = prevElement
-  const season = prevElement.dataset.season ? parseInt(prevElement.dataset.season) : -1
-  const episode = prevElement.dataset.episode ? parseInt(prevElement.dataset.episode) : -1
+  const season = prevElement.dataset.season ? prevElement.dataset.season : -1
+  const episode = prevElement.dataset.episode ? prevElement.dataset.episode : -1
   const cleanTitle = prevElement.dataset.cleanTitle || null
-  const isLocal = prevElement.parentElement.id === 'library' || prevElement.parentElement.id === 'library-list'
-  showDetails(prevElement.dataset.url, prevElement.dataset.tmdbId, prevElement.dataset.libraryObj.mediaType, isLocal, season, episode, cleanTitle)
+  const isLocal = prevElement.dataset.isLocal === 'true'
+  currentResultElement = prevElement
+  showDetails(prevElement.dataset.url, prevElement.dataset.id, prevElement.dataset.mediaType, isLocal, season, episode, cleanTitle)
   updateCarouselButtons()
 }
 
@@ -277,12 +277,12 @@ const showNext = () => {
   const nextElement = getNextNavigable(currentResultElement)
   if (!nextElement) return
   
-  currentResultElement = nextElement
-  const season = nextElement.dataset.season ? parseInt(nextElement.dataset.season) : -1
-  const episode = nextElement.dataset.episode ? parseInt(nextElement.dataset.episode) : -1
+  const season = nextElement.dataset.season ? nextElement.dataset.season : -1
+  const episode = nextElement.dataset.episode ? nextElement.dataset.episode : -1
   const cleanTitle = nextElement.dataset.cleanTitle || null
-  const isLocal = nextElement.parentElement.id === 'library' || nextElement.parentElement.id === 'library-list'
-  showDetails(nextElement.dataset.url, nextElement.dataset.tmdbId, nextElement.dataset.mediaType, isLocal, season, episode, cleanTitle)
+  const isLocal = nextElement.dataset.isLocal === 'true'
+  currentResultElement = nextElement
+  showDetails(nextElement.dataset.url, nextElement.dataset.id, nextElement.dataset.mediaType, isLocal, season, episode, cleanTitle)
   updateCarouselButtons()
 }
 
@@ -293,8 +293,7 @@ export const showDetails = async (url, id, media_type, local = false, season = -
   $modalPoster.src = ""
   let result = {}
   if (id === undefined || id === null) {
-    id = 0
-    alert("Unable to show details for this item: No ID found.")
+    // No TMDB id available
   } else {
     result = await getTitleDetails(id, media_type)
   }

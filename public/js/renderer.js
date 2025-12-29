@@ -537,7 +537,7 @@ const loadLibraryDirectoryPanel = () => {
   })
   dirs.forEach(dir => {
     const libDir = elementFromHtml(`<div class="library-directory"></div>`)
-    const libDirType = elementFromHtml(`<div class="library-directory-type">${dir.type}</div>`)
+    const libDirType = elementFromHtml(`<div class="library-directory-type">${dir.type === 'tv' ? 'TV' : 'Movie'}</div>`)
     const libDirPath = elementFromHtml(`<div class="library-directory-path" title="${dir.dir}">${dir.dir}</div>`)
     const libDirRescan = elementFromHtml('<div class="library-directory-btn fas fa-rotate-left" title="Scan for New Files"></div>')    
     const libDirRefresh = elementFromHtml('<div class="library-directory-btn library-directory-refresh fas fa-arrows-rotate" title="Refresh all Metadata"></div>')
