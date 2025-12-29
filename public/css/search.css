@@ -197,6 +197,7 @@
 #modal-carousel-left,
 #modal-carousel-right {
   cursor: pointer;
+  margin-inline: -1px;
 }
 
 #modal-carousel-left:hover,
@@ -358,6 +359,15 @@ img[src=""], img:not([src]) {
   display: flex;
   overflow-y: auto;
   gap: 8px;
+}
+
+.modal-play {
+  font-size: 2.5rem;
+}
+
+.modal-play:hover {
+  color: var(--color-system-accent);
+  cursor: pointer;
 }
 
 .modal-provider-image {

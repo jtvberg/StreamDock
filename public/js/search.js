@@ -5,6 +5,7 @@ import { getYear, elementFromHtml } from "./util/helpers.js"
 import { getImagePath, getTitlePath } from './util/tmdb.js'
 import { changeHomeLayout } from './renderer.js'
 import { cacheImage, getCachedImage } from "./util/imageCache.js"
+import { playLibraryItem } from "./library.js"
 
 // Constants
 const tmdbImagePath = getImagePath()
@@ -178,13 +179,13 @@ const loadNextPage = (page, queryObj) => {
 
 const appendResults = (results, queryObj) => {
   const frag = document.createDocumentFragment()
-  results.forEach((result, index) => {
-    frag.appendChild(createResultTile(result, queryObj.media_type, index))
+  results.forEach((result) => {
+    frag.appendChild(createResultTile(result, queryObj.media_type))
   })
   $searchResults.appendChild(frag)
 }
 
-const createResultTile = (result, media_type = result.media_type, index) => {
+const createResultTile = (result, media_type = result.media_type) => {
   const poster = result.poster_path ? `${tmdbImagePath}${result.poster_path}` : null
   const resultTile = elementFromHtml(`<div class="result-tile"></div>`)
   const resultPoster = elementFromHtml(`<img class="result-poster" src="${poster}"></img>`)
@@ -200,10 +201,11 @@ const createResultTile = (result, media_type = result.media_type, index) => {
   resultTile.dataset.tmdbId = result.id
   resultTile.dataset.mediaType = media_type
   resultTile.dataset.isNavigable = 'true'
+  resultTile.dataset.url = `${tmdbTitlePath}${media_type}/${result.id}`
   
   resultTile.addEventListener('click', () => {
     currentResultElement = resultTile
-    showDetails(result.id, media_type)
+    showDetails(resultTile.dataset.url, result.id, media_type)
     updateCarouselButtons()
   })
   return resultTile
@@ -267,7 +269,7 @@ const showPrevious = () => {
   const episode = prevElement.dataset.episode ? parseInt(prevElement.dataset.episode) : -1
   const cleanTitle = prevElement.dataset.cleanTitle || null
   const isLocal = prevElement.parentElement.id === 'library' || prevElement.parentElement.id === 'library-list'
-  showDetails(prevElement.dataset.tmdbId, prevElement.dataset.mediaType, isLocal, season, episode, cleanTitle)
+  showDetails(prevElement.dataset.url, prevElement.dataset.tmdbId, prevElement.dataset.libraryObj.mediaType, isLocal, season, episode, cleanTitle)
   updateCarouselButtons()
 }
 
@@ -280,11 +282,11 @@ const showNext = () => {
   const episode = nextElement.dataset.episode ? parseInt(nextElement.dataset.episode) : -1
   const cleanTitle = nextElement.dataset.cleanTitle || null
   const isLocal = nextElement.parentElement.id === 'library' || nextElement.parentElement.id === 'library-list'
-  showDetails(nextElement.dataset.tmdbId, nextElement.dataset.mediaType, isLocal, season, episode, cleanTitle)
+  showDetails(nextElement.dataset.url, nextElement.dataset.tmdbId, nextElement.dataset.mediaType, isLocal, season, episode, cleanTitle)
   updateCarouselButtons()
 }
 
-export const showDetails = async (id, media_type, local = false, season = -1, episode = -1, cleanTitle = null) => {
+export const showDetails = async (url, id, media_type, local = false, season = -1, episode = -1, cleanTitle = null, lastPlayTime = 0) => {
   showError(false)
   $modalPoster.style.display = 'none'
   $modalNoposter.style.display = ''
@@ -309,7 +311,7 @@ export const showDetails = async (id, media_type, local = false, season = -1, ep
   $searchOverlay.style.display = 'flex'
   $modal.dataset.id = id
   $modal.dataset.media_type = media_type
-  $modal.dataset.url = `${tmdbTitlePath}${media_type}/${id}`
+  $modal.dataset.url = url
   const posterUrl = episodeDetails ? getStillUrl(episodeDetails) : getPosterUrl(result)
   const posterPath = episodeDetails ? episodeDetails.still_path : result.backdrop_path
   if (posterUrl) {
@@ -352,6 +354,15 @@ export const showDetails = async (id, media_type, local = false, season = -1, ep
     frag.appendChild(pe)
     $modalProviders.appendChild(frag)
   })
+  if (local) {
+    const frag = document.createDocumentFragment()
+    const pb = elementFromHtml('<div class="modal-play fas fa-play"></div>')
+    pb.addEventListener('click', () => {
+      playLibraryItem({url, lastPlayTime})
+    })
+    frag.appendChild(pb)
+    $modalProviders.appendChild(frag)
+  }
   
   updateCarouselButtons()
 }

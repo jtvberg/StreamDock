@@ -165,8 +165,8 @@ const extractParentheses = str => {
 const createLibraryTile = async libraryObj => {
   const parenthesesText = extractParentheses(libraryObj.title)
   const cleanTitle = `${libraryObj.metadata?.title || libraryObj.metadata?.name || libraryObj.title || 'Unknown Title'} ${parenthesesText ? `- ${parenthesesText}` : ''}`
-  const cleanYear = libraryObj.releaseYear === undefined ? '' : `(${libraryObj.releaseYear})`
-  let poster = libraryObj.metadata?.poster_path ? `${tmdbImagePath}${libraryObj.metadata?.poster_path}` : null
+  const cleanYear = libraryObj.releaseYear ? libraryObj.releaseYear : 'NA'
+  let poster = null
 
   if (libraryObj.metadata?.poster_path) {
     poster = `${tmdbImagePath}${libraryObj.metadata.poster_path}`
@@ -182,47 +182,44 @@ const createLibraryTile = async libraryObj => {
   const resultPoster = elementFromHtml(`<img class="result-poster" src="${poster}"></img>`)
   const resultDetails = elementFromHtml(`<div class="result-details"></div>`)
   const resultTitle = elementFromHtml(`<div class="result-title" title="${cleanTitle}">${cleanTitle}</div>`)
-  const resultYear = elementFromHtml(`<div class="result-year" title="${cleanYear}">${cleanYear}</div>`)
+  const resultYear = elementFromHtml(`<div class="result-year" title="${cleanYear}">(${cleanYear})</div>`)
   const resultPlayBtn = elementFromHtml(`<div class="result-play fas fa-2x fa-play result-play"></div>`)
   resultDetails.appendChild(resultTitle)
   resultDetails.appendChild(resultYear)
   resultDetails.appendChild(resultPlayBtn)
   resultTile.appendChild(resultDetails)
   poster ? resultTile.appendChild(resultPoster) : null
-  const s = Number.isInteger(libraryObj.season) ? libraryObj.season : null
-  const ep = Number.isInteger(libraryObj.episode) ? libraryObj.episode : null
-  if (libraryObj.type === 'tv' && Number.isInteger(s) && Number.isInteger(ep)) {
-    const resultEpisode = elementFromHtml(`<div class="result-episode" title="Season:${s} Episode:${ep}">s${s}e${ep}</div>`)
+  if (libraryObj.type === 'tv') {
+    const resultEpisode = elementFromHtml(`<div class="result-episode" title="Season:${libraryObj.season} Episode:${libraryObj.episode}">s${libraryObj.season}e${libraryObj.episode}</div>`)
     resultTile.appendChild(resultEpisode)
   }
+  resultTile.dataset.libraryObj = libraryObj
   if (libraryObj.metadata?.id) {
     resultTile.dataset.tmdbId = libraryObj.metadata.id
     resultTile.dataset.mediaType = libraryObj.type
-    resultTile.dataset.season = s !== null ? s : ''
-    resultTile.dataset.episode = ep !== null ? ep : ''
+    resultTile.dataset.season = libraryObj.season
+    resultTile.dataset.episode = libraryObj.episode
     resultTile.dataset.cleanTitle = cleanTitle
     resultTile.dataset.isNavigable = 'true'
   }
   resultPlayBtn.addEventListener('click', e => {
     e.stopImmediatePropagation()
-    playLibraryItem(libraryObj.url)
+    playLibraryItem(libraryObj)
   })
   resultTile.addEventListener('click', e => {
     setCurrentResultElement(resultTile)
-    showDetails(libraryObj.metadata?.id, libraryObj.type, true, s, ep, cleanTitle)
+    showDetails(libraryObj.url, libraryObj.metadata?.id, libraryObj.type, true, libraryObj.season, libraryObj.episode, cleanTitle, libraryObj.lastPlayTime)
   })
   return resultTile
 }
 
 // create a library list item
 const createLibraryListItem = libraryObj => {
-  const s = Number.isInteger(libraryObj.season) ? libraryObj.season : null
-  const ep = Number.isInteger(libraryObj.episode) ? libraryObj.episode : null
-  const cleanYear = libraryObj.releaseYear === undefined ? '' : `(${libraryObj.releaseYear})`
   const parenthesesText = extractParentheses(libraryObj.title)
-  const episode = (libraryObj.type === 'tv' && Number.isInteger(s) && Number.isInteger(ep)) ? ` s${s}e${ep}` : ''
+  const episode = libraryObj.type === 'tv' ? ` s${libraryObj.season}e${libraryObj.episode}` : ''
   const cleanTitle = `${libraryObj.metadata?.title || libraryObj.metadata?.name || libraryObj.title} ${episode}${parenthesesText ? `- ${parenthesesText}` : ''}`
-  const fullTitle  = `${cleanTitle.trim()} ${cleanYear.trim()}`
+  const cleanYear = libraryObj.releaseYear ? libraryObj.releaseYear : 'NA'
+  const fullTitle  = `${cleanTitle.trim()} (${cleanYear})`
   const frag = document.createDocumentFragment()
   const libraryListItem = elementFromHtml(`<div class="library-row" data-ts="${libraryObj.timestamp}"></div>`)
   const libraryListPlay = elementFromHtml(`<div class="fas fa-play library-list-play"></div>`)
@@ -233,21 +230,22 @@ const createLibraryListItem = libraryObj => {
   libraryListItem.appendChild(libraryListTitle)
   libraryListItem.appendChild(libraryListPath)
   libraryListItem.appendChild(libraryListTime)
+  libraryListItem.dataset.libraryObj = libraryObj
   if (libraryObj.metadata?.id) {
     libraryListItem.dataset.tmdbId = libraryObj.metadata.id
     libraryListItem.dataset.mediaType = libraryObj.type
-    libraryListItem.dataset.season = s !== null ? s : ''
-    libraryListItem.dataset.episode = ep !== null ? ep : ''
+    libraryListItem.dataset.season = libraryObj.season
+    libraryListItem.dataset.episode = libraryObj.episode
     libraryListItem.dataset.cleanTitle = cleanTitle
     libraryListItem.dataset.isNavigable = 'true'
   }
   libraryListPlay.addEventListener('click', e => {
     e.stopImmediatePropagation()
-    playLibraryItem(libraryObj.url)
+    playLibraryItem(libraryObj)
   })
   libraryListItem.addEventListener('click', () => {
     setCurrentResultElement(libraryListItem)
-    showDetails(libraryObj.metadata?.id, libraryObj.type, true, s, ep, cleanTitle)
+    showDetails(libraryObj.url, libraryObj.metadata?.id, libraryObj.type, true, libraryObj.season, libraryObj.episode, cleanTitle, libraryObj.lastPlayTime)
   })
   
   frag.appendChild(libraryListItem)
@@ -255,16 +253,13 @@ const createLibraryListItem = libraryObj => {
 }
 
 // play library item
-const playLibraryItem = (url) => {
-  const library = JSON.parse(localStorage.getItem('library')) || []
-  const item = library.find(li => li.url === url)
-  const time = item.lastPlayTime || 0
+export const playLibraryItem = (libraryObj) => {
   if (getPrefs().find(pref => pref.id === 'library-external').state()) {
-    // console.log(`Opening video in external player: ${url}`)
-    window.electronAPI.openExternalPlayer(item.path)
+    // console.log(`Opening video in external player: ${libraryObj.path}`)
+    window.electronAPI.openExternalPlayer(libraryObj.path)
   } else {
-    // console.log(`Opening video in StreamDock: ${url}`)
-    window.electronAPI.openUrl(url, time)
+    // console.log(`Opening video in StreamDock: ${libraryObj.url}`)
+    window.electronAPI.openUrl(libraryObj.url, libraryObj.lastPlayTime)
   }
 }
 
