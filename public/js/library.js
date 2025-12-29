@@ -216,18 +216,11 @@ const createLibraryTile = async libraryObj => {
 
 // create a library list item
 const createLibraryListItem = libraryObj => {
-  let season = ''
-  let episode = ''
-  if (libraryObj.type === 'tv' ) {
-    const match = getSeasonEpisode(libraryObj.title)
-    if (match) {
-      season = `s${parseInt(match[1])}` || ''
-      episode = `e${parseInt(match[2])}` || ''
-    }
-  }
+  const s = Number.isInteger(libraryObj.season) ? libraryObj.season : null
+  const ep = Number.isInteger(libraryObj.episode) ? libraryObj.episode : null
   const cleanYear = libraryObj.releaseYear === undefined ? '' : `(${libraryObj.releaseYear})`
   const parenthesesText = extractParentheses(libraryObj.title)
-  const cleanTitle = `${libraryObj.metadata?.title || libraryObj.metadata?.name || libraryObj.title} ${season}${episode}${parenthesesText ? `- ${parenthesesText}` : ''}`
+  const cleanTitle = `${libraryObj.metadata?.title || libraryObj.metadata?.name || libraryObj.title} s${s}e${ep}${parenthesesText ? `- ${parenthesesText}` : ''}`
   const fullTitle  = `${cleanTitle.trim()} ${cleanYear.trim()}`
   const frag = document.createDocumentFragment()
   const libraryListItem = elementFromHtml(`<div class="library-row" data-ts="${libraryObj.timestamp}"></div>`)
@@ -242,8 +235,8 @@ const createLibraryListItem = libraryObj => {
   if (libraryObj.metadata?.id) {
     libraryListItem.dataset.tmdbId = libraryObj.metadata.id
     libraryListItem.dataset.mediaType = libraryObj.type
-    libraryListItem.dataset.season = season !== null ? season : ''
-    libraryListItem.dataset.episode = episode !== null ? episode : ''
+    libraryListItem.dataset.season = s !== null ? s : ''
+    libraryListItem.dataset.episode = ep !== null ? ep : ''
     libraryListItem.dataset.cleanTitle = cleanTitle
     libraryListItem.dataset.isNavigable = 'true'
   }
@@ -251,9 +244,6 @@ const createLibraryListItem = libraryObj => {
     e.stopImmediatePropagation()
     playLibraryItem(libraryObj.url)
   })
-  
-  const s = Number.isInteger(libraryObj.season) ? libraryObj.season : null
-  const ep = Number.isInteger(libraryObj.episode) ? libraryObj.episode : null
   libraryListItem.addEventListener('click', () => {
     setCurrentResultElement(libraryListItem)
     showDetails(libraryObj.metadata?.id, libraryObj.type, true, s, ep, cleanTitle)

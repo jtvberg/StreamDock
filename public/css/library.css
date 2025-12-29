@@ -202,6 +202,7 @@
 }
 
 .season-group-row {
+  grid-template-columns: auto 1fr auto auto;
   cursor: pointer;
 }
 
