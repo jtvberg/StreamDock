@@ -206,7 +206,7 @@ const createResultTile = (result, media_type = result.media_type) => {
   
   resultTile.addEventListener('click', () => {
     currentResultElement = resultTile
-    showDetails(resultTile.dataset.url, result.id, media_type)
+    showDetails(resultTile.dataset.url, parseInt(result.id), media_type)
     updateCarouselButtons()
   })
   return resultTile
@@ -270,7 +270,7 @@ const showPrevious = () => {
   const cleanTitle = prevElement.dataset.cleanTitle || null
   const isLocal = prevElement.dataset.isLocal === 'true'
   currentResultElement = prevElement
-  showDetails(prevElement.dataset.url, prevElement.dataset.id, prevElement.dataset.mediaType, isLocal, season, episode, cleanTitle)
+  showDetails(prevElement.dataset.url, parseInt(prevElement.dataset.id), prevElement.dataset.mediaType, isLocal, season, episode, cleanTitle)
   updateCarouselButtons()
 }
 
@@ -283,7 +283,7 @@ const showNext = () => {
   const cleanTitle = nextElement.dataset.cleanTitle || null
   const isLocal = nextElement.dataset.isLocal === 'true'
   currentResultElement = nextElement
-  showDetails(nextElement.dataset.url, nextElement.dataset.id, nextElement.dataset.mediaType, isLocal, season, episode, cleanTitle)
+  showDetails(nextElement.dataset.url, parseInt(nextElement.dataset.id), nextElement.dataset.mediaType, isLocal, season, episode, cleanTitle)
   updateCarouselButtons()
 }
 
