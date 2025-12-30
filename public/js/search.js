@@ -39,6 +39,7 @@ const $modalTmdbLogo = document.querySelector('#modal-tmdb-logo')
 const $modalProviders = document.querySelector('#modal-providers')
 const $modalCarouselLeft = document.querySelector('#modal-carousel-left')
 const $modalCarouselRight = document.querySelector('#modal-carousel-right')
+const $modalNotFound = document.querySelectorAll('.not-found')
 
 // Vars
 let currentResultElement = null
@@ -291,10 +292,15 @@ export const showDetails = async (url, id, media_type, local = false, season = -
   $modalPoster.style.display = 'none'
   $modalNoposter.style.display = ''
   $modalPoster.src = ""
+  $modal.dataset.id = id
+  $modal.dataset.media_type = media_type
+  $modal.dataset.url = null
   let result = {}
   if (id === undefined || id === null) {
-    // No TMDB id available
+    $modalNotFound.forEach(el => el.style.display = 'none')
   } else {
+    $modalNotFound.forEach(el => el.style.display = '')
+    $modal.dataset.url = local ? `${tmdbTitlePath}${media_type}/${id}` : url
     result = await getTitleDetails(id, media_type)
   }
   if (result === 1) {
@@ -308,9 +314,6 @@ export const showDetails = async (url, id, media_type, local = false, season = -
   }
   const loc = getPrefs().find(pref => pref.id === 'search-loc').state()
   $searchOverlay.style.display = 'flex'
-  $modal.dataset.id = id
-  $modal.dataset.media_type = media_type
-  $modal.dataset.url = url
   const posterUrl = episodeDetails ? getStillUrl(episodeDetails) : getPosterUrl(result)
   const posterPath = episodeDetails ? episodeDetails.still_path : result.backdrop_path
   if (posterUrl) {
@@ -346,13 +349,6 @@ export const showDetails = async (url, id, media_type, local = false, season = -
   $modalOverview.textContent = getOverview(episodeDetails || result)
   $modalCast.textContent = getCast(result)
   $modalProviders.replaceChildren([])
-  getProviders(result, loc).forEach(p => {
-    const frag = document.createDocumentFragment()
-    const pe = elementFromHtml(`<img class="modal-provider-image" src="${p.path}" title="${p.name}">`)
-    pe.addEventListener('click', () => window.electronAPI.openUrl(p.link))
-    frag.appendChild(pe)
-    $modalProviders.appendChild(frag)
-  })
   if (local) {
     const frag = document.createDocumentFragment()
     const pb = elementFromHtml('<div class="modal-play fas fa-play"></div>')
@@ -362,7 +358,13 @@ export const showDetails = async (url, id, media_type, local = false, season = -
     frag.appendChild(pb)
     $modalProviders.appendChild(frag)
   }
-  
+  getProviders(result, loc).forEach(p => {
+    const frag = document.createDocumentFragment()
+    const pe = elementFromHtml(`<img class="modal-provider-image" src="${p.path}" title="${p.name}">`)
+    pe.addEventListener('click', () => window.electronAPI.openUrl(p.link))
+    frag.appendChild(pe)
+    $modalProviders.appendChild(frag)
+  })
   updateCarouselButtons()
 }
 
