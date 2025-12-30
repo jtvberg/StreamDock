@@ -349,6 +349,17 @@ export const showDetails = async (url, id, media_type, local = false, season = -
   $modalOverview.textContent = getOverview(episodeDetails || result)
   $modalCast.textContent = getCast(result)
   $modalProviders.replaceChildren([])
+  const library = JSON.parse(localStorage.getItem('library')) || null
+  if (library) {
+    library.forEach(item => {
+      if (item.metadata?.id === id && item.type === media_type) {
+        local = true
+        url = item.url
+        lastPlayTime = item.lastPlayTime || 0
+        return
+      }
+    })
+  }
   if (local) {
     const frag = document.createDocumentFragment()
     const pb = elementFromHtml('<div class="modal-play fas fa-play"></div>')
