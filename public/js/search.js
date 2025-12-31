@@ -340,6 +340,7 @@ export const showDetails = async (url, id, media_type, local = false, season = -
   $modalTitle.textContent = `${title} (${getYear(episodeDetails?.air_date || result.first_air_date || result.release_date) || ''})`
   $modalRating.textContent = getRating(result, media_type, loc)
   $modalMedia.textContent = getMedia(episodeDetails || result, media_type)
+  $modalMedia.title = media_type === 'movie' ? 'Media Type' : 'Season and Episode Info'. // TODO: total vs current
   $modalGenre.textContent = getGenre(result)
   $modalRuntime.textContent = getRuntime(episodeDetails || result)
   $modalLanguage.textContent = getLanguage(result)

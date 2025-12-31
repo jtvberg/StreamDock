@@ -168,6 +168,10 @@
   border-radius: 2px;
 }
 
+.context-btn {
+  color: var(--color-system-accent)
+}
+
 .toggled {
   color: var(--color-system-accent-trans);
 }
