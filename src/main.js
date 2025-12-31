@@ -306,7 +306,7 @@ const loadScripts = (bv = streamView, host) => {
         break
       case 'www.hulu.com':
         response['service-rs'] === 'true' ? setTimeout(hlRecapSkip, 3000, bv) : hlRecapSkipRem(bv)
-        response['service-rs'] === 'true' ? setTimeout(hlEpisodeNext, 3000, bv) : hlEpisodeNextRem(bv)
+        response['service-bm'] === 'true' ? setTimeout(hlEpisodeNext, 3000, bv) : hlEpisodeNextRem(bv)
         break
       case 'www.disneyplus.com':
         response['service-rs'] === 'true' ? setTimeout(dpSkip, 3000, bv) : dpSkipRem(bv)
