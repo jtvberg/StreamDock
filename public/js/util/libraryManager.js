@@ -1,0 +1,239 @@
+// library cache
+let library = []
+let saveTimer = null
+let isDirty = false
+
+// initialize from localStorage
+export const initLibrary = () => {
+  const raw = JSON.parse(localStorage.getItem('library')) || []
+  library = raw.map(item => migrateLibraryItem(item))
+  return library
+}
+
+// migrate legacy library items to current structure
+const migrateLibraryItem = (item) => {
+  return {
+    ...item,
+    manualUpdate: item.manualUpdate ?? undefined,
+    excludeTitle: item.excludeTitle ?? undefined,
+    lastPlayTime: item.lastPlayTime ?? 0,
+    metadata: item.metadata || {}
+  }
+}
+
+// get full library
+export const getLibrary = (includeExcluded = false) => {
+  if (includeExcluded) {
+    return library
+  }
+  return library.filter(item => item.excludeTitle !== true)
+}
+
+// get filtered library by type
+export const getLibraryByType = (type, includeExcluded = false) => {
+  const filtered = library.filter(item => {
+    if (!includeExcluded && item.excludeTitle === true) return false
+    if (!type) return true
+    return item.type === type
+  })
+  return filtered
+}
+
+// find single item by URL
+export const findLibraryItem = (url) => {
+  return library.find(item => item.url === url)
+}
+
+// find items by directory
+export const findLibraryItemsByDir = (dir) => {
+  return library.filter(item => item.path.startsWith(dir))
+}
+
+// create object from library item
+export const toSearchResult = (item) => {
+  return {
+    ...item.metadata,
+    url: item.url,
+    path: item.path,
+    isLocal: true,
+    lastPlayTime: item.lastPlayTime || 0,
+    season: item.season,
+    episode: item.episode,
+    excludeTitle: item.excludeTitle ?? false,
+    manualUpdate: item.manualUpdate ?? false
+  }
+}
+
+// update single item properties
+export const updateLibraryItem = (url, updates) => {
+  const item = findLibraryItem(url)
+  if (item) {
+    Object.assign(item, updates)
+    isDirty = true
+    scheduleSave()
+    return true
+  }
+  return false
+}
+
+// update item metadata only
+export const updateLibraryItemMetadata = (url, metadata) => {
+  const item = findLibraryItem(url)
+  if (item) {
+    item.metadata = {
+      ...metadata,
+      media_type: item.type
+    }
+    item.releaseYear = getYear(metadata.release_date || metadata.first_air_date)
+    item.releaseDate = getDate(metadata.release_date || metadata.first_air_date)
+    isDirty = true
+    scheduleSave()
+    return true
+  }
+  return false
+}
+
+// helper to get year from date
+const getYear = (input) => {
+  const year = new Date(input).getFullYear()
+  return isNaN(year) ? undefined : year
+}
+
+// helper to get timestamp from date
+const getDate = (input) => {
+  const date = new Date(input)
+  return isNaN(date) ? undefined : date.getTime()
+}
+
+// check if item should skip metadata updates
+export const shouldSkipMetadataUpdate = (item) => {
+  if (item.manualUpdate === true) return true
+  return false
+}
+
+// sync directory files with library (add new, remove deleted, fetch metadata for items without it)
+export const rescanDirectory = async (dir, newItems, type, fetchMetadata = false) => {
+  const existingItemsInDir = findLibraryItemsByDir(dir)
+  const newUrls = newItems.map(item => item.url)
+  const existingUrls = existingItemsInDir.map(item => item.url)
+  const urlsToRemove = existingUrls.filter(url => !newUrls.includes(url))
+  urlsToRemove.forEach(url => {
+    const index = library.findIndex(item => item.url === url)
+    if (index > -1) {
+      library.splice(index, 1)
+      isDirty = true
+    }
+  })
+
+  const itemsToAdd = newItems.filter(item => !existingUrls.includes(item.url))
+  itemsToAdd.forEach(item => {
+    library.push({
+      ...item,
+      type,
+      metadata: {},
+      lastPlayTime: 0
+    })
+    isDirty = true
+  })
+
+  if (isDirty) {
+    saveImmediately()
+  }
+
+  if (fetchMetadata) {
+    return findLibraryItemsByDir(dir).filter(item => 
+      item.type === type && 
+      !shouldSkipMetadataUpdate(item) &&
+      (!item.metadata || !item.metadata.id)
+    )
+  }
+
+  return []
+}
+
+// force reload metadata for all items in directory (except manual)
+export const refreshDirectoryMetadata = (dir, type) => {
+  const itemsInDir = findLibraryItemsByDir(dir).filter(item => item.type === type)
+  itemsInDir.forEach(item => {
+    if (item.manualUpdate !== true) {
+      item.metadata = {}
+      item.releaseYear = undefined
+      item.releaseDate = undefined
+      isDirty = true
+    }
+  })
+
+  if (isDirty) {
+    saveImmediately()
+  }
+
+  return itemsInDir.filter(item => !shouldSkipMetadataUpdate(item))
+}
+
+// remove items by filter function
+export const removeLibraryItems = (filterFn) => {
+  const before = library.length
+  library = library.filter(item => !filterFn(item))
+  if (library.length !== before) {
+    isDirty = true
+    saveImmediately()
+  }
+  return before - library.length
+}
+
+// sort library in-place
+export const sortLibrary = (compareFn) => {
+  library.sort(compareFn)
+  isDirty = true
+  scheduleSave()
+}
+
+// toggle exclude flag for item
+export const setExcludeTitle = (url, exclude) => {
+  const item = findLibraryItem(url)
+  if (item) {
+    item.excludeTitle = exclude
+    isDirty = true
+    scheduleSave()
+    return true
+  }
+  return false
+}
+
+// set manual metadata flag
+export const setManualMetadata = (url, metadata) => {
+  const item = findLibraryItem(url)
+  if (item) {
+    item.metadata = {
+      ...metadata,
+      media_type: item.type
+    }
+    item.releaseYear = getYear(metadata.release_date || metadata.first_air_date)
+    item.releaseDate = getDate(metadata.release_date || metadata.first_air_date)
+    item.manualUpdate = true
+    isDirty = true
+    saveImmediately()
+    return true
+  }
+  return false
+}
+
+// save
+const scheduleSave = () => {
+  clearTimeout(saveTimer)
+  saveTimer = setTimeout(saveImmediately, 500)
+}
+
+// immediate save
+export const saveImmediately = () => {
+  if (isDirty) {
+    localStorage.setItem('library', JSON.stringify(library))
+    isDirty = false
+  }
+  clearTimeout(saveTimer)
+}
+
+// cleanup on page unload
+if (typeof window !== 'undefined') {
+  window.addEventListener('beforeunload', saveImmediately)
+}

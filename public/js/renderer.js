@@ -1,4 +1,5 @@
 // Imports
+import { initLibrary, findLibraryItem, saveImmediately } from './util/libraryManager.js'
 import { getStreams, setStreams, getNewStreamId, getLastStream, getPrefs, setLastStream, getWinBounds, setWinBounds, getWinLock, setWinLock, getWinRatio, setWinRatio } from "./util/settings.js"
 import { rescanAllLibraryDirs, updateLibraryDirStatus, loadLibraryDir, loadLibraryFromStorage } from "./library.js"
 import { elementFromHtml, elementRemoveFlash } from "./util/helpers.js"
@@ -149,8 +150,7 @@ const openLastUrl = () => {
   const url = getLastStream()
   let time = 0
   if (url.startsWith('file:')) {
-    const library = JSON.parse(localStorage.getItem('library')) || []
-    const item = library.find(li => li.url === url)
+    const item = findLibraryItem(url)
     if (item) {
       time = item.lastPlayTime || 0
     }
@@ -608,8 +608,7 @@ const loadLibraryDirectoryPanel = () => {
 export const removeLastStream = () => {
   const lastStream = getLastStream()
   if (lastStream && lastStream.startsWith('file:')) {
-    const library = JSON.parse(localStorage.getItem('library')) || []
-    const item = library.find(li => li.url === lastStream)
+    const item = findLibraryItem(lastStream)
     if (!item) {
       setLastStream('')
       openLastUrl()
@@ -957,7 +956,10 @@ $openDevTools.addEventListener('click', window.electronAPI.openDevTools)
 
 $header.addEventListener('mouseenter', expandHeader)
 
-$header.addEventListener('contextmenu', window.electronAPI.winHide)
+$header.addEventListener('contextmenu', () => {
+  saveImmediately()
+  window.electronAPI.winHide()
+})
 
 $header.addEventListener('dblclick', window.electronAPI.winMax)
 
@@ -996,5 +998,8 @@ window.electronAPI.streamOpened(() => togglePanel($homeBtn, true))
 
 window.electronAPI.getAppInfo((e, appInfo) => loadAbout(appInfo))
 
+window.addEventListener('beforeunload', saveImmediately)
+
 // Setup
+initLibrary()
 applySettings()

@@ -6,6 +6,7 @@ import { getImagePath, getTitlePath } from './util/tmdb.js'
 import { changeHomeLayout } from './renderer.js'
 import { cacheImage, getCachedImage } from "./util/imageCache.js"
 import { playLibraryItem } from "./library.js"
+import { getLibrary } from "./util/libraryManager.js"
 
 // Constants
 const tmdbImagePath = getImagePath()
@@ -44,12 +45,11 @@ const $modalNotFound = document.querySelectorAll('.not-found')
 // Vars
 let currentResultElement = null
 
-// Export setter function for external access
+// Functions
 export const setCurrentResultElement = (element) => {
   currentResultElement = element
 }
 
-// Functions
 const getTrending = async (time = 'week', page = 1) => {
   if (page === 1) { clearResults() }
   const response = await getTrendingTitles(time, page)
@@ -202,11 +202,18 @@ const createResultTile = (result, media_type = result.media_type) => {
   resultTile.dataset.id = result.id
   resultTile.dataset.mediaType = media_type
   resultTile.dataset.isNavigable = 'true'
-  resultTile.dataset.url = `${tmdbTitlePath}${media_type}/${result.id}`
+
+  const streamingUrl = `${tmdbTitlePath}${media_type}/${result.id}`
+  resultTile.dataset.url = streamingUrl
   
   resultTile.addEventListener('click', () => {
     currentResultElement = resultTile
-    showDetails(resultTile.dataset.url, parseInt(result.id), media_type)
+    showDetails({ 
+      ...result,
+      id: result.id,
+      media_type,
+      url: streamingUrl
+    })
     updateCarouselButtons()
   })
   return resultTile
@@ -265,12 +272,17 @@ const showPrevious = () => {
   const prevElement = getPreviousNavigable(currentResultElement)
   if (!prevElement) return
   
-  const season = prevElement.dataset.season ? prevElement.dataset.season : -1
-  const episode = prevElement.dataset.episode ? prevElement.dataset.episode : -1
-  const cleanTitle = prevElement.dataset.cleanTitle || null
-  const isLocal = prevElement.dataset.isLocal === 'true'
   currentResultElement = prevElement
-  showDetails(prevElement.dataset.url, parseInt(prevElement.dataset.id), prevElement.dataset.mediaType, isLocal, season, episode, cleanTitle)
+  const isLocal = prevElement.dataset.isLocal === 'true'
+  const result = {
+    id: Number(prevElement.dataset.id),
+    media_type: prevElement.dataset.mediaType,
+    url: prevElement.dataset.url,
+    isLocal,
+    season: prevElement.dataset.season ? Number(prevElement.dataset.season) : undefined,
+    episode: prevElement.dataset.episode ? Number(prevElement.dataset.episode) : undefined
+  }
+  showDetails(result)
   updateCarouselButtons()
 }
 
@@ -278,34 +290,49 @@ const showNext = () => {
   const nextElement = getNextNavigable(currentResultElement)
   if (!nextElement) return
   
-  const season = nextElement.dataset.season ? nextElement.dataset.season : -1
-  const episode = nextElement.dataset.episode ? nextElement.dataset.episode : -1
-  const cleanTitle = nextElement.dataset.cleanTitle || null
-  const isLocal = nextElement.dataset.isLocal === 'true'
   currentResultElement = nextElement
-  showDetails(nextElement.dataset.url, parseInt(nextElement.dataset.id), nextElement.dataset.mediaType, isLocal, season, episode, cleanTitle)
+  const isLocal = nextElement.dataset.isLocal === 'true'
+  const result = {
+    id: Number(nextElement.dataset.id),
+    media_type: nextElement.dataset.mediaType,
+    url: nextElement.dataset.url,
+    isLocal,
+    season: nextElement.dataset.season ? Number(nextElement.dataset.season) : undefined,
+    episode: nextElement.dataset.episode ? Number(nextElement.dataset.episode) : undefined
+  }
+  showDetails(result)
   updateCarouselButtons()
 }
 
-export const showDetails = async (url, id, media_type, local = false, season = -1, episode = -1, cleanTitle = null, lastPlayTime = 0) => {
+export const showDetails = async (result) => {
   showError(false)
   $modalPoster.style.display = 'none'
   $modalNoposter.style.display = ''
   $modalPoster.src = ""
+  
+  const id = result.id
+  const media_type = result.media_type || (result.title ? 'movie' : 'tv')
+  const url = result.url
+  const isLocal = result.isLocal || false
+  const season = result.season ?? -1
+  const episode = result.episode ?? -1
+  const lastPlayTime = result.lastPlayTime || 0
+  
   $modal.dataset.id = id
   $modal.dataset.media_type = media_type
   $modal.dataset.url = null
-  let result = {}
+  
+  let details = {}
   if (id === undefined || id === null) {
     $modalNotFound.forEach(el => el.style.display = 'none')
   } else {
     $modalNotFound.forEach(el => el.style.display = '')
-    $modal.dataset.url = local ? `${tmdbTitlePath}${media_type}/${id}` : url
-    result = await getTitleDetails(id, media_type)
+    $modal.dataset.url = isLocal ? `${tmdbTitlePath}${media_type}/${id}` : url
+    details = await getTitleDetails(id, media_type)
   }
-  if (result === 1) {
+  if (details === 1) {
     alert("Unable to show details for this item: No API key found.")
-  } else if (result === -1) {
+  } else if (details === -1) {
     alert("Unable to show details for this item: Check your internet connection.")
   }
   let episodeDetails = null
@@ -314,10 +341,10 @@ export const showDetails = async (url, id, media_type, local = false, season = -
   }
   const loc = getPrefs().find(pref => pref.id === 'search-loc').state()
   $searchOverlay.style.display = 'flex'
-  const posterUrl = episodeDetails ? getStillUrl(episodeDetails) : getPosterUrl(result)
-  const posterPath = episodeDetails ? episodeDetails.still_path : result.backdrop_path
+  const posterUrl = episodeDetails ? getStillUrl(episodeDetails) : getPosterUrl(details)
+  const posterPath = episodeDetails ? episodeDetails.still_path : details.backdrop_path
   if (posterUrl) {
-    if (local) {
+    if (isLocal) {
       const cachedPoster = await getCachedImage(posterPath)
       if (cachedPoster) {
         $modalPoster.src = cachedPoster
@@ -336,41 +363,50 @@ export const showDetails = async (url, id, media_type, local = false, season = -
     $modalNoposter.style.display = 'none'
     $modalPoster.style.display = ''
   }
-  const title = cleanTitle ? cleanTitle : `${getTitle(episodeDetails || result)}`
-  $modalTitle.textContent = `${title} (${getYear(episodeDetails?.air_date || result.first_air_date || result.release_date) || ''})`
-  $modalRating.textContent = getRating(result, media_type, loc)
-  $modalMedia.textContent = getMedia(episodeDetails || result, media_type)
-  $modalMedia.title = media_type === 'movie' ? 'Media Type' : 'Season and Episode Info' // TODO: total vs current
-  $modalGenre.textContent = getGenre(result)
-  $modalRuntime.textContent = getRuntime(episodeDetails || result)
-  $modalLanguage.textContent = getLanguage(result)
-  const tagline = getTagline(result)
+  
+  const cleanTitle = result.path ? extractCleanTitle(result) : null
+  const title = cleanTitle || getTitle(episodeDetails || details)
+  
+  $modalTitle.textContent = `${title} (${getYear(episodeDetails?.air_date || details.first_air_date || details.release_date) || ''})`
+  $modalRating.textContent = getRating(details, media_type, loc)
+  $modalMedia.textContent = getMedia(episodeDetails || details, media_type)
+  $modalMedia.title = media_type === 'movie' ? 'Media Type' : 'Season and Episode Info'
+  $modalGenre.textContent = getGenre(details)
+  $modalRuntime.textContent = getRuntime(episodeDetails || details)
+  $modalLanguage.textContent = getLanguage(details)
+  const tagline = getTagline(details)
   $modalTagline.style.display = ''
   tagline === `""` ? $modalTagline.style.display = 'none' : $modalTagline.textContent = tagline
-  $modalOverview.textContent = getOverview(episodeDetails || result)
-  $modalCast.textContent = getCast(result)
+  $modalOverview.textContent = getOverview(episodeDetails || details)
+  $modalCast.textContent = getCast(details)
   $modalProviders.replaceChildren([])
-  const library = JSON.parse(localStorage.getItem('library')) || null
-  if (library) {
-    library.forEach(item => {
-      if (item.metadata?.id === id && item.type === media_type) {
-        local = true
-        url = item.url
-        lastPlayTime = item.lastPlayTime || 0
-        return
-      }
-    })
+  
+  let libraryUrl = isLocal ? url : null
+  let libraryTime = isLocal ? lastPlayTime : 0
+  
+  if (!isLocal && id) {
+    const library = getLibrary()
+    const libraryItem = library.find(item => 
+      item.metadata?.id === id && 
+      item.type === media_type
+    )
+    if (libraryItem) {
+      libraryUrl = libraryItem.url
+      libraryTime = libraryItem.lastPlayTime || 0
+    }
   }
-  if (local) {
+  
+  if (libraryUrl) {
     const frag = document.createDocumentFragment()
     const pb = elementFromHtml('<div class="modal-play fas fa-play"></div>')
     pb.addEventListener('click', () => {
-      playLibraryItem({url, lastPlayTime})
+      playLibraryItem({ url: libraryUrl, lastPlayTime: libraryTime })
     })
     frag.appendChild(pb)
     $modalProviders.appendChild(frag)
   }
-  getProviders(result, loc).forEach(p => {
+  
+  getProviders(details, loc).forEach(p => {
     const frag = document.createDocumentFragment()
     const pe = elementFromHtml(`<img class="modal-provider-image" src="${p.path}" title="${p.name}">`)
     pe.addEventListener('click', () => window.electronAPI.openUrl(p.link))
@@ -378,6 +414,12 @@ export const showDetails = async (url, id, media_type, local = false, season = -
     $modalProviders.appendChild(frag)
   })
   updateCarouselButtons()
+}
+
+function extractCleanTitle(result) {
+  const parenthesesText = result.title.match(/\(([^)]+)\)/)?.[1] || ''
+  const episode = result.type === 'tv' ? ` s${result.season}e${result.episode}` : ''
+  return `${result.metadata?.title || result.metadata?.name || result.title} ${episode}${parenthesesText ? ` - ${parenthesesText}` : ''}`.trim()
 }
 
 function getPosterUrl(input) {

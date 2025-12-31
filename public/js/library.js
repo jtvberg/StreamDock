@@ -1,9 +1,26 @@
 // Imports
+import { 
+  initLibrary,
+  getLibrary,
+  getLibraryByType,
+  findLibraryItem,
+  findLibraryItemsByDir,
+  updateLibraryItem,
+  updateLibraryItemMetadata,
+  rescanDirectory,
+  refreshDirectoryMetadata,
+  removeLibraryItems,
+  shouldSkipMetadataUpdate,
+  setExcludeTitle,
+  saveImmediately,
+  sortLibrary as sortLib,
+  toSearchResult
+} from './util/libraryManager.js'
 import { searchMovie, searchTv, getSeason, getEpisode } from './util/tmdb.js'
 import { showDetails, setCurrentResultElement } from './search.js'
 import { cacheImage, getCachedImage } from "./util/imageCache.js"
 import { getPrefs } from "./util/settings.js"
-import { getYear, getDate, getCleanTitle, elementFromHtml, getSeasonEpisode } from "./util/helpers.js"
+import { getCleanTitle, elementFromHtml, getSeasonEpisode } from "./util/helpers.js"
 import { getImagePath } from './util/tmdb.js'
 import { removeLastStream } from './renderer.js'
 
@@ -69,10 +86,7 @@ const createSeasonGroupTile = async (showId, season, episodes) => {
   resultDetails.appendChild(resultCountBadge)
   resultTile.appendChild(resultDetails)
   poster ? resultTile.appendChild(resultPoster) : null
-
   resultTile.dataset.isNavigable = 'false'
-
-  // click entire tile to expand/collapse
   resultTile.addEventListener('click', () => {
     toggleSeasonGroup(resultTile, episodes, false)
   })
@@ -95,10 +109,7 @@ const createSeasonGroupListItem = (showId, season, episodes) => {
   libraryListItem.appendChild(libraryListTitle)
   libraryListItem.appendChild(libraryListPath)
   libraryListItem.appendChild(libraryListTime)
-
   libraryListItem.dataset.isNavigable = 'false'
-
-  // click entire row to expand/collapse
   libraryListItem.addEventListener('click', () => {
     toggleSeasonGroup(libraryListItem, episodes, true)
   })
@@ -212,7 +223,7 @@ const createLibraryTile = async libraryObj => {
   })
   resultTile.addEventListener('click', e => {
     setCurrentResultElement(resultTile)
-    showDetails(libraryObj.url, libraryObj.metadata?.id, libraryObj.type, true, libraryObj.season, libraryObj.episode, cleanTitle, libraryObj.lastPlayTime)
+    showDetails(toSearchResult(libraryObj))
   })
   return resultTile
 }
@@ -249,7 +260,7 @@ const createLibraryListItem = libraryObj => {
   })
   libraryListItem.addEventListener('click', () => {
     setCurrentResultElement(libraryListItem)
-    showDetails(libraryObj.url, libraryObj.metadata?.id, libraryObj.type, true, libraryObj.season, libraryObj.episode, cleanTitle, libraryObj.lastPlayTime)
+    showDetails(toSearchResult(libraryObj))
   })
   
   frag.appendChild(libraryListItem)
@@ -376,9 +387,9 @@ export const loadLibraryDir = (dir, type, silent = false) => {
 
 // load library from local storage
 export const loadLibraryFromStorage = () => {
-  const libraryWithMetadata = JSON.parse(localStorage.getItem('library')) || []
-  if (libraryWithMetadata.length > 0) {
-    loadLibraryUi(libraryWithMetadata)
+  const library = getLibrary()
+  if (library.length > 0) {
+    loadLibraryUi(library)
   }
 }
 
@@ -439,132 +450,87 @@ export const updateLibraryDirStatus = (ele, status) => {
   return ele
 }
 
-// add library items from renderer process
-const addLibraryItems = async (library, type, dir) => {
-  // one load at a time
+// add/rescan library items from directory
+const addLibraryItems = async (newItems, type, dir) => {
   await libraryLoadLock
   let resolveLock
   libraryLoadLock = new Promise(res => resolveLock = res)
-  // console.log(`Adding library items from directory: ${dir}, Type: ${type}`)
+
   try {
-    const localLibrary = JSON.parse(localStorage.getItem('library')) || []
-    // remove items from local library that no longer exist in the directory
-    const filtered = localLibrary.filter(entry => !entry.path.startsWith(dir) || library.some(item => item.url === entry.url))
-
-    // add any new items from `library`
-    for (const item of library) {
-      if (!filtered.some(entry => entry.url === item.url)) {
-        if (type === 'tv') {
-          item.season = 0
-          item.episode = 0
-          const match = getSeasonEpisode(item.title)
-          if (match) {
-            item.season = parseInt(match[1]) || 0
-            item.episode = parseInt(match[2]) || 0
-          }
+    const processedItems = newItems.map(item => {
+      if (type === 'tv') {
+        const match = getSeasonEpisode(item.title)
+        return {
+          ...item,
+          season: match ? Number(match[1]) || 0 : 0,
+          episode: match ? Number(match[2]) || 0 : 0
         }
-        filtered.push(item)
       }
-    }
+      return item
+    })
 
-    // persist & continue
-    localStorage.setItem('library', JSON.stringify(filtered))
+    const shouldFetchMetadata = getPrefs().find(pref => pref.id === 'library-meta').state()
+    const itemsNeedingMetadata = await rescanDirectory(dir, processedItems, type, shouldFetchMetadata)
 
-    // remove last stream if it matches any of the new items
     removeLastStream()
 
-    if (getPrefs().find(pref => pref.id === 'library-meta').state()) {
-      await getLibraryMetadata(type, dir)
+    if (shouldFetchMetadata && itemsNeedingMetadata.length > 0) {
+      await fetchMetadataForItems(itemsNeedingMetadata, type, dir)
     } else {
       setLibraryDirStatus(dir, 'file')
-      loadLibraryUi(filtered)
+      loadLibraryUi(getLibrary())
     }
   } finally {
     resolveLock()
   }
 }
 
-// get metadata for library items
-const getLibraryMetadata = async (type, dir) => {
+// fetch metadata for specific items
+const fetchMetadataForItems = async (items, type, dir) => {
   setLibraryDirStatus(dir, 'pending')
   let error = false
-  // console.log(`Fetching metadata for Directory: ${dir}, Type: ${type}`)
-  const library = JSON.parse(localStorage.getItem('library')) || []
-  const libraryWithMetadata = []
 
-  for (const item of library) {
-    // skip items not in this dir/type OR already have metadata
-    if (
-      !item.path.startsWith(dir) ||
-      item.type !== type ||
-      (item.metadata && Object.keys(item.metadata).length > 0)
-    ) {
-      libraryWithMetadata.push(item)
-      continue
-    }
+  for (const item of items) {
     const searchTerm = getCleanTitle(item.title)
-    // console.log(`Searching for metadata for: ${searchTerm}`)
     const searchResult = type === 'movie'
       ? await searchMovie(searchTerm, 1)
       : await searchTv(searchTerm, 1)
-    
-    if (searchResult === 1) {
+
+    if (searchResult === 1 || searchResult === -1) {
       if (!errorShown) {
-        handleMetadataError(dir, 1)
+        handleMetadataError(dir, searchResult)
         errorShown = true
       }
       error = true
-      return
-    }
-    if (searchResult === -1) {
-      if (!errorShown) {
-        handleMetadataError(dir, -1)
-        errorShown = true
-      }
-      error = true
-      libraryWithMetadata.push(item)
       continue
     }
-    let metadata = {}
-    let releaseYear
-    let releaseDate
-    if (searchResult && searchResult.results && searchResult.results.length > 0) {
-      metadata = searchResult.results[0]
+
+    if (searchResult?.results?.length > 0) {
+      let metadata = searchResult.results[0]
+
       if (type === 'tv' && item.season && item.episode) {
         const seasonData = await getSeason(metadata.id, item.season)
-        if (seasonData === 1 || seasonData === -1) {
-          if (!errorShown) {
-            handleMetadataError(dir, seasonData)
-            errorShown = true
-          }
-          error = true
-          continue
+        if (seasonData?.poster_path) {
+          metadata.poster_path = seasonData.poster_path
         }
-        metadata.poster_path = seasonData?.poster_path || metadata.poster_path
-        
-        // get episode-specific air date
         const episodeData = await getEpisode(metadata.id, item.season, item.episode)
-        if (episodeData && episodeData.air_date) {
+        if (episodeData?.air_date) {
           metadata.first_air_date = episodeData.air_date
-        } else if (seasonData?.air_date) {
-          // fallback to season air date
-          metadata.first_air_date = seasonData.air_date
         }
       }
-      releaseYear = getYear(metadata.release_date || metadata.first_air_date || 'NA')
-      releaseDate = getDate(metadata.release_date || metadata.first_air_date || 'NA')
-      if (metadata.poster_path && getPrefs().find(pref => pref.id === 'library-cache').state()) {
-        const posterUrl = `${tmdbImagePath}${metadata.poster_path}`
-        cacheImage(posterUrl, metadata.poster_path)
+
+      updateLibraryItemMetadata(item.url, metadata)
+
+      if (metadata.poster_path && getPrefs().find(p => p.id === 'library-cache').state()) {
+        cacheImage(`${tmdbImagePath}${metadata.poster_path}`, metadata.poster_path)
       }
     }
-    libraryWithMetadata.push({ ...item, releaseYear, releaseDate, metadata })
   }
+
   if (!error) {
     setLibraryDirStatus(dir, 'complete')
   }
-  localStorage.setItem('library', JSON.stringify(libraryWithMetadata))
-  loadLibraryUi(libraryWithMetadata)
+  loadLibraryUi(getLibrary())
 }
 
 // group seasons and episodes for TV shows
@@ -581,8 +547,8 @@ const groupSeasonsEpisodes = library => {
       const match = getSeasonEpisode(item.title)
       let season, episode
       if (match) {
-        season = parseInt(match[1], 10) || 0
-        episode = parseInt(match[2], 10) || 0
+        season = Number(match[1]) || 0
+        episode = Number(match[2]) || 0
       } else {
         season = 0
         episode = 0
@@ -606,45 +572,26 @@ const groupSeasonsEpisodes = library => {
 // sort library by order param
 const sortLibrary = order => {
   currentSortOrder = order
-  const library = JSON.parse(localStorage.getItem('library')) || []
   
-  switch (order) {
-    case 'old':
-      // sort by date ascending (oldest first)
-      library.sort((a, b) => getSortValue(a, 'date') - getSortValue(b, 'date'))
-      break
-    case 'new':
-      // sort by date descending (newest first)
-      library.sort((a, b) => getSortValue(b, 'date') - getSortValue(a, 'date'))
-      break
-    case 'title':
-      // sort by title ascending
-      library.sort((a, b) => {
-        const titleA = getSortValue(a, 'title')
-        const titleB = getSortValue(b, 'title')
-        return titleA < titleB ? -1 : 1
-      })
-      break
-    case 'path':
-      // sort by path ascending
-      library.sort((a, b) => {
-        const pathA = getSortValue(a, 'path')
-        const pathB = getSortValue(b, 'path')
-        return pathA < pathB ? -1 : 1
-      })
-      break
-    default:
-      library.sort((a, b) => {
-        const titleA = getSortValue(a, 'title')
-        const titleB = getSortValue(b, 'title')
-        return titleA < titleB ? -1 : 1
-      })
-      break
-  }
+  const compareFn = {
+    'old': (a, b) => getSortValue(a, 'date') - getSortValue(b, 'date'),
+    'new': (a, b) => getSortValue(b, 'date') - getSortValue(a, 'date'),
+    'title': (a, b) => {
+      const titleA = getSortValue(a, 'title')
+      const titleB = getSortValue(b, 'title')
+      return titleA < titleB ? -1 : 1
+    },
+    'path': (a, b) => {
+      const pathA = getSortValue(a, 'path')
+      const pathB = getSortValue(b, 'path')
+      return pathA < pathB ? -1 : 1
+    }
+  }[order]
+  
+  sortLib(compareFn)
   
   $library.replaceChildren([])
   $libraryList.replaceChildren([])
-  localStorage.setItem('library', JSON.stringify(library))
   
   let type = null
   if ($libraryMovieBtn.classList.contains('toggled-bg')) {
@@ -657,23 +604,16 @@ const sortLibrary = order => {
 
 // filter library by type
 const filterLibrary = type => {
-  const library = JSON.parse(localStorage.getItem('library')) || []
-  const filteredLibrary = library.filter(li => li.type === type)
   $library.replaceChildren([])
   $libraryList.replaceChildren([])
-  
-  // disable group button if movie filter is active
+
   if (type === 'movie') {
     $libraryGroupBtn.disabled = true
   } else {
     $libraryGroupBtn.disabled = false
   }
   
-  if (!type) {
-    loadLibraryUi(library)
-  } else {
-    loadLibraryUi(filteredLibrary)
-  }
+  loadLibraryUi(getLibraryByType(type))
 }
 
 // rescan all library directories
@@ -735,18 +675,11 @@ $libraryGroupBtn.addEventListener('click', () => {
 window.electronAPI.sendLibrary((e, libraryObj) => addLibraryItems(libraryObj.library, libraryObj.type, libraryObj.dir))
 
 window.electronAPI.setVideoTime((e, urlTime) => {
-  const library = JSON.parse(localStorage.getItem('library')) || []
-  const item = library.find(li => li.url === urlTime.url)
-  if (item) {
-    item.lastPlayTime = urlTime.time
-    localStorage.setItem('library', JSON.stringify(library))
-    // console.log(`Set video time for ${urlTime.url} to ${urlTime.time}`)
-  } else {
-    // console.log(`No library item found for URL: ${urlTime.url}`)
-  }
+  updateLibraryItem(urlTime.url, { lastPlayTime: urlTime.time })
 })
 
 // setup
+initLibrary()
 if (localStorage.getItem('library-group-season') === 'true') {
   $libraryGroupBtn.classList.add('toggled-bg')
 }
