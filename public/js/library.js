@@ -201,9 +201,11 @@ const createLibraryTile = async libraryObj => {
   const resultTitle = elementFromHtml(`<div class="result-title" title="${cleanTitle}">${cleanTitle}</div>`)
   const resultYear = elementFromHtml(`<div class="result-year" title="${cleanYear}">(${cleanYear})</div>`)
   const resultPlayBtn = elementFromHtml(`<div class="result-play fas fa-2x fa-play result-play"></div>`)
+  const resultOptionsBtn = elementFromHtml(`<div class="result-options fas fa-ellipsis-vertical"></div>`)
   resultDetails.appendChild(resultTitle)
   resultDetails.appendChild(resultYear)
   resultDetails.appendChild(resultPlayBtn)
+  resultDetails.appendChild(resultOptionsBtn)
   resultTile.appendChild(resultDetails)
   poster ? resultTile.appendChild(resultPoster) : null
   if (libraryObj.type === 'tv') {

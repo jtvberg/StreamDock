@@ -100,6 +100,13 @@
   width: -webkit-fill-available;
 }
 
+.result-options {
+  position: absolute;
+  bottom: 6px;
+  right: 9px;
+  font-size: 2rem;
+}
+
 .result-poster {
   position: absolute;
   width: 100%;
@@ -132,7 +139,7 @@
   transition: color 200ms ease-out;
 }
 
-.result-play:hover {
+.result-play:hover, .result-options:hover {
   color: var(--color-system-accent);
 }
 
