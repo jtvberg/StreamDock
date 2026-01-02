@@ -46,13 +46,14 @@ export const findLibraryItem = (url) => {
 
 // find items by directory
 export const findLibraryItemsByDir = (dir) => {
-  return library.filter(item => item.path.startsWith(dir))
+  return library.filter(item => item.dir === dir)
 }
 
 // create object from library item
 export const toSearchResult = (item) => {
   return {
     ...item.metadata,
+    title: item.title, // Include base title for items without metadata
     url: item.url,
     path: item.path,
     isLocal: true,
@@ -117,6 +118,8 @@ export const rescanDirectory = async (dir, newItems, type, fetchMetadata = false
   const newUrls = newItems.map(item => item.url)
   const existingUrls = existingItemsInDir.map(item => item.url)
   const urlsToRemove = existingUrls.filter(url => !newUrls.includes(url))
+  const hadDeletions = urlsToRemove.length > 0
+  
   urlsToRemove.forEach(url => {
     const index = library.findIndex(item => item.url === url)
     if (index > -1) {
@@ -125,10 +128,14 @@ export const rescanDirectory = async (dir, newItems, type, fetchMetadata = false
     }
   })
 
-  const itemsToAdd = newItems.filter(item => !existingUrls.includes(item.url))
+  // Check against ALL library items, not just this directory
+  const allExistingUrls = new Set(library.map(item => item.url))
+  const itemsToAdd = newItems.filter(item => !allExistingUrls.has(item.url))
+  
   itemsToAdd.forEach(item => {
     library.push({
       ...item,
+      dir,
       type,
       metadata: {},
       lastPlayTime: 0
@@ -140,15 +147,16 @@ export const rescanDirectory = async (dir, newItems, type, fetchMetadata = false
     saveImmediately()
   }
 
+  let itemsNeedingMetadata = []
   if (fetchMetadata) {
-    return findLibraryItemsByDir(dir).filter(item => 
+    itemsNeedingMetadata = findLibraryItemsByDir(dir).filter(item => 
       item.type === type && 
       !shouldSkipMetadataUpdate(item) &&
       (!item.metadata || !item.metadata.id)
     )
   }
 
-  return []
+  return { itemsNeedingMetadata, hadDeletions }
 }
 
 // force reload metadata for all items in directory (except manual)
@@ -174,11 +182,13 @@ export const refreshDirectoryMetadata = (dir, type) => {
 export const removeLibraryItems = (filterFn) => {
   const before = library.length
   library = library.filter(item => !filterFn(item))
+  const removed = before - library.length
+  console.log(`removeLibraryItems: removed ${removed} items, library now has ${library.length} items`)
   if (library.length !== before) {
     isDirty = true
     saveImmediately()
   }
-  return before - library.length
+  return removed
 }
 
 // sort library in-place

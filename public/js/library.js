@@ -41,6 +41,8 @@ const $librarySortPathBtn = document.querySelector('#library-sort-path-btn')
 let libraryLoadLock = Promise.resolve()
 let currentSortOrder = 'title' // track current sort: 'old', 'new', 'title', 'path'
 let errorShown = false
+export let directoriesCache = null
+let directoriesSaveTimeout = null
 
 // get sortable value with fallbacks
 const getSortValue = (item, field) => {
@@ -405,21 +407,42 @@ const handleMetadataError = (dir, error) => {
   }
 }
 
+// get directories from cache or localStorage
+export const getDirectories = () => {
+  if (!directoriesCache) {
+    directoriesCache = JSON.parse(localStorage.getItem('directories')) || []
+  }
+  return directoriesCache
+}
+
+// save directories
+const saveDirectories = () => {
+  clearTimeout(directoriesSaveTimeout)
+  directoriesSaveTimeout = setTimeout(() => {
+    localStorage.setItem('directories', JSON.stringify(directoriesCache))
+  }, 500)
+}
+
 // set directory metadata status
 const setLibraryDirStatus = (dir, status) => {
-  // console.log(`Setting status for directory: ${dir} to ${status}`)
-  const dirs = JSON.parse(localStorage.getItem('directories')) || []
+  console.log(`Setting status for directory: ${dir} to ${status}`)
+  const dirs = getDirectories()
   const dirIndex = dirs.findIndex(d => d.dir === dir)
   if (dirIndex > -1) {
     dirs[dirIndex].status = status
-    localStorage.setItem('directories', JSON.stringify(dirs))
+    saveDirectories()
     // update library directory panel
     const libDir = document.querySelector(`.library-directory-path[title="${dir}"]`)
     if (libDir) {
       const statusIcon = libDir.parentElement.querySelector('.library-directory-status')
       if (statusIcon) {
+        console.log(`Updating UI icon to ${status}`)
         updateLibraryDirStatus(statusIcon, status)
+      } else {
+        console.log(`Status icon element not found for ${dir}`)
       }
+    } else {
+      console.log(`Library directory DOM element not found for ${dir}`)
     }
   } else {
     console.log(`Directory ${dir} not found in library directories`)
@@ -470,14 +493,23 @@ const addLibraryItems = async (newItems, type, dir) => {
     })
 
     const shouldFetchMetadata = getPrefs().find(pref => pref.id === 'library-meta').state()
-    const itemsNeedingMetadata = await rescanDirectory(dir, processedItems, type, shouldFetchMetadata)
+    const { itemsNeedingMetadata, hadDeletions } = await rescanDirectory(dir, processedItems, type, shouldFetchMetadata)
 
-    removeLastStream()
+
+    if (hadDeletions) {
+      removeLastStream()
+    }
 
     if (shouldFetchMetadata && itemsNeedingMetadata.length > 0) {
       await fetchMetadataForItems(itemsNeedingMetadata, type, dir)
     } else {
-      setLibraryDirStatus(dir, 'file')
+      if (shouldFetchMetadata) {
+        const itemsInDir = findLibraryItemsByDir(dir).filter(item => item.type === type)
+        const hasMetadata = itemsInDir.length > 0 && itemsInDir.every(item => item.metadata?.id)
+        setLibraryDirStatus(dir, hasMetadata ? 'complete' : 'file')
+      } else {
+        setLibraryDirStatus(dir, 'file')
+      }
       loadLibraryUi(getLibrary())
     }
   } finally {

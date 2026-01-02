@@ -275,10 +275,11 @@ const showPrevious = () => {
   currentResultElement = prevElement
   const isLocal = prevElement.dataset.isLocal === 'true'
   const result = {
-    id: Number(prevElement.dataset.id),
+    id: Number(prevElement.dataset.id) || null,
     media_type: prevElement.dataset.mediaType,
     url: prevElement.dataset.url,
     isLocal,
+    cleanTitle: prevElement.dataset.cleanTitle,
     season: prevElement.dataset.season ? Number(prevElement.dataset.season) : undefined,
     episode: prevElement.dataset.episode ? Number(prevElement.dataset.episode) : undefined
   }
@@ -293,10 +294,11 @@ const showNext = () => {
   currentResultElement = nextElement
   const isLocal = nextElement.dataset.isLocal === 'true'
   const result = {
-    id: Number(nextElement.dataset.id),
+    id: Number(nextElement.dataset.id) || null,
     media_type: nextElement.dataset.mediaType,
     url: nextElement.dataset.url,
     isLocal,
+    cleanTitle: nextElement.dataset.cleanTitle,
     season: nextElement.dataset.season ? Number(nextElement.dataset.season) : undefined,
     episode: nextElement.dataset.episode ? Number(nextElement.dataset.episode) : undefined
   }
@@ -330,6 +332,7 @@ export const showDetails = async (result) => {
     $modal.dataset.url = isLocal ? `${tmdbTitlePath}${media_type}/${id}` : url
     details = await getTitleDetails(id, media_type)
   }
+
   if (details === 1) {
     alert("Unable to show details for this item: No API key found.")
   } else if (details === -1) {
@@ -364,7 +367,7 @@ export const showDetails = async (result) => {
     $modalPoster.style.display = ''
   }
   
-  const cleanTitle = result.path ? extractCleanTitle(result) : null
+  const cleanTitle = result.cleanTitle || (result.path ? extractCleanTitle(result) : null)
   const title = cleanTitle || getTitle(episodeDetails || details)
   
   $modalTitle.textContent = `${title} (${getYear(episodeDetails?.air_date || details.first_air_date || details.release_date) || ''})`
@@ -417,9 +420,13 @@ export const showDetails = async (result) => {
 }
 
 function extractCleanTitle(result) {
-  const parenthesesText = result.title.match(/\(([^)]+)\)/)?.[1] || ''
+  if (!result) {
+    return 'Unknown Title'
+  }
+  const baseTitle = result.title || ''
+  const parenthesesText = baseTitle.match(/\(([^)]+)\)/)?.[1] || ''
   const episode = result.type === 'tv' ? ` s${result.season}e${result.episode}` : ''
-  return `${result.metadata?.title || result.metadata?.name || result.title} ${episode}${parenthesesText ? ` - ${parenthesesText}` : ''}`.trim()
+  return `${result.metadata?.title || result.metadata?.name || baseTitle} ${episode}${parenthesesText ? ` - ${parenthesesText}` : ''}`.trim()
 }
 
 function getPosterUrl(input) {

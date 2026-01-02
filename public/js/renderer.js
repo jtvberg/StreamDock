@@ -1,7 +1,7 @@
 // Imports
-import { initLibrary, findLibraryItem, saveImmediately } from './util/libraryManager.js'
+import { initLibrary, findLibraryItem, findLibraryItemsByDir, removeLibraryItems, saveImmediately, getLibrary } from './util/libraryManager.js'
 import { getStreams, setStreams, getNewStreamId, getLastStream, getPrefs, setLastStream, getWinBounds, setWinBounds, getWinLock, setWinLock, getWinRatio, setWinRatio } from "./util/settings.js"
-import { rescanAllLibraryDirs, updateLibraryDirStatus, loadLibraryDir, loadLibraryFromStorage } from "./library.js"
+import { rescanAllLibraryDirs, updateLibraryDirStatus, loadLibraryDir, loadLibraryFromStorage, getDirectories, directoriesCache } from "./library.js"
 import { elementFromHtml, elementRemoveFlash } from "./util/helpers.js"
 import locs from '../res/loc.json' with { type: 'json' }
 
@@ -558,10 +558,12 @@ const loadLibraryDirectoryPanel = () => {
       }
       // trigger a refresh of the library directory metadata
       // console.log(`Refreshing library directory metadata: ${dir.dir}`)
-      // drop items from local storage libarary with dir and save
-      const library = JSON.parse(localStorage.getItem('library')) || []
-      const updatedLibrary = library.filter(item => !item.path.startsWith(dir.dir))
-      localStorage.setItem('library', JSON.stringify(updatedLibrary))
+      // remove all items from this directory using library manager
+      removeLibraryItems(item => item.dir === dir.dir)
+      // reload library items in UI
+      $library.replaceChildren([])
+      $libraryList.replaceChildren([])
+      loadLibraryFromStorage()
       // load the library directory again
       loadLibraryDir(dir.dir, dir.type)
     })
@@ -571,17 +573,40 @@ const loadLibraryDirectoryPanel = () => {
       }
       // trigger a delete of the library directory
       // console.log(`Deleting library directory: ${dir.dir}`)
-      // remove the directory from local storage
-      const dirs = JSON.parse(localStorage.getItem('directories')) || []
-      dirs.splice(dirs.findIndex(d => d.dir === dir.dir), 1)
-      localStorage.setItem('directories', JSON.stringify(dirs))
-      // remove library items with dir from storage
-      const library = JSON.parse(localStorage.getItem('library')) || []
-      const updatedLibrary = library.filter(item => !item.path.startsWith(dir.dir))
-      localStorage.setItem('library', JSON.stringify(updatedLibrary))
+      // remove the directory from cache
+      const dirs = getDirectories()
+      const dirIndex = dirs.findIndex(d => d.dir === dir.dir)
+      if (dirIndex > -1) {
+        dirs.splice(dirIndex, 1)
+        localStorage.setItem('directories', JSON.stringify(dirs))
+      }
+      // remove all library items from this directory using library manager
+      console.log(`Attempting to remove items with dir === "${dir.dir}"`)
+      const allItems = getLibrary(true) // Get all items including excluded
+      const testItem = allItems.find(item => item.path && item.path.startsWith(dir.dir))
+      if (testItem) {
+        console.log('Sample item from directory:', { 
+          dir: testItem.dir, 
+          path: testItem.path, 
+          url: testItem.url,
+          dirMatches: testItem.dir === dir.dir
+        })
+      } else {
+        console.log('No items found with path starting with:', dir.dir)
+        const anyItem = allItems[0]
+        if (anyItem) {
+          console.log('Sample of any item:', {
+            dir: anyItem.dir,
+            path: anyItem.path,
+            url: anyItem.url
+          })
+        }
+      }
+      removeLibraryItems(item => item.dir === dir.dir)
+      saveImmediately()
       // reload library directory panel
       loadLibraryDirectoryPanel()
-      // reload library items
+      // reload library items in UI
       $library.replaceChildren([])
       $libraryList.replaceChildren([])
       loadLibraryFromStorage()
@@ -623,7 +648,7 @@ export const removeLastStream = () => {
 
 // add directory to library directory storage, panel and load library directory
 const addLibraryDirectory = (dir, type) => {
-  const dirs = JSON.parse(localStorage.getItem('directories')) || []
+  const dirs = getDirectories()
   if (!dirs.some(entry => entry.dir === dir)) {
     dirs.push({
       dir,
