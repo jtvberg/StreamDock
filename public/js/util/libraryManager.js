@@ -51,9 +51,14 @@ export const findLibraryItemsByDir = (dir) => {
 
 // create object from library item
 export const toSearchResult = (item) => {
+  const parenthesesText = item.title ? (item.title.match(/\(([^)]+)\)/) || [])[1] || '' : ''
+  const episode = item.type === 'tv' ? ` s${item.season}e${item.episode}` : ''
+  const cleanTitle = `${item.metadata?.title || item.metadata?.name || item.title || 'Unknown Title'} ${episode}${parenthesesText ? ` - ${parenthesesText}` : ''}`.trim()
+  
   return {
     ...item.metadata,
-    title: item.title, // Include base title for items without metadata
+    title: item.title,
+    cleanTitle,
     url: item.url,
     path: item.path,
     isLocal: true,

@@ -181,7 +181,7 @@ const extractParentheses = str => {
 // create a library tile
 const createLibraryTile = async libraryObj => {
   const parenthesesText = extractParentheses(libraryObj.title)
-  const cleanTitle = `${libraryObj.metadata?.title || libraryObj.metadata?.name || libraryObj.title || 'Unknown Title'} ${parenthesesText ? `- ${parenthesesText}` : ''}`
+  const cleanTitle = `${libraryObj.metadata?.title || libraryObj.metadata?.name || libraryObj.title || 'Unknown Title'} ${parenthesesText ? `- ${parenthesesText}` : ''}`.trim()
   const cleanYear = libraryObj.releaseYear ? libraryObj.releaseYear : 'NA'
   let poster = null
 
@@ -234,9 +234,9 @@ const createLibraryTile = async libraryObj => {
 const createLibraryListItem = libraryObj => {
   const parenthesesText = extractParentheses(libraryObj.title)
   const episode = libraryObj.type === 'tv' ? ` s${libraryObj.season}e${libraryObj.episode}` : ''
-  const cleanTitle = `${libraryObj.metadata?.title || libraryObj.metadata?.name || libraryObj.title} ${episode}${parenthesesText ? `- ${parenthesesText}` : ''}`
+  const cleanTitle = `${libraryObj.metadata?.title || libraryObj.metadata?.name || libraryObj.title} ${episode}${parenthesesText ? `- ${parenthesesText}` : ''}`.trim()
   const cleanYear = libraryObj.releaseYear ? libraryObj.releaseYear : 'NA'
-  const fullTitle  = `${cleanTitle.trim()} (${cleanYear})`
+  const fullTitle  = `${cleanTitle} (${cleanYear})`
   const frag = document.createDocumentFragment()
   const libraryListItem = elementFromHtml(`<div class="library-row" data-ts="${libraryObj.timestamp}"></div>`)
   const libraryListPlay = elementFromHtml(`<div class="fas fa-play library-list-play"></div>`)
@@ -436,16 +436,9 @@ const setLibraryDirStatus = (dir, status) => {
     if (libDir) {
       const statusIcon = libDir.parentElement.querySelector('.library-directory-status')
       if (statusIcon) {
-        console.log(`Updating UI icon to ${status}`)
         updateLibraryDirStatus(statusIcon, status)
-      } else {
-        console.log(`Status icon element not found for ${dir}`)
       }
-    } else {
-      console.log(`Library directory DOM element not found for ${dir}`)
     }
-  } else {
-    console.log(`Directory ${dir} not found in library directories`)
   }
 }
 

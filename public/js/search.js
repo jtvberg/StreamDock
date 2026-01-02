@@ -366,7 +366,7 @@ export const showDetails = async (result) => {
     $modalNoposter.style.display = 'none'
     $modalPoster.style.display = ''
   }
-  
+
   const cleanTitle = result.cleanTitle || (result.path ? extractCleanTitle(result) : null)
   const title = cleanTitle || getTitle(episodeDetails || details)
   
