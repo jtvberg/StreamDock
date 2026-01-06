@@ -703,6 +703,7 @@ window.electronAPI.sendLibrary((e, libraryObj) => addLibraryItems(libraryObj.lib
 
 window.electronAPI.setVideoTime((e, urlTime) => {
   updateLibraryItem(urlTime.url, { lastPlayTime: urlTime.time })
+  saveImmediately()
 })
 
 // setup

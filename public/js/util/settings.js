@@ -421,4 +421,6 @@ export const getWinRatio = () => localStorage.getItem('ratio-lock')
 
 export const setWinRatio = bool => localStorage.setItem('ratio-lock', bool)
 
+export const setVideoPaused = bool => localStorage.setItem('video-paused', bool)
+
 export const getNewStreamId = () => Date.now().toString(36) + Math.random().toString(36).substring(2)

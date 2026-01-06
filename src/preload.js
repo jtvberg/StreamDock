@@ -34,6 +34,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
     setAccent: color => ipcRenderer.on('set-accent', color),
     hideHeader: bool => ipcRenderer.on('hide-header', bool),
     lastStream: url => ipcRenderer.on('last-stream', url),
+    onVideoPaused: callback => ipcRenderer.on('set-video-paused', callback),
     setIsNetflix: bool => ipcRenderer.on('is-netflix', bool),
     streamOpened: bool => ipcRenderer.on('stream-opened', bool),
     getHeaderHeight: heightObj => ipcRenderer.invoke('set-header-height', heightObj),

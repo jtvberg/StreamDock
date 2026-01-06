@@ -1,7 +1,7 @@
 // Imports
-import { initLibrary, findLibraryItem, findLibraryItemsByDir, removeLibraryItems, saveImmediately, getLibrary } from './util/libraryManager.js'
-import { getStreams, setStreams, getNewStreamId, getLastStream, getPrefs, setLastStream, getWinBounds, setWinBounds, getWinLock, setWinLock, getWinRatio, setWinRatio } from "./util/settings.js"
-import { rescanAllLibraryDirs, updateLibraryDirStatus, loadLibraryDir, loadLibraryFromStorage, getDirectories, directoriesCache } from "./library.js"
+import { initLibrary, findLibraryItem, removeLibraryItems, saveImmediately, getLibrary } from './util/libraryManager.js'
+import { getStreams, setStreams, getNewStreamId, getLastStream, getPrefs, setLastStream, setVideoPaused, getWinBounds, setWinBounds, getWinLock, setWinLock, getWinRatio, setWinRatio } from "./util/settings.js"
+import { rescanAllLibraryDirs, updateLibraryDirStatus, loadLibraryDir, loadLibraryFromStorage, getDirectories } from "./library.js"
 import { elementFromHtml, elementRemoveFlash } from "./util/helpers.js"
 import locs from '../res/loc.json' with { type: 'json' }
 
@@ -135,6 +135,8 @@ const applySettings = () => {
   window.electronAPI.winGetLoc((e, bounds) => setWinBounds(bounds))
 
   window.electronAPI.setIsMac((e, bool) => osHeader(bool))
+
+  window.electronAPI.onVideoPaused((e, bool) => setVideoPaused(bool))
 
   window.electronAPI.setAccent((e, color) => {
     let root = document.documentElement

@@ -67,6 +67,7 @@ let domain = null
 let ratioLocked = false
 let isPlaying = false
 let resumePlaying = false
+let isLocal = false
 let defaultAgent = ''
 
 // load reload module in dev
@@ -85,6 +86,29 @@ if (isMac) {
 if (isWindows) {
   systemPreferences.on('accent-color-changed', () => {
     setAccent()
+  })
+}
+
+// reset aspect ratio on mac resume
+if (isMac) {
+  const { powerMonitor } = require('electron')
+  
+  powerMonitor.on('resume', () => {
+    setTimeout(() => {
+      if (mainWin && !mainWin.isDestroyed()) {
+        const bounds = mainWin.getBounds()
+        
+        if (ratioLocked) {
+          mainWin.setAspectRatio(0)
+          mainWin.setAspectRatio(bounds.width / bounds.height)
+        }
+
+        streamView.setBounds({ x: 0, y: 0, width: bounds.width, height: bounds.height })
+        const hb = headerView.getBounds()
+        setHeaderViewBounds(hb.height > headerCollapsed ? bounds.height : hb.height)
+        facetView.setBounds({ x: 0, y: 0, width: facetView.getBounds().width, height: bounds.height + 2 })
+      }
+    }, 500)
   })
 }
 
@@ -192,6 +216,9 @@ const createWindow = () => {
   // set is playing variable on media play
   streamView.webContents.on('media-started-playing', () => {
     isPlaying = true
+    if (isLocal) {
+      headerView.webContents.send('set-video-paused', !isPlaying)
+    }
   })
 
   // set is playing variable on media pause
@@ -346,11 +373,11 @@ const setHeaderViewBounds = height => headerView.setBounds({ x: 0, y: 0, width: 
 const setFacetViewBounds = width => facetView.setBounds({ x: 0, y: 0, width, height: mainWin.getBounds().height + 2 })
 
 // open url in streamView and send stream opened message to renderer
-const openUrl = (url, time = 0) => {
+const openUrl = async (url, time = 0) => {
   if (!validUrl(url)) {
     return
   }
-  saveVideoTime(getCurrentUrl())
+  await saveVideoTime(getCurrentUrl())
   sendLogData(`Open URL: ${url}`)
   if (url.host === googleAuthHost) {
     streamView.webContents.loadURL(url)
@@ -359,12 +386,18 @@ const openUrl = (url, time = 0) => {
     streamView.webContents.loadURL(url, { userAgent: defaultAgent })
   }
   showStream(true)
-  headerView.webContents.send('last-stream', url)
-  headerView.webContents.send('stream-opened')
-  if (url.startsWith('file:')) {
+  isLocal = url.startsWith('file:') ? true : false
+  if (isLocal) {
     makeFullWindow()
     setVideoTime(time)
+    const wasPaused = await headerView.webContents.executeJavaScript('localStorage.getItem("video-paused") === "true"')
+    const lastStream = await headerView.webContents.executeJavaScript('localStorage.getItem("last-stream")')
+    if (wasPaused && lastStream === url) {
+      setTimeout(() => pauseVideo(streamView), 200)
+    }
   }
+  headerView.webContents.send('last-stream', url)
+  headerView.webContents.send('stream-opened')
 }
 
 // open external player with url
@@ -446,13 +479,16 @@ const setVideoTime = (time = 0) => {
 
 // send video time to renderer and save it
 const saveVideoTime = async (url) => {
-  if (!url.startsWith('file:')) return
-  getVideoTime().then(time => {
+  if (!isLocal) return
+  try {
+    const time = await getVideoTime()
     if (time !== null) {
-      urlTime = { url, time }
+      const urlTime = { url, time }
       headerView.webContents.send('set-video-time', urlTime)
     }
-  })
+  } catch (err) {
+    sendLogData(`Error saving video time: ${err.message}`)
+  }
 }
 
 // get system preference for accent color and send to renderers
@@ -741,6 +777,13 @@ app.whenReady().then(async () => {
     const updater = require('./util/updater')
     setTimeout(updater, 3000)
   }
+})
+
+// on before quit, perform any necessary cleanup
+app.on('before-quit', (e) => {
+    if (isLocal) {
+      headerView.webContents.send('set-video-paused', !isPlaying)
+    }
 })
 
 // on all windows closed, save video time and quit app
