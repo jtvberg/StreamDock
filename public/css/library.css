@@ -99,7 +99,7 @@
 
 .library-row {
   display: grid;
-  grid-template-columns: auto 1fr 2fr 230px;
+  grid-template-columns: auto 1fr 2fr 230px 18px;
   gap: 8px;
   align-items: center;
   font-size: 1.2rem;
@@ -114,7 +114,7 @@
   transition: color 200ms ease-out;
 }
 
-.library-list-play:hover {
+.library-list-play:hover, .library-result-options:hover {
   color: var(--color-system-accent);
 }
 

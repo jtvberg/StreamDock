@@ -226,11 +226,21 @@ const createLibraryTile = async libraryObj => {
     e.stopImmediatePropagation()
     playLibraryItem(libraryObj)
   })
+  resultOptionsBtn.addEventListener('click', e => {
+    e.stopImmediatePropagation()
+    createLibraryItemContextMenu(libraryObj)
+  })
   resultTile.addEventListener('click', e => {
     setCurrentResultElement(resultTile)
     showDetails(toSearchResult(libraryObj))
   })
   return resultTile
+}
+
+// create library item context menu
+const createLibraryItemContextMenu = (libraryObj) => {
+  // TODO: implement context menu
+  console.log('Create context menu for library item:', libraryObj)
 }
 
 // create a library list item
@@ -246,10 +256,12 @@ const createLibraryListItem = libraryObj => {
   const libraryListTitle = elementFromHtml(`<div class="library-cell" title="${fullTitle}">${fullTitle}</div>`)
   const libraryListPath = elementFromHtml(`<div class="library-cell" title="${libraryObj.path}">${libraryObj.path}</div>`)
   const libraryListTime = elementFromHtml(`<div class="library-cell library-cell-right">${new Date(libraryObj.timestamp).toLocaleString()}</div>`)
+  const libraryListOptionsBtn = elementFromHtml(`<div class="library-cell library-result-options fas fa-ellipsis"></div>`)
   libraryListItem.appendChild(libraryListPlay)
   libraryListItem.appendChild(libraryListTitle)
   libraryListItem.appendChild(libraryListPath)
   libraryListItem.appendChild(libraryListTime)
+  libraryListItem.appendChild(libraryListOptionsBtn)
   libraryListItem.dataset.isLocal = 'true'
   libraryListItem.dataset.isNavigable = 'true'
   libraryListItem.dataset.cleanTitle = cleanTitle
@@ -262,6 +274,10 @@ const createLibraryListItem = libraryObj => {
   libraryListPlay.addEventListener('click', e => {
     e.stopImmediatePropagation()
     playLibraryItem(libraryObj)
+  })
+  libraryListOptionsBtn.addEventListener('click', e => {
+    e.stopImmediatePropagation()
+    createLibraryItemContextMenu(libraryObj)
   })
   libraryListItem.addEventListener('click', () => {
     setCurrentResultElement(libraryListItem)
