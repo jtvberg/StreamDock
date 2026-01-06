@@ -596,7 +596,6 @@ const openNewin = url => {
     child.show()
   })
   child.webContents.on('dom-ready', () => {
-    console.log('Child window loaded ')
     child.webContents.executeJavaScript(`
       (() => {
         try {

@@ -188,7 +188,7 @@ export const removeLibraryItems = (filterFn) => {
   const before = library.length
   library = library.filter(item => !filterFn(item))
   const removed = before - library.length
-  console.log(`removeLibraryItems: removed ${removed} items, library now has ${library.length} items`)
+  // console.log(`removeLibraryItems: removed ${removed} items, library now has ${library.length} items`)
   if (library.length !== before) {
     isDirty = true
     saveImmediately()

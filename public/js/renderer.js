@@ -549,8 +549,6 @@ const loadLibraryDirectoryPanel = () => {
       libDirRefresh.classList.add('disabled') 
     }
     libDirRescan.addEventListener('click', () => {
-      // trigger a rescan of the library directory
-      // console.log(`Rescanning library directory: ${dir.dir}`)
       // look for new files in the directory and remove any items that no longer exist
       loadLibraryDir(dir.dir, dir.type)
     })
@@ -558,8 +556,6 @@ const loadLibraryDirectoryPanel = () => {
       if (!confirm(`Are you sure you want to refresh all metadata for:\n${dir.dir}?\nThis will remove and reload all metadata for this directory.`)) {
         return
       }
-      // trigger a refresh of the library directory metadata
-      // console.log(`Refreshing library directory metadata: ${dir.dir}`)
       // remove all items from this directory using library manager
       removeLibraryItems(item => item.dir === dir.dir)
       // reload library items in UI
@@ -573,8 +569,6 @@ const loadLibraryDirectoryPanel = () => {
       if (!confirm(`Are you sure you want to delete the library directory:\n${dir.dir}?`)) {
         return
       }
-      // trigger a delete of the library directory
-      // console.log(`Deleting library directory: ${dir.dir}`)
       // remove the directory from cache
       const dirs = getDirectories()
       const dirIndex = dirs.findIndex(d => d.dir === dir.dir)
@@ -582,28 +576,8 @@ const loadLibraryDirectoryPanel = () => {
         dirs.splice(dirIndex, 1)
         localStorage.setItem('directories', JSON.stringify(dirs))
       }
+      
       // remove all library items from this directory using library manager
-      console.log(`Attempting to remove items with dir === "${dir.dir}"`)
-      const allItems = getLibrary(true) // Get all items including excluded
-      const testItem = allItems.find(item => item.path && item.path.startsWith(dir.dir))
-      if (testItem) {
-        console.log('Sample item from directory:', { 
-          dir: testItem.dir, 
-          path: testItem.path, 
-          url: testItem.url,
-          dirMatches: testItem.dir === dir.dir
-        })
-      } else {
-        console.log('No items found with path starting with:', dir.dir)
-        const anyItem = allItems[0]
-        if (anyItem) {
-          console.log('Sample of any item:', {
-            dir: anyItem.dir,
-            path: anyItem.path,
-            url: anyItem.url
-          })
-        }
-      }
       removeLibraryItems(item => item.dir === dir.dir)
       saveImmediately()
       // reload library directory panel

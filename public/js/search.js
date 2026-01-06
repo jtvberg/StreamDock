@@ -372,8 +372,9 @@ export const showDetails = async (result) => {
   
   $modalTitle.textContent = `${title} (${getYear(episodeDetails?.air_date || details.first_air_date || details.release_date) || ''})`
   $modalRating.textContent = getRating(details, media_type, loc)
-  $modalMedia.textContent = getMedia(episodeDetails || details, media_type)
-  $modalMedia.title = media_type === 'movie' ? 'Media Type' : 'Season and Episode Info'
+  const mediaInfo = getMedia(episodeDetails || details, media_type)
+  $modalMedia.textContent = mediaInfo.mediaType
+  $modalMedia.title = media_type === 'movie' ? 'Media Type' : mediaInfo.isEpisode ? 'Season/Episode' : '# of Seasons/Episodes'
   $modalGenre.textContent = getGenre(details)
   $modalRuntime.textContent = getRuntime(episodeDetails || details)
   $modalLanguage.textContent = getLanguage(details)
@@ -454,7 +455,12 @@ function getRating(input, media_type, loc) {
 }
 
 function getMedia(input, media_type) {
-  return media_type === 'movie' ? 'Film' : getSeasonInfo(input)
+  if (media_type === 'movie') {
+    return { mediaType: 'Film', isEpisode: false }
+  } else {
+    const { isEpisode, seasonInfo } = getSeasonInfo(input)
+    return { mediaType: seasonInfo, isEpisode }
+  }
 }
 
 function getGenre(input) {
@@ -508,11 +514,14 @@ function getCast(input) {
 }
 
 function getSeasonInfo(input) {
-  let season = 'TV'
+  let isEpisode = true
+  let seasonInfo = 'TV'
+  // console.log(input)
   try {
-    season = `S:${input.season_number ?? input.number_of_seasons ?? 'NA'} E:${input.episode_number ?? input.number_of_episodes ?? 'NA'}`
+    isEpisode = input.episode_number !== undefined
+    seasonInfo = `S:${input.season_number ?? input.number_of_seasons ?? 'NA'} E:${input.episode_number ?? input.number_of_episodes ?? 'NA'}`
   } catch (err) { console.log(`No season info found for id ${input.id}`) }
-  return season
+  return { isEpisode, seasonInfo }
 }
 
 function getProviders(input, loc) {

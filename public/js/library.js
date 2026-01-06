@@ -427,7 +427,7 @@ const saveDirectories = () => {
 
 // set directory metadata status
 const setLibraryDirStatus = (dir, status) => {
-  console.log(`Setting status for directory: ${dir} to ${status}`)
+  // console.log(`Setting status for directory: ${dir} to ${status}`)
   const dirs = getDirectories()
   const dirIndex = dirs.findIndex(d => d.dir === dir)
   if (dirIndex > -1) {
