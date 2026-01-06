@@ -36,6 +36,7 @@ const $librarySortOldBtn = document.querySelector('#library-sort-old-btn')
 const $librarySortNewBtn = document.querySelector('#library-sort-new-btn')
 const $librarySortTitleBtn = document.querySelector('#library-sort-title-btn')
 const $librarySortPathBtn = document.querySelector('#library-sort-path-btn')
+const $libraryShowHiddenBtn = document.querySelector('#library-show-hidden-btn')
 
 // Vars
 let libraryLoadLock = Promise.resolve()
@@ -658,6 +659,16 @@ $librarySortNewBtn.addEventListener('click', () => sortLibrary('new'))
 $librarySortTitleBtn.addEventListener('click', () => sortLibrary('title'))
 
 $librarySortPathBtn.addEventListener('click', () => sortLibrary('path'))
+
+$libraryShowHiddenBtn.addEventListener('click', () => {
+  if ($libraryShowHiddenBtn.classList.contains('toggled-bg')) {
+    $libraryShowHiddenBtn.classList.remove('toggled-bg')
+    // hide hidden items
+  } else {
+    $libraryShowHiddenBtn.classList.add('toggled-bg')
+    // show hidden items
+  }
+})
 
 $libraryMovieBtn.addEventListener('click', () => {
   $libraryTvBtn.classList.remove('toggled-bg')
