@@ -13,6 +13,7 @@
   width: stretch;
   overflow-y: auto;
   overflow-x: hidden;
+  transition: all 200ms ease-out;
 }
 
 .library-instance {
@@ -105,7 +106,7 @@
   font-size: 1.2rem;
   padding: 3px 6px;
   border-radius: 5px;
-  transition: background-color 200ms ease-out;
+  transition: background-color 200ms ease-out, opacity 200ms ease-in, transform 200ms ease-in;
 }
 
 .library-list-play {

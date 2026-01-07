@@ -263,13 +263,22 @@ const toggleItemHidden = (libraryObj) => {
     const listElement = $libraryList.querySelector(`[data-url="${libraryObj.url}"]`)
     
     if (tileElement && tileElement.dataset.isLocal === 'true') {
-      tileElement.classList.add('element-fadeout')
-      tileElement.addEventListener('transitionend', () => tileElement.remove(), { once: true })
+      const height = tileElement.offsetHeight
+      tileElement.style.maxHeight = `${height}px`
+      requestAnimationFrame(() => {
+        tileElement.classList.add('element-fadeout')
+        setTimeout(() => tileElement.remove(), 400)
+      })
     }
     
     if (listElement && listElement.dataset.isLocal === 'true' && !listElement.classList.contains('season-group-row')) {
-      listElement.classList.add('element-fadeout')
-      listElement.addEventListener('transitionend', () => listElement.remove(), { once: true })
+      listElement.remove()
+      // const height = listElement.offsetHeight
+      // listElement.style.maxHeight = `${height}px`
+      // requestAnimationFrame(() => {
+      //   listElement.classList.add('element-fadeout')
+      //   setTimeout(() => listElement.remove(), 400)
+      // })
     }
   } else if (!newHiddenState && showHidden) {
     const tileElement = $library.querySelector(`[data-url="${libraryObj.url}"]`)
