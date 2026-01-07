@@ -179,6 +179,123 @@ const extractParentheses = str => {
   return match ? match[1] : ''
 }
 
+// close any open context menu
+const closeContextMenu = () => {
+  document.querySelectorAll('.library-context-menu').forEach(menu => menu.remove())
+}
+
+// create library item context menu
+const createLibraryItemContextMenu = (libraryObj, event) => {
+  closeContextMenu()
+  
+  const menu = elementFromHtml(`<div class="library-context-menu"></div>`)
+  const isHidden = libraryObj.isHidden === true
+  
+  // hide/show toggle
+  const hideShowItem = elementFromHtml(`
+    <div class="library-context-menu-item">
+      <span class="fas ${isHidden ? 'fa-eye' : 'fa-eye-slash'}"></span>
+      <span>${isHidden ? 'Show' : 'Hide'} Title</span>
+    </div>
+  `)
+  hideShowItem.addEventListener('click', () => {
+    toggleItemHidden(libraryObj)
+    closeContextMenu()
+  })
+  menu.appendChild(hideShowItem)
+  
+  // update metadata (placeholder)
+  const updateMetaItem = elementFromHtml(`
+    <div class="library-context-menu-item disabled">
+      <span class="fas fa-rotate"></span>
+      <span>Update Metadata</span>
+    </div>
+  `)
+  menu.appendChild(updateMetaItem)
+  
+  // lock metadata (placeholder)
+  const lockMetaItem = elementFromHtml(`
+    <div class="library-context-menu-item disabled">
+      <span class="fas fa-lock"></span>
+      <span>Lock Metadata</span>
+    </div>
+  `)
+  menu.appendChild(lockMetaItem)
+  document.body.appendChild(menu)
+  
+  const rect = event.target.getBoundingClientRect()
+  const menuRect = menu.getBoundingClientRect()
+  let left = rect.left
+  let top = rect.bottom + 5
+
+  if (left + menuRect.width > window.innerWidth) {
+    left = rect.right - menuRect.width
+  }
+
+  if (top + menuRect.height > window.innerHeight) {
+    top = rect.top - menuRect.height - 5
+  }
+  
+  menu.style.left = `${Math.max(5, left)}px`
+  menu.style.top = `${Math.max(5, top)}px`
+  
+  // close on outside click
+  setTimeout(() => {
+    const closeOnClickOutside = (e) => {
+      if (!menu.contains(e.target)) {
+        closeContextMenu()
+        document.removeEventListener('click', closeOnClickOutside)
+      }
+    }
+    document.addEventListener('click', closeOnClickOutside)
+  }, 0)
+}
+
+// toggle item hidden state
+const toggleItemHidden = (libraryObj) => {
+  const newHiddenState = !(libraryObj.isHidden === true)
+  updateLibraryItem(libraryObj.url, { isHidden: newHiddenState })
+  saveImmediately()
+  
+  const showHidden = $libraryShowHiddenBtn.classList.contains('toggled-bg')
+  if (newHiddenState && !showHidden) {
+    const tileElement = $library.querySelector(`[data-url="${libraryObj.url}"]`)
+    const listElement = $libraryList.querySelector(`[data-url="${libraryObj.url}"]`)
+    
+    if (tileElement && tileElement.dataset.isLocal === 'true') {
+      tileElement.classList.add('element-fadeout')
+      tileElement.addEventListener('transitionend', () => tileElement.remove(), { once: true })
+    }
+    
+    if (listElement && listElement.dataset.isLocal === 'true' && !listElement.classList.contains('season-group-row')) {
+      listElement.classList.add('element-fadeout')
+      listElement.addEventListener('transitionend', () => listElement.remove(), { once: true })
+    }
+  } else if (!newHiddenState && showHidden) {
+    const tileElement = $library.querySelector(`[data-url="${libraryObj.url}"]`)
+    const listElement = $libraryList.querySelector(`[data-url="${libraryObj.url}"]`)
+    
+    if (tileElement && tileElement.dataset.isLocal === 'true') {
+      tileElement.classList.remove('library-item-hidden')
+    }
+    
+    if (listElement && listElement.dataset.isLocal === 'true' && !listElement.classList.contains('season-group-row')) {
+      listElement.classList.remove('library-item-hidden')
+    }
+  } else {
+    const tileElement = $library.querySelector(`[data-url="${libraryObj.url}"]`)
+    const listElement = $libraryList.querySelector(`[data-url="${libraryObj.url}"]`)
+    
+    if (tileElement && tileElement.dataset.isLocal === 'true') {
+      tileElement.classList.add('library-item-hidden')
+    }
+    
+    if (listElement && listElement.dataset.isLocal === 'true' && !listElement.classList.contains('season-group-row')) {
+      listElement.classList.add('library-item-hidden')
+    }
+  }
+}
+
 // create a library tile
 const createLibraryTile = async libraryObj => {
   const parenthesesText = extractParentheses(libraryObj.title)
@@ -202,11 +319,9 @@ const createLibraryTile = async libraryObj => {
   const resultTitle = elementFromHtml(`<div class="result-title" title="${cleanTitle}">${cleanTitle}</div>`)
   const resultYear = elementFromHtml(`<div class="result-year" title="${cleanYear}">(${cleanYear})</div>`)
   const resultPlayBtn = elementFromHtml(`<div class="result-play fas fa-2x fa-play result-play"></div>`)
-  const resultOptionsBtn = elementFromHtml(`<div class="result-options fas fa-ellipsis-vertical"></div>`)
   resultDetails.appendChild(resultTitle)
   resultDetails.appendChild(resultYear)
   resultDetails.appendChild(resultPlayBtn)
-  resultDetails.appendChild(resultOptionsBtn)
   resultTile.appendChild(resultDetails)
   poster ? resultTile.appendChild(resultPoster) : null
   if (libraryObj.type === 'tv') {
@@ -216,6 +331,7 @@ const createLibraryTile = async libraryObj => {
   resultTile.dataset.isLocal = 'true'
   resultTile.dataset.isNavigable = 'true'
   resultTile.dataset.cleanTitle = cleanTitle
+  resultTile.dataset.url = libraryObj.url
   if (libraryObj.metadata?.id) {
     resultTile.dataset.id = libraryObj.metadata.id
     resultTile.dataset.mediaType = libraryObj.type
@@ -226,21 +342,21 @@ const createLibraryTile = async libraryObj => {
     e.stopImmediatePropagation()
     playLibraryItem(libraryObj)
   })
-  resultOptionsBtn.addEventListener('click', e => {
+  resultTile.addEventListener('contextmenu', e => {
     e.stopImmediatePropagation()
-    createLibraryItemContextMenu(libraryObj)
+    createLibraryItemContextMenu(libraryObj, e)
   })
   resultTile.addEventListener('click', e => {
     setCurrentResultElement(resultTile)
     showDetails(toSearchResult(libraryObj))
   })
+  
+  // apply hidden styling if item is hidden and we're showing hidden items
+  if (libraryObj.isHidden === true && $libraryShowHiddenBtn.classList.contains('toggled-bg')) {
+    resultTile.classList.add('library-item-hidden')
+  }
+  
   return resultTile
-}
-
-// create library item context menu
-const createLibraryItemContextMenu = (libraryObj) => {
-  // TODO: implement context menu
-  console.log('Create context menu for library item:', libraryObj)
 }
 
 // create a library list item
@@ -256,15 +372,14 @@ const createLibraryListItem = libraryObj => {
   const libraryListTitle = elementFromHtml(`<div class="library-cell" title="${fullTitle}">${fullTitle}</div>`)
   const libraryListPath = elementFromHtml(`<div class="library-cell" title="${libraryObj.path}">${libraryObj.path}</div>`)
   const libraryListTime = elementFromHtml(`<div class="library-cell library-cell-right">${new Date(libraryObj.timestamp).toLocaleString()}</div>`)
-  const libraryListOptionsBtn = elementFromHtml(`<div class="library-cell library-result-options fas fa-ellipsis"></div>`)
   libraryListItem.appendChild(libraryListPlay)
   libraryListItem.appendChild(libraryListTitle)
   libraryListItem.appendChild(libraryListPath)
   libraryListItem.appendChild(libraryListTime)
-  libraryListItem.appendChild(libraryListOptionsBtn)
   libraryListItem.dataset.isLocal = 'true'
   libraryListItem.dataset.isNavigable = 'true'
   libraryListItem.dataset.cleanTitle = cleanTitle
+  libraryListItem.dataset.url = libraryObj.url
   if (libraryObj.metadata?.id) {
     libraryListItem.dataset.id = libraryObj.metadata.id
     libraryListItem.dataset.mediaType = libraryObj.type
@@ -275,14 +390,19 @@ const createLibraryListItem = libraryObj => {
     e.stopImmediatePropagation()
     playLibraryItem(libraryObj)
   })
-  libraryListOptionsBtn.addEventListener('click', e => {
+  libraryListItem.addEventListener('contextmenu', e => {
     e.stopImmediatePropagation()
-    createLibraryItemContextMenu(libraryObj)
+    createLibraryItemContextMenu(libraryObj, e)
   })
   libraryListItem.addEventListener('click', () => {
     setCurrentResultElement(libraryListItem)
     showDetails(toSearchResult(libraryObj))
   })
+  
+  // apply hidden styling if item is hidden and we're showing hidden items
+  if (libraryObj.isHidden === true && $libraryShowHiddenBtn.classList.contains('toggled-bg')) {
+    libraryListItem.classList.add('library-item-hidden')
+  }
   
   frag.appendChild(libraryListItem)
   return frag
@@ -315,12 +435,14 @@ const libraryListView = () => {
 // load library
 const loadLibraryUi = async library => {
   const isGrouped = localStorage.getItem('library-group-season') === 'true'
+  const showHidden = $libraryShowHiddenBtn.classList.contains('toggled-bg')
+  const filteredLibrary = showHidden ? library : library.filter(item => item.isHidden !== true)
   const fragTiles = document.createDocumentFragment()
   const fragList = document.createDocumentFragment()
 
   if (isGrouped) {
     // group TV shows by season
-    const grouped = groupSeasonsEpisodes(library)
+    const grouped = groupSeasonsEpisodes(filteredLibrary)
     const groupedShowIds = new Set()
     const mixedItems = []
 
@@ -328,14 +450,21 @@ const loadLibraryUi = async library => {
     for (const showId in grouped) {
       for (const season in grouped[showId]) {
         const episodes = grouped[showId][season]
-        const firstEpisode = episodes[0]
-        grouped[showId][season].forEach(ep => groupedShowIds.add(ep.url))
+        
+        // Filter hidden episodes from group
+        const visibleEpisodes = showHidden ? episodes : episodes.filter(ep => ep.isHidden !== true)
+        
+        // only show group if it has visible episodes
+        if (visibleEpisodes.length === 0) continue
+        
+        const firstEpisode = visibleEpisodes[0]
+        visibleEpisodes.forEach(ep => groupedShowIds.add(ep.url))
         
         mixedItems.push({
           isGroup: true,
           showId,
           season,
-          episodes,
+          episodes: visibleEpisodes,
           sortTitle: firstEpisode.metadata?.name || firstEpisode.title,
           sortDate: firstEpisode.releaseDate || 253402300800000,
           sortPath: firstEpisode.path || firstEpisode.url
@@ -344,7 +473,7 @@ const loadLibraryUi = async library => {
     }
 
     // add ungrouped items
-    const ungroupedItems = library.filter(item => !groupedShowIds.has(item.url))
+    const ungroupedItems = filteredLibrary.filter(item => !groupedShowIds.has(item.url))
     ungroupedItems.forEach(item => {
       mixedItems.push({
         isGroup: false,
@@ -387,9 +516,9 @@ const loadLibraryUi = async library => {
     }
   } else {
     // ungrouped: render library as-is (already sorted)
-    const tileNodes = await Promise.all(library.map(li => createLibraryTile(li)))
+    const tileNodes = await Promise.all(filteredLibrary.map(li => createLibraryTile(li)))
     tileNodes.forEach(node => fragTiles.appendChild(node))
-    library.forEach(li => fragList.appendChild(createLibraryListItem(li)))
+    filteredLibrary.forEach(li => fragList.appendChild(createLibraryListItem(li)))
   }
 
   $library.replaceChildren([])
@@ -679,11 +808,18 @@ $librarySortPathBtn.addEventListener('click', () => sortLibrary('path'))
 $libraryShowHiddenBtn.addEventListener('click', () => {
   if ($libraryShowHiddenBtn.classList.contains('toggled-bg')) {
     $libraryShowHiddenBtn.classList.remove('toggled-bg')
-    // hide hidden items
   } else {
     $libraryShowHiddenBtn.classList.add('toggled-bg')
-    // show hidden items
   }
+  
+  // reload library with new hidden visibility state
+  let type = null
+  if ($libraryMovieBtn.classList.contains('toggled-bg')) {
+    type = 'movie'
+  } else if ($libraryTvBtn.classList.contains('toggled-bg')) {
+    type = 'tv'
+  }
+  filterLibrary(type)
 })
 
 $libraryMovieBtn.addEventListener('click', () => {

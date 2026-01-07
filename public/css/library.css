@@ -99,7 +99,7 @@
 
 .library-row {
   display: grid;
-  grid-template-columns: auto 1fr 2fr 230px 18px;
+  grid-template-columns: auto 1fr 2fr 230px 22px;
   gap: 8px;
   align-items: center;
   font-size: 1.2rem;
@@ -210,4 +210,66 @@
   padding-left: 14px;
   border-left: 3px solid var(--color-system-accent-trans);
   margin-left: 10px;
+}
+
+.library-context-menu {
+  position: fixed;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--color-control-black-trans);
+  border: 1px solid var(--color-control-darkgray);
+  border-radius: 5px;
+  padding: 5px 0;
+  z-index: 9999;
+  min-width: 180px;
+  backdrop-filter: blur(10px);
+}
+
+.library-context-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  cursor: pointer;
+  color: var(--color-control-white);
+  font-size: 0.9rem;
+  transition: background-color 200ms ease-out;
+}
+
+.library-context-menu-item:hover:not(.disabled) {
+  background-color: var(--color-system-accent-trans);
+}
+
+.library-context-menu-item.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.library-context-menu-item .fas {
+  width: 16px;
+  text-align: center;
+}
+
+.library-item-hidden {
+  opacity: 0.5;
+  position: relative;
+}
+
+.library-item-hidden::after {
+  content: '\f070';
+  font-family: 'Font Awesome 6 Free';
+  font-weight: 900;
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  background-color: var(--color-control-black-trans);
+  color: var(--color-control-white);
+  padding: 4px 6px;
+  border-radius: 3px;
+  font-size: 0.8rem;
+  pointer-events: none;
+}
+
+.library-row.library-item-hidden::after {
+  right: 4px;
 }
