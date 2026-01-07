@@ -160,12 +160,7 @@ a {
 
 .element-fadeout {
   opacity: 0;
-  transform: scale(0.8);
-  max-height: 0;
-  overflow: hidden;
-  margin: 0;
-  padding: 0;
-  transition: opacity 200ms ease-in, transform 200ms ease-in, max-height 200ms ease-in 200ms, margin 200ms ease-in 200ms, padding 200ms ease-in 200ms;
+  transition: opacity 200ms ease-in;
 }
 
 .toggle {
