@@ -90,6 +90,9 @@ const createSeasonGroupTile = async (showId, season, episodes) => {
   resultTile.appendChild(resultDetails)
   poster ? resultTile.appendChild(resultPoster) : null
   resultTile.dataset.isNavigable = 'false'
+  resultTile.dataset.cleanTitle = cleanTitle
+  resultTile.dataset.type = 'tv'
+  resultTile.dataset.ts = firstEpisode.timestamp || 0
   resultTile.addEventListener('click', () => {
     toggleSeasonGroup(resultTile, episodes, false)
   })
@@ -113,6 +116,9 @@ const createSeasonGroupListItem = (showId, season, episodes) => {
   libraryListItem.appendChild(libraryListPath)
   libraryListItem.appendChild(libraryListTime)
   libraryListItem.dataset.isNavigable = 'false'
+  libraryListItem.dataset.cleanTitle = cleanTitle
+  libraryListItem.dataset.type = 'tv'
+  libraryListItem.dataset.ts = firstEpisode.timestamp || 0
   libraryListItem.addEventListener('click', () => {
     toggleSeasonGroup(libraryListItem, episodes, true)
   })
@@ -257,45 +263,49 @@ const toggleItemHidden = (libraryObj) => {
   updateLibraryItem(libraryObj.url, { isHidden: newHiddenState })
   saveImmediately()
   
-  const showHidden = $libraryShowHiddenBtn.classList.contains('toggled-bg')
-  if (newHiddenState && !showHidden) {
-    const tileElement = $library.querySelector(`[data-url="${libraryObj.url}"]`)
-    const listElement = $libraryList.querySelector(`[data-url="${libraryObj.url}"]`)
-    
-    if (tileElement && tileElement.dataset.isLocal === 'true') {
-      requestAnimationFrame(() => {
-        tileElement.classList.add('element-fadeout')
-        setTimeout(() => tileElement.remove(), 400)
-      })
-    }
-    
-    if (listElement && listElement.dataset.isLocal === 'true' && !listElement.classList.contains('season-group-row')) {
-      requestAnimationFrame(() => {
-        listElement.classList.add('element-fadeout')
-        setTimeout(() => listElement.remove(), 400)
-      })
-    }
-  } else if (!newHiddenState && showHidden) {
-    const tileElement = $library.querySelector(`[data-url="${libraryObj.url}"]`)
-    const listElement = $libraryList.querySelector(`[data-url="${libraryObj.url}"]`)
-    
-    if (tileElement && tileElement.dataset.isLocal === 'true') {
+  const isHidingHiddenItems = $library.classList.contains('hide-hidden')
+  const tileElement = $library.querySelector(`[data-url="${libraryObj.url}"]`)
+  const listElement = $libraryList.querySelector(`[data-url="${libraryObj.url}"]`)
+  
+  if (tileElement && tileElement.dataset.isLocal === 'true') {
+    if (newHiddenState) {
+      if (isHidingHiddenItems) {
+        requestAnimationFrame(() => {
+          tileElement.classList.add('element-fadeout')
+          setTimeout(() => {
+            tileElement.classList.remove('element-fadeout')
+            tileElement.dataset.hidden = 'true'
+            tileElement.classList.add('library-item-hidden')
+          }, 400)
+        })
+      } else {
+        tileElement.dataset.hidden = 'true'
+        tileElement.classList.add('library-item-hidden')
+      }
+    } else {
+      tileElement.dataset.hidden = 'false'
       tileElement.classList.remove('library-item-hidden')
     }
-    
-    if (listElement && listElement.dataset.isLocal === 'true' && !listElement.classList.contains('season-group-row')) {
+  }
+  
+  if (listElement && listElement.dataset.isLocal === 'true' && !listElement.classList.contains('season-group-row')) {
+    if (newHiddenState) {
+      if (isHidingHiddenItems) {
+        requestAnimationFrame(() => {
+          listElement.classList.add('element-fadeout')
+          setTimeout(() => {
+            listElement.classList.remove('element-fadeout')
+            listElement.dataset.hidden = 'true'
+            listElement.classList.add('library-item-hidden')
+          }, 400)
+        })
+      } else {
+        listElement.dataset.hidden = 'true'
+        listElement.classList.add('library-item-hidden')
+      }
+    } else {
+      listElement.dataset.hidden = 'false'
       listElement.classList.remove('library-item-hidden')
-    }
-  } else {
-    const tileElement = $library.querySelector(`[data-url="${libraryObj.url}"]`)
-    const listElement = $libraryList.querySelector(`[data-url="${libraryObj.url}"]`)
-    
-    if (tileElement && tileElement.dataset.isLocal === 'true') {
-      tileElement.classList.add('library-item-hidden')
-    }
-    
-    if (listElement && listElement.dataset.isLocal === 'true' && !listElement.classList.contains('season-group-row')) {
-      listElement.classList.add('library-item-hidden')
     }
   }
 }
@@ -336,6 +346,9 @@ const createLibraryTile = async libraryObj => {
   resultTile.dataset.isNavigable = 'true'
   resultTile.dataset.cleanTitle = cleanTitle
   resultTile.dataset.url = libraryObj.url
+  resultTile.dataset.type = libraryObj.type
+  resultTile.dataset.hidden = libraryObj.isHidden === true ? 'true' : 'false'
+  resultTile.dataset.ts = libraryObj.timestamp || 0
   if (libraryObj.metadata?.id) {
     resultTile.dataset.id = libraryObj.metadata.id
     resultTile.dataset.mediaType = libraryObj.type
@@ -355,8 +368,8 @@ const createLibraryTile = async libraryObj => {
     showDetails(toSearchResult(libraryObj))
   })
   
-  // apply hidden styling if item is hidden and we're showing hidden items
-  if (libraryObj.isHidden === true && $libraryShowHiddenBtn.classList.contains('toggled-bg')) {
+  // apply hidden styling if item is hidden
+  if (libraryObj.isHidden === true) {
     resultTile.classList.add('library-item-hidden')
   }
   
@@ -384,6 +397,9 @@ const createLibraryListItem = libraryObj => {
   libraryListItem.dataset.isNavigable = 'true'
   libraryListItem.dataset.cleanTitle = cleanTitle
   libraryListItem.dataset.url = libraryObj.url
+  libraryListItem.dataset.type = libraryObj.type
+  libraryListItem.dataset.hidden = libraryObj.isHidden === true ? 'true' : 'false'
+  libraryListItem.dataset.ts = libraryObj.timestamp || 0
   if (libraryObj.metadata?.id) {
     libraryListItem.dataset.id = libraryObj.metadata.id
     libraryListItem.dataset.mediaType = libraryObj.type
@@ -403,8 +419,8 @@ const createLibraryListItem = libraryObj => {
     showDetails(toSearchResult(libraryObj))
   })
   
-  // apply hidden styling if item is hidden and we're showing hidden items
-  if (libraryObj.isHidden === true && $libraryShowHiddenBtn.classList.contains('toggled-bg')) {
+  // apply hidden styling if item is hidden
+  if (libraryObj.isHidden === true) {
     libraryListItem.classList.add('library-item-hidden')
   }
   
@@ -439,36 +455,27 @@ const libraryListView = () => {
 // load library
 const loadLibraryUi = async library => {
   const isGrouped = localStorage.getItem('library-group-season') === 'true'
-  const showHidden = $libraryShowHiddenBtn.classList.contains('toggled-bg')
-  const filteredLibrary = showHidden ? library : library.filter(item => item.isHidden !== true)
   const fragTiles = document.createDocumentFragment()
   const fragList = document.createDocumentFragment()
 
   if (isGrouped) {
     // group TV shows by season
-    const grouped = groupSeasonsEpisodes(filteredLibrary)
+    const grouped = groupSeasonsEpisodes(library)
     const groupedShowIds = new Set()
     const mixedItems = []
 
-    // add groups - use first episode's values for sorting
+    // add groups, use first episode's values for sorting
     for (const showId in grouped) {
       for (const season in grouped[showId]) {
         const episodes = grouped[showId][season]
-        
-        // Filter hidden episodes from group
-        const visibleEpisodes = showHidden ? episodes : episodes.filter(ep => ep.isHidden !== true)
-        
-        // only show group if it has visible episodes
-        if (visibleEpisodes.length === 0) continue
-        
-        const firstEpisode = visibleEpisodes[0]
-        visibleEpisodes.forEach(ep => groupedShowIds.add(ep.url))
+        const firstEpisode = episodes[0]
+        episodes.forEach(ep => groupedShowIds.add(ep.url))
         
         mixedItems.push({
           isGroup: true,
           showId,
           season,
-          episodes: visibleEpisodes,
+          episodes,
           sortTitle: firstEpisode.metadata?.name || firstEpisode.title,
           sortDate: firstEpisode.releaseDate || 253402300800000,
           sortPath: firstEpisode.path || firstEpisode.url
@@ -477,7 +484,7 @@ const loadLibraryUi = async library => {
     }
 
     // add ungrouped items
-    const ungroupedItems = filteredLibrary.filter(item => !groupedShowIds.has(item.url))
+    const ungroupedItems = library.filter(item => !groupedShowIds.has(item.url))
     ungroupedItems.forEach(item => {
       mixedItems.push({
         isGroup: false,
@@ -519,10 +526,10 @@ const loadLibraryUi = async library => {
       }
     }
   } else {
-    // ungrouped: render library as-is (already sorted)
-    const tileNodes = await Promise.all(filteredLibrary.map(li => createLibraryTile(li)))
+    // ungrouped, render library as-is (already sorted)
+    const tileNodes = await Promise.all(library.map(li => createLibraryTile(li)))
     tileNodes.forEach(node => fragTiles.appendChild(node))
-    filteredLibrary.forEach(li => fragList.appendChild(createLibraryListItem(li)))
+    library.forEach(li => fragList.appendChild(createLibraryListItem(li)))
   }
 
   $library.replaceChildren([])
@@ -750,47 +757,76 @@ const groupSeasonsEpisodes = library => {
 const sortLibrary = order => {
   currentSortOrder = order
   
-  const compareFn = {
-    'old': (a, b) => getSortValue(a, 'date') - getSortValue(b, 'date'),
-    'new': (a, b) => getSortValue(b, 'date') - getSortValue(a, 'date'),
-    'title': (a, b) => {
-      const titleA = getSortValue(a, 'title')
-      const titleB = getSortValue(b, 'title')
-      return titleA < titleB ? -1 : 1
-    },
-    'path': (a, b) => {
-      const pathA = getSortValue(a, 'path')
-      const pathB = getSortValue(b, 'path')
-      return pathA < pathB ? -1 : 1
+  const tiles = Array.from($library.querySelectorAll('.result-tile:not(.nested-episode-tile), .season-group-tile'))
+  const listItems = Array.from($libraryList.querySelectorAll('.library-row:not(.nested-episode-row), .season-group-row'))
+  
+  // sort function based on data attributes
+  const sorter = (a, b) => {
+    const getItemValue = (el, field) => {
+      if (field === 'title') {
+        return el.dataset.cleanTitle || ''
+      } else if (field === 'date') {
+        return Number(el.dataset.ts) || 253402300800000
+      } else if (field === 'path') {
+        return el.dataset.url || ''
+      }
+      return ''
     }
-  }[order]
-  
-  sortLib(compareFn)
-  
-  $library.replaceChildren([])
-  $libraryList.replaceChildren([])
-  
-  let type = null
-  if ($libraryMovieBtn.classList.contains('toggled-bg')) {
-    type = 'movie'
-  } else if ($libraryTvBtn.classList.contains('toggled-bg')) {
-    type = 'tv'
+    
+    switch (order) {
+      case 'old':
+        return getItemValue(a, 'date') - getItemValue(b, 'date')
+      case 'new':
+        return getItemValue(b, 'date') - getItemValue(a, 'date')
+      case 'title':
+        const titleA = getItemValue(a, 'title')
+        const titleB = getItemValue(b, 'title')
+        return titleA.localeCompare(titleB)
+      case 'path':
+        const pathA = getItemValue(a, 'path')
+        const pathB = getItemValue(b, 'path')
+        return pathA.localeCompare(pathB)
+      default:
+        return 0
+    }
   }
-  filterLibrary(type)
+  
+  // sort arrays
+  tiles.sort(sorter)
+  listItems.sort(sorter)
+  
+  // reorder in DOM
+  tiles.forEach(tile => $library.appendChild(tile))
+  listItems.forEach(item => $libraryList.appendChild(item))
 }
 
 // filter library by type
 const filterLibrary = type => {
-  $library.replaceChildren([])
-  $libraryList.replaceChildren([])
-
+  $library.classList.remove('filter-movie', 'filter-tv')
+  $libraryList.classList.remove('filter-movie', 'filter-tv')
+  
+  // apply new filter class
   if (type === 'movie') {
+    $library.classList.add('filter-movie')
+    $libraryList.classList.add('filter-movie')
     $libraryGroupBtn.disabled = true
+  } else if (type === 'tv') {
+    $library.classList.add('filter-tv')
+    $libraryList.classList.add('filter-tv')
+    $libraryGroupBtn.disabled = false
   } else {
     $libraryGroupBtn.disabled = false
   }
   
-  loadLibraryUi(getLibraryByType(type))
+  // update hidden class based on toggle
+  const showHidden = $libraryShowHiddenBtn.classList.contains('toggled-bg')
+  if (showHidden) {
+    $library.classList.remove('hide-hidden')
+    $libraryList.classList.remove('hide-hidden')
+  } else {
+    $library.classList.add('hide-hidden')
+    $libraryList.classList.add('hide-hidden')
+  }
 }
 
 // rescan all library directories
@@ -812,18 +848,13 @@ $librarySortPathBtn.addEventListener('click', () => sortLibrary('path'))
 $libraryShowHiddenBtn.addEventListener('click', () => {
   if ($libraryShowHiddenBtn.classList.contains('toggled-bg')) {
     $libraryShowHiddenBtn.classList.remove('toggled-bg')
+    $library.classList.add('hide-hidden')
+    $libraryList.classList.add('hide-hidden')
   } else {
     $libraryShowHiddenBtn.classList.add('toggled-bg')
+    $library.classList.remove('hide-hidden')
+    $libraryList.classList.remove('hide-hidden')
   }
-  
-  // reload library with new hidden visibility state
-  let type = null
-  if ($libraryMovieBtn.classList.contains('toggled-bg')) {
-    type = 'movie'
-  } else if ($libraryTvBtn.classList.contains('toggled-bg')) {
-    type = 'tv'
-  }
-  filterLibrary(type)
 })
 
 $libraryMovieBtn.addEventListener('click', () => {
@@ -856,7 +887,11 @@ $libraryGroupBtn.addEventListener('click', () => {
     $libraryGroupBtn.classList.add('toggled-bg')
     localStorage.setItem('library-group-season', 'true')
   }
-  // reload library with new grouping state
+
+  $library.replaceChildren([])
+  $libraryList.replaceChildren([])
+  loadLibraryUi(getLibrary())
+  
   let type = null
   if ($libraryMovieBtn.classList.contains('toggled-bg')) {
     type = 'movie'
@@ -878,4 +913,7 @@ initLibrary()
 if (localStorage.getItem('library-group-season') === 'true') {
   $libraryGroupBtn.classList.add('toggled-bg')
 }
+// set initial hide-hidden class since show-hidden button starts off
+$library.classList.add('hide-hidden')
+$libraryList.classList.add('hide-hidden')
 loadLibraryFromStorage()

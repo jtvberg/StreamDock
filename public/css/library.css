@@ -274,3 +274,40 @@
 .library-row.library-item-hidden::after {
   right: 4px;
 }
+
+/* CSS-based filtering - opacity transitions only */
+.result-tile,
+.season-group-tile,
+.library-row,
+.season-group-row {
+  transition: opacity 200ms ease-out;
+}
+
+/* Hide items by type filter */
+#library.filter-movie [data-type="tv"],
+#library.filter-tv [data-type="movie"],
+#library-list.filter-movie [data-type="tv"],
+#library-list.filter-tv [data-type="movie"] {
+  opacity: 0;
+  pointer-events: none;
+  position: absolute;
+  visibility: hidden;
+}
+
+/* Hide TV season groups when filtering to movies */
+#library.filter-movie .season-group-tile,
+#library-list.filter-movie .season-group-row {
+  opacity: 0;
+  pointer-events: none;
+  position: absolute;
+  visibility: hidden;
+}
+
+/* Hide items marked as hidden when show-hidden toggle is off */
+#library.hide-hidden [data-hidden="true"],
+#library-list.hide-hidden [data-hidden="true"] {
+  opacity: 0;
+  pointer-events: none;
+  position: absolute;
+  visibility: hidden;
+}

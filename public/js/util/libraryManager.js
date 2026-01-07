@@ -184,9 +184,9 @@ export const refreshDirectoryMetadata = (dir, type) => {
 }
 
 // remove items by filter function
-export const removeLibraryItems = (filterFn) => {
+export const removeLibraryItems = (filterer) => {
   const before = library.length
-  library = library.filter(item => !filterFn(item))
+  library = library.filter(item => !filterer(item))
   const removed = before - library.length
   // console.log(`removeLibraryItems: removed ${removed} items, library now has ${library.length} items`)
   if (library.length !== before) {
@@ -197,8 +197,8 @@ export const removeLibraryItems = (filterFn) => {
 }
 
 // sort library in-place
-export const sortLibrary = (compareFn) => {
-  library.sort(compareFn)
+export const sortLibrary = (comparer) => {
+  library.sort(comparer)
   isDirty = true
   scheduleSave()
 }

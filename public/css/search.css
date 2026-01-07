@@ -83,7 +83,7 @@
   aspect-ratio: 2/3;
   background-color: var(--color-control-darkgray);
   cursor: pointer;
-  transition: border-color 200ms ease-out, opacity 200ms ease-in, transform 200ms ease-in;
+  transition: border-color 200ms ease-out, opacity 200ms ease-out;
 }
 
 .result-tile:hover {
