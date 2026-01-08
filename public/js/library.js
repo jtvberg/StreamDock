@@ -201,7 +201,7 @@ const createLibraryItemContextMenu = (libraryObj, event) => {
   
   // hide/show toggle
   const hideShowItem = elementFromHtml(`
-    <div class="library-context-menu-item">
+    <div class="library-context-menu-item" title="Toggle hidden state for this title">
       <span class="fas ${isHidden ? 'fa-eye' : 'fa-eye-slash'}"></span>
       <span>${isHidden ? 'Show' : 'Hide'} Title</span>
     </div>
@@ -214,20 +214,28 @@ const createLibraryItemContextMenu = (libraryObj, event) => {
   
   // update metadata (placeholder)
   const updateMetaItem = elementFromHtml(`
-    <div class="library-context-menu-item disabled">
+    <div class="library-context-menu-item disabled" title="Select alternative TMDB metadata">
       <span class="fas fa-rotate"></span>
       <span>Update Metadata</span>
     </div>
   `)
+  updateMetaItem.addEventListener('click', () => {
+    selectAlternativeMetadata(libraryObj)
+    closeContextMenu()
+  })
   menu.appendChild(updateMetaItem)
   
   // lock metadata (placeholder)
   const lockMetaItem = elementFromHtml(`
-    <div class="library-context-menu-item disabled">
-      <span class="fas fa-lock"></span>
-      <span>Lock Metadata</span>
+    <div class="library-context-menu-item" title="Lock metadata to prevent automatic updates">
+      <span class="fas ${libraryObj.isMetadataLocked === true ? 'fa-lock-open' : 'fa-lock'}"></span>
+      <span>${libraryObj.isMetadataLocked === true ? 'Unlock' : 'Lock'} Metadata</span>
     </div>
   `)
+  lockMetaItem.addEventListener('click', () => {
+    toggleItemLocked(libraryObj)
+    closeContextMenu()
+  })
   menu.appendChild(lockMetaItem)
   document.body.appendChild(menu)
   
@@ -257,6 +265,18 @@ const createLibraryItemContextMenu = (libraryObj, event) => {
     }
     document.addEventListener('click', closeOnClickOutside)
   }, 0)
+}
+
+// select alt metdata
+const selectAlternativeMetadata = (libraryObj) => {
+
+}
+
+// toggle item locked state
+const toggleItemLocked = (libraryObj) => {
+  const newLockedState = !(libraryObj.isMetadataLocked === true)
+  updateLibraryItem(libraryObj.url, { isMetadataLocked: newLockedState })
+  saveImmediately()
 }
 
 // toggle item hidden state
