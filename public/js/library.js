@@ -198,6 +198,7 @@ const createLibraryItemContextMenu = (libraryObj, event) => {
   
   const menu = elementFromHtml(`<div class="library-context-menu"></div>`)
   const isHidden = libraryObj.isHidden === true
+  const isLocked = libraryObj.isMetadataLocked === true
   
   // hide/show toggle
   const hideShowItem = elementFromHtml(`
@@ -228,8 +229,8 @@ const createLibraryItemContextMenu = (libraryObj, event) => {
   // lock metadata (placeholder)
   const lockMetaItem = elementFromHtml(`
     <div class="library-context-menu-item" title="Lock metadata to prevent automatic updates">
-      <span class="fas ${libraryObj.isMetadataLocked === true ? 'fa-lock-open' : 'fa-lock'}"></span>
-      <span>${libraryObj.isMetadataLocked === true ? 'Unlock' : 'Lock'} Metadata</span>
+      <span class="fas ${isLocked ? 'fa-lock-open' : 'fa-lock'}"></span>
+      <span>${isLocked ? 'Unlock' : 'Lock'} Metadata</span>
     </div>
   `)
   lockMetaItem.addEventListener('click', () => {
@@ -269,7 +270,7 @@ const createLibraryItemContextMenu = (libraryObj, event) => {
 
 // select alt metdata
 const selectAlternativeMetadata = (libraryObj) => {
-
+  
 }
 
 // toggle item locked state

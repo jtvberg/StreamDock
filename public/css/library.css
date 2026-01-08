@@ -13,6 +13,8 @@
   width: stretch;
   overflow-y: auto;
   overflow-x: hidden;
+  padding-right: 3px;
+  padding-bottom: 3px;
   transition: all 200ms ease-out;
 }
 
