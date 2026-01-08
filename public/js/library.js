@@ -92,7 +92,8 @@ const createSeasonGroupTile = async (showId, season, episodes) => {
   resultTile.dataset.isNavigable = 'false'
   resultTile.dataset.cleanTitle = cleanTitle
   resultTile.dataset.type = 'tv'
-  resultTile.dataset.ts = firstEpisode.timestamp || 0
+  resultTile.dataset.ts = firstEpisode.timestamp || 253402300800000
+  resultTile.dataset.releaseDate = firstEpisode.releaseDate || 253402300800000
   resultTile.addEventListener('click', () => {
     toggleSeasonGroup(resultTile, episodes, false)
   })
@@ -118,7 +119,8 @@ const createSeasonGroupListItem = (showId, season, episodes) => {
   libraryListItem.dataset.isNavigable = 'false'
   libraryListItem.dataset.cleanTitle = cleanTitle
   libraryListItem.dataset.type = 'tv'
-  libraryListItem.dataset.ts = firstEpisode.timestamp || 0
+  libraryListItem.dataset.ts = firstEpisode.timestamp || 253402300800000
+  libraryListItem.dataset.releaseDate = firstEpisode.releaseDate || 253402300800000
   libraryListItem.addEventListener('click', () => {
     toggleSeasonGroup(libraryListItem, episodes, true)
   })
@@ -348,7 +350,8 @@ const createLibraryTile = async libraryObj => {
   resultTile.dataset.url = libraryObj.url
   resultTile.dataset.type = libraryObj.type
   resultTile.dataset.hidden = libraryObj.isHidden === true ? 'true' : 'false'
-  resultTile.dataset.ts = libraryObj.timestamp || 0
+  resultTile.dataset.ts = libraryObj.timestamp || 253402300800000
+  resultTile.dataset.releaseDate = libraryObj.releaseDate || 253402300800000
   if (libraryObj.metadata?.id) {
     resultTile.dataset.id = libraryObj.metadata.id
     resultTile.dataset.mediaType = libraryObj.type
@@ -399,7 +402,8 @@ const createLibraryListItem = libraryObj => {
   libraryListItem.dataset.url = libraryObj.url
   libraryListItem.dataset.type = libraryObj.type
   libraryListItem.dataset.hidden = libraryObj.isHidden === true ? 'true' : 'false'
-  libraryListItem.dataset.ts = libraryObj.timestamp || 0
+  libraryListItem.dataset.ts = libraryObj.timestamp || 253402300800000
+  libraryListItem.dataset.releaseDate = libraryObj.releaseDate || 253402300800000
   if (libraryObj.metadata?.id) {
     libraryListItem.dataset.id = libraryObj.metadata.id
     libraryListItem.dataset.mediaType = libraryObj.type
@@ -766,7 +770,7 @@ const sortLibrary = order => {
       if (field === 'title') {
         return el.dataset.cleanTitle || ''
       } else if (field === 'date') {
-        return Number(el.dataset.ts) || 253402300800000
+        return Number(el.dataset.releaseDate) || 253402300800000
       } else if (field === 'path') {
         return el.dataset.url || ''
       }

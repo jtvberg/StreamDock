@@ -159,7 +159,11 @@
 
 .comp-second-btn {
   font-size: 1.3rem;
-  margin-block: -6px;
+  margin-block: -7px;
+}
+
+.comp-arrow {
+  margin-top: 2px;
 }
 
 .btn-divider {
