@@ -268,9 +268,13 @@ const createLibraryItemContextMenu = (libraryObj, event) => {
   }, 0)
 }
 
-// select alt metdata
+// select alternative metadata
 const selectAlternativeMetadata = (libraryObj) => {
-  
+  // TODO: When implemented, this will:
+  // 1. Show TMDB search results
+  // 2. Let user select correct metadata
+  // 3. Set isUserUpdated: true to indicate manual selection
+  // 4. Display indicator on tile/list item
 }
 
 // toggle item locked state

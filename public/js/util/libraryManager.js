@@ -14,7 +14,8 @@ export const initLibrary = () => {
 const migrateLibraryItem = (item) => {
   return {
     ...item,
-    manualUpdate: item.manualUpdate ?? undefined,
+    isUserUpdated: item.isUserUpdated ?? item.manualUpdate ?? undefined,
+    isMetadataLocked: item.isMetadataLocked ?? undefined,
     excludeTitle: item.excludeTitle ?? undefined,
     lastPlayTime: item.lastPlayTime ?? 0,
     metadata: item.metadata || {}
@@ -66,7 +67,8 @@ export const toSearchResult = (item) => {
     season: item.season,
     episode: item.episode,
     excludeTitle: item.excludeTitle ?? false,
-    manualUpdate: item.manualUpdate ?? false
+    isUserUpdated: item.isUserUpdated ?? false,
+    isMetadataLocked: item.isMetadataLocked ?? false
   }
 }
 
@@ -113,8 +115,7 @@ const getDate = (input) => {
 
 // check if item should skip metadata updates
 export const shouldSkipMetadataUpdate = (item) => {
-  if (item.manualUpdate === true) return true
-  return false
+  return item.isMetadataLocked === true
 }
 
 // sync directory files with library (add new, remove deleted, fetch metadata for items without it)
@@ -164,11 +165,11 @@ export const rescanDirectory = async (dir, newItems, type, fetchMetadata = false
   return { itemsNeedingMetadata, hadDeletions }
 }
 
-// force reload metadata for all items in directory (except manual)
+// force reload metadata for all items in directory (except locked)
 export const refreshDirectoryMetadata = (dir, type) => {
   const itemsInDir = findLibraryItemsByDir(dir).filter(item => item.type === type)
   itemsInDir.forEach(item => {
-    if (item.manualUpdate !== true) {
+    if (!shouldSkipMetadataUpdate(item)) {
       item.metadata = {}
       item.releaseYear = undefined
       item.releaseDate = undefined
@@ -225,7 +226,7 @@ export const setManualMetadata = (url, metadata) => {
     }
     item.releaseYear = getYear(metadata.release_date || metadata.first_air_date)
     item.releaseDate = getDate(metadata.release_date || metadata.first_air_date)
-    item.manualUpdate = true
+    item.isUserUpdated = true
     isDirty = true
     saveImmediately()
     return true
