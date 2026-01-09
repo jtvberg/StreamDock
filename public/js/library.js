@@ -213,11 +213,11 @@ const createLibraryItemContextMenu = (libraryObj, event) => {
   })
   menu.appendChild(hideShowItem)
   
-  // update metadata (placeholder)
+  // update metadata
   const updateMetaItem = elementFromHtml(`
-    <div class="library-context-menu-item disabled" title="Select alternative TMDB metadata">
+    <div class="library-context-menu-item" title="Select alternative TMDB metadata${libraryObj.isUserUpdated === true ? ' (User Selected)' : ''}">
       <span class="fas fa-rotate"></span>
-      <span>Update Metadata</span>
+      <span>Update Metadata${libraryObj.isUserUpdated === true ? ' <span class="fas fa-user-check" style="font-size: 0.75rem; color: var(--color-system-accent);"></span>' : ''}</span>
     </div>
   `)
   updateMetaItem.addEventListener('click', () => {
@@ -226,7 +226,7 @@ const createLibraryItemContextMenu = (libraryObj, event) => {
   })
   menu.appendChild(updateMetaItem)
   
-  // lock metadata (placeholder)
+  // lock metadata
   const lockMetaItem = elementFromHtml(`
     <div class="library-context-menu-item" title="Lock metadata to prevent automatic updates">
       <span class="fas ${isLocked ? 'fa-lock-open' : 'fa-lock'}"></span>
@@ -270,11 +270,193 @@ const createLibraryItemContextMenu = (libraryObj, event) => {
 
 // select alternative metadata
 const selectAlternativeMetadata = (libraryObj) => {
-  // TODO: When implemented, this will:
-  // 1. Show TMDB search results
-  // 2. Let user select correct metadata
-  // 3. Set isUserUpdated: true to indicate manual selection
-  // 4. Display indicator on tile/list item
+  closeContextMenu()
+  
+  const modal = elementFromHtml(`
+    <div class="metadata-search-modal">
+      <div class="metadata-search-container">
+        <div class="metadata-search-input-container">
+          <input type="text" class="metadata-search-input" 
+                 placeholder="Search TMDB..." 
+                 value="${getCleanTitle(libraryObj.title)}">
+          <button class="metadata-search-btn fas fa-search"></button>
+        </div>
+        <div class="metadata-results-container"></div>
+        <div class="metadata-pagination" style="display: none;">
+          <button class="metadata-page-btn metadata-prev-btn" disabled><span class="fas fa-chevron-left"></span> Previous</button>
+          <span class="metadata-page-info"></span>
+          <button class="metadata-page-btn metadata-next-btn">Next <span class="fas fa-chevron-right"></span></button>
+        </div>
+      </div>
+    </div>
+  `)
+  
+  document.body.appendChild(modal)
+  modal.dataset.currentPage = '1'
+  modal.dataset.totalPages = '1'
+  
+  const searchInput = modal.querySelector('.metadata-search-input')
+  searchInput.focus()
+  searchInput.select()
+  
+  setupMetadataSearchHandlers(modal, libraryObj)
+  performMetadataSearch(libraryObj, searchInput.value, modal, 1)
+}
+
+// perform metadata search
+const performMetadataSearch = async (libraryObj, searchTerm, modal, page = 1) => {
+  const resultsContainer = modal.querySelector('.metadata-results-container')
+  const pagination = modal.querySelector('.metadata-pagination')
+  resultsContainer.innerHTML = '<div class="metadata-loading">Searching TMDB...</div>'
+  pagination.style.display = 'none'
+  
+  const searchFn = libraryObj.type === 'movie' ? searchMovie : searchTv
+  const results = await searchFn(searchTerm, page)
+  
+  if (results === 1 || results === -1) {
+    resultsContainer.innerHTML = '<div class="metadata-error">Search failed. Check API key in settings.</div>'
+    return
+  }
+  
+  if (!results?.results?.length) {
+    resultsContainer.innerHTML = '<div class="metadata-no-results">No results found. Try a different search term.</div>'
+    return
+  }
+  
+  modal.dataset.currentPage = page
+  modal.dataset.totalPages = results.total_pages || 1
+  modal.dataset.searchTerm = searchTerm
+  
+  renderMetadataResults(results.results, libraryObj, modal)
+  updatePagination(modal, libraryObj)
+}
+
+// update pagination UI
+const updatePagination = (modal, libraryObj) => {
+  const pagination = modal.querySelector('.metadata-pagination')
+  const prevBtn = modal.querySelector('.metadata-prev-btn')
+  const nextBtn = modal.querySelector('.metadata-next-btn')
+  const pageInfo = modal.querySelector('.metadata-page-info')
+  const currentPage = parseInt(modal.dataset.currentPage)
+  const totalPages = parseInt(modal.dataset.totalPages)
+  
+  if (totalPages > 1) {
+    pagination.style.display = 'flex'
+    pageInfo.textContent = `Page ${currentPage} of ${totalPages}`
+    prevBtn.disabled = currentPage <= 1
+    nextBtn.disabled = currentPage >= totalPages
+    
+    prevBtn.onclick = () => {
+      if (currentPage > 1) {
+        performMetadataSearch(libraryObj, modal.dataset.searchTerm, modal, currentPage - 1)
+      }
+    }
+    
+    nextBtn.onclick = () => {
+      if (currentPage < totalPages) {
+        performMetadataSearch(libraryObj, modal.dataset.searchTerm, modal, currentPage + 1)
+      }
+    }
+  } else {
+    pagination.style.display = 'none'
+  }
+}
+
+// render metadata search results
+const renderMetadataResults = (results, libraryObj, modal) => {
+  const container = modal.querySelector('.metadata-results-container')
+  const frag = document.createDocumentFragment()
+  
+  results.forEach(result => {
+    const isCurrentMetadata = result.id === libraryObj.metadata?.id
+    const year = new Date(result.release_date || result.first_air_date).getFullYear()
+    const title = `${result.title || result.name} (${isNaN(year) ? 'NA' : year})`
+    const card = elementFromHtml(`
+      <div class="metadata-result-card ${isCurrentMetadata ? 'current' : ''}" 
+           data-tmdb-id="${result.id}">
+        ${result.poster_path ? `<img class="metadata-result-poster" src="${tmdbImagePath}${result.poster_path}" alt="${title}">` : '<div class="metadata-result-poster-placeholder"></div>'}
+        <div class="metadata-result-details">
+          <div class="metadata-result-title" title="${title}">${title}</div>
+          <div class="metadata-result-overview" title="${result.overview || 'No description available.'}">${result.overview || 'No description available.'}</div>
+          ${isCurrentMetadata ? '<div class="metadata-current-badge">Current</div>' : ''}
+        </div>
+        <button class="metadata-select-btn">Select</button>
+      </div>
+    `)
+    
+    card.querySelector('.metadata-select-btn').addEventListener('click', () => {
+      applyMetadataSelection(libraryObj, result, modal)
+    })
+    
+    frag.appendChild(card)
+  })
+  
+  container.replaceChildren(frag)
+}
+
+// apply metadata selection
+const applyMetadataSelection = async (libraryObj, selectedMetadata, modal) => {
+  const resultsContainer = modal.querySelector('.metadata-results-container')
+  resultsContainer.innerHTML = '<div class="metadata-loading">Applying metadata...</div>'
+  
+  let fullMetadata = selectedMetadata
+  
+  if (libraryObj.type === 'tv' && libraryObj.season && libraryObj.episode) {
+    const seasonData = await getSeason(selectedMetadata.id, libraryObj.season)
+    if (seasonData?.poster_path) {
+      fullMetadata.poster_path = seasonData.poster_path
+    }
+    const episodeData = await getEpisode(selectedMetadata.id, libraryObj.season, libraryObj.episode)
+    if (episodeData?.air_date) {
+      fullMetadata.first_air_date = episodeData.air_date
+    }
+  }
+  
+  updateLibraryItemMetadata(libraryObj.url, fullMetadata)
+  
+  updateLibraryItem(libraryObj.url, {
+    isUserUpdated: true,
+    isMetadataLocked: true
+  })
+  
+  if (fullMetadata.poster_path && getPrefs().find(p => p.id === 'library-cache').state()) {
+    cacheImage(`${tmdbImagePath}${fullMetadata.poster_path}`, fullMetadata.poster_path)
+  }
+  
+  saveImmediately()
+  
+  modal.remove()
+  loadLibraryUi(getLibrary())
+}
+
+// setup metadata search handlers
+const setupMetadataSearchHandlers = (modal, libraryObj) => {
+  const searchInput = modal.querySelector('.metadata-search-input')
+  const searchBtn = modal.querySelector('.metadata-search-btn')
+  
+  searchBtn.addEventListener('click', () => {
+    performMetadataSearch(libraryObj, searchInput.value, modal, 1)
+  })
+  
+  searchInput.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') {
+      performMetadataSearch(libraryObj, searchInput.value, modal, 1)
+    }
+  })
+  
+  const escapeHandler = (e) => {
+    if (e.key === 'Escape') {
+      modal.remove()
+      document.removeEventListener('keydown', escapeHandler)
+    }
+  }
+  document.addEventListener('keydown', escapeHandler)
+  
+  modal.addEventListener('click', (e) => {
+    if (e.target === modal) {
+      modal.remove()
+    }
+  })
 }
 
 // toggle item locked state
