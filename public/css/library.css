@@ -9,7 +9,7 @@
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
   grid-auto-rows: max-content;
-  gap: 7px;
+  gap: 5px;
   width: stretch;
   overflow-y: auto;
   overflow-x: hidden;

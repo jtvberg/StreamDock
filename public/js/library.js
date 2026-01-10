@@ -215,7 +215,7 @@ const createLibraryItemContextMenu = (libraryObj, event) => {
   
   // update metadata
   const updateMetaItem = elementFromHtml(`
-    <div class="library-context-menu-item" title="Select alternative TMDB metadata${libraryObj.isUserUpdated === true ? ' (User Selected)' : ''}">
+    <div class="library-context-menu-item" title="Select alternative TMDB metadata${libraryObj.isUserUpdated === true ? ' (Currently User Updated)' : ''}">
       <span class="fas fa-rotate"></span>
       <span>Update Metadata${libraryObj.isUserUpdated === true ? ' <span class="fas fa-user-check" style="font-size: 0.75rem; color: var(--color-system-accent);"></span>' : ''}</span>
     </div>

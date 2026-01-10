@@ -553,7 +553,7 @@ const loadLibraryDirectoryPanel = () => {
       loadLibraryDir(dir.dir, dir.type)
     })
     libDirRefresh.addEventListener('click', () => {
-      if (!confirm(`Are you sure you want to refresh all metadata for:\n${dir.dir}?\nThis will remove and reload all metadata for this directory.`)) {
+      if (!confirm(`Are you sure you want to refresh metadata for:\n${dir.dir}?\n\nThis will remove and reload TMDB metadata for all items in this directory unless locked.`)) {
         return
       }
       // remove all items from this directory using library manager
