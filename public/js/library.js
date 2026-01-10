@@ -14,7 +14,8 @@ import {
   setExcludeTitle,
   saveImmediately,
   sortLibrary as sortLib,
-  toSearchResult
+  toSearchResult,
+  clearMetadataCache
 } from './util/libraryManager.js'
 import { searchMovie, searchTv, getSeason, getEpisode } from './util/tmdb.js'
 import { showDetails, setCurrentResultElement } from './search.js'
@@ -911,8 +912,7 @@ const addLibraryItems = async (newItems, type, dir) => {
     })
 
     const shouldFetchMetadata = getPrefs().find(pref => pref.id === 'library-meta').state()
-    const { itemsNeedingMetadata, hadDeletions } = await rescanDirectory(dir, processedItems, type, shouldFetchMetadata)
-
+    const { itemsNeedingMetadata, hadDeletions } = await rescanDirectory(dir, processedItems, type, shouldFetchMetadata, true)
 
     if (hadDeletions) {
       removeLastStream()

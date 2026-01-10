@@ -2,6 +2,7 @@
 let library = []
 let saveTimer = null
 let isDirty = false
+let metadataCache = null
 
 // initialize from localStorage
 export const initLibrary = () => {
@@ -118,8 +119,54 @@ export const shouldSkipMetadataUpdate = (item) => {
   return false
 }
 
+// cache locked metadata for a directory
+export const cacheLockedMetadata = (dir) => {
+  if (!metadataCache) {
+    metadataCache = {}
+  }
+  
+  const lockedItems = library.filter(item => 
+    item.dir === dir && item.isMetadataLocked === true
+  )
+  
+  lockedItems.forEach(item => {
+    metadataCache[item.url] = JSON.parse(JSON.stringify(item))
+  })
+  
+  return metadataCache
+}
+
+// restore locked metadata from cache
+const restoreLockedMetadataFromCache = (dir) => {
+  if (!metadataCache) return
+
+  Object.keys(metadataCache).forEach(url => {
+    const cachedItem = metadataCache[url]
+    const existingItem = library.find(item => item.url === url)
+    
+    if (existingItem && cachedItem.dir === dir) {
+      existingItem.metadata = cachedItem.metadata
+      existingItem.releaseYear = cachedItem.releaseYear
+      existingItem.releaseDate = cachedItem.releaseDate
+      existingItem.isUserUpdated = cachedItem.isUserUpdated
+      existingItem.isMetadataLocked = cachedItem.isMetadataLocked
+      existingItem.isHidden = cachedItem.isHidden
+      existingItem.lastPlayTime = cachedItem.lastPlayTime
+    }
+  })
+
+  clearMetadataCache()
+  isDirty = true
+  scheduleSave()
+}
+
+// clear metadata cache
+export const clearMetadataCache = () => {
+  metadataCache = null
+}
+
 // sync directory files with library (add new, remove deleted, fetch metadata for items without it)
-export const rescanDirectory = async (dir, newItems, type, fetchMetadata = false) => {
+export const rescanDirectory = async (dir, newItems, type, fetchMetadata = false, allowCacheRestore = false) => {
   const existingItemsInDir = findLibraryItemsByDir(dir)
   const newUrls = newItems.map(item => item.url)
   const existingUrls = existingItemsInDir.map(item => item.url)
@@ -153,6 +200,11 @@ export const rescanDirectory = async (dir, newItems, type, fetchMetadata = false
     saveImmediately()
   }
 
+  // restore locked items from cache if flag is set
+  if (allowCacheRestore && metadataCache !== null) {
+    restoreLockedMetadataFromCache(dir)
+  }
+
   let itemsNeedingMetadata = []
   if (fetchMetadata) {
     itemsNeedingMetadata = findLibraryItemsByDir(dir).filter(item => 
@@ -184,8 +236,12 @@ export const refreshDirectoryMetadata = (dir, type) => {
   return itemsInDir.filter(item => !shouldSkipMetadataUpdate(item))
 }
 
-// remove items by filter function
-export const removeLibraryItems = (filterer) => {
+// remove items by filter function and preserver locked metadata if needed
+export const removeLibraryItems = (filterer, preserveLocked = false, targetDir = null) => {
+  if (preserveLocked && targetDir) {
+    cacheLockedMetadata(targetDir)
+  }
+  
   const before = library.length
   library = library.filter(item => !filterer(item))
   const removed = before - library.length

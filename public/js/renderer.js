@@ -1,5 +1,5 @@
 // Imports
-import { initLibrary, findLibraryItem, removeLibraryItems, saveImmediately, getLibrary } from './util/libraryManager.js'
+import { initLibrary, findLibraryItem, removeLibraryItems, saveImmediately, getLibrary, clearMetadataCache } from './util/libraryManager.js'
 import { getStreams, setStreams, getNewStreamId, getLastStream, getPrefs, setLastStream, setVideoPaused, getWinBounds, setWinBounds, getWinLock, setWinLock, getWinRatio, setWinRatio } from "./util/settings.js"
 import { rescanAllLibraryDirs, updateLibraryDirStatus, loadLibraryDir, loadLibraryFromStorage, getDirectories } from "./library.js"
 import { elementFromHtml, elementRemoveFlash } from "./util/helpers.js"
@@ -553,16 +553,16 @@ const loadLibraryDirectoryPanel = () => {
       loadLibraryDir(dir.dir, dir.type)
     })
     libDirRefresh.addEventListener('click', () => {
-      if (!confirm(`Are you sure you want to refresh metadata for:\n${dir.dir}?\n\nThis will remove and reload TMDB metadata for all items in this directory unless locked.`)) {
+      if (!confirm(`Are you sure you want to refresh metadata for:\n${dir.dir}?\n\nThis will remove and reload TMDB metadata for all items in this directory unless an item is locked.`)) {
         return
       }
-      // remove all items from this directory using library manager
-      removeLibraryItems(item => item.dir === dir.dir)
+      // remove all items from this directory preserving locked metadata
+      removeLibraryItems(item => item.dir === dir.dir, true, dir.dir)
       // reload library items in UI
       $library.replaceChildren([])
       $libraryList.replaceChildren([])
       loadLibraryFromStorage()
-      // load the library directory again
+      // load the library directory again (will restore locked metadata from cache)
       loadLibraryDir(dir.dir, dir.type)
     })
     libDirDel.addEventListener('click', () => {
@@ -577,8 +577,11 @@ const loadLibraryDirectoryPanel = () => {
         localStorage.setItem('directories', JSON.stringify(dirs))
       }
       
-      // remove all library items from this directory using library manager
-      removeLibraryItems(item => item.dir === dir.dir)
+      // clear metadata cache to ensure fresh start
+      clearMetadataCache()
+      
+      // remove all library items from this directory (do not preserve locked metadata)
+      removeLibraryItems(item => item.dir === dir.dir, false)
       saveImmediately()
       // reload library directory panel
       loadLibraryDirectoryPanel()
@@ -626,6 +629,8 @@ export const removeLastStream = () => {
 const addLibraryDirectory = (dir, type) => {
   const dirs = getDirectories()
   if (!dirs.some(entry => entry.dir === dir)) {
+    clearMetadataCache()
+    
     dirs.push({
       dir,
       type,
