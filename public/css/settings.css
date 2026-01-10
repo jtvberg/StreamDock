@@ -24,10 +24,6 @@
   max-width: 600px;
 }
 
-.settings-nav-btn {
-  cursor: pointer;
-}
-
 #prefs-show {
   color: var(--color-control-white);
   margin: 5px;
@@ -161,6 +157,7 @@
 
 .library-add-btn {
   margin: 5px;
+  cursor: pointer;
 }
 
 .library-add-btn:hover {
@@ -173,6 +170,7 @@
   border-radius: 3px;
   text-align: center;
   line-height: 23px;
+  cursor: pointer;
 }
 
 .library-directory-btn:hover {

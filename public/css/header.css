@@ -136,9 +136,10 @@
   display: flex;
   flex-flow: column;
   gap: 5px;
-  width: 30px;
+  width: 34px;
   user-select: none;
-  margin-right: 6px;
+  margin-right: 4px;
+  overflow-y: auto;
 }
 
 .home-heading,
@@ -170,6 +171,11 @@
   height: 0px;
   border: 2px solid var(--color-control-darkgray);
   border-radius: 2px;
+}
+
+.home-nav-btn, .context-btn, .settings-nav-btn {
+  cursor: pointer;
+  min-height: 32px;
 }
 
 .context-btn {

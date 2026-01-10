@@ -535,6 +535,12 @@ function getProviders(input, loc) {
 clearResults()
 
 // Events
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') {
+    $searchOverlay.style.display = ''
+  }
+})
+
 $searchOverlay.addEventListener('click', e => e.target.style.display = '')
 
 $searchHotBtn.addEventListener('click', () => getTrending())

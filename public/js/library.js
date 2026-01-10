@@ -314,7 +314,7 @@ const performMetadataSearch = async (libraryObj, searchTerm, modal, page = 1) =>
   const results = await searchFn(searchTerm, page)
   
   if (results === 1 || results === -1) {
-    resultsContainer.innerHTML = '<div class="metadata-error">Search failed. Check API key in settings.</div>'
+    resultsContainer.innerHTML = '<div class="metadata-error"><div class="result-glyph fas fa-exclamation-triangle" style="font-size: 2.6rem;"></div><div>Error</div><div>Check your internet connection and that your TMDB API key is set.</div></div>'
     return
   }
   
@@ -595,7 +595,7 @@ const createLibraryListItem = libraryObj => {
   const fullTitle  = `${cleanTitle} (${cleanYear})`
   const frag = document.createDocumentFragment()
   const libraryListItem = elementFromHtml(`<div class="library-row" data-ts="${libraryObj.timestamp}"></div>`)
-  const libraryListPlay = elementFromHtml(`<div class="fas fa-play library-list-play"></div>`)
+  const libraryListPlay = elementFromHtml(`<div class="fas fa-play library-list-play-btn"></div>`)
   const libraryListTitle = elementFromHtml(`<div class="library-cell" title="${fullTitle}">${fullTitle}</div>`)
   const libraryListPath = elementFromHtml(`<div class="library-cell" title="${libraryObj.path}">${libraryObj.path}</div>`)
   const libraryListTime = elementFromHtml(`<div class="library-cell library-cell-right">${new Date(libraryObj.timestamp).toLocaleString()}</div>`)

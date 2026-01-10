@@ -111,13 +111,14 @@
   transition: background-color 200ms ease-out, opacity 200ms ease-in, transform 200ms ease-in;
 }
 
-.library-list-play {
+.library-list-play-btn {
   padding-top: 1px;
   color: var(--color-control-white);
   transition: color 200ms ease-out;
+  cursor: pointer;
 }
 
-.library-list-play:hover, .library-result-options:hover {
+.library-list-play-btn:hover, .library-result-options:hover {
   color: var(--color-system-accent);
 }
 
@@ -201,7 +202,7 @@
 }
 
 .nested-episode-tile > .result-poster {
-  border-radius: 0px 5px 5px 0px;
+  border-radius: 0px 4px 4px 0px;
 }
 
 .season-group-row {
@@ -360,6 +361,7 @@
   height: 34px;
   padding: 0;
   margin: 0;
+  cursor: pointer;
 }
 
 .metadata-results-container {
@@ -376,15 +378,11 @@
 .metadata-error,
 .metadata-no-results {
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
   min-height: 200px;
-  color: var(--color-control-lightgray);
-  font-size: 1rem;
-}
-
-.metadata-error {
-  color: var(--color-control-yellow);
+  font-size: 1.2rem;
 }
 
 .metadata-result-card {
@@ -452,6 +450,7 @@
   color: var(--color-control-lightgray);
   line-height: 1.4;
   display: -webkit-box;
+  line-clamp: 4;
   -webkit-line-clamp: 4;
   -webkit-box-orient: vertical;
   overflow: hidden;
@@ -473,6 +472,7 @@
   align-self: center;
   white-space: nowrap;
   padding: 0 1rem;
+  cursor: pointer;
 }
 
 .metadata-pagination {
