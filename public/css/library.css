@@ -502,3 +502,23 @@
   color: var(--color-control-lightgray);
   white-space: nowrap;
 }
+
+.metadata-update-notice {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 15px;
+  background-color: var(--color-system-accent-trans);
+  border-radius: 5px 5px 0 0;
+  font-size: 0.9rem;
+  color: var(--color-control-white);
+}
+
+.metadata-update-notice .fa-info-circle {
+  color: var(--color-system-accent);
+  font-size: 1.2rem;
+}
+
+.metadata-update-notice strong {
+  color: var(--color-system-white);
+}

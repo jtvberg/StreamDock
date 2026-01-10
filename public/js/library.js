@@ -272,9 +272,26 @@ const createLibraryItemContextMenu = (libraryObj, event) => {
 const selectAlternativeMetadata = (libraryObj) => {
   closeContextMenu()
   
+  // calculate affected episodes count for TV shows
+  let affectedCount = 1
+  if (libraryObj.type === 'tv' && libraryObj.metadata?.id) {
+    const sameShowEpisodes = findLibraryItemsByDir(libraryObj.dir).filter(item => 
+      item.type === 'tv' &&
+      item.metadata?.id === libraryObj.metadata.id &&
+      getCleanTitle(item.title) === getCleanTitle(libraryObj.title)
+    )
+    affectedCount = sameShowEpisodes.length
+  }
+  
   const modal = elementFromHtml(`
     <div class="metadata-search-modal">
       <div class="metadata-search-container">
+        ${libraryObj.type === 'tv' && affectedCount > 1 ? `
+          <div class="metadata-update-notice">
+            <span class="fas fa-info-circle"></span>
+            <span>Updating metadata will affect <strong>${affectedCount} episodes</strong> in this directory</span>
+          </div>
+        ` : ''}
         <div class="metadata-search-input-container">
           <input type="text" class="metadata-search-input" 
                  placeholder="Search TMDB..." 
@@ -399,32 +416,70 @@ const applyMetadataSelection = async (libraryObj, selectedMetadata, modal) => {
   const resultsContainer = modal.querySelector('.metadata-results-container')
   resultsContainer.innerHTML = '<div class="metadata-loading">Applying metadata...</div>'
   
-  let fullMetadata = selectedMetadata
+  // for TV shows, update all episodes in the same directory
+  if (libraryObj.type === 'tv') {
+    await updateShowInDirectory(libraryObj, selectedMetadata, modal)
+  } else {
+    // otherwise, just update the single item
+    let fullMetadata = selectedMetadata
+    
+    updateLibraryItemMetadata(libraryObj.url, fullMetadata)
+    
+    updateLibraryItem(libraryObj.url, {
+      isUserUpdated: true,
+      isMetadataLocked: true
+    })
+    
+    if (fullMetadata.poster_path && getPrefs().find(p => p.id === 'library-cache').state()) {
+      cacheImage(`${tmdbImagePath}${fullMetadata.poster_path}`, fullMetadata.poster_path)
+    }
+    
+    saveImmediately()
+    
+    modal.remove()
+    loadLibraryUi(getLibrary())
+  }
+}
+
+// update all episodes of a show in the same directory
+const updateShowInDirectory = async (libraryObj, selectedMetadata, modal) => {
+  const oldShowId = libraryObj.metadata?.id
+  const newShowId = selectedMetadata.id
   
-  if (libraryObj.type === 'tv' && libraryObj.season && libraryObj.episode) {
-    const seasonData = await getSeason(selectedMetadata.id, libraryObj.season)
+  // find all episodes in the same directory with the same show name
+  const episodesToUpdate = findLibraryItemsByDir(libraryObj.dir).filter(item => 
+    item.type === 'tv' &&
+    item.metadata?.id === oldShowId &&
+    getCleanTitle(item.title) === getCleanTitle(libraryObj.title)
+  )
+  
+  // update each episode with show metadata + season poster + episode air date
+  for (const episode of episodesToUpdate) {
+    let fullMetadata = { ...selectedMetadata }
+
+    const seasonData = await getSeason(newShowId, episode.season)
     if (seasonData?.poster_path) {
       fullMetadata.poster_path = seasonData.poster_path
     }
-    const episodeData = await getEpisode(selectedMetadata.id, libraryObj.season, libraryObj.episode)
+
+    const episodeData = await getEpisode(newShowId, episode.season, episode.episode)
     if (episodeData?.air_date) {
       fullMetadata.first_air_date = episodeData.air_date
     }
-  }
-  
-  updateLibraryItemMetadata(libraryObj.url, fullMetadata)
-  
-  updateLibraryItem(libraryObj.url, {
-    isUserUpdated: true,
-    isMetadataLocked: true
-  })
-  
-  if (fullMetadata.poster_path && getPrefs().find(p => p.id === 'library-cache').state()) {
-    cacheImage(`${tmdbImagePath}${fullMetadata.poster_path}`, fullMetadata.poster_path)
+    
+    updateLibraryItemMetadata(episode.url, fullMetadata)
+    
+    updateLibraryItem(episode.url, {
+      isUserUpdated: true,
+      isMetadataLocked: true
+    })
+    
+    if (fullMetadata.poster_path && getPrefs().find(p => p.id === 'library-cache').state()) {
+      cacheImage(`${tmdbImagePath}${fullMetadata.poster_path}`, fullMetadata.poster_path)
+    }
   }
   
   saveImmediately()
-  
   modal.remove()
   loadLibraryUi(getLibrary())
 }
@@ -905,12 +960,14 @@ const fetchMetadataForItems = async (items, type, dir) => {
 
       if (type === 'tv' && item.season && item.episode) {
         const seasonData = await getSeason(metadata.id, item.season)
-        if (seasonData?.poster_path) {
-          metadata.poster_path = seasonData.poster_path
-        }
         const episodeData = await getEpisode(metadata.id, item.season, item.episode)
-        if (episodeData?.air_date) {
-          metadata.first_air_date = episodeData.air_date
+
+        metadata = {
+          ...metadata,
+          poster_path: seasonData?.poster_path || metadata.poster_path,
+          first_air_date: episodeData?.air_date || seasonData?.air_date || metadata.first_air_date,
+          episode_name: episodeData?.name,
+          episode_overview: episodeData?.overview
         }
       }
 
@@ -1124,7 +1181,6 @@ initLibrary()
 if (localStorage.getItem('library-group-season') === 'true') {
   $libraryGroupBtn.classList.add('toggled-bg')
 }
-// set initial hide-hidden class since show-hidden button starts off
 $library.classList.add('hide-hidden')
 $libraryList.classList.add('hide-hidden')
 loadLibraryFromStorage()
