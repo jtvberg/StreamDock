@@ -127,8 +127,9 @@ const createWindow = () => {
     height: 576,
     minWidth: 672,
     minHeight: 378,
-    transparent: true,
+    transparent: isMac,
     frame: false,
+    resizable: true,
     trafficLightPosition: {
       x: 6,
       y: 5
@@ -563,7 +564,7 @@ const unlockRatio = () => {
 }
 
 // remove scrollbars from view
-const removeScrollbars = bv => bv.webContents.executeJavaScript(`document.body.insertAdjacentHTML('beforeend', '<style> ::-webkit-scrollbar { display: none; } </style>')`)
+const removeScrollbars = bv => bv.webContents.executeJavaScript(`const style = document.createElement('style'); style.textContent = '::-webkit-scrollbar { display: none; }'; document.head.appendChild(style);`)
 
 // open child window with url
 const openNewin = url => {
@@ -605,16 +606,11 @@ const openNewin = url => {
           dragHeader.style.cssText = 'position: fixed; top: 0; left: 0; width: calc(100% - 25px); height: 15px; opacity: 0; z-index: 99999; cursor: -webkit-grab; cursor: grab; -webkit-user-drag: none; -webkit-app-region: drag;';
           document.body.appendChild(dragHeader);
 
-          // Add scrollbar hiding styles
-          const style = document.createElement('style');
-          style.textContent = '::-webkit-scrollbar { display: none; }';
-          document.head.appendChild(style);
-
           ${!isMac ? `
           // Create close button (only on non-Mac)
           const closeBtn = document.createElement('div');
           closeBtn.className = 'sd-frameless-close';
-          closeBtn.innerHTML = '&times;';
+          closeBtn.textContent = '\u00D7';
           closeBtn.onclick = () => window.close();
           closeBtn.style.cssText = 'position: fixed; top: 4px; right: 4px; display: flex; height: 27px; align-items: center; justify-content: center; font-family: sans-serif; font-size: 36px; color: #dbdbdb; background-color: #0f0f0f; border-radius: 50%; z-index: 999999; opacity: 0; aspect-ratio: 1 / 1; user-select: none; cursor: pointer;';
           closeBtn.addEventListener('mouseenter', () => closeBtn.style.opacity = '1');
