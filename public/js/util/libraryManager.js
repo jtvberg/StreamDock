@@ -5,10 +5,16 @@ let isDirty = false
 let metadataCache = null
 
 // initialize from localStorage
-export const initLibrary = () => { //TOFIX: bad JSON freezes app
+export const initLibrary = () => {
+  try {
   const raw = JSON.parse(localStorage.getItem('library')) || []
   library = raw.map(item => migrateLibraryItem(item))
   return library
+  } catch (e) {
+    console.error('Failed to load library from localStorage:', e)
+    library = []
+    return library
+  }
 }
 
 // migrate legacy library items to current structure

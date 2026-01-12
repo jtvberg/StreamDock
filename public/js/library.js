@@ -1178,7 +1178,6 @@ window.electronAPI.setVideoTime((e, urlTime) => {
 })
 
 // setup
-initLibrary()
 if (localStorage.getItem('library-group-season') === 'true') {
   $libraryGroupBtn.classList.add('toggled-bg')
 }
