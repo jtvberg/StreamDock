@@ -406,7 +406,7 @@ const openExternalPlayer = (url) => {
   sendLogData(`Opening video in external player: ${url}`)
   // open file:// urls in default video player
   if (url.startsWith('/')) {
-    const filePath = `file://${url}`
+    const filePath = `file:///${url.replace(/\\/g, '/')}`
     require('child_process').exec(`open "${filePath}"`)
   } else {
     // open http/https urls in default browser (not implemented)
@@ -702,7 +702,7 @@ const getLibrary = async (dir, type, recursive = true) => {
               title: path.basename(file.name, ext),
               dir: currentDir,
               path: filePath,
-              url: encodeURI(`file://${filePath}`),
+              url: encodeURI(`file:///${filePath.replace(/\\/g, '/')}`),
               lastPlayTime: 0,
               timestamp: stat.birthtimeMs
             })
