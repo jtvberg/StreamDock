@@ -188,10 +188,10 @@ const createWindow = () => {
 
   // on stream view load get url, remove scrollbars, show stream, load scripts
   streamView.webContents.on('did-finish-load', () => {
+    showStream(true)
     const cleanUrl = validUrl(getCurrentUrl())
     domain = cleanUrl ? cleanUrl.hostname : null
     removeScrollbars(streamView)
-    showStream(true, streamView)
     loadScripts(streamView, domain)
   })
 
@@ -379,6 +379,7 @@ const openUrl = async (url, time = 0) => {
     return
   }
   await saveVideoTime(getCurrentUrl())
+  showStream(false)
   sendLogData(`Open URL: ${url}`)
   if (url.host === googleAuthHost) {
     streamView.webContents.loadURL(url)
@@ -386,7 +387,6 @@ const openUrl = async (url, time = 0) => {
     sendLogData(`Loading URL with: ${defaultAgent}`)
     streamView.webContents.loadURL(url, { userAgent: defaultAgent })
   }
-  showStream(true)
   isLocal = url.startsWith('file:') ? true : false
   if (isLocal) {
     makeFullWindow()
@@ -396,6 +396,7 @@ const openUrl = async (url, time = 0) => {
     if (wasPaused && lastStream === url) {
       setTimeout(() => pauseVideo(streamView), 200)
     }
+    showStream(true)
   }
   headerView.webContents.send('last-stream', url)
   headerView.webContents.send('stream-opened')
