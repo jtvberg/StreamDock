@@ -857,8 +857,9 @@ const setLibraryDirStatus = (dir, status) => {
   if (dirIndex > -1) {
     dirs[dirIndex].status = status
     saveDirectories()
-    // update library directory panel
-    const libDir = document.querySelector(`.library-directory-path[title="${dir}"]`)
+    // update library directory panel using getAttribute to avoid querySelector escaping issues
+    const allDirPaths = Array.from(document.querySelectorAll('.library-directory-path'))
+    const libDir = allDirPaths.find(el => el.getAttribute('title') === dir)
     if (libDir) {
       const statusIcon = libDir.parentElement.querySelector('.library-directory-status')
       if (statusIcon) {
