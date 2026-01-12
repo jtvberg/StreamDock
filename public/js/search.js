@@ -405,6 +405,7 @@ export const showDetails = async (result) => {
     const pb = elementFromHtml('<div class="modal-play fas fa-play"></div>')
     pb.addEventListener('click', () => {
       playLibraryItem({ url: libraryUrl, lastPlayTime: libraryTime })
+      $searchOverlay.style.display = ''
     })
     frag.appendChild(pb)
     $modalProviders.appendChild(frag)
