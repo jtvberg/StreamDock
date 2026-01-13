@@ -3,6 +3,11 @@ export const logOutput = log => {
   console.log(`${new Date().toLocaleString()}: ${log}\n`)
 }
 
+// helper function for user alerts
+export const alertUser = message => {
+  alert(message)
+}
+
 // helper funtion to create element from html string
 export const elementFromHtml = html => {
   const parser = new DOMParser()
@@ -70,3 +75,4 @@ export const copyLink = (e, link, alt = false) => {
 }
 
 window.electronAPI.logData((e, data) => logOutput(data))
+window.electronAPI.sendAlert((e, data) => alertUser(data))

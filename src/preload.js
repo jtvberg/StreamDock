@@ -3,6 +3,7 @@ const { contextBridge, ipcRenderer } = require('electron')
 
 contextBridge.exposeInMainWorld('electronAPI', {
     logData: data => ipcRenderer.on('log-data', data),
+    sendAlert: data => ipcRenderer.on('send-alert', data),
     clearData: bool => ipcRenderer.send('clear-data', bool),
     defaultAgent: agent => ipcRenderer.send('default-agent', agent),
     updateHeaderHeight: height => ipcRenderer.send('update-header-height', height),

@@ -188,11 +188,15 @@ const createWindow = () => {
 
   // on stream view load get url, remove scrollbars, show stream, load scripts
   streamView.webContents.on('did-finish-load', () => {
-    showStream(true)
-    const cleanUrl = validUrl(getCurrentUrl())
-    domain = cleanUrl ? cleanUrl.hostname : null
-    removeScrollbars(streamView)
-    loadScripts(streamView, domain)
+    if (isLocal) {
+      localLoadError()
+    } else {
+      const cleanUrl = validUrl(getCurrentUrl())
+      domain = cleanUrl ? cleanUrl.hostname : null
+      showStream(true)
+      removeScrollbars(streamView)
+      loadScripts(streamView, domain)
+    }
   })
 
   // on google login redirect, set user agent to empty string to prevent login issues
@@ -254,6 +258,13 @@ const createWindow = () => {
 
   // add main window to windows set
   windows.add(mainWin)
+}
+
+// handle local file load error
+const localLoadError = () => {
+  showStream(false)
+  sendLogData('Local file failed to load')
+  sendAlertMessage('Error: File not found or could not be loaded. Please check that the file exists and is a supported video format.')
 }
 
 // create tray icon
@@ -389,6 +400,7 @@ const openUrl = async (url, time = 0) => {
   }
   isLocal = url.startsWith('file:') ? true : false
   if (isLocal) {
+    facetView.webContents.send('is-netflix', false)
     makeFullWindow()
     setVideoTime(time)
     const wasPaused = await headerView.webContents.executeJavaScript('localStorage.getItem("video-paused") === "true"')
@@ -430,7 +442,6 @@ const validUrl = url => {
   let valid
   try {
     valid = new URL(url)
-    if (valid.protocol === 'file:') facetView.webContents.send('is-netflix', false)
   } catch (err) {
     sendLogData(`Invalid URL: ${url}`)
     return false
@@ -505,6 +516,7 @@ const setAccent = () => {
 }
 
 // navigate back in view if possible
+// TODO: navigating back to local video does not expand window or remove facets
 const navBack = () => streamView.webContents.navigationHistory.canGoBack() ? streamView.webContents.navigationHistory.goBack() : null
 
 // inject pause video function into view
@@ -680,6 +692,11 @@ const clearAppData = async relaunch => {
 // send log data to renderer
 const sendLogData = log => {
   headerView.webContents.send('log-data', log)
+}
+
+// send alert message to renderer
+const sendAlertMessage = message => {
+  headerView.webContents.send('send-alert', message)
 }
 
 // get library from directory and type (movies or tv)
