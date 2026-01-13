@@ -1,21 +1,12 @@
 // Imports
-import { 
-  initLibrary,
+import {
   getLibrary,
-  getLibraryByType,
-  findLibraryItem,
   findLibraryItemsByDir,
   updateLibraryItem,
   updateLibraryItemMetadata,
   rescanDirectory,
-  refreshDirectoryMetadata,
-  removeLibraryItems,
-  shouldSkipMetadataUpdate,
-  setExcludeTitle,
   saveImmediately,
-  sortLibrary as sortLib,
-  toSearchResult,
-  clearMetadataCache
+  toSearchResult
 } from './util/libraryManager.js'
 import { searchMovie, searchTv, getSeason, getEpisode } from './util/tmdb.js'
 import { showDetails, setCurrentResultElement } from './search.js'

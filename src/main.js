@@ -200,11 +200,18 @@ const createWindow = () => {
   })
 
   // on google login redirect, set user agent to empty string to prevent login issues
-  streamView.webContents.on('did-navigate', () => {
+  streamView.webContents.on('did-navigate', async (e, url) => {
+    facetView.webContents.send('is-netflix', false)
     const cleanUrl = validUrl(getCurrentUrl())
     if (cleanUrl.host === googleAuthHost) {
       sendLogData(`Opening Google Auth URL: ${cleanUrl}`)
       streamView.webContents.userAgent = ''
+    }
+    isLocal = url.startsWith('file:')
+    if (isLocal) {
+      const explicitTime = streamView._explicitTime || 0
+      delete streamView._explicitTime
+      await setupLocalPlayback(url, explicitTime)
     }
   })
 
@@ -398,20 +405,37 @@ const openUrl = async (url, time = 0) => {
     sendLogData(`Loading URL with: ${defaultAgent}`)
     streamView.webContents.loadURL(url, { userAgent: defaultAgent })
   }
-  isLocal = url.startsWith('file:') ? true : false
-  if (isLocal) {
-    facetView.webContents.send('is-netflix', false)
-    makeFullWindow()
-    setVideoTime(time)
-    const wasPaused = await headerView.webContents.executeJavaScript('localStorage.getItem("video-paused") === "true"')
-    const lastStream = await headerView.webContents.executeJavaScript('localStorage.getItem("last-stream")')
-    if (wasPaused && lastStream === url) {
-      setTimeout(() => pauseVideo(streamView), 200)
-    }
-    showStream(true)
+
+  if (isLocal && time > 0) {
+    streamView._explicitTime = time
   }
+
   headerView.webContents.send('last-stream', url)
   headerView.webContents.send('stream-opened')
+}
+
+// centralized local file playback setup
+const setupLocalPlayback = async (url, time = 0) => {
+  facetView.webContents.send('is-netflix', false)
+  let savedTime = 0
+  if (time > 0) {
+    savedTime = time
+  } else {
+    savedTime = await headerView.webContents.executeJavaScript(`
+      (() => {
+        try {
+          const library = JSON.parse(localStorage.getItem('library') || '[]');
+          const item = library.find(i => i.url === '${url.replace(/'/g, "\\'")}');
+          return item?.lastPlayTime || 0;
+        } catch {
+          return 0;
+        }
+      })()
+    `).catch(() => 0)
+  }
+  setVideoTime(savedTime)
+  makeFullWindow()
+  showStream(true)
 }
 
 // open external player with url
@@ -516,8 +540,14 @@ const setAccent = () => {
 }
 
 // navigate back in view if possible
-// TODO: navigating back to local video does not expand window or remove facets
-const navBack = () => streamView.webContents.navigationHistory.canGoBack() ? streamView.webContents.navigationHistory.goBack() : null
+const navBack = () => {
+  if (streamView.webContents.navigationHistory.canGoBack()) {
+    if (isLocal) {
+      saveVideoTime(getCurrentUrl())
+    }
+    streamView.webContents.navigationHistory.goBack()
+  }
+}
 
 // inject pause video function into view
 const pauseVideo = bv => bv.webContents.executeJavaScript(`(${defaultPause.toString()})()`)
@@ -715,12 +745,17 @@ const getLibrary = async (dir, type, recursive = true) => {
           const ext = path.extname(file.name).toLowerCase()
           if (videoExts.includes(ext)) {
             const stat = await fs.stat(filePath)
+            const normalizedPath = filePath.replace(/\\/g, '/')
+            const encodedPath = encodeURI(normalizedPath)
+            const fileUrl = encodedPath.startsWith('/') 
+              ? `file://${encodedPath}` 
+              : `file:///${encodedPath}`
             library.push({
               type,
               title: path.basename(file.name, ext),
               dir: currentDir,
               path: filePath,
-              url: encodeURI(`file:///${filePath.replace(/\\/g, '/')}`),
+              url: fileUrl,
               lastPlayTime: 0,
               timestamp: stat.birthtimeMs
             })
