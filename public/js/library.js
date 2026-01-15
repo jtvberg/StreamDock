@@ -797,8 +797,8 @@ const loadLibraryUi = async library => {
 }
 
 // load library directory
-export const loadLibraryDir = (dir, type, silent = false) => {
-  errorShown = silent
+export const loadLibraryDir = (dir, type, refresh = false) => {
+  sessionStorage.setItem('refresh-mode', JSON.stringify({ dir, active: refresh }))
   type === 'movie' ? window.electronAPI.getMovies(dir) : window.electronAPI.getTv(dir)
   $libraryTvBtn.classList.remove('toggled-bg')
   $libraryMovieBtn.classList.remove('toggled-bg')
@@ -889,26 +889,43 @@ export const updateLibraryDirStatus = (ele, status) => {
 }
 
 // add/rescan library items from directory
-const addLibraryItems = async (newItems, type, dir, error) => {
+const addLibraryItems = async (newItems, type, dir, error, discoveredSubDirs = [], isRefresh = false) => {
   await libraryLoadLock
   let resolveLock
   libraryLoadLock = new Promise(res => resolveLock = res)
 
   try {
-    // handle directory unavailable error
+    // handle PARENT directory unavailable error - preserve entire tree
     if (error || newItems === null) {
-      console.error(`Directory unavailable: ${dir}`, error)
+      // console.error(`Parent directory unavailable: ${dir}`, error)
       setLibraryDirStatus(dir, 'unavailable')
       loadLibraryUi(getLibrary())
+      if (isRefresh) {
+        alert(`Cannot refresh metadata: Parent directory is unavailable\n\n${dir}\n\nPlease reconnect the drive or network and try again.`)
+      }
       return
     }
 
-    // directory is available
+    // parent directory is available - update/create directory entry with subdirectories
     const dirs = getDirectories()
-    const dirEntry = dirs.find(d => d.dir === dir)
-    if (dirEntry?.status === 'unavailable') {
-      setLibraryDirStatus(dir, 'file')
+    let dirEntry = dirs.find(d => d.dir === dir)
+    
+    if (!dirEntry) {
+      dirEntry = {
+        dir,
+        type,
+        status: 'file',
+        subDirs: discoveredSubDirs
+      }
+      dirs.push(dirEntry)
+    } else {
+      dirEntry.subDirs = discoveredSubDirs
+      if (dirEntry.status === 'unavailable') {
+        dirEntry.status = 'file'
+      }
     }
+    
+    localStorage.setItem('directories', JSON.stringify(dirs))
 
     const processedItems = newItems.map(item => {
       if (type === 'tv') {
@@ -923,7 +940,24 @@ const addLibraryItems = async (newItems, type, dir, error) => {
     })
 
     const shouldFetchMetadata = getPrefs().find(pref => pref.id === 'library-meta').state()
-    const { itemsNeedingMetadata, hadDeletions } = await rescanDirectory(dir, processedItems, type, shouldFetchMetadata, true)
+    
+    // if refreshing, clear metadata for unlocked items in tree BEFORE rescan
+    if (isRefresh && shouldFetchMetadata) {
+      const allDirs = [dir, ...discoveredSubDirs]
+      const library = getLibrary()
+      library.forEach(item => {
+        if (allDirs.some(targetDir => item.dir === targetDir || item.dir.startsWith(targetDir + '/')) &&
+            item.isMetadataLocked !== true) {
+          item.metadata = {}
+          item.releaseYear = undefined
+          item.releaseDate = undefined
+        }
+      })
+      saveImmediately()
+    }
+    
+    // parent is available - rescan will remove items from missing subdirectories
+    const { itemsNeedingMetadata, hadDeletions } = await rescanDirectory(dir, discoveredSubDirs, processedItems, type, shouldFetchMetadata)
 
     if (hadDeletions) {
       removeLastStream()
@@ -933,8 +967,11 @@ const addLibraryItems = async (newItems, type, dir, error) => {
       await fetchMetadataForItems(itemsNeedingMetadata, type, dir)
     } else {
       if (shouldFetchMetadata) {
-        const itemsInDir = findLibraryItemsByDir(dir).filter(item => item.type === type)
-        const hasMetadata = itemsInDir.length > 0 && itemsInDir.every(item => item.metadata?.id)
+        const allDirs = [dir, ...discoveredSubDirs]
+        const itemsInTree = getLibrary().filter(item => 
+          allDirs.some(targetDir => item.dir === targetDir || item.dir.startsWith(targetDir + '/'))
+        )
+        const hasMetadata = itemsInTree.length > 0 && itemsInTree.every(item => item.metadata?.id)
         setLibraryDirStatus(dir, hasMetadata ? 'complete' : 'file')
       } else {
         setLibraryDirStatus(dir, 'file')
@@ -1180,7 +1217,14 @@ $libraryGroupBtn.addEventListener('click', () => {
   filterLibrary(type)
 })
 
-window.electronAPI.sendLibrary((e, libraryObj) => addLibraryItems(libraryObj.library, libraryObj.type, libraryObj.dir, libraryObj.error))
+window.electronAPI.sendLibrary((e, libraryObj) => {
+  const refreshMode = sessionStorage.getItem('refresh-mode')
+  const isRefresh = refreshMode ? JSON.parse(refreshMode).dir === libraryObj.dir && JSON.parse(refreshMode).active : false
+  if (isRefresh) {
+    sessionStorage.removeItem('refresh-mode')
+  }
+  addLibraryItems(libraryObj.library, libraryObj.type, libraryObj.dir, libraryObj.error, libraryObj.discoveredSubDirs || [], isRefresh)
+})
 
 window.electronAPI.setVideoTime((e, urlTime) => {
   updateLibraryItem(urlTime.url, { lastPlayTime: urlTime.time })

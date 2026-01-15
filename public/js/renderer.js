@@ -549,26 +549,23 @@ const loadLibraryDirectoryPanel = () => {
       libDirRefresh.classList.add('disabled') 
     }
     libDirRescan.addEventListener('click', () => {
-      // look for new files in the directory and remove any items that no longer exist
-      loadLibraryDir(dir.dir, dir.type)
+      // rescan directory tree for new/deleted files and subdirectories
+      loadLibraryDir(dir.dir, dir.type, false)
     })
     libDirRefresh.addEventListener('click', () => {
-      if (!confirm(`Are you sure you want to refresh metadata for:\n${dir.dir}?\n\nThis will remove and reload TMDB metadata for all items in this directory unless an item is locked.`)) {
+      if (!confirm(`Are you sure you want to refresh metadata for:\n${dir.dir}?\n\nThis will reload TMDB metadata for all items in this directory and its subdirectories unless an item is locked.`)) {
         return
       }
-      // remove all items from this directory preserving locked metadata
-      removeLibraryItems(item => item.dir === dir.dir, true, dir.dir)
-      // reload library items in UI
-      $library.replaceChildren([])
-      $libraryList.replaceChildren([])
-      loadLibraryFromStorage()
-      // load the library directory again (will restore locked metadata from cache)
-      loadLibraryDir(dir.dir, dir.type)
+      // refresh metadata for unlocked items in directory tree
+      loadLibraryDir(dir.dir, dir.type, true)
     })
     libDirDel.addEventListener('click', () => {
-      if (!confirm(`Are you sure you want to delete the library directory:\n${dir.dir}?`)) {
+      if (!confirm(`Are you sure you want to delete the library directory:\n${dir.dir}?\n\nThis will remove all files from this directory and its subdirectories.`)) {
         return
       }
+      // get all directories in tree
+      const allDirs = [dir.dir, ...(dir.subDirs || [])]
+      
       // remove the directory from cache
       const dirs = getDirectories()
       const dirIndex = dirs.findIndex(d => d.dir === dir.dir)
@@ -577,15 +574,18 @@ const loadLibraryDirectoryPanel = () => {
         localStorage.setItem('directories', JSON.stringify(dirs))
       }
       
-      // clear metadata cache to ensure fresh start
+      // clear metadata cache
       clearMetadataCache()
       
-      // remove all library items from this directory (do not preserve locked metadata)
-      removeLibraryItems(item => item.dir === dir.dir, false)
+      // remove all library items from entire tree (including locked items)
+      removeLibraryItems(item => 
+        allDirs.some(targetDir => item.dir === targetDir || item.dir.startsWith(targetDir + '/')),
+        false
+      )
       saveImmediately()
-      // reload library directory panel
+      
+      // reload UI
       loadLibraryDirectoryPanel()
-      // reload library items in UI
       $library.replaceChildren([])
       $libraryList.replaceChildren([])
       loadLibraryFromStorage()
@@ -825,7 +825,6 @@ const updatePref = (id, val) => {
   // console.log(`Preference ${id} Updated`)
   switch (id) {
     case 'pref-agent':
-      console.log(`R-Default User Agent Updated: ${val}`)
       window.electronAPI.defaultAgent(val)
       break
     case 'pref-fullscreen':

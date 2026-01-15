@@ -736,6 +736,7 @@ const sendAlertMessage = message => {
 const getLibrary = async (dir, type, recursive = true) => {
   const videoExts = ['.mp4', '.mkv', '.avi', '.mov', '.webm']
   const library = []
+  const discoveredDirs = new Set()
 
   const processDirectory = async (currentDir) => {
     try {
@@ -743,12 +744,15 @@ const getLibrary = async (dir, type, recursive = true) => {
       for (const file of files) {
         const filePath = path.join(currentDir, file.name)
         if (recursive && file.isDirectory()) {
+          const normalizedDirPath = filePath.replace(/\\/g, '/')
+          discoveredDirs.add(normalizedDirPath)
           await processDirectory(filePath)
         } else if (file.isFile()) {
           const ext = path.extname(file.name).toLowerCase()
           if (videoExts.includes(ext)) {
             const stat = await fs.stat(filePath)
             const normalizedPath = filePath.replace(/\\/g, '/')
+            const normalizedDir = currentDir.replace(/\\/g, '/')
             const encodedPath = encodeURI(normalizedPath)
             const fileUrl = encodedPath.startsWith('/') 
               ? `file://${encodedPath}` 
@@ -756,7 +760,7 @@ const getLibrary = async (dir, type, recursive = true) => {
             library.push({
               type,
               title: path.basename(file.name, ext),
-              dir: currentDir,
+              dir: normalizedDir,
               path: filePath,
               url: fileUrl,
               lastPlayTime: 0,
@@ -773,10 +777,11 @@ const getLibrary = async (dir, type, recursive = true) => {
 
   try {
     await processDirectory(dir)
-    const libraryObj = { library, type, dir, error: null }
+    const subDirsArray = Array.from(discoveredDirs)
+    const libraryObj = { library, type, dir, error: null, discoveredSubDirs: subDirsArray }
     headerView.webContents.send('send-library', libraryObj)
   } catch (err) {
-    const libraryObj = { library: null, type, dir, error: err.message }
+    const libraryObj = { library: null, type, dir, error: err.message, discoveredSubDirs: [] }
     headerView.webContents.send('send-library', libraryObj)
   }
 }

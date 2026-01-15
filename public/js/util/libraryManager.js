@@ -11,7 +11,7 @@ export const initLibrary = () => {
   library = raw.map(item => migrateLibraryItem(item))
   return library
   } catch (e) {
-    console.error('Failed to load library from localStorage:', e)
+    // console.error('Failed to load library from localStorage:', e)
     library = []
     return library
   }
@@ -172,18 +172,21 @@ export const clearMetadataCache = () => {
 }
 
 // sync directory files with library (add new, remove deleted, fetch metadata for items without it)
-export const rescanDirectory = async (dir, newItems, type, fetchMetadata = false, allowCacheRestore = false) => {
-  // if newItems is null, directory is unavailable, preserve existing items
-  if (newItems === null) {
-    return { itemsNeedingMetadata: [], hadDeletions: false }
-  }
-
-  const existingItemsInDir = findLibraryItemsByDir(dir)
+export const rescanDirectory = async (dir, subDirs, newItems, type, fetchMetadata = false) => {
+  // Parent is available - remove items from entire tree including missing subdirectories
+  const allDirsInTree = [dir, ...subDirs]
+  
+  // find all existing items in the entire tree (parent + all subdirectories)
+  const existingItemsInTree = library.filter(item => 
+    allDirsInTree.some(targetDir => item.dir === targetDir || item.dir.startsWith(targetDir + '/'))
+  )
+  
   const newUrls = newItems.map(item => item.url)
-  const existingUrls = existingItemsInDir.map(item => item.url)
+  const existingUrls = existingItemsInTree.map(item => item.url)
   const urlsToRemove = existingUrls.filter(url => !newUrls.includes(url))
   const hadDeletions = urlsToRemove.length > 0
   
+  // remove items that no longer exist (including from missing subdirectories and locked items)
   urlsToRemove.forEach(url => {
     const index = library.findIndex(item => item.url === url)
     if (index > -1) {
@@ -192,14 +195,14 @@ export const rescanDirectory = async (dir, newItems, type, fetchMetadata = false
     }
   })
 
-  // check against ALL library items, not just this directory
+  // check against ALL library items to avoid duplicates
   const allExistingUrls = new Set(library.map(item => item.url))
   const itemsToAdd = newItems.filter(item => !allExistingUrls.has(item.url))
   
+  // add new items (preserve their actual directory path from main.js)
   itemsToAdd.forEach(item => {
     library.push({
       ...item,
-      dir,
       type,
       metadata: {},
       lastPlayTime: 0
@@ -211,16 +214,13 @@ export const rescanDirectory = async (dir, newItems, type, fetchMetadata = false
     saveImmediately()
   }
 
-  // restore locked items from cache if flag is set
-  if (allowCacheRestore && metadataCache !== null) {
-    restoreLockedMetadataFromCache(dir)
-  }
-
+  // find items needing metadata in the entire tree
   let itemsNeedingMetadata = []
   if (fetchMetadata) {
-    itemsNeedingMetadata = findLibraryItemsByDir(dir).filter(item => 
+    itemsNeedingMetadata = library.filter(item => 
+      allDirsInTree.some(targetDir => item.dir === targetDir || item.dir.startsWith(targetDir + '/')) &&
       item.type === type && 
-      !shouldSkipMetadataUpdate(item) &&
+      item.isMetadataLocked !== true &&
       (!item.metadata || !item.metadata.id)
     )
   }

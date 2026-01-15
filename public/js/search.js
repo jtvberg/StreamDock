@@ -378,7 +378,7 @@ export const showDetails = async (result) => {
   $modalGenre.textContent = getGenre(details)
   $modalRuntime.textContent = getRuntime(episodeDetails || details)
   $modalLanguage.textContent = getLanguage(details)
-  const tagline = getTagline(details)
+  const tagline = media_type === 'tv' ? `"${episodeDetails?.name}"`|| getTagline(details) : getTagline(details)
   $modalTagline.style.display = ''
   tagline === `""` ? $modalTagline.style.display = 'none' : $modalTagline.textContent = tagline
   $modalOverview.textContent = getOverview(episodeDetails || details)
