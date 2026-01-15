@@ -231,9 +231,6 @@ const createWindow = () => {
   // set is playing variable on media play
   streamView.webContents.on('media-started-playing', () => {
     isPlaying = true
-    if (isLocal) {
-      headerView.webContents.send('set-video-paused', !isPlaying)
-    }
   })
 
   // set is playing variable on media pause
@@ -436,6 +433,11 @@ const setupLocalPlayback = async (url, time = 0) => {
       })()
     `).catch(() => 0)
   }
+  headerView.webContents.executeJavaScript('localStorage.getItem("video-paused");', true).then(response => {
+    if (response === 'true') {
+      pauseVideo(streamView)
+    }
+  })
   setVideoTime(savedTime)
   makeFullWindow()
   showStream(true)
