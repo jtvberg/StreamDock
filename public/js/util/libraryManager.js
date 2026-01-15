@@ -173,6 +173,11 @@ export const clearMetadataCache = () => {
 
 // sync directory files with library (add new, remove deleted, fetch metadata for items without it)
 export const rescanDirectory = async (dir, newItems, type, fetchMetadata = false, allowCacheRestore = false) => {
+  // if newItems is null, directory is unavailable, preserve existing items
+  if (newItems === null) {
+    return { itemsNeedingMetadata: [], hadDeletions: false }
+  }
+
   const existingItemsInDir = findLibraryItemsByDir(dir)
   const newUrls = newItems.map(item => item.url)
   const existingUrls = existingItemsInDir.map(item => item.url)
@@ -187,7 +192,7 @@ export const rescanDirectory = async (dir, newItems, type, fetchMetadata = false
     }
   })
 
-  // Check against ALL library items, not just this directory
+  // check against ALL library items, not just this directory
   const allExistingUrls = new Set(library.map(item => item.url))
   const itemsToAdd = newItems.filter(item => !allExistingUrls.has(item.url))
   

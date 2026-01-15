@@ -6,6 +6,10 @@
   color: var(--color-control-yellow);
 }
 
+.red {
+  color: var(--color-control-red);
+}
+
 .settings-layout-header {
   display: flex;
   align-items: center;

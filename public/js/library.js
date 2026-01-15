@@ -862,7 +862,7 @@ const setLibraryDirStatus = (dir, status) => {
 
 // update library directory status icon
 export const updateLibraryDirStatus = (ele, status) => {
-  ele.classList.remove('fa-file', 'fa-hourglass-half', 'fa-check', 'fa-triangle-exclamation', 'green', 'yellow')
+  ele.classList.remove('fa-file', 'fa-hourglass-half', 'fa-check', 'fa-triangle-exclamation', 'fa-plug-circle-xmark', 'green', 'yellow', 'red')
   switch (status) {
     case 'file':
       ele.classList.add('fa-file')
@@ -880,17 +880,36 @@ export const updateLibraryDirStatus = (ele, status) => {
       ele.classList.add('fa-triangle-exclamation', 'yellow')
       ele.title = 'Metadata Error'
       break
+    case 'unavailable':
+      ele.classList.add('fa-plug-circle-xmark', 'red')
+      ele.title = 'Directory Unavailable'
+      break
   }
   return ele
 }
 
 // add/rescan library items from directory
-const addLibraryItems = async (newItems, type, dir) => {
+const addLibraryItems = async (newItems, type, dir, error) => {
   await libraryLoadLock
   let resolveLock
   libraryLoadLock = new Promise(res => resolveLock = res)
 
   try {
+    // handle directory unavailable error
+    if (error || newItems === null) {
+      console.error(`Directory unavailable: ${dir}`, error)
+      setLibraryDirStatus(dir, 'unavailable')
+      loadLibraryUi(getLibrary())
+      return
+    }
+
+    // directory is available
+    const dirs = getDirectories()
+    const dirEntry = dirs.find(d => d.dir === dir)
+    if (dirEntry?.status === 'unavailable') {
+      setLibraryDirStatus(dir, 'file')
+    }
+
     const processedItems = newItems.map(item => {
       if (type === 'tv') {
         const match = getSeasonEpisode(item.title)
@@ -1161,7 +1180,7 @@ $libraryGroupBtn.addEventListener('click', () => {
   filterLibrary(type)
 })
 
-window.electronAPI.sendLibrary((e, libraryObj) => addLibraryItems(libraryObj.library, libraryObj.type, libraryObj.dir))
+window.electronAPI.sendLibrary((e, libraryObj) => addLibraryItems(libraryObj.library, libraryObj.type, libraryObj.dir, libraryObj.error))
 
 window.electronAPI.setVideoTime((e, urlTime) => {
   updateLibraryItem(urlTime.url, { lastPlayTime: urlTime.time })

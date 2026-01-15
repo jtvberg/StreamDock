@@ -188,7 +188,10 @@ const createWindow = () => {
 
   // on stream view load get url, remove scrollbars, show stream, load scripts
   streamView.webContents.on('did-finish-load', () => {
-    if (isLocal) {
+    const currentUrl = getCurrentUrl()
+    const currentIsLocal = currentUrl.startsWith('file:')
+    
+    if (currentIsLocal) {
       localLoadError()
     } else {
       const cleanUrl = validUrl(getCurrentUrl())
@@ -764,12 +767,18 @@ const getLibrary = async (dir, type, recursive = true) => {
       }
     } catch (err) {
       sendLogData(`Error reading directory ${currentDir}: ${err.message}`)
+      throw err
     }
   }
 
-  await processDirectory(dir)
-  const libraryObj = { library, type, dir }
-  headerView.webContents.send('send-library', libraryObj)
+  try {
+    await processDirectory(dir)
+    const libraryObj = { library, type, dir, error: null }
+    headerView.webContents.send('send-library', libraryObj)
+  } catch (err) {
+    const libraryObj = { library: null, type, dir, error: err.message }
+    headerView.webContents.send('send-library', libraryObj)
+  }
 }
 
 // perform a trusted click on an element in the webContents
