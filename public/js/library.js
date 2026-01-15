@@ -895,7 +895,6 @@ const addLibraryItems = async (newItems, type, dir, error, discoveredSubDirs = [
   libraryLoadLock = new Promise(res => resolveLock = res)
 
   try {
-    // handle PARENT directory unavailable error - preserve entire tree
     if (error || newItems === null) {
       // console.error(`Parent directory unavailable: ${dir}`, error)
       setLibraryDirStatus(dir, 'unavailable')
@@ -906,7 +905,6 @@ const addLibraryItems = async (newItems, type, dir, error, discoveredSubDirs = [
       return
     }
 
-    // parent directory is available - update/create directory entry with subdirectories
     const dirs = getDirectories()
     let dirEntry = dirs.find(d => d.dir === dir)
     
@@ -941,7 +939,6 @@ const addLibraryItems = async (newItems, type, dir, error, discoveredSubDirs = [
 
     const shouldFetchMetadata = getPrefs().find(pref => pref.id === 'library-meta').state()
     
-    // if refreshing, clear metadata for unlocked items in tree BEFORE rescan
     if (isRefresh && shouldFetchMetadata) {
       const allDirs = [dir, ...discoveredSubDirs]
       const library = getLibrary()
@@ -956,7 +953,6 @@ const addLibraryItems = async (newItems, type, dir, error, discoveredSubDirs = [
       saveImmediately()
     }
     
-    // parent is available - rescan will remove items from missing subdirectories
     const { itemsNeedingMetadata, hadDeletions } = await rescanDirectory(dir, discoveredSubDirs, processedItems, type, shouldFetchMetadata)
 
     if (hadDeletions) {

@@ -173,10 +173,7 @@ export const clearMetadataCache = () => {
 
 // sync directory files with library (add new, remove deleted, fetch metadata for items without it)
 export const rescanDirectory = async (dir, subDirs, newItems, type, fetchMetadata = false) => {
-  // Parent is available - remove items from entire tree including missing subdirectories
   const allDirsInTree = [dir, ...subDirs]
-  
-  // find all existing items in the entire tree (parent + all subdirectories)
   const existingItemsInTree = library.filter(item => 
     allDirsInTree.some(targetDir => item.dir === targetDir || item.dir.startsWith(targetDir + '/'))
   )
@@ -195,11 +192,11 @@ export const rescanDirectory = async (dir, subDirs, newItems, type, fetchMetadat
     }
   })
 
-  // check against ALL library items to avoid duplicates
+  // avoid duplicates
   const allExistingUrls = new Set(library.map(item => item.url))
   const itemsToAdd = newItems.filter(item => !allExistingUrls.has(item.url))
   
-  // add new items (preserve their actual directory path from main.js)
+  // add new items
   itemsToAdd.forEach(item => {
     library.push({
       ...item,

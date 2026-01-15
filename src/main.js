@@ -648,14 +648,12 @@ const openNewin = url => {
     child.webContents.executeJavaScript(`
       (() => {
         try {
-          // Create drag header element
           const dragHeader = document.createElement('div');
           dragHeader.className = 'sd-frameless-header';
           dragHeader.style.cssText = 'position: fixed; top: 0; left: 0; width: calc(100% - 25px); height: 15px; opacity: 0; z-index: 99999; cursor: -webkit-grab; cursor: grab; -webkit-user-drag: none; -webkit-app-region: drag;';
           document.body.appendChild(dragHeader);
 
           ${!isMac ? `
-          // Create close button (only on non-Mac)
           const closeBtn = document.createElement('div');
           closeBtn.className = 'sd-frameless-close';
           closeBtn.textContent = '\u00D7';
@@ -797,7 +795,6 @@ const performTrustedClick = async (webContents, selector) => {
     const rect = await webContents.executeJavaScript(`
       (() => {
         const el = document.querySelector('${selector}');
-        // Check if element exists, is part of the layout (offsetParent), and has dimensions
         if (el && el.offsetParent !== null && typeof el.getBoundingClientRect === 'function') {
           const bounds = el.getBoundingClientRect();
           if (bounds.width > 0 && bounds.height > 0) { // Basic visibility check

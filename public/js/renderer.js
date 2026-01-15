@@ -198,8 +198,8 @@ const editStreamLineup = bool => {
     document.querySelectorAll('.stream-settings-control').forEach(el => {
       el.setAttribute('draggable', true)
       el.classList.add('wobble')
-      el.style.animationDelay = `-${(Math.random() * (75 - 5) + 5) / 100}s` // -.05 - -.75
-      el.style.animationDuration = `${(Math.random() * (33 - 22) + 22) / 100}s` // .22 - .33
+      el.style.animationDelay = `-${(Math.random() * (75 - 5) + 5) / 100}s`
+      el.style.animationDuration = `${(Math.random() * (33 - 22) + 22) / 100}s`
     })
   } else {
     $streamDoneBtn.style.display = 'none'
@@ -374,15 +374,12 @@ const updateStreams = stream => {
 
 // reorder stream elements in stream edit pane
 const updateStreamOrder = ele => {
-  // New order
   const loc = (parseInt(ele.style.order) + 1) > 9999 ? 9999 : parseInt(ele.style.order) + 1
-  // Update stream order in edit pane
   document.querySelectorAll('.stream-settings-control').forEach((el) => {
     if (el.style.order && el.style.order >= loc) {
       el.style.order++
     }
     dragStream.style.order = loc
-    // Update order in streams array
     streams.find(s => s.id === el.dataset.id).order = parseInt(el.style.order)
   })
   reorderStreams()
@@ -391,11 +388,8 @@ const updateStreamOrder = ele => {
 
 // reorder streams array and save to local storage
 const reorderStreams = () => {
-  // Sort the steams array based on new order
   streams.sort((a, b) => (a.order > b.order) ? 1 : ((b.order > a.order) ? -1 : 0))
-  // Reset order# from 1 to n based on new index
   streams.forEach((s, i) => s.order = i + 1)
-  // Save to local storage
   setStreams(streams)
   // console.log('Streams Updated')
 }
