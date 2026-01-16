@@ -61,7 +61,7 @@ export const findLibraryItemsByDir = (dir) => {
 export const toSearchResult = (item) => {
   const parenthesesText = item.title ? (item.title.match(/\(([^)]+)\)/) || [])[1] || '' : ''
   const episode = item.type === 'tv' ? ` s${item.season}e${item.episode}` : ''
-  const cleanTitle = `${item.metadata?.title || item.metadata?.name || item.title || 'Unknown Title'} ${episode}${parenthesesText ? ` - ${parenthesesText}` : ''}`.trim()
+  const cleanTitle = `${item.metadata?.title || item.metadata?.name || item.title || 'Unknown Title'}${parenthesesText ? ` - ${parenthesesText}` : ''}`.trim()
   
   return {
     ...item.metadata,

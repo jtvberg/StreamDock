@@ -569,7 +569,7 @@ const toggleItemHidden = (libraryObj) => {
 // create a library tile
 const createLibraryTile = async libraryObj => {
   const parenthesesText = extractParentheses(libraryObj.title)
-  const cleanTitle = `${libraryObj.metadata?.title || libraryObj.metadata?.name || libraryObj.title || 'Unknown Title'} ${parenthesesText ? `- ${parenthesesText}` : ''}`.trim()
+  const cleanTitle = `${libraryObj.metadata?.title || libraryObj.metadata?.name || libraryObj.title || 'Unknown Title'}${parenthesesText ? ` - ${parenthesesText}` : ''}`.trim()
   const cleanYear = libraryObj.releaseYear ? libraryObj.releaseYear : 'NA'
   let poster = null
 
@@ -637,9 +637,10 @@ const createLibraryTile = async libraryObj => {
 const createLibraryListItem = libraryObj => {
   const parenthesesText = extractParentheses(libraryObj.title)
   const episode = libraryObj.type === 'tv' ? ` s${libraryObj.season}e${libraryObj.episode}` : ''
-  const cleanTitle = `${libraryObj.metadata?.title || libraryObj.metadata?.name || libraryObj.title} ${episode}${parenthesesText ? `- ${parenthesesText}` : ''}`.trim()
+  const episodeTitle = `${libraryObj.metadata?.title || libraryObj.metadata?.name || libraryObj.title || 'Unknown Title'}${episode}${parenthesesText ? ` - ${parenthesesText}` : ''}`.trim()
+  const cleanTitle = `${libraryObj.metadata?.title || libraryObj.metadata?.name || libraryObj.title || 'Unknown Title'}${parenthesesText ? ` - ${parenthesesText}` : ''}`.trim()
   const cleanYear = libraryObj.releaseYear ? libraryObj.releaseYear : 'NA'
-  const fullTitle  = `${cleanTitle} (${cleanYear})`
+  const fullTitle  = `${episodeTitle} (${cleanYear})`
   const frag = document.createDocumentFragment()
   const libraryListItem = elementFromHtml(`<div class="library-row" data-ts="${libraryObj.timestamp}"></div>`)
   const libraryListPlay = elementFromHtml(`<div class="fas fa-play library-list-play-btn"></div>`)

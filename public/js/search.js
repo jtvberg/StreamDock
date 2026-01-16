@@ -367,9 +367,7 @@ export const showDetails = async (result) => {
     $modalPoster.style.display = ''
   }
 
-  const cleanTitle = result.cleanTitle || (result.path ? extractCleanTitle(result) : null)
-  const title = cleanTitle || getTitle(episodeDetails || details)
-  
+  const title = result.cleanTitle || getTitle(episodeDetails || details)
   $modalTitle.textContent = `${title} (${getYear(episodeDetails?.air_date || details.first_air_date || details.release_date) || ''})`
   $modalRating.textContent = getRating(details, media_type, loc)
   const mediaInfo = getMedia(episodeDetails || details, media_type)
@@ -378,7 +376,7 @@ export const showDetails = async (result) => {
   $modalGenre.textContent = getGenre(details)
   $modalRuntime.textContent = getRuntime(episodeDetails || details)
   $modalLanguage.textContent = getLanguage(details)
-  const tagline = media_type === 'tv' ? `"${episodeDetails?.name}"`|| getTagline(details) : getTagline(details)
+  const tagline = media_type === 'tv' ? (episodeDetails?.name ? `"${episodeDetails.name}"` : getTagline(details)) : getTagline(details)
   $modalTagline.style.display = ''
   tagline === `""` ? $modalTagline.style.display = 'none' : $modalTagline.textContent = tagline
   $modalOverview.textContent = getOverview(episodeDetails || details)
@@ -419,16 +417,6 @@ export const showDetails = async (result) => {
     $modalProviders.appendChild(frag)
   })
   updateCarouselButtons()
-}
-
-function extractCleanTitle(result) {
-  if (!result) {
-    return 'Unknown Title'
-  }
-  const baseTitle = result.title || ''
-  const parenthesesText = baseTitle.match(/\(([^)]+)\)/)?.[1] || ''
-  const episode = result.type === 'tv' ? ` s${result.season}e${result.episode}` : ''
-  return `${result.metadata?.title || result.metadata?.name || baseTitle} ${episode}${parenthesesText ? ` - ${parenthesesText}` : ''}`.trim()
 }
 
 function getPosterUrl(input) {
