@@ -879,7 +879,7 @@ export const updateLibraryDirStatus = (ele, status) => {
       break
     case 'error':
       ele.classList.add('fa-triangle-exclamation', 'yellow')
-      ele.title = 'Metadata Error'
+      ele.title = 'Metadata Error' // TOFIX: why is this not set with no internet?
       break
     case 'unavailable':
       ele.classList.add('fa-plug-circle-xmark', 'red')
@@ -910,12 +910,7 @@ const addLibraryItems = async (newItems, type, dir, error, discoveredSubDirs = [
     let dirEntry = dirs.find(d => d.dir === dir)
     
     if (!dirEntry) {
-      dirEntry = {
-        dir,
-        type,
-        status: 'file',
-        subDirs: discoveredSubDirs
-      }
+      dirEntry = { dir, type, status: 'file', subDirs: discoveredSubDirs }
       dirs.push(dirEntry)
     } else {
       dirEntry.subDirs = discoveredSubDirs
@@ -939,19 +934,25 @@ const addLibraryItems = async (newItems, type, dir, error, discoveredSubDirs = [
     })
 
     const shouldFetchMetadata = getPrefs().find(pref => pref.id === 'library-meta').state()
+
+    let libraryRef = getLibrary(true)
     
     if (isRefresh && shouldFetchMetadata) {
       const allDirs = [dir, ...discoveredSubDirs]
-      const library = getLibrary()
-      library.forEach(item => {
+
+      libraryRef.forEach(item => {
         if (allDirs.some(targetDir => item.dir === targetDir || item.dir.startsWith(targetDir + '/')) &&
             item.isMetadataLocked !== true) {
           item.metadata = {}
           item.releaseYear = undefined
           item.releaseDate = undefined
+          item.isUserUpdated = false
         }
       })
+
       saveImmediately()
+      
+      await new Promise(resolve => setTimeout(resolve, 50))
     }
     
     const { itemsNeedingMetadata, hadDeletions } = await rescanDirectory(dir, discoveredSubDirs, processedItems, type, shouldFetchMetadata)
@@ -1145,7 +1146,7 @@ const filterLibrary = type => {
 // rescan all library directories
 export const rescanAllLibraryDirs = () => {
   const dirs = JSON.parse(localStorage.getItem('directories')) || []
-  dirs.forEach(dir => loadLibraryDir(dir.dir, dir.type, true))
+  dirs.forEach(dir => loadLibraryDir(dir.dir, dir.type, false))
 }
 
 $libraryListBtn.addEventListener('click', libraryListView)

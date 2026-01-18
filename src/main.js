@@ -187,18 +187,39 @@ const createWindow = () => {
   })
 
   // on stream view load get url, remove scrollbars, show stream, load scripts
-  streamView.webContents.on('did-finish-load', () => {
+  streamView.webContents.on('did-finish-load', async () => {
     const currentUrl = getCurrentUrl()
     const currentIsLocal = currentUrl.startsWith('file:')
-    
     if (currentIsLocal) {
       localLoadError()
     } else {
       const cleanUrl = validUrl(getCurrentUrl())
       domain = cleanUrl ? cleanUrl.hostname : null
-      showStream(true)
-      removeScrollbars(streamView)
-      loadScripts(streamView, domain)
+      
+      // check to see if a page actually loaded
+      const hasContent = await streamView.webContents.executeJavaScript(`
+        (() => {
+          const body = document.body;
+          if (!body) return false;
+          const isErrorPage = document.querySelector('#main-frame-error') !== null || 
+                            document.querySelector('.error-code') !== null ||
+                            body.innerHTML.includes('ERR_INTERNET_DISCONNECTED') ||
+                            body.innerHTML.includes('ERR_NAME_NOT_RESOLVED') ||
+                            body.childNodes.length <= 1;
+          
+          return !isErrorPage;
+        })()
+      `).catch(() => false)
+      
+      if (hasContent) {
+        showStream(true)
+        removeScrollbars(streamView)
+        loadScripts(streamView, domain)
+      } else {
+        showStream(false)
+        sendLogData('Failed to load page: Network error or no internet connection')
+        sendAlertMessage('Error: Unable to load page. Please check your internet connection.')
+      }
     }
   })
 
