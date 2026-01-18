@@ -172,7 +172,7 @@ export const clearMetadataCache = () => {
 }
 
 // sync directory files with library (add new, remove deleted, fetch metadata for items without it)
-export const rescanDirectory = async (dir, subDirs, newItems, type, fetchMetadata = false) => {
+export const rescanDirectory = async (dir, subDirs, newItems, type, fetchMetadata = false, isRefresh = false) => {
   const allDirsInTree = [dir, ...subDirs]
   const existingItemsInTree = library.filter(item => 
     allDirsInTree.some(targetDir => item.dir === targetDir || item.dir.startsWith(targetDir + '/'))
@@ -211,12 +211,19 @@ export const rescanDirectory = async (dir, subDirs, newItems, type, fetchMetadat
     saveImmediately()
   }
 
-  // find items needing metadata in the entire tree
+  // determine items needing metadata
   let itemsNeedingMetadata = []
-  if (fetchMetadata) {
+  if (isRefresh) {
+    // REFRESH: all unlocked items in tree (metadata was cleared in addLibraryItems)
     itemsNeedingMetadata = library.filter(item => 
       allDirsInTree.some(targetDir => item.dir === targetDir || item.dir.startsWith(targetDir + '/')) &&
       item.type === type && 
+      item.isMetadataLocked !== true &&
+      !item.metadata?.id  // only items with cleared metadata
+    )
+  } else if (fetchMetadata) {
+    // RESCAN: only newly added items without metadata
+    itemsNeedingMetadata = itemsToAdd.filter(item => 
       item.isMetadataLocked !== true &&
       (!item.metadata || !item.metadata.id)
     )

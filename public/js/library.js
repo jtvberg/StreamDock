@@ -33,7 +33,6 @@ const $libraryShowHiddenBtn = document.querySelector('#library-show-hidden-btn')
 // Vars
 let libraryLoadLock = Promise.resolve()
 let currentSortOrder = 'title' // track current sort: 'old', 'new', 'title', 'path'
-let errorShown = false
 export let directoriesCache = null
 let directoriesSaveTimeout = null
 
@@ -797,8 +796,38 @@ const loadLibraryUi = async library => {
   $libraryList.appendChild(fragList)
 }
 
+// check if network is available
+const checkNetworkAvailability = async () => {
+  try {
+    const apiKey = getPrefs().find(p => p.id === 'search-api').state()
+    if (!apiKey) return false
+    
+    const response = await fetch(`https://api.themoviedb.org/3/configuration?api_key=${apiKey}`, {
+      method: 'HEAD',
+      signal: AbortSignal.timeout(5000)
+    })
+    return response.ok
+  } catch (err) {
+    return false
+  }
+}
+
 // load library directory
-export const loadLibraryDir = (dir, type, refresh = false) => {
+export const loadLibraryDir = async (dir, type, refresh = false) => {
+  // check that metadata fetching is enabled if refresh is requested
+  if (refresh) {
+    if (!getPrefs().find(pref => pref.id === 'library-meta').state()) {
+      alert('Cannot refresh metadata: Metadata fetching is disabled.\n\nPlease enable "Fetch Metadata" in Library settings.')
+      return
+    }
+    const hasNetwork = await checkNetworkAvailability()
+    if (!hasNetwork) {
+      alert('Cannot refresh metadata: No internet connection detected.\n\nPlease connect to the internet and try again.')
+      return
+    }
+  }
+  
+  console.log(dir, refresh)
   sessionStorage.setItem('refresh-mode', JSON.stringify({ dir, active: refresh }))
   type === 'movie' ? window.electronAPI.getMovies(dir) : window.electronAPI.getTv(dir)
   $libraryTvBtn.classList.remove('toggled-bg')
@@ -816,11 +845,10 @@ export const loadLibraryFromStorage = () => {
 // metadata load error handler
 const handleMetadataError = (dir, error) => {
   if (error === 1) {
-    // console.log(`TMDB API Error: No API key provided`)
     alert('TMDB API Error: No API key provided. Please set your TMDB API key in the search settings.')
     setLibraryDirStatus(dir, 'error')
   } else if (error === -1) {
-    // console.log(`TMDB API Error`)
+    alert('TMDB API Error: Network connection failed or API is unavailable.\n\nPlease check your internet connection and try again.')
     setLibraryDirStatus(dir, 'error')
   }
 }
@@ -879,7 +907,7 @@ export const updateLibraryDirStatus = (ele, status) => {
       break
     case 'error':
       ele.classList.add('fa-triangle-exclamation', 'yellow')
-      ele.title = 'Metadata Error' // TOFIX: why is this not set with no internet?
+      ele.title = 'Metadata Error'
       break
     case 'unavailable':
       ele.classList.add('fa-plug-circle-xmark', 'red')
@@ -934,13 +962,12 @@ const addLibraryItems = async (newItems, type, dir, error, discoveredSubDirs = [
     })
 
     const shouldFetchMetadata = getPrefs().find(pref => pref.id === 'library-meta').state()
-
-    let libraryRef = getLibrary(true)
     
-    if (isRefresh && shouldFetchMetadata) {
+    // clear metadata for refresh (isRefresh already validated that metadata fetching is enabled)
+    if (isRefresh) {
       const allDirs = [dir, ...discoveredSubDirs]
-
-      libraryRef.forEach(item => {
+      const library = getLibrary(true)
+      library.forEach(item => {
         if (allDirs.some(targetDir => item.dir === targetDir || item.dir.startsWith(targetDir + '/')) &&
             item.isMetadataLocked !== true) {
           item.metadata = {}
@@ -951,11 +978,9 @@ const addLibraryItems = async (newItems, type, dir, error, discoveredSubDirs = [
       })
 
       saveImmediately()
-      
-      await new Promise(resolve => setTimeout(resolve, 50))
     }
     
-    const { itemsNeedingMetadata, hadDeletions } = await rescanDirectory(dir, discoveredSubDirs, processedItems, type, shouldFetchMetadata)
+    const { itemsNeedingMetadata, hadDeletions } = await rescanDirectory(dir, discoveredSubDirs, processedItems, type, shouldFetchMetadata, isRefresh)
 
     if (hadDeletions) {
       removeLastStream()
@@ -984,7 +1009,7 @@ const addLibraryItems = async (newItems, type, dir, error, discoveredSubDirs = [
 // fetch metadata for specific items
 const fetchMetadataForItems = async (items, type, dir) => {
   setLibraryDirStatus(dir, 'pending')
-  let error = false
+  let hasError = false
 
   for (const item of items) {
     const searchTerm = getCleanTitle(item.title)
@@ -993,11 +1018,10 @@ const fetchMetadataForItems = async (items, type, dir) => {
       : await searchTv(searchTerm, 1)
 
     if (searchResult === 1 || searchResult === -1) {
-      if (!errorShown) {
+      if (!hasError) {
         handleMetadataError(dir, searchResult)
-        errorShown = true
+        hasError = true
       }
-      error = true
       continue
     }
 
@@ -1025,7 +1049,7 @@ const fetchMetadataForItems = async (items, type, dir) => {
     }
   }
 
-  if (!error) {
+  if (!hasError) {
     setLibraryDirStatus(dir, 'complete')
   }
   loadLibraryUi(getLibrary())
