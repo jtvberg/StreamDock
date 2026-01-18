@@ -29,13 +29,13 @@
   "license": "MIT",
   "devDependencies": {
     "dotenv-cli": "^11.0.0",
-    "electron": "github:castlabs/electron-releases#v37.10.3+wvcus",
-    "electron-builder": "^26.0.12",
+    "electron": "github:castlabs/electron-releases#v39.2.4+wvcus",
+    "electron-builder": "^26.4.0",
     "electron-reloader": "^1.2.3"
   },
   "dependencies": {
     "@fortawesome/fontawesome-free": "^6.7.2",
-    "electron-updater": "^6.6.2"
+    "electron-updater": "^6.7.3"
   },
   "build": {
     "files": [
