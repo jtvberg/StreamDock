@@ -3,7 +3,7 @@ import nfFacets from '../res/nffacets.json' with { type: 'json' }
 
 // Constants
 const facetsCollapsed = 12
-const facetsExpanded = 250
+const facetsExpanded = 300
 
 // Element references
 const $facetPanel = document.querySelector('#facet-panel')
@@ -14,7 +14,6 @@ const $facetClear = document.querySelector('#facet-clear-btn')
 
 // Vars
 let isNetflix = false
-let showAllFacets = false
 let facetsTimeOut
 
 window.electronAPI.setAccent((e, color) => {
@@ -55,12 +54,14 @@ const openFacet = (code) => {
   window.electronAPI.facetWidth(facetsCollapsed)
 }
 
-const createFacet = (facet, txt, weight, category) => {
+const createFacet = (facet, txt, weight, category, isDisabled = false) => {
   const fac = elementFromHtml(`<div class="facet" data-code="${facet.Code}"></div>`)
   category ? fac.classList.add('cat') : null
   fac.style.fontWeight = weight
   fac.textContent = txt
-  fac.addEventListener('click', () => openFacet(facet.Code))
+  if (!isDisabled) {
+    fac.addEventListener('click', () => openFacet(facet.Code))
+  }
   return fac
 }
 
@@ -73,18 +74,10 @@ const setTitle = () => {
 const loadFacets = () => {
   const frag = document.createDocumentFragment()
   nfFacets.forEach(facet => {
-    if (showAllFacets) {
-      if (facet.Category === 'Genre') {
-        frag.appendChild(createFacet(facet, `${facet.Genre}`, 700, true))
-      } else {
-        frag.appendChild(createFacet(facet, `- ${facet.Genre}`, 200, false))
-      }
+    if (facet.Category === 'Genre') {
+      frag.appendChild(createFacet(facet, `${facet.Genre}`, 700, true, facet.Code === '0'))
     } else {
-      if (facet.Code !== '0' && facet.Category === 'Genre') {
-        frag.appendChild(createFacet(facet, `${facet.Genre}`, 700, true))
-      } else if (facet.Code !== '0' && facet.Category !== 'A-Z') {
-        frag.appendChild(createFacet(facet, `- ${facet.Genre}`, 200, false))
-      }
+      frag.appendChild(createFacet(facet, `- ${facet.Genre}`, 200, false))
     }
   })
   $facetHost.appendChild(frag)
