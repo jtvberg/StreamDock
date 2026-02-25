@@ -446,7 +446,7 @@ const setupLocalPlayback = async (url, time = 0) => {
       (() => {
         try {
           const library = JSON.parse(localStorage.getItem('library') || '[]');
-          const item = library.find(i => i.url === '${url.replace(/'/g, "\\'")}');
+          const item = library.find(i => i.url === ${JSON.stringify(url)});
           return item?.lastPlayTime || 0;
         } catch {
           return 0;
