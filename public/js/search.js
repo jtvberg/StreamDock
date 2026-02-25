@@ -344,8 +344,9 @@ export const showDetails = async (result) => {
   }
   const loc = getPrefs().find(pref => pref.id === 'search-loc').state()
   $searchOverlay.style.display = 'flex'
-  const posterUrl = episodeDetails ? getStillUrl(episodeDetails) : getPosterUrl(details)
-  const posterPath = episodeDetails ? episodeDetails.still_path : details.backdrop_path
+  const posterUrl = (episodeDetails ? getStillUrl(episodeDetails) : getPosterUrl(details)) || (details.poster_path ? `${tmdbImagePath}${details.poster_path}` : null)
+  const posterPath = episodeDetails ? episodeDetails.still_path : details.backdrop_path || details.poster_path
+  console.log(posterUrl, posterPath)
   if (posterUrl) {
     if (isLocal) {
       const cachedPoster = await getCachedImage(posterPath)
