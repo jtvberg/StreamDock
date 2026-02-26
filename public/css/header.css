@@ -136,9 +136,18 @@
   display: flex;
   flex-flow: column;
   gap: 5px;
-  width: 30px;
+  width: 34px;
   user-select: none;
-  margin-right: 6px;
+  margin-right: 4px;
+}
+
+.context-nav {
+  display: flex;
+  flex-flow: column;
+  gap: 5px;
+  width: 34px;
+  user-select: none;
+  overflow-y: auto;
 }
 
 .home-heading,
@@ -159,13 +168,22 @@
 
 .comp-second-btn {
   font-size: 1.3rem;
-  margin-block: -6px;
+  margin-block: -7px;
+}
+
+.comp-arrow {
+  margin-top: 2px;
 }
 
 .btn-divider {
   height: 0px;
   border: 2px solid var(--color-control-darkgray);
   border-radius: 2px;
+}
+
+.home-nav-btn, .context-btn, .settings-nav-btn {
+  cursor: pointer;
+  min-height: 32px;
 }
 
 .context-btn {

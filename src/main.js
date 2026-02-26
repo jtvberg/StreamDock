@@ -67,6 +67,7 @@ let domain = null
 let ratioLocked = false
 let isPlaying = false
 let resumePlaying = false
+let isLocal = false
 let defaultAgent = ''
 
 // load reload module in dev
@@ -88,6 +89,29 @@ if (isWindows) {
   })
 }
 
+// reset aspect ratio on mac resume
+if (isMac) {
+  const { powerMonitor } = require('electron')
+  
+  powerMonitor.on('resume', () => {
+    setTimeout(() => {
+      if (mainWin && !mainWin.isDestroyed()) {
+        const bounds = mainWin.getBounds()
+        
+        if (ratioLocked) {
+          mainWin.setAspectRatio(0)
+          mainWin.setAspectRatio(bounds.width / bounds.height)
+        }
+
+        streamView.setBounds({ x: 0, y: 0, width: bounds.width, height: bounds.height })
+        const hb = headerView.getBounds()
+        setHeaderViewBounds(hb.height > headerCollapsed ? bounds.height : hb.height)
+        facetView.setBounds({ x: 0, y: 0, width: facetView.getBounds().width, height: bounds.height + 2 })
+      }
+    }, 500)
+  })
+}
+
 // disable hardware acceleration
 app.disableHardwareAcceleration()
 
@@ -103,8 +127,9 @@ const createWindow = () => {
     height: 576,
     minWidth: 672,
     minHeight: 378,
-    transparent: true,
+    transparent: isMac,
     frame: false,
+    resizable: true,
     trafficLightPosition: {
       x: 6,
       y: 5
@@ -162,20 +187,55 @@ const createWindow = () => {
   })
 
   // on stream view load get url, remove scrollbars, show stream, load scripts
-  streamView.webContents.on('did-finish-load', () => {
-    const cleanUrl = validUrl(getCurrentUrl())
-    domain = cleanUrl ? cleanUrl.hostname : null
-    removeScrollbars(streamView)
-    showStream(true, streamView)
-    loadScripts(streamView, domain)
+  streamView.webContents.on('did-finish-load', async () => {
+    const currentUrl = getCurrentUrl()
+    const currentIsLocal = currentUrl.startsWith('file:')
+    if (currentIsLocal) {
+      localLoadError()
+    } else {
+      const cleanUrl = validUrl(getCurrentUrl())
+      domain = cleanUrl ? cleanUrl.hostname : null
+      
+      // check to see if a page actually loaded
+      const hasContent = await streamView.webContents.executeJavaScript(`
+        (() => {
+          const body = document.body;
+          if (!body) return false;
+          const isErrorPage = document.querySelector('#main-frame-error') !== null || 
+                            document.querySelector('.error-code') !== null ||
+                            body.innerHTML.includes('ERR_INTERNET_DISCONNECTED') ||
+                            body.innerHTML.includes('ERR_NAME_NOT_RESOLVED') ||
+                            body.childNodes.length <= 1;
+          
+          return !isErrorPage;
+        })()
+      `).catch(() => false)
+      
+      if (hasContent) {
+        showStream(true)
+        removeScrollbars(streamView)
+        loadScripts(streamView, domain)
+      } else {
+        showStream(false)
+        sendLogData('Failed to load page: Network error or no internet connection')
+        sendAlertMessage('Error: Unable to load page. Please check your internet connection.')
+      }
+    }
   })
 
   // on google login redirect, set user agent to empty string to prevent login issues
-  streamView.webContents.on('did-navigate', () => {
+  streamView.webContents.on('did-navigate', async (e, url) => {
+    facetView.webContents.send('is-netflix', false)
     const cleanUrl = validUrl(getCurrentUrl())
     if (cleanUrl.host === googleAuthHost) {
       sendLogData(`Opening Google Auth URL: ${cleanUrl}`)
       streamView.webContents.userAgent = ''
+    }
+    isLocal = url.startsWith('file:')
+    if (isLocal) {
+      const explicitTime = streamView._explicitTime || 0
+      delete streamView._explicitTime
+      await setupLocalPlayback(url, explicitTime)
     }
   })
 
@@ -226,6 +286,13 @@ const createWindow = () => {
 
   // add main window to windows set
   windows.add(mainWin)
+}
+
+// handle local file load error
+const localLoadError = () => {
+  showStream(false)
+  sendLogData('Local file failed to load')
+  sendAlertMessage('Error: File not found or could not be loaded. Please check that the file exists and is a supported video format.')
 }
 
 // create tray icon
@@ -346,11 +413,12 @@ const setHeaderViewBounds = height => headerView.setBounds({ x: 0, y: 0, width: 
 const setFacetViewBounds = width => facetView.setBounds({ x: 0, y: 0, width, height: mainWin.getBounds().height + 2 })
 
 // open url in streamView and send stream opened message to renderer
-const openUrl = (url, time = 0) => {
+const openUrl = async (url, time = 0) => {
   if (!validUrl(url)) {
     return
   }
-  saveVideoTime(getCurrentUrl())
+  await saveVideoTime(getCurrentUrl())
+  showStream(false)
   sendLogData(`Open URL: ${url}`)
   if (url.host === googleAuthHost) {
     streamView.webContents.loadURL(url)
@@ -358,13 +426,42 @@ const openUrl = (url, time = 0) => {
     sendLogData(`Loading URL with: ${defaultAgent}`)
     streamView.webContents.loadURL(url, { userAgent: defaultAgent })
   }
-  showStream(true)
+
+  if (isLocal && time > 0) {
+    streamView._explicitTime = time
+  }
+
   headerView.webContents.send('last-stream', url)
   headerView.webContents.send('stream-opened')
-  if (url.startsWith('file:')) {
-    makeFullWindow()
-    setVideoTime(time)
+}
+
+// centralized local file playback setup
+const setupLocalPlayback = async (url, time = 0) => {
+  facetView.webContents.send('is-netflix', false)
+  let savedTime = 0
+  if (time > 0) {
+    savedTime = time
+  } else {
+    savedTime = await headerView.webContents.executeJavaScript(`
+      (() => {
+        try {
+          const library = JSON.parse(localStorage.getItem('library') || '[]');
+          const item = library.find(i => i.url === ${JSON.stringify(url)});
+          return item?.lastPlayTime || 0;
+        } catch {
+          return 0;
+        }
+      })()
+    `).catch(() => 0)
   }
+  headerView.webContents.executeJavaScript('localStorage.getItem("video-paused");', true).then(response => {
+    if (response === 'true') {
+      pauseVideo(streamView)
+    }
+  })
+  setVideoTime(savedTime)
+  makeFullWindow()
+  showStream(true)
 }
 
 // open external player with url
@@ -372,7 +469,7 @@ const openExternalPlayer = (url) => {
   sendLogData(`Opening video in external player: ${url}`)
   // open file:// urls in default video player
   if (url.startsWith('/')) {
-    const filePath = `file://${url}`
+    const filePath = `file:///${url.replace(/\\/g, '/')}`
     require('child_process').exec(`open "${filePath}"`)
   } else {
     // open http/https urls in default browser (not implemented)
@@ -395,7 +492,6 @@ const validUrl = url => {
   let valid
   try {
     valid = new URL(url)
-    if (valid.protocol === 'file:') facetView.webContents.send('is-netflix', false)
   } catch (err) {
     sendLogData(`Invalid URL: ${url}`)
     return false
@@ -446,13 +542,16 @@ const setVideoTime = (time = 0) => {
 
 // send video time to renderer and save it
 const saveVideoTime = async (url) => {
-  if (!url.startsWith('file:')) return
-  getVideoTime().then(time => {
+  if (!isLocal) return
+  try {
+    const time = await getVideoTime()
     if (time !== null) {
-      urlTime = { url, time }
+      const urlTime = { url, time }
       headerView.webContents.send('set-video-time', urlTime)
     }
-  })
+  } catch (err) {
+    sendLogData(`Error saving video time: ${err.message}`)
+  }
 }
 
 // get system preference for accent color and send to renderers
@@ -467,7 +566,14 @@ const setAccent = () => {
 }
 
 // navigate back in view if possible
-const navBack = () => streamView.webContents.navigationHistory.canGoBack() ? streamView.webContents.navigationHistory.goBack() : null
+const navBack = () => {
+  if (streamView.webContents.navigationHistory.canGoBack()) {
+    if (isLocal) {
+      saveVideoTime(getCurrentUrl())
+    }
+    streamView.webContents.navigationHistory.goBack()
+  }
+}
 
 // inject pause video function into view
 const pauseVideo = bv => bv.webContents.executeJavaScript(`(${defaultPause.toString()})()`)
@@ -527,7 +633,7 @@ const unlockRatio = () => {
 }
 
 // remove scrollbars from view
-const removeScrollbars = bv => bv.webContents.executeJavaScript(`document.body.insertAdjacentHTML('beforeend', '<style> ::-webkit-scrollbar { display: none; } </style>')`)
+const removeScrollbars = bv => bv.webContents.executeJavaScript(`const style = document.createElement('style'); style.textContent = '::-webkit-scrollbar { display: none; }'; document.head.appendChild(style);`)
 
 // open child window with url
 const openNewin = url => {
@@ -560,26 +666,18 @@ const openNewin = url => {
     child.show()
   })
   child.webContents.on('dom-ready', () => {
-    console.log('Child window loaded ')
     child.webContents.executeJavaScript(`
       (() => {
         try {
-          // Create drag header element
           const dragHeader = document.createElement('div');
           dragHeader.className = 'sd-frameless-header';
           dragHeader.style.cssText = 'position: fixed; top: 0; left: 0; width: calc(100% - 25px); height: 15px; opacity: 0; z-index: 99999; cursor: -webkit-grab; cursor: grab; -webkit-user-drag: none; -webkit-app-region: drag;';
           document.body.appendChild(dragHeader);
 
-          // Add scrollbar hiding styles
-          const style = document.createElement('style');
-          style.textContent = '::-webkit-scrollbar { display: none; }';
-          document.head.appendChild(style);
-
           ${!isMac ? `
-          // Create close button (only on non-Mac)
           const closeBtn = document.createElement('div');
           closeBtn.className = 'sd-frameless-close';
-          closeBtn.innerHTML = '&times;';
+          closeBtn.textContent = '\u00D7';
           closeBtn.onclick = () => window.close();
           closeBtn.style.cssText = 'position: fixed; top: 4px; right: 4px; display: flex; height: 27px; align-items: center; justify-content: center; font-family: sans-serif; font-size: 36px; color: #dbdbdb; background-color: #0f0f0f; border-radius: 50%; z-index: 999999; opacity: 0; aspect-ratio: 1 / 1; user-select: none; cursor: pointer;';
           closeBtn.addEventListener('mouseenter', () => closeBtn.style.opacity = '1');
@@ -650,10 +748,16 @@ const sendLogData = log => {
   headerView.webContents.send('log-data', log)
 }
 
+// send alert message to renderer
+const sendAlertMessage = message => {
+  headerView.webContents.send('send-alert', message)
+}
+
 // get library from directory and type (movies or tv)
 const getLibrary = async (dir, type, recursive = true) => {
   const videoExts = ['.mp4', '.mkv', '.avi', '.mov', '.webm']
   const library = []
+  const discoveredDirs = new Set()
 
   const processDirectory = async (currentDir) => {
     try {
@@ -661,17 +765,25 @@ const getLibrary = async (dir, type, recursive = true) => {
       for (const file of files) {
         const filePath = path.join(currentDir, file.name)
         if (recursive && file.isDirectory()) {
+          const normalizedDirPath = filePath.replace(/\\/g, '/')
+          discoveredDirs.add(normalizedDirPath)
           await processDirectory(filePath)
         } else if (file.isFile()) {
           const ext = path.extname(file.name).toLowerCase()
           if (videoExts.includes(ext)) {
             const stat = await fs.stat(filePath)
+            const normalizedPath = filePath.replace(/\\/g, '/')
+            const normalizedDir = currentDir.replace(/\\/g, '/')
+            const encodedPath = encodeURI(normalizedPath)
+            const fileUrl = encodedPath.startsWith('/') 
+              ? `file://${encodedPath}` 
+              : `file:///${encodedPath}`
             library.push({
               type,
               title: path.basename(file.name, ext),
-              dir: currentDir,
+              dir: normalizedDir,
               path: filePath,
-              url: encodeURI(`file://${filePath}`),
+              url: fileUrl,
               lastPlayTime: 0,
               timestamp: stat.birthtimeMs
             })
@@ -680,12 +792,19 @@ const getLibrary = async (dir, type, recursive = true) => {
       }
     } catch (err) {
       sendLogData(`Error reading directory ${currentDir}: ${err.message}`)
+      throw err
     }
   }
 
-  await processDirectory(dir)
-  const libraryObj = { library, type, dir }
-  headerView.webContents.send('send-library', libraryObj)
+  try {
+    await processDirectory(dir)
+    const subDirsArray = Array.from(discoveredDirs)
+    const libraryObj = { library, type, dir, error: null, discoveredSubDirs: subDirsArray }
+    headerView.webContents.send('send-library', libraryObj)
+  } catch (err) {
+    const libraryObj = { library: null, type, dir, error: err.message, discoveredSubDirs: [] }
+    headerView.webContents.send('send-library', libraryObj)
+  }
 }
 
 // perform a trusted click on an element in the webContents
@@ -697,7 +816,6 @@ const performTrustedClick = async (webContents, selector) => {
     const rect = await webContents.executeJavaScript(`
       (() => {
         const el = document.querySelector('${selector}');
-        // Check if element exists, is part of the layout (offsetParent), and has dimensions
         if (el && el.offsetParent !== null && typeof el.getBoundingClientRect === 'function') {
           const bounds = el.getBoundingClientRect();
           if (bounds.width > 0 && bounds.height > 0) { // Basic visibility check
@@ -741,6 +859,13 @@ app.whenReady().then(async () => {
     const updater = require('./util/updater')
     setTimeout(updater, 3000)
   }
+})
+
+// on before quit, perform any necessary cleanup
+app.on('before-quit', (e) => {
+    if (isLocal) {
+      headerView.webContents.send('set-video-paused', !isPlaying)
+    }
 })
 
 // on all windows closed, save video time and quit app

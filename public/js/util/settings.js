@@ -307,7 +307,7 @@ export const getPrefs = () => {
       'service',
       'checkbox',
       'Skip and Dismiss Ads',
-      'Check to automatically skip or dismiss ads when possible (not previews)',
+      'Check to automatically skip or dismiss ads when possible (YouTube only)',
       true,
       true
     ),
@@ -316,7 +316,7 @@ export const getPrefs = () => {
       'service',
       'checkbox',
       'Skip Episode Recaps',
-      'Check to automatically skip episode recaps and intros',
+      'Check to automatically skip recaps and intros (also starts next episode on Disney+)',
       true,
       true
     ),
@@ -325,7 +325,7 @@ export const getPrefs = () => {
       'service',
       'checkbox',
       'Binge Mode',
-      'Check to automatically start the next episode (no delay)',
+      'Check to automatically start the next episode',
       true,
       true
     ),
@@ -334,7 +334,7 @@ export const getPrefs = () => {
       'service',
       'checkbox',
       'Skip Previews',
-      'Check to automatically skip previews (no delay)',
+      'Check to automatically skip previews (Amazon Prime Video only)',
       true,
       true
     ),
@@ -420,5 +420,7 @@ export const setWinLock = bool => localStorage.setItem('ontop-lock', bool)
 export const getWinRatio = () => localStorage.getItem('ratio-lock')
 
 export const setWinRatio = bool => localStorage.setItem('ratio-lock', bool)
+
+export const setVideoPaused = bool => localStorage.setItem('video-paused', bool)
 
 export const getNewStreamId = () => Date.now().toString(36) + Math.random().toString(36).substring(2)

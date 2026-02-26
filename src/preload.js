@@ -3,6 +3,7 @@ const { contextBridge, ipcRenderer } = require('electron')
 
 contextBridge.exposeInMainWorld('electronAPI', {
     logData: data => ipcRenderer.on('log-data', data),
+    sendAlert: data => ipcRenderer.on('send-alert', data),
     clearData: bool => ipcRenderer.send('clear-data', bool),
     defaultAgent: agent => ipcRenderer.send('default-agent', agent),
     updateHeaderHeight: height => ipcRenderer.send('update-header-height', height),
@@ -34,6 +35,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
     setAccent: color => ipcRenderer.on('set-accent', color),
     hideHeader: bool => ipcRenderer.on('hide-header', bool),
     lastStream: url => ipcRenderer.on('last-stream', url),
+    onVideoPaused: callback => ipcRenderer.on('set-video-paused', callback),
     setIsNetflix: bool => ipcRenderer.on('is-netflix', bool),
     streamOpened: bool => ipcRenderer.on('stream-opened', bool),
     getHeaderHeight: heightObj => ipcRenderer.invoke('set-header-height', heightObj),

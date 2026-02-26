@@ -9,10 +9,13 @@
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
   grid-auto-rows: max-content;
-  gap: 7px;
+  gap: 5px;
   width: stretch;
   overflow-y: auto;
   overflow-x: hidden;
+  padding-right: 3px;
+  padding-bottom: 3px;
+  transition: all 200ms ease-out;
 }
 
 .library-instance {
@@ -99,22 +102,23 @@
 
 .library-row {
   display: grid;
-  grid-template-columns: auto 1fr 2fr 230px;
+  grid-template-columns: auto 1fr 2fr 230px 22px;
   gap: 8px;
   align-items: center;
   font-size: 1.2rem;
   padding: 3px 6px;
   border-radius: 5px;
-  transition: background-color 200ms ease-out;
+  transition: background-color 200ms ease-out, opacity 200ms ease-in, transform 200ms ease-in;
 }
 
-.library-list-play {
+.library-list-play-btn {
   padding-top: 1px;
   color: var(--color-control-white);
   transition: color 200ms ease-out;
+  cursor: pointer;
 }
 
-.library-list-play:hover {
+.library-list-play-btn:hover, .library-result-options:hover {
   color: var(--color-system-accent);
 }
 
@@ -198,7 +202,7 @@
 }
 
 .nested-episode-tile > .result-poster {
-  border-radius: 0px 5px 5px 0px;
+  border-radius: 0px 4px 4px 0px;
 }
 
 .season-group-row {
@@ -210,4 +214,311 @@
   padding-left: 14px;
   border-left: 3px solid var(--color-system-accent-trans);
   margin-left: 10px;
+}
+
+.library-context-menu {
+  position: fixed;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--color-control-black-trans);
+  border: 1px solid var(--color-control-darkgray);
+  border-radius: 5px;
+  padding: 5px 0;
+  z-index: 9999;
+  min-width: 180px;
+  backdrop-filter: blur(10px);
+}
+
+.library-context-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px;
+  cursor: pointer;
+  color: var(--color-control-white);
+  font-size: 0.9rem;
+  transition: background-color 200ms ease-out;
+}
+
+.library-context-menu-item:hover:not(.disabled) {
+  background-color: var(--color-system-accent-trans);
+}
+
+.library-context-menu-item.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.library-context-menu-item .fas {
+  width: 16px;
+  text-align: center;
+  margin-left: 5px;
+}
+
+.library-item-hidden {
+  opacity: 0.5;
+  position: relative;
+}
+
+.library-item-hidden::after {
+  content: '\f070';
+  font-family: 'Font Awesome 6 Free';
+  font-weight: 900;
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  background-color: var(--color-control-black-trans);
+  color: var(--color-control-white);
+  padding: 4px 6px;
+  border-radius: 3px;
+  font-size: 0.8rem;
+  pointer-events: none;
+}
+
+.library-row.library-item-hidden::after {
+  right: 4px;
+}
+
+/* CSS-based filtering - opacity transitions only */
+.result-tile,
+.season-group-tile,
+.library-row,
+.season-group-row {
+  transition: opacity 200ms ease-out;
+}
+
+/* Hide items by type filter */
+#library.filter-movie [data-type="tv"],
+#library.filter-tv [data-type="movie"],
+#library-list.filter-movie [data-type="tv"],
+#library-list.filter-tv [data-type="movie"] {
+  opacity: 0;
+  pointer-events: none;
+  position: absolute;
+  visibility: hidden;
+}
+
+/* Hide TV season groups when filtering to movies */
+#library.filter-movie .season-group-tile,
+#library-list.filter-movie .season-group-row {
+  opacity: 0;
+  pointer-events: none;
+  position: absolute;
+  visibility: hidden;
+}
+
+/* Hide items marked as hidden when show-hidden toggle is off */
+#library.hide-hidden [data-hidden="true"],
+#library-list.hide-hidden [data-hidden="true"] {
+  opacity: 0;
+  pointer-events: none;
+  position: absolute;
+  visibility: hidden;
+}
+
+/* Metadata Search Modal */
+.metadata-search-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: var(--color-control-trans);
+  backdrop-filter: blur(3px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+}
+
+.metadata-search-container {
+  background-color: var(--color-control-part-trans);
+  border: 1px solid var(--color-system-accent-trans);
+  border-radius: 8px;
+  box-shadow: 0px 0px 6px 0px var(--color-system-accent-trans);
+  max-width: 800px;
+  max-height: 80vh;
+  width: 90%;
+  display: flex;
+  flex-direction: column;
+  color: var(--color-control-white);
+}
+
+.metadata-search-input-container {
+  display: flex;
+  gap: 8px;
+  padding: 10px;
+  border-bottom: 1px solid var(--color-control-darkgray);
+}
+
+.metadata-search-input {
+  flex: 1;
+  margin: 0;
+}
+
+.metadata-search-btn {
+  width: 40px;
+  height: 34px;
+  padding: 0;
+  margin: 0;
+  cursor: pointer;
+}
+
+.metadata-results-container {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  overflow-y: auto;
+  padding: 10px;
+  border-radius: 6px;
+  background-color: var(--color-control-part-trans);
+}
+
+.metadata-loading,
+.metadata-error,
+.metadata-no-results {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 200px;
+  font-size: 1.2rem;
+}
+
+.metadata-result-card {
+  display: grid;
+  grid-template-columns: 100px 1fr auto;
+  gap: 10px;
+  padding: 10px;
+  border: 2px solid var(--color-control-darkgray);
+  border-radius: 6px;
+  transition: border-color 200ms;
+  background: var(--color-control-darkgray-trans);
+}
+
+.metadata-result-card:hover {
+  border-color: var(--color-system-accent);
+}
+
+.metadata-result-card.current {
+  border-color: var(--color-control-green);
+  background: var(--color-control-green-trans);
+}
+
+.metadata-result-poster {
+  width: 100px;
+  height: 150px;
+  object-fit: cover;
+  border: 1px solid var(--color-control-darkgray);
+  border-radius: 3px;
+}
+
+.metadata-result-poster-placeholder {
+  width: 100px;
+  height: 150px;
+  background: var(--color-control-darkgray);
+  border-radius: 3px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.metadata-result-poster-placeholder::before {
+  content: '\f03e';
+  font-family: 'Font Awesome 6 Free';
+  font-weight: 900;
+  font-size: 2rem;
+  color: var(--color-control-lightgray);
+}
+
+.metadata-result-details {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  position: relative;
+}
+
+.metadata-result-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--color-control-white);
+}
+
+.metadata-result-overview {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--color-control-lightgray);
+  line-height: 1.4;
+  display: -webkit-box;
+  line-clamp: 4;
+  -webkit-line-clamp: 4;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.metadata-current-badge {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  background: var(--color-control-green);
+  color: var(--color-control-white);
+  padding: 2px 8px;
+  border-radius: 3px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.metadata-select-btn {
+  align-self: center;
+  white-space: nowrap;
+  padding: 0 1rem;
+  cursor: pointer;
+}
+
+.metadata-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 4px;
+  border-top: 1px solid var(--color-control-darkgray);
+  gap: 1rem;
+}
+
+.metadata-page-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  height: auto;
+}
+
+.metadata-page-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.metadata-page-info {
+  font-size: 0.9rem;
+  color: var(--color-control-lightgray);
+  white-space: nowrap;
+}
+
+.metadata-update-notice {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 15px;
+  background-color: var(--color-system-accent-trans);
+  border-radius: 5px 5px 0 0;
+  font-size: 0.9rem;
+  color: var(--color-control-white);
+}
+
+.metadata-update-notice .fa-info-circle {
+  color: var(--color-system-accent);
+  font-size: 1.2rem;
+}
+
+.metadata-update-notice strong {
+  color: var(--color-system-white);
 }

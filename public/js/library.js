@@ -1,9 +1,18 @@
 // Imports
+import {
+  getLibrary,
+  findLibraryItemsByDir,
+  updateLibraryItem,
+  updateLibraryItemMetadata,
+  rescanDirectory,
+  saveImmediately,
+  toSearchResult
+} from './util/libraryManager.js'
 import { searchMovie, searchTv, getSeason, getEpisode } from './util/tmdb.js'
 import { showDetails, setCurrentResultElement } from './search.js'
 import { cacheImage, getCachedImage } from "./util/imageCache.js"
 import { getPrefs } from "./util/settings.js"
-import { getYear, getDate, getCleanTitle, elementFromHtml, getSeasonEpisode } from "./util/helpers.js"
+import { getCleanTitle, elementFromHtml, getSeasonEpisode } from "./util/helpers.js"
 import { getImagePath } from './util/tmdb.js'
 import { removeLastStream } from './renderer.js'
 
@@ -19,11 +28,13 @@ const $librarySortOldBtn = document.querySelector('#library-sort-old-btn')
 const $librarySortNewBtn = document.querySelector('#library-sort-new-btn')
 const $librarySortTitleBtn = document.querySelector('#library-sort-title-btn')
 const $librarySortPathBtn = document.querySelector('#library-sort-path-btn')
+const $libraryShowHiddenBtn = document.querySelector('#library-show-hidden-btn')
 
 // Vars
 let libraryLoadLock = Promise.resolve()
 let currentSortOrder = 'title' // track current sort: 'old', 'new', 'title', 'path'
-let errorShown = false
+export let directoriesCache = null
+let directoriesSaveTimeout = null
 
 // get sortable value with fallbacks
 const getSortValue = (item, field) => {
@@ -69,10 +80,11 @@ const createSeasonGroupTile = async (showId, season, episodes) => {
   resultDetails.appendChild(resultCountBadge)
   resultTile.appendChild(resultDetails)
   poster ? resultTile.appendChild(resultPoster) : null
-
   resultTile.dataset.isNavigable = 'false'
-
-  // click entire tile to expand/collapse
+  resultTile.dataset.cleanTitle = cleanTitle
+  resultTile.dataset.type = 'tv'
+  resultTile.dataset.ts = firstEpisode.timestamp || 253402300800000
+  resultTile.dataset.releaseDate = firstEpisode.releaseDate || 253402300800000
   resultTile.addEventListener('click', () => {
     toggleSeasonGroup(resultTile, episodes, false)
   })
@@ -95,10 +107,11 @@ const createSeasonGroupListItem = (showId, season, episodes) => {
   libraryListItem.appendChild(libraryListTitle)
   libraryListItem.appendChild(libraryListPath)
   libraryListItem.appendChild(libraryListTime)
-
   libraryListItem.dataset.isNavigable = 'false'
-
-  // click entire row to expand/collapse
+  libraryListItem.dataset.cleanTitle = cleanTitle
+  libraryListItem.dataset.type = 'tv'
+  libraryListItem.dataset.ts = firstEpisode.timestamp || 253402300800000
+  libraryListItem.dataset.releaseDate = firstEpisode.releaseDate || 253402300800000
   libraryListItem.addEventListener('click', () => {
     toggleSeasonGroup(libraryListItem, episodes, true)
   })
@@ -165,10 +178,397 @@ const extractParentheses = str => {
   return match ? match[1] : ''
 }
 
+// close any open context menu
+const closeContextMenu = () => {
+  document.querySelectorAll('.library-context-menu').forEach(menu => menu.remove())
+}
+
+// create library item context menu
+const createLibraryItemContextMenu = (libraryObj, event) => {
+  closeContextMenu()
+  
+  const menu = elementFromHtml(`<div class="library-context-menu"></div>`)
+  const isHidden = libraryObj.isHidden === true
+  const isLocked = libraryObj.isMetadataLocked === true
+  
+  // hide/show toggle
+  const hideShowItem = elementFromHtml(`
+    <div class="library-context-menu-item" title="Toggle hidden state for this title">
+      <span class="fas ${isHidden ? 'fa-eye' : 'fa-eye-slash'}"></span>
+      <span>${isHidden ? 'Show' : 'Hide'} Title</span>
+    </div>
+  `)
+  hideShowItem.addEventListener('click', () => {
+    toggleItemHidden(libraryObj)
+    closeContextMenu()
+  })
+  menu.appendChild(hideShowItem)
+  
+  // update metadata
+  const updateMetaItem = elementFromHtml(`
+    <div class="library-context-menu-item" title="Select alternative TMDB metadata${libraryObj.isUserUpdated === true ? ' (Currently User Updated)' : ''}">
+      <span class="fas fa-rotate"></span>
+      <span>Update Metadata${libraryObj.isUserUpdated === true ? ' <span class="fas fa-user-check" style="font-size: 0.75rem; color: var(--color-system-accent);"></span>' : ''}</span>
+    </div>
+  `)
+  updateMetaItem.addEventListener('click', () => {
+    selectAlternativeMetadata(libraryObj)
+    closeContextMenu()
+  })
+  menu.appendChild(updateMetaItem)
+  
+  // lock metadata
+  const lockMetaItem = elementFromHtml(`
+    <div class="library-context-menu-item" title="Lock metadata to prevent automatic updates">
+      <span class="fas ${isLocked ? 'fa-lock-open' : 'fa-lock'}"></span>
+      <span>${isLocked ? 'Unlock' : 'Lock'} Metadata</span>
+    </div>
+  `)
+  lockMetaItem.addEventListener('click', () => {
+    toggleItemLocked(libraryObj)
+    closeContextMenu()
+  })
+  menu.appendChild(lockMetaItem)
+  document.body.appendChild(menu)
+  
+  const rect = event.target.getBoundingClientRect()
+  const menuRect = menu.getBoundingClientRect()
+  let left = rect.left
+  let top = rect.bottom + 5
+
+  if (left + menuRect.width > window.innerWidth) {
+    left = rect.right - menuRect.width
+  }
+
+  if (top + menuRect.height > window.innerHeight) {
+    top = rect.top - menuRect.height - 5
+  }
+  
+  menu.style.left = `${Math.max(5, left)}px`
+  menu.style.top = `${Math.max(5, top)}px`
+  
+  // close on outside click
+  setTimeout(() => {
+    const closeOnClickOutside = (e) => {
+      if (!menu.contains(e.target)) {
+        closeContextMenu()
+        document.removeEventListener('click', closeOnClickOutside)
+      }
+    }
+    document.addEventListener('click', closeOnClickOutside)
+  }, 0)
+}
+
+// select alternative metadata
+const selectAlternativeMetadata = (libraryObj) => {
+  closeContextMenu()
+  
+  // calculate affected episodes count for TV shows
+  let affectedCount = 1
+  if (libraryObj.type === 'tv' && libraryObj.metadata?.id) {
+    const sameShowEpisodes = findLibraryItemsByDir(libraryObj.dir).filter(item => 
+      item.type === 'tv' &&
+      item.metadata?.id === libraryObj.metadata.id &&
+      getCleanTitle(item.title) === getCleanTitle(libraryObj.title)
+    )
+    affectedCount = sameShowEpisodes.length
+  }
+  
+  const modal = elementFromHtml(`
+    <div class="metadata-search-modal">
+      <div class="metadata-search-container">
+        ${libraryObj.type === 'tv' && affectedCount > 1 ? `
+          <div class="metadata-update-notice">
+            <span class="fas fa-info-circle"></span>
+            <span>Updating metadata will affect <strong>${affectedCount} episodes</strong> in this directory</span>
+          </div>
+        ` : ''}
+        <div class="metadata-search-input-container">
+          <input type="text" class="metadata-search-input" 
+                 placeholder="Search TMDB..." 
+                 value="${getCleanTitle(libraryObj.title)}">
+          <button class="metadata-search-btn fas fa-search"></button>
+        </div>
+        <div class="metadata-results-container"></div>
+        <div class="metadata-pagination" style="display: none;">
+          <button class="metadata-page-btn metadata-prev-btn" disabled><span class="fas fa-chevron-left"></span> Previous</button>
+          <span class="metadata-page-info"></span>
+          <button class="metadata-page-btn metadata-next-btn">Next <span class="fas fa-chevron-right"></span></button>
+        </div>
+      </div>
+    </div>
+  `)
+  
+  document.body.appendChild(modal)
+  modal.dataset.currentPage = '1'
+  modal.dataset.totalPages = '1'
+  
+  const searchInput = modal.querySelector('.metadata-search-input')
+  searchInput.focus()
+  searchInput.select()
+  
+  setupMetadataSearchHandlers(modal, libraryObj)
+  performMetadataSearch(libraryObj, searchInput.value, modal, 1)
+}
+
+// perform metadata search
+const performMetadataSearch = async (libraryObj, searchTerm, modal, page = 1) => {
+  const resultsContainer = modal.querySelector('.metadata-results-container')
+  const pagination = modal.querySelector('.metadata-pagination')
+  resultsContainer.innerHTML = '<div class="metadata-loading">Searching TMDB...</div>'
+  pagination.style.display = 'none'
+  
+  const searchFn = libraryObj.type === 'movie' ? searchMovie : searchTv
+  const results = await searchFn(searchTerm, page)
+  
+  if (results === 1 || results === -1) {
+    resultsContainer.innerHTML = '<div class="metadata-error"><div class="result-glyph fas fa-exclamation-triangle" style="font-size: 2.6rem;"></div><div>Error</div><div>Check your internet connection and that your TMDB API key is set.</div></div>'
+    return
+  }
+  
+  if (!results?.results?.length) {
+    resultsContainer.innerHTML = '<div class="metadata-no-results">No results found. Try a different search term.</div>'
+    return
+  }
+  
+  modal.dataset.currentPage = page
+  modal.dataset.totalPages = results.total_pages || 1
+  modal.dataset.searchTerm = searchTerm
+  
+  renderMetadataResults(results.results, libraryObj, modal)
+  updatePagination(modal, libraryObj)
+}
+
+// update pagination UI
+const updatePagination = (modal, libraryObj) => {
+  const pagination = modal.querySelector('.metadata-pagination')
+  const prevBtn = modal.querySelector('.metadata-prev-btn')
+  const nextBtn = modal.querySelector('.metadata-next-btn')
+  const pageInfo = modal.querySelector('.metadata-page-info')
+  const currentPage = parseInt(modal.dataset.currentPage)
+  const totalPages = parseInt(modal.dataset.totalPages)
+  
+  if (totalPages > 1) {
+    pagination.style.display = 'flex'
+    pageInfo.textContent = `Page ${currentPage} of ${totalPages}`
+    prevBtn.disabled = currentPage <= 1
+    nextBtn.disabled = currentPage >= totalPages
+    
+    prevBtn.onclick = () => {
+      if (currentPage > 1) {
+        performMetadataSearch(libraryObj, modal.dataset.searchTerm, modal, currentPage - 1)
+      }
+    }
+    
+    nextBtn.onclick = () => {
+      if (currentPage < totalPages) {
+        performMetadataSearch(libraryObj, modal.dataset.searchTerm, modal, currentPage + 1)
+      }
+    }
+  } else {
+    pagination.style.display = 'none'
+  }
+}
+
+// render metadata search results
+const renderMetadataResults = (results, libraryObj, modal) => {
+  const container = modal.querySelector('.metadata-results-container')
+  const frag = document.createDocumentFragment()
+  
+  results.forEach(result => {
+    const isCurrentMetadata = result.id === libraryObj.metadata?.id
+    const year = new Date(result.release_date || result.first_air_date).getFullYear()
+    const title = `${result.title || result.name} (${isNaN(year) ? 'NA' : year})`
+    const card = elementFromHtml(`
+      <div class="metadata-result-card ${isCurrentMetadata ? 'current' : ''}" 
+           data-tmdb-id="${result.id}">
+        ${result.poster_path ? `<img class="metadata-result-poster" src="${tmdbImagePath}${result.poster_path}" alt="${title}">` : '<div class="metadata-result-poster-placeholder"></div>'}
+        <div class="metadata-result-details">
+          <div class="metadata-result-title" title="${title}">${title}</div>
+          <div class="metadata-result-overview" title="${result.overview || 'No description available.'}">${result.overview || 'No description available.'}</div>
+          ${isCurrentMetadata ? '<div class="metadata-current-badge">Current</div>' : ''}
+        </div>
+        <button class="metadata-select-btn">Select</button>
+      </div>
+    `)
+    
+    card.querySelector('.metadata-select-btn').addEventListener('click', () => {
+      applyMetadataSelection(libraryObj, result, modal)
+    })
+    
+    frag.appendChild(card)
+  })
+  
+  container.replaceChildren(frag)
+}
+
+// apply metadata selection
+const applyMetadataSelection = async (libraryObj, selectedMetadata, modal) => {
+  const resultsContainer = modal.querySelector('.metadata-results-container')
+  resultsContainer.innerHTML = '<div class="metadata-loading">Applying metadata...</div>'
+  
+  // for TV shows, update all episodes in the same directory
+  if (libraryObj.type === 'tv') {
+    await updateShowInDirectory(libraryObj, selectedMetadata, modal)
+  } else {
+    // otherwise, just update the single item
+    let fullMetadata = selectedMetadata
+    
+    updateLibraryItemMetadata(libraryObj.url, fullMetadata)
+    
+    updateLibraryItem(libraryObj.url, {
+      isUserUpdated: true,
+      isMetadataLocked: true
+    })
+    
+    if (fullMetadata.poster_path && getPrefs().find(p => p.id === 'library-cache').state()) {
+      cacheImage(`${tmdbImagePath}${fullMetadata.poster_path}`, fullMetadata.poster_path)
+    }
+    
+    saveImmediately()
+    
+    modal.remove()
+    loadLibraryUi(getLibrary())
+  }
+}
+
+// update all episodes of a show in the same directory
+const updateShowInDirectory = async (libraryObj, selectedMetadata, modal) => {
+  const oldShowId = libraryObj.metadata?.id
+  const newShowId = selectedMetadata.id
+  
+  // find all episodes in the same directory with the same show name
+  const episodesToUpdate = findLibraryItemsByDir(libraryObj.dir).filter(item => 
+    item.type === 'tv' &&
+    item.metadata?.id === oldShowId &&
+    getCleanTitle(item.title) === getCleanTitle(libraryObj.title)
+  )
+  
+  // update each episode with show metadata + season poster + episode air date
+  for (const episode of episodesToUpdate) {
+    let fullMetadata = { ...selectedMetadata }
+
+    const seasonData = await getSeason(newShowId, episode.season)
+    if (seasonData?.poster_path) {
+      fullMetadata.poster_path = seasonData.poster_path
+    }
+
+    const episodeData = await getEpisode(newShowId, episode.season, episode.episode)
+    if (episodeData?.air_date) {
+      fullMetadata.first_air_date = episodeData.air_date
+    }
+    
+    updateLibraryItemMetadata(episode.url, fullMetadata)
+    
+    updateLibraryItem(episode.url, {
+      isUserUpdated: true,
+      isMetadataLocked: true
+    })
+    
+    if (fullMetadata.poster_path && getPrefs().find(p => p.id === 'library-cache').state()) {
+      cacheImage(`${tmdbImagePath}${fullMetadata.poster_path}`, fullMetadata.poster_path)
+    }
+  }
+  
+  saveImmediately()
+  modal.remove()
+  loadLibraryUi(getLibrary())
+}
+
+// setup metadata search handlers
+const setupMetadataSearchHandlers = (modal, libraryObj) => {
+  const searchInput = modal.querySelector('.metadata-search-input')
+  const searchBtn = modal.querySelector('.metadata-search-btn')
+  
+  searchBtn.addEventListener('click', () => {
+    performMetadataSearch(libraryObj, searchInput.value, modal, 1)
+  })
+  
+  searchInput.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') {
+      performMetadataSearch(libraryObj, searchInput.value, modal, 1)
+    }
+  })
+  
+  const escapeHandler = (e) => {
+    if (e.key === 'Escape') {
+      modal.remove()
+      document.removeEventListener('keydown', escapeHandler)
+    }
+  }
+  document.addEventListener('keydown', escapeHandler)
+  
+  modal.addEventListener('click', (e) => {
+    if (e.target === modal) {
+      modal.remove()
+    }
+  })
+}
+
+// toggle item locked state
+const toggleItemLocked = (libraryObj) => {
+  const newLockedState = !(libraryObj.isMetadataLocked === true)
+  updateLibraryItem(libraryObj.url, { isMetadataLocked: newLockedState })
+  saveImmediately()
+}
+
+// toggle item hidden state
+const toggleItemHidden = (libraryObj) => {
+  const newHiddenState = !(libraryObj.isHidden === true)
+  updateLibraryItem(libraryObj.url, { isHidden: newHiddenState })
+  saveImmediately()
+  
+  const isHidingHiddenItems = $library.classList.contains('hide-hidden')
+  const tileElement = $library.querySelector(`[data-url="${libraryObj.url}"]`)
+  const listElement = $libraryList.querySelector(`[data-url="${libraryObj.url}"]`)
+  
+  if (tileElement && tileElement.dataset.isLocal === 'true') {
+    if (newHiddenState) {
+      if (isHidingHiddenItems) {
+        requestAnimationFrame(() => {
+          tileElement.classList.add('element-fadeout')
+          setTimeout(() => {
+            tileElement.classList.remove('element-fadeout')
+            tileElement.dataset.hidden = 'true'
+            tileElement.classList.add('library-item-hidden')
+          }, 400)
+        })
+      } else {
+        tileElement.dataset.hidden = 'true'
+        tileElement.classList.add('library-item-hidden')
+      }
+    } else {
+      tileElement.dataset.hidden = 'false'
+      tileElement.classList.remove('library-item-hidden')
+    }
+  }
+  
+  if (listElement && listElement.dataset.isLocal === 'true' && !listElement.classList.contains('season-group-row')) {
+    if (newHiddenState) {
+      if (isHidingHiddenItems) {
+        requestAnimationFrame(() => {
+          listElement.classList.add('element-fadeout')
+          setTimeout(() => {
+            listElement.classList.remove('element-fadeout')
+            listElement.dataset.hidden = 'true'
+            listElement.classList.add('library-item-hidden')
+          }, 400)
+        })
+      } else {
+        listElement.dataset.hidden = 'true'
+        listElement.classList.add('library-item-hidden')
+      }
+    } else {
+      listElement.dataset.hidden = 'false'
+      listElement.classList.remove('library-item-hidden')
+    }
+  }
+}
+
 // create a library tile
 const createLibraryTile = async libraryObj => {
   const parenthesesText = extractParentheses(libraryObj.title)
-  const cleanTitle = `${libraryObj.metadata?.title || libraryObj.metadata?.name || libraryObj.title || 'Unknown Title'} ${parenthesesText ? `- ${parenthesesText}` : ''}`
+  const cleanTitle = `${libraryObj.metadata?.title || libraryObj.metadata?.name || libraryObj.title || 'Unknown Title'}${parenthesesText ? ` - ${parenthesesText}` : ''}`.trim()
   const cleanYear = libraryObj.releaseYear ? libraryObj.releaseYear : 'NA'
   let poster = null
 
@@ -200,6 +600,11 @@ const createLibraryTile = async libraryObj => {
   resultTile.dataset.isLocal = 'true'
   resultTile.dataset.isNavigable = 'true'
   resultTile.dataset.cleanTitle = cleanTitle
+  resultTile.dataset.url = libraryObj.url
+  resultTile.dataset.type = libraryObj.type
+  resultTile.dataset.hidden = libraryObj.isHidden === true ? 'true' : 'false'
+  resultTile.dataset.ts = libraryObj.timestamp || 253402300800000
+  resultTile.dataset.releaseDate = libraryObj.releaseDate || 253402300800000
   if (libraryObj.metadata?.id) {
     resultTile.dataset.id = libraryObj.metadata.id
     resultTile.dataset.mediaType = libraryObj.type
@@ -210,10 +615,20 @@ const createLibraryTile = async libraryObj => {
     e.stopImmediatePropagation()
     playLibraryItem(libraryObj)
   })
+  resultTile.addEventListener('contextmenu', e => {
+    e.stopImmediatePropagation()
+    createLibraryItemContextMenu(libraryObj, e)
+  })
   resultTile.addEventListener('click', e => {
     setCurrentResultElement(resultTile)
-    showDetails(libraryObj.url, libraryObj.metadata?.id, libraryObj.type, true, libraryObj.season, libraryObj.episode, cleanTitle, libraryObj.lastPlayTime)
+    showDetails(toSearchResult(libraryObj))
   })
+  
+  // apply hidden styling if item is hidden
+  if (libraryObj.isHidden === true) {
+    resultTile.classList.add('library-item-hidden')
+  }
+  
   return resultTile
 }
 
@@ -221,12 +636,13 @@ const createLibraryTile = async libraryObj => {
 const createLibraryListItem = libraryObj => {
   const parenthesesText = extractParentheses(libraryObj.title)
   const episode = libraryObj.type === 'tv' ? ` s${libraryObj.season}e${libraryObj.episode}` : ''
-  const cleanTitle = `${libraryObj.metadata?.title || libraryObj.metadata?.name || libraryObj.title} ${episode}${parenthesesText ? `- ${parenthesesText}` : ''}`
+  const episodeTitle = `${libraryObj.metadata?.title || libraryObj.metadata?.name || libraryObj.title || 'Unknown Title'}${episode}${parenthesesText ? ` - ${parenthesesText}` : ''}`.trim()
+  const cleanTitle = `${libraryObj.metadata?.title || libraryObj.metadata?.name || libraryObj.title || 'Unknown Title'}${parenthesesText ? ` - ${parenthesesText}` : ''}`.trim()
   const cleanYear = libraryObj.releaseYear ? libraryObj.releaseYear : 'NA'
-  const fullTitle  = `${cleanTitle.trim()} (${cleanYear})`
+  const fullTitle  = `${episodeTitle} (${cleanYear})`
   const frag = document.createDocumentFragment()
   const libraryListItem = elementFromHtml(`<div class="library-row" data-ts="${libraryObj.timestamp}"></div>`)
-  const libraryListPlay = elementFromHtml(`<div class="fas fa-play library-list-play"></div>`)
+  const libraryListPlay = elementFromHtml(`<div class="fas fa-play library-list-play-btn"></div>`)
   const libraryListTitle = elementFromHtml(`<div class="library-cell" title="${fullTitle}">${fullTitle}</div>`)
   const libraryListPath = elementFromHtml(`<div class="library-cell" title="${libraryObj.path}">${libraryObj.path}</div>`)
   const libraryListTime = elementFromHtml(`<div class="library-cell library-cell-right">${new Date(libraryObj.timestamp).toLocaleString()}</div>`)
@@ -237,6 +653,11 @@ const createLibraryListItem = libraryObj => {
   libraryListItem.dataset.isLocal = 'true'
   libraryListItem.dataset.isNavigable = 'true'
   libraryListItem.dataset.cleanTitle = cleanTitle
+  libraryListItem.dataset.url = libraryObj.url
+  libraryListItem.dataset.type = libraryObj.type
+  libraryListItem.dataset.hidden = libraryObj.isHidden === true ? 'true' : 'false'
+  libraryListItem.dataset.ts = libraryObj.timestamp || 253402300800000
+  libraryListItem.dataset.releaseDate = libraryObj.releaseDate || 253402300800000
   if (libraryObj.metadata?.id) {
     libraryListItem.dataset.id = libraryObj.metadata.id
     libraryListItem.dataset.mediaType = libraryObj.type
@@ -247,10 +668,19 @@ const createLibraryListItem = libraryObj => {
     e.stopImmediatePropagation()
     playLibraryItem(libraryObj)
   })
+  libraryListItem.addEventListener('contextmenu', e => {
+    e.stopImmediatePropagation()
+    createLibraryItemContextMenu(libraryObj, e)
+  })
   libraryListItem.addEventListener('click', () => {
     setCurrentResultElement(libraryListItem)
-    showDetails(libraryObj.url, libraryObj.metadata?.id, libraryObj.type, true, libraryObj.season, libraryObj.episode, cleanTitle, libraryObj.lastPlayTime)
+    showDetails(toSearchResult(libraryObj))
   })
+  
+  // apply hidden styling if item is hidden
+  if (libraryObj.isHidden === true) {
+    libraryListItem.classList.add('library-item-hidden')
+  }
   
   frag.appendChild(libraryListItem)
   return frag
@@ -292,12 +722,12 @@ const loadLibraryUi = async library => {
     const groupedShowIds = new Set()
     const mixedItems = []
 
-    // add groups - use first episode's values for sorting
+    // add groups, use first episode's values for sorting
     for (const showId in grouped) {
       for (const season in grouped[showId]) {
         const episodes = grouped[showId][season]
         const firstEpisode = episodes[0]
-        grouped[showId][season].forEach(ep => groupedShowIds.add(ep.url))
+        episodes.forEach(ep => groupedShowIds.add(ep.url))
         
         mixedItems.push({
           isGroup: true,
@@ -354,7 +784,7 @@ const loadLibraryUi = async library => {
       }
     }
   } else {
-    // ungrouped: render library as-is (already sorted)
+    // ungrouped, render library as-is (already sorted)
     const tileNodes = await Promise.all(library.map(li => createLibraryTile(li)))
     tileNodes.forEach(node => fragTiles.appendChild(node))
     library.forEach(li => fragList.appendChild(createLibraryListItem(li)))
@@ -366,9 +796,39 @@ const loadLibraryUi = async library => {
   $libraryList.appendChild(fragList)
 }
 
+// check if network is available
+const checkNetworkAvailability = async () => {
+  try {
+    const apiKey = getPrefs().find(p => p.id === 'search-api').state()
+    if (!apiKey) return false
+    
+    const response = await fetch(`https://api.themoviedb.org/3/configuration?api_key=${apiKey}`, {
+      method: 'HEAD',
+      signal: AbortSignal.timeout(5000)
+    })
+    return response.ok
+  } catch (err) {
+    return false
+  }
+}
+
 // load library directory
-export const loadLibraryDir = (dir, type, silent = false) => {
-  errorShown = silent
+export const loadLibraryDir = async (dir, type, refresh = false) => {
+  // check that metadata fetching is enabled if refresh is requested
+  if (refresh) {
+    if (!getPrefs().find(pref => pref.id === 'library-meta').state()) {
+      alert('Cannot refresh metadata: Metadata fetching is disabled.\n\nPlease enable "Fetch Metadata" in Library settings.')
+      return
+    }
+    const hasNetwork = await checkNetworkAvailability()
+    if (!hasNetwork) {
+      alert('Cannot refresh metadata: No internet connection detected.\n\nPlease connect to the internet and try again.')
+      return
+    }
+  }
+  
+  console.log(dir, refresh)
+  sessionStorage.setItem('refresh-mode', JSON.stringify({ dir, active: refresh }))
   type === 'movie' ? window.electronAPI.getMovies(dir) : window.electronAPI.getTv(dir)
   $libraryTvBtn.classList.remove('toggled-bg')
   $libraryMovieBtn.classList.remove('toggled-bg')
@@ -376,48 +836,62 @@ export const loadLibraryDir = (dir, type, silent = false) => {
 
 // load library from local storage
 export const loadLibraryFromStorage = () => {
-  const libraryWithMetadata = JSON.parse(localStorage.getItem('library')) || []
-  if (libraryWithMetadata.length > 0) {
-    loadLibraryUi(libraryWithMetadata)
+  const library = getLibrary()
+  if (library.length > 0) {
+    loadLibraryUi(library)
   }
 }
 
 // metadata load error handler
 const handleMetadataError = (dir, error) => {
   if (error === 1) {
-    // console.log(`TMDB API Error: No API key provided`)
     alert('TMDB API Error: No API key provided. Please set your TMDB API key in the search settings.')
     setLibraryDirStatus(dir, 'error')
   } else if (error === -1) {
-    // console.log(`TMDB API Error`)
+    alert('TMDB API Error: Network connection failed or API is unavailable.\n\nPlease check your internet connection and try again.')
     setLibraryDirStatus(dir, 'error')
   }
+}
+
+// get directories from cache or localStorage
+export const getDirectories = () => {
+  if (!directoriesCache) {
+    directoriesCache = JSON.parse(localStorage.getItem('directories')) || []
+  }
+  return directoriesCache
+}
+
+// save directories
+const saveDirectories = () => {
+  clearTimeout(directoriesSaveTimeout)
+  directoriesSaveTimeout = setTimeout(() => {
+    localStorage.setItem('directories', JSON.stringify(directoriesCache))
+  }, 500)
 }
 
 // set directory metadata status
 const setLibraryDirStatus = (dir, status) => {
   // console.log(`Setting status for directory: ${dir} to ${status}`)
-  const dirs = JSON.parse(localStorage.getItem('directories')) || []
+  const dirs = getDirectories()
   const dirIndex = dirs.findIndex(d => d.dir === dir)
   if (dirIndex > -1) {
     dirs[dirIndex].status = status
-    localStorage.setItem('directories', JSON.stringify(dirs))
-    // update library directory panel
-    const libDir = document.querySelector(`.library-directory-path[title="${dir}"]`)
+    saveDirectories()
+    // update library directory panel using getAttribute to avoid querySelector escaping issues
+    const allDirPaths = Array.from(document.querySelectorAll('.library-directory-path'))
+    const libDir = allDirPaths.find(el => el.getAttribute('title') === dir)
     if (libDir) {
       const statusIcon = libDir.parentElement.querySelector('.library-directory-status')
       if (statusIcon) {
         updateLibraryDirStatus(statusIcon, status)
       }
     }
-  } else {
-    console.log(`Directory ${dir} not found in library directories`)
   }
 }
 
 // update library directory status icon
 export const updateLibraryDirStatus = (ele, status) => {
-  ele.classList.remove('fa-file', 'fa-hourglass-half', 'fa-check', 'fa-triangle-exclamation', 'green', 'yellow')
+  ele.classList.remove('fa-file', 'fa-hourglass-half', 'fa-check', 'fa-triangle-exclamation', 'fa-plug-circle-xmark', 'green', 'yellow', 'red')
   switch (status) {
     case 'file':
       ele.classList.add('fa-file')
@@ -435,136 +909,150 @@ export const updateLibraryDirStatus = (ele, status) => {
       ele.classList.add('fa-triangle-exclamation', 'yellow')
       ele.title = 'Metadata Error'
       break
+    case 'unavailable':
+      ele.classList.add('fa-plug-circle-xmark', 'red')
+      ele.title = 'Directory Unavailable'
+      break
   }
   return ele
 }
 
-// add library items from renderer process
-const addLibraryItems = async (library, type, dir) => {
-  // one load at a time
+// add/rescan library items from directory
+const addLibraryItems = async (newItems, type, dir, error, discoveredSubDirs = [], isRefresh = false) => {
   await libraryLoadLock
   let resolveLock
   libraryLoadLock = new Promise(res => resolveLock = res)
-  // console.log(`Adding library items from directory: ${dir}, Type: ${type}`)
-  try {
-    const localLibrary = JSON.parse(localStorage.getItem('library')) || []
-    // remove items from local library that no longer exist in the directory
-    const filtered = localLibrary.filter(entry => !entry.path.startsWith(dir) || library.some(item => item.url === entry.url))
 
-    // add any new items from `library`
-    for (const item of library) {
-      if (!filtered.some(entry => entry.url === item.url)) {
-        if (type === 'tv') {
-          item.season = 0
-          item.episode = 0
-          const match = getSeasonEpisode(item.title)
-          if (match) {
-            item.season = parseInt(match[1]) || 0
-            item.episode = parseInt(match[2]) || 0
-          }
-        }
-        filtered.push(item)
+  try {
+    if (error || newItems === null) {
+      // console.error(`Parent directory unavailable: ${dir}`, error)
+      setLibraryDirStatus(dir, 'unavailable')
+      loadLibraryUi(getLibrary())
+      if (isRefresh) {
+        alert(`Cannot refresh metadata: Parent directory is unavailable\n\n${dir}\n\nPlease reconnect the drive or network and try again.`)
       }
+      return
     }
 
-    // persist & continue
-    localStorage.setItem('library', JSON.stringify(filtered))
-
-    // remove last stream if it matches any of the new items
-    removeLastStream()
-
-    if (getPrefs().find(pref => pref.id === 'library-meta').state()) {
-      await getLibraryMetadata(type, dir)
+    const dirs = getDirectories()
+    let dirEntry = dirs.find(d => d.dir === dir)
+    
+    if (!dirEntry) {
+      dirEntry = { dir, type, status: 'file', subDirs: discoveredSubDirs }
+      dirs.push(dirEntry)
     } else {
-      setLibraryDirStatus(dir, 'file')
-      loadLibraryUi(filtered)
+      dirEntry.subDirs = discoveredSubDirs
+      if (dirEntry.status === 'unavailable') {
+        dirEntry.status = 'file'
+      }
+    }
+    
+    localStorage.setItem('directories', JSON.stringify(dirs))
+
+    const processedItems = newItems.map(item => {
+      if (type === 'tv') {
+        const match = getSeasonEpisode(item.title)
+        return {
+          ...item,
+          season: match ? Number(match[1]) || 0 : 0,
+          episode: match ? Number(match[2]) || 0 : 0
+        }
+      }
+      return item
+    })
+
+    const shouldFetchMetadata = getPrefs().find(pref => pref.id === 'library-meta').state()
+    
+    // clear metadata for refresh (isRefresh already validated that metadata fetching is enabled)
+    if (isRefresh) {
+      const allDirs = [dir, ...discoveredSubDirs]
+      const library = getLibrary(true)
+      library.forEach(item => {
+        if (allDirs.some(targetDir => item.dir === targetDir || item.dir.startsWith(targetDir + '/')) &&
+            item.isMetadataLocked !== true) {
+          item.metadata = {}
+          item.releaseYear = undefined
+          item.releaseDate = undefined
+          item.isUserUpdated = false
+        }
+      })
+
+      saveImmediately()
+    }
+    
+    const { itemsNeedingMetadata, hadDeletions } = await rescanDirectory(dir, discoveredSubDirs, processedItems, type, shouldFetchMetadata, isRefresh)
+
+    if (hadDeletions) {
+      removeLastStream()
+    }
+
+    if (shouldFetchMetadata && itemsNeedingMetadata.length > 0) {
+      await fetchMetadataForItems(itemsNeedingMetadata, type, dir)
+    } else {
+      if (shouldFetchMetadata) {
+        const allDirs = [dir, ...discoveredSubDirs]
+        const itemsInTree = getLibrary().filter(item => 
+          allDirs.some(targetDir => item.dir === targetDir || item.dir.startsWith(targetDir + '/'))
+        )
+        const hasMetadata = itemsInTree.length > 0 && itemsInTree.every(item => item.metadata?.id)
+        setLibraryDirStatus(dir, hasMetadata ? 'complete' : 'file')
+      } else {
+        setLibraryDirStatus(dir, 'file')
+      }
+      loadLibraryUi(getLibrary())
     }
   } finally {
     resolveLock()
   }
 }
 
-// get metadata for library items
-const getLibraryMetadata = async (type, dir) => {
+// fetch metadata for specific items
+const fetchMetadataForItems = async (items, type, dir) => {
   setLibraryDirStatus(dir, 'pending')
-  let error = false
-  // console.log(`Fetching metadata for Directory: ${dir}, Type: ${type}`)
-  const library = JSON.parse(localStorage.getItem('library')) || []
-  const libraryWithMetadata = []
+  let hasError = false
 
-  for (const item of library) {
-    // skip items not in this dir/type OR already have metadata
-    if (
-      !item.path.startsWith(dir) ||
-      item.type !== type ||
-      (item.metadata && Object.keys(item.metadata).length > 0)
-    ) {
-      libraryWithMetadata.push(item)
-      continue
-    }
+  for (const item of items) {
     const searchTerm = getCleanTitle(item.title)
-    // console.log(`Searching for metadata for: ${searchTerm}`)
     const searchResult = type === 'movie'
       ? await searchMovie(searchTerm, 1)
       : await searchTv(searchTerm, 1)
-    
-    if (searchResult === 1) {
-      if (!errorShown) {
-        handleMetadataError(dir, 1)
-        errorShown = true
+
+    if (searchResult === 1 || searchResult === -1) {
+      if (!hasError) {
+        handleMetadataError(dir, searchResult)
+        hasError = true
       }
-      error = true
-      return
-    }
-    if (searchResult === -1) {
-      if (!errorShown) {
-        handleMetadataError(dir, -1)
-        errorShown = true
-      }
-      error = true
-      libraryWithMetadata.push(item)
       continue
     }
-    let metadata = {}
-    let releaseYear
-    let releaseDate
-    if (searchResult && searchResult.results && searchResult.results.length > 0) {
-      metadata = searchResult.results[0]
+
+    if (searchResult?.results?.length > 0) {
+      let metadata = searchResult.results[0]
+
       if (type === 'tv' && item.season && item.episode) {
         const seasonData = await getSeason(metadata.id, item.season)
-        if (seasonData === 1 || seasonData === -1) {
-          if (!errorShown) {
-            handleMetadataError(dir, seasonData)
-            errorShown = true
-          }
-          error = true
-          continue
-        }
-        metadata.poster_path = seasonData?.poster_path || metadata.poster_path
-        
-        // get episode-specific air date
         const episodeData = await getEpisode(metadata.id, item.season, item.episode)
-        if (episodeData && episodeData.air_date) {
-          metadata.first_air_date = episodeData.air_date
-        } else if (seasonData?.air_date) {
-          // fallback to season air date
-          metadata.first_air_date = seasonData.air_date
+
+        metadata = {
+          ...metadata,
+          poster_path: seasonData?.poster_path || metadata.poster_path,
+          first_air_date: episodeData?.air_date || seasonData?.air_date || metadata.first_air_date,
+          episode_name: episodeData?.name,
+          episode_overview: episodeData?.overview
         }
       }
-      releaseYear = getYear(metadata.release_date || metadata.first_air_date || 'NA')
-      releaseDate = getDate(metadata.release_date || metadata.first_air_date || 'NA')
-      if (metadata.poster_path && getPrefs().find(pref => pref.id === 'library-cache').state()) {
-        const posterUrl = `${tmdbImagePath}${metadata.poster_path}`
-        cacheImage(posterUrl, metadata.poster_path)
+
+      updateLibraryItemMetadata(item.url, metadata)
+
+      if (metadata.poster_path && getPrefs().find(p => p.id === 'library-cache').state()) {
+        cacheImage(`${tmdbImagePath}${metadata.poster_path}`, metadata.poster_path)
       }
     }
-    libraryWithMetadata.push({ ...item, releaseYear, releaseDate, metadata })
   }
-  if (!error) {
+
+  if (!hasError) {
     setLibraryDirStatus(dir, 'complete')
   }
-  localStorage.setItem('library', JSON.stringify(libraryWithMetadata))
-  loadLibraryUi(libraryWithMetadata)
+  loadLibraryUi(getLibrary())
 }
 
 // group seasons and episodes for TV shows
@@ -581,8 +1069,8 @@ const groupSeasonsEpisodes = library => {
       const match = getSeasonEpisode(item.title)
       let season, episode
       if (match) {
-        season = parseInt(match[1], 10) || 0
-        episode = parseInt(match[2], 10) || 0
+        season = Number(match[1]) || 0
+        episode = Number(match[2]) || 0
       } else {
         season = 0
         episode = 0
@@ -606,80 +1094,83 @@ const groupSeasonsEpisodes = library => {
 // sort library by order param
 const sortLibrary = order => {
   currentSortOrder = order
-  const library = JSON.parse(localStorage.getItem('library')) || []
   
-  switch (order) {
-    case 'old':
-      // sort by date ascending (oldest first)
-      library.sort((a, b) => getSortValue(a, 'date') - getSortValue(b, 'date'))
-      break
-    case 'new':
-      // sort by date descending (newest first)
-      library.sort((a, b) => getSortValue(b, 'date') - getSortValue(a, 'date'))
-      break
-    case 'title':
-      // sort by title ascending
-      library.sort((a, b) => {
-        const titleA = getSortValue(a, 'title')
-        const titleB = getSortValue(b, 'title')
-        return titleA < titleB ? -1 : 1
-      })
-      break
-    case 'path':
-      // sort by path ascending
-      library.sort((a, b) => {
-        const pathA = getSortValue(a, 'path')
-        const pathB = getSortValue(b, 'path')
-        return pathA < pathB ? -1 : 1
-      })
-      break
-    default:
-      library.sort((a, b) => {
-        const titleA = getSortValue(a, 'title')
-        const titleB = getSortValue(b, 'title')
-        return titleA < titleB ? -1 : 1
-      })
-      break
+  const tiles = Array.from($library.querySelectorAll('.result-tile:not(.nested-episode-tile), .season-group-tile'))
+  const listItems = Array.from($libraryList.querySelectorAll('.library-row:not(.nested-episode-row), .season-group-row'))
+  
+  // sort function based on data attributes
+  const sorter = (a, b) => {
+    const getItemValue = (el, field) => {
+      if (field === 'title') {
+        return el.dataset.cleanTitle || ''
+      } else if (field === 'date') {
+        return Number(el.dataset.releaseDate) || 253402300800000
+      } else if (field === 'path') {
+        return el.dataset.url || ''
+      }
+      return ''
+    }
+    
+    switch (order) {
+      case 'old':
+        return getItemValue(a, 'date') - getItemValue(b, 'date')
+      case 'new':
+        return getItemValue(b, 'date') - getItemValue(a, 'date')
+      case 'title':
+        const titleA = getItemValue(a, 'title')
+        const titleB = getItemValue(b, 'title')
+        return titleA.localeCompare(titleB)
+      case 'path':
+        const pathA = getItemValue(a, 'path')
+        const pathB = getItemValue(b, 'path')
+        return pathA.localeCompare(pathB)
+      default:
+        return 0
+    }
   }
   
-  $library.replaceChildren([])
-  $libraryList.replaceChildren([])
-  localStorage.setItem('library', JSON.stringify(library))
+  // sort arrays
+  tiles.sort(sorter)
+  listItems.sort(sorter)
   
-  let type = null
-  if ($libraryMovieBtn.classList.contains('toggled-bg')) {
-    type = 'movie'
-  } else if ($libraryTvBtn.classList.contains('toggled-bg')) {
-    type = 'tv'
-  }
-  filterLibrary(type)
+  // reorder in DOM
+  tiles.forEach(tile => $library.appendChild(tile))
+  listItems.forEach(item => $libraryList.appendChild(item))
 }
 
 // filter library by type
 const filterLibrary = type => {
-  const library = JSON.parse(localStorage.getItem('library')) || []
-  const filteredLibrary = library.filter(li => li.type === type)
-  $library.replaceChildren([])
-  $libraryList.replaceChildren([])
+  $library.classList.remove('filter-movie', 'filter-tv')
+  $libraryList.classList.remove('filter-movie', 'filter-tv')
   
-  // disable group button if movie filter is active
+  // apply new filter class
   if (type === 'movie') {
+    $library.classList.add('filter-movie')
+    $libraryList.classList.add('filter-movie')
     $libraryGroupBtn.disabled = true
+  } else if (type === 'tv') {
+    $library.classList.add('filter-tv')
+    $libraryList.classList.add('filter-tv')
+    $libraryGroupBtn.disabled = false
   } else {
     $libraryGroupBtn.disabled = false
   }
   
-  if (!type) {
-    loadLibraryUi(library)
+  // update hidden class based on toggle
+  const showHidden = $libraryShowHiddenBtn.classList.contains('toggled-bg')
+  if (showHidden) {
+    $library.classList.remove('hide-hidden')
+    $libraryList.classList.remove('hide-hidden')
   } else {
-    loadLibraryUi(filteredLibrary)
+    $library.classList.add('hide-hidden')
+    $libraryList.classList.add('hide-hidden')
   }
 }
 
 // rescan all library directories
 export const rescanAllLibraryDirs = () => {
   const dirs = JSON.parse(localStorage.getItem('directories')) || []
-  dirs.forEach(dir => loadLibraryDir(dir.dir, dir.type, true))
+  dirs.forEach(dir => loadLibraryDir(dir.dir, dir.type, false))
 }
 
 $libraryListBtn.addEventListener('click', libraryListView)
@@ -691,6 +1182,18 @@ $librarySortNewBtn.addEventListener('click', () => sortLibrary('new'))
 $librarySortTitleBtn.addEventListener('click', () => sortLibrary('title'))
 
 $librarySortPathBtn.addEventListener('click', () => sortLibrary('path'))
+
+$libraryShowHiddenBtn.addEventListener('click', () => {
+  if ($libraryShowHiddenBtn.classList.contains('toggled-bg')) {
+    $libraryShowHiddenBtn.classList.remove('toggled-bg')
+    $library.classList.add('hide-hidden')
+    $libraryList.classList.add('hide-hidden')
+  } else {
+    $libraryShowHiddenBtn.classList.add('toggled-bg')
+    $library.classList.remove('hide-hidden')
+    $libraryList.classList.remove('hide-hidden')
+  }
+})
 
 $libraryMovieBtn.addEventListener('click', () => {
   $libraryTvBtn.classList.remove('toggled-bg')
@@ -722,7 +1225,11 @@ $libraryGroupBtn.addEventListener('click', () => {
     $libraryGroupBtn.classList.add('toggled-bg')
     localStorage.setItem('library-group-season', 'true')
   }
-  // reload library with new grouping state
+
+  $library.replaceChildren([])
+  $libraryList.replaceChildren([])
+  loadLibraryUi(getLibrary())
+  
   let type = null
   if ($libraryMovieBtn.classList.contains('toggled-bg')) {
     type = 'movie'
@@ -732,22 +1239,24 @@ $libraryGroupBtn.addEventListener('click', () => {
   filterLibrary(type)
 })
 
-window.electronAPI.sendLibrary((e, libraryObj) => addLibraryItems(libraryObj.library, libraryObj.type, libraryObj.dir))
+window.electronAPI.sendLibrary((e, libraryObj) => {
+  const refreshMode = sessionStorage.getItem('refresh-mode')
+  const isRefresh = refreshMode ? JSON.parse(refreshMode).dir === libraryObj.dir && JSON.parse(refreshMode).active : false
+  if (isRefresh) {
+    sessionStorage.removeItem('refresh-mode')
+  }
+  addLibraryItems(libraryObj.library, libraryObj.type, libraryObj.dir, libraryObj.error, libraryObj.discoveredSubDirs || [], isRefresh)
+})
 
 window.electronAPI.setVideoTime((e, urlTime) => {
-  const library = JSON.parse(localStorage.getItem('library')) || []
-  const item = library.find(li => li.url === urlTime.url)
-  if (item) {
-    item.lastPlayTime = urlTime.time
-    localStorage.setItem('library', JSON.stringify(library))
-    // console.log(`Set video time for ${urlTime.url} to ${urlTime.time}`)
-  } else {
-    // console.log(`No library item found for URL: ${urlTime.url}`)
-  }
+  updateLibraryItem(urlTime.url, { lastPlayTime: urlTime.time })
+  saveImmediately()
 })
 
 // setup
 if (localStorage.getItem('library-group-season') === 'true') {
   $libraryGroupBtn.classList.add('toggled-bg')
 }
+$library.classList.add('hide-hidden')
+$libraryList.classList.add('hide-hidden')
 loadLibraryFromStorage()

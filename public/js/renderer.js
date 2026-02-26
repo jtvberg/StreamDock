@@ -1,6 +1,7 @@
 // Imports
-import { getStreams, setStreams, getNewStreamId, getLastStream, getPrefs, setLastStream, getWinBounds, setWinBounds, getWinLock, setWinLock, getWinRatio, setWinRatio } from "./util/settings.js"
-import { rescanAllLibraryDirs, updateLibraryDirStatus, loadLibraryDir, loadLibraryFromStorage } from "./library.js"
+import { initLibrary, findLibraryItem, removeLibraryItems, saveImmediately, getLibrary, clearMetadataCache } from './util/libraryManager.js'
+import { getStreams, setStreams, getNewStreamId, getLastStream, getPrefs, setLastStream, setVideoPaused, getWinBounds, setWinBounds, getWinLock, setWinLock, getWinRatio, setWinRatio } from "./util/settings.js"
+import { rescanAllLibraryDirs, updateLibraryDirStatus, loadLibraryDir, loadLibraryFromStorage, getDirectories } from "./library.js"
 import { elementFromHtml, elementRemoveFlash } from "./util/helpers.js"
 import locs from '../res/loc.json' with { type: 'json' }
 
@@ -135,6 +136,8 @@ const applySettings = () => {
 
   window.electronAPI.setIsMac((e, bool) => osHeader(bool))
 
+  window.electronAPI.onVideoPaused((e, bool) => setVideoPaused(bool))
+
   window.electronAPI.setAccent((e, color) => {
     let root = document.documentElement
     root.style.setProperty('--color-system-accent', color)
@@ -149,8 +152,7 @@ const openLastUrl = () => {
   const url = getLastStream()
   let time = 0
   if (url.startsWith('file:')) {
-    const library = JSON.parse(localStorage.getItem('library')) || []
-    const item = library.find(li => li.url === url)
+    const item = findLibraryItem(url)
     if (item) {
       time = item.lastPlayTime || 0
     }
@@ -196,8 +198,8 @@ const editStreamLineup = bool => {
     document.querySelectorAll('.stream-settings-control').forEach(el => {
       el.setAttribute('draggable', true)
       el.classList.add('wobble')
-      el.style.animationDelay = `-${(Math.random() * (75 - 5) + 5) / 100}s` // -.05 - -.75
-      el.style.animationDuration = `${(Math.random() * (33 - 22) + 22) / 100}s` // .22 - .33
+      el.style.animationDelay = `-${(Math.random() * (75 - 5) + 5) / 100}s`
+      el.style.animationDuration = `${(Math.random() * (33 - 22) + 22) / 100}s`
     })
   } else {
     $streamDoneBtn.style.display = 'none'
@@ -372,15 +374,12 @@ const updateStreams = stream => {
 
 // reorder stream elements in stream edit pane
 const updateStreamOrder = ele => {
-  // New order
   const loc = (parseInt(ele.style.order) + 1) > 9999 ? 9999 : parseInt(ele.style.order) + 1
-  // Update stream order in edit pane
   document.querySelectorAll('.stream-settings-control').forEach((el) => {
     if (el.style.order && el.style.order >= loc) {
       el.style.order++
     }
     dragStream.style.order = loc
-    // Update order in streams array
     streams.find(s => s.id === el.dataset.id).order = parseInt(el.style.order)
   })
   reorderStreams()
@@ -389,11 +388,8 @@ const updateStreamOrder = ele => {
 
 // reorder streams array and save to local storage
 const reorderStreams = () => {
-  // Sort the steams array based on new order
   streams.sort((a, b) => (a.order > b.order) ? 1 : ((b.order > a.order) ? -1 : 0))
-  // Reset order# from 1 to n based on new index
   streams.forEach((s, i) => s.order = i + 1)
-  // Save to local storage
   setStreams(streams)
   // console.log('Streams Updated')
 }
@@ -547,41 +543,43 @@ const loadLibraryDirectoryPanel = () => {
       libDirRefresh.classList.add('disabled') 
     }
     libDirRescan.addEventListener('click', () => {
-      // trigger a rescan of the library directory
-      // console.log(`Rescanning library directory: ${dir.dir}`)
-      // look for new files in the directory and remove any items that no longer exist
-      loadLibraryDir(dir.dir, dir.type)
+      // rescan directory tree for new/deleted files and subdirectories
+      loadLibraryDir(dir.dir, dir.type, false)
     })
     libDirRefresh.addEventListener('click', () => {
-      if (!confirm(`Are you sure you want to refresh all metadata for:\n${dir.dir}?\nThis will remove and reload all metadata for this directory.`)) {
+      if (!confirm(`Are you sure you want to refresh metadata for:\n${dir.dir}?\n\nThis will reload TMDB metadata for all items in this directory and its subdirectories unless an item is locked.`)) {
         return
       }
-      // trigger a refresh of the library directory metadata
-      // console.log(`Refreshing library directory metadata: ${dir.dir}`)
-      // drop items from local storage libarary with dir and save
-      const library = JSON.parse(localStorage.getItem('library')) || []
-      const updatedLibrary = library.filter(item => !item.path.startsWith(dir.dir))
-      localStorage.setItem('library', JSON.stringify(updatedLibrary))
-      // load the library directory again
-      loadLibraryDir(dir.dir, dir.type)
+      // refresh metadata for unlocked items in directory tree
+      loadLibraryDir(dir.dir, dir.type, true)
     })
     libDirDel.addEventListener('click', () => {
-      if (!confirm(`Are you sure you want to delete the library directory:\n${dir.dir}?`)) {
+      if (!confirm(`Are you sure you want to delete the library directory:\n${dir.dir}?\n\nThis will remove all files from this directory and its subdirectories.`)) {
         return
       }
-      // trigger a delete of the library directory
-      // console.log(`Deleting library directory: ${dir.dir}`)
-      // remove the directory from local storage
-      const dirs = JSON.parse(localStorage.getItem('directories')) || []
-      dirs.splice(dirs.findIndex(d => d.dir === dir.dir), 1)
-      localStorage.setItem('directories', JSON.stringify(dirs))
-      // remove library items with dir from storage
-      const library = JSON.parse(localStorage.getItem('library')) || []
-      const updatedLibrary = library.filter(item => !item.path.startsWith(dir.dir))
-      localStorage.setItem('library', JSON.stringify(updatedLibrary))
-      // reload library directory panel
+      // get all directories in tree
+      const allDirs = [dir.dir, ...(dir.subDirs || [])]
+      
+      // remove the directory from cache
+      const dirs = getDirectories()
+      const dirIndex = dirs.findIndex(d => d.dir === dir.dir)
+      if (dirIndex > -1) {
+        dirs.splice(dirIndex, 1)
+        localStorage.setItem('directories', JSON.stringify(dirs))
+      }
+      
+      // clear metadata cache
+      clearMetadataCache()
+      
+      // remove all library items from entire tree (including locked items)
+      removeLibraryItems(item => 
+        allDirs.some(targetDir => item.dir === targetDir || item.dir.startsWith(targetDir + '/')),
+        false
+      )
+      saveImmediately()
+      
+      // reload UI
       loadLibraryDirectoryPanel()
-      // reload library items
       $library.replaceChildren([])
       $libraryList.replaceChildren([])
       loadLibraryFromStorage()
@@ -608,8 +606,7 @@ const loadLibraryDirectoryPanel = () => {
 export const removeLastStream = () => {
   const lastStream = getLastStream()
   if (lastStream && lastStream.startsWith('file:')) {
-    const library = JSON.parse(localStorage.getItem('library')) || []
-    const item = library.find(li => li.url === lastStream)
+    const item = findLibraryItem(lastStream)
     if (!item) {
       setLastStream('')
       openLastUrl()
@@ -624,8 +621,10 @@ export const removeLastStream = () => {
 
 // add directory to library directory storage, panel and load library directory
 const addLibraryDirectory = (dir, type) => {
-  const dirs = JSON.parse(localStorage.getItem('directories')) || []
+  const dirs = getDirectories()
   if (!dirs.some(entry => entry.dir === dir)) {
+    clearMetadataCache()
+    
     dirs.push({
       dir,
       type,
@@ -820,7 +819,6 @@ const updatePref = (id, val) => {
   // console.log(`Preference ${id} Updated`)
   switch (id) {
     case 'pref-agent':
-      console.log(`R-Default User Agent Updated: ${val}`)
       window.electronAPI.defaultAgent(val)
       break
     case 'pref-fullscreen':
@@ -957,7 +955,10 @@ $openDevTools.addEventListener('click', window.electronAPI.openDevTools)
 
 $header.addEventListener('mouseenter', expandHeader)
 
-$header.addEventListener('contextmenu', window.electronAPI.winHide)
+$header.addEventListener('contextmenu', () => {
+  saveImmediately()
+  window.electronAPI.winHide()
+})
 
 $header.addEventListener('dblclick', window.electronAPI.winMax)
 
@@ -996,5 +997,8 @@ window.electronAPI.streamOpened(() => togglePanel($homeBtn, true))
 
 window.electronAPI.getAppInfo((e, appInfo) => loadAbout(appInfo))
 
+window.addEventListener('beforeunload', saveImmediately)
+
 // Setup
+initLibrary()
 applySettings()

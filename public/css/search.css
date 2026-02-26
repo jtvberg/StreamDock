@@ -48,10 +48,12 @@
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
   grid-auto-rows: max-content;
-  gap: 7px;
+  gap: 5px;
   width: -webkit-fill-available;
   overflow-y: auto;
   overflow-x: hidden;
+  padding-right: 3px;
+  padding-bottom: 3px;
 }
 
 #search-error,
@@ -63,6 +65,7 @@
   position: absolute;
   top: 50%;
   left: 50%;
+  width: 90%;
   font-size: 2rem;
   text-align: center;
   transform: translate(-50%, -50%);
@@ -70,6 +73,7 @@
 
 .result-glyph {
   font-size: 4rem;
+  color: var(--color-control-yellow);
 }
 
 #search-clear-btn {
@@ -83,7 +87,7 @@
   aspect-ratio: 2/3;
   background-color: var(--color-control-darkgray);
   cursor: pointer;
-  transition: border-color 200ms ease-out;
+  transition: border-color 200ms ease-out, opacity 200ms ease-out;
 }
 
 .result-tile:hover {
@@ -100,11 +104,18 @@
   width: -webkit-fill-available;
 }
 
+.result-options {
+  position: absolute;
+  bottom: 6px;
+  right: 9px;
+  font-size: 2rem;
+}
+
 .result-poster {
   position: absolute;
   width: 100%;
   height: 100%;
-  border-radius: 5px;
+  border-radius: 4px;
   opacity: 1;
   transition: opacity 400ms ease-out;
 }
@@ -132,7 +143,7 @@
   transition: color 200ms ease-out;
 }
 
-.result-play:hover {
+.result-play:hover, .result-options:hover {
   color: var(--color-system-accent);
 }
 
