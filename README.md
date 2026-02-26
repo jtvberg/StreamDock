@@ -10,9 +10,7 @@ New release (2.2.0)
 
 # Dev Update
 
-Peacock skip recap and auto-binge are now working!
-Episodes can now be stacked into seasons!
-Once I get the metadata selection sorted for local files, I will post a another release.
+2.3.0 has been merged. A lot of updates here. Metadata selection and locking is now in place along with a host of other fixes and enhancements. I will post a release here very soon along with more extensive version notes.
 
 # StreamDock 2.0.0, The Sequel! (Old News)
 
