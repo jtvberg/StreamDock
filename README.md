@@ -28,7 +28,7 @@ Even after a recent update to the service scripts, I noticed a couple are not wo
 It took two years and a lack of focus to get 1.0.0 out the door and upon completion I looked at what I had wrought and wept.
 What a mess. It worked. I would say it worked well but it needed some serious refactoring. So serious that I just started from scratch.
 
-The point of the app is still the same in that it was born out of my desire to fill the damn window instead of going fullscreen. Seriously, I want a window with the video content only... why isn't there a button for that? Theater mode, miniplayer, fullscreen... WORTHLESS! Now it has ev
+The point of the app is still the same in that it was born out of my desire to fill the damn window instead of going fullscreen. Seriously, I want a window with the video content only... why isn't there a button for that? Theater mode, miniplayer, fullscreen... WORTHLESS!
 
 Anyway, enjoy.
 
