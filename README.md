@@ -3,19 +3,19 @@
 New release (2.3.0)
 
 - Bumps all packages to latest stable versions (except FA)
-- A mea culpa for the Windows users... it appears shortly after the last release the user agent aged out on Windows... I don't know why things still worked on macOS but I didn't notice (as I don't use Windows all that often)
+- A mea culpa for the Windows users... it appears shortly after the last release the user agent aged out on Windows. I don't know why things still worked on macOS but I didn't notice (as I don't use Windows all that often)
 - Local media
-  - Another mea culpa to the Windows users, somewhere along the line I backed out a change that then broke local media functionality for windows (fixed)
-  - You can now select correct title from API if the initial result is incorrect
+  - You can now select correct title from API if the initial result is incorrect (right-click menu)
   - You can also lock metadata and hide library items
   - More detail on this in the Local File Support section
+  - Another apology to the Windows users, somewhere along the line I backed out a change that then broke local media functionality for windows (fixed)
 - Reworked the Search/Library detail
   - I switched to using the backdrop when available in the detail as it is more meaningful for episodes
   - The title image in the detail now appears, as available, in this order: Backdrop > Poster > Not found glyph
   - There are now carousel buttons in the detail modal so you can navigate through titles from there (top right)
   - If a search result matches a title in your library, there will be a play button in the detail modal (bottom left)
 - The stream loading indicator is back (not sure what happened there)
-- Netflix facet refresh: This was considerable effort... I searched around and then consolidated 20+ lists of IDs into around 7000 and then wrote some python to iterate through the IDs to see if a valid page returned with a genre title... this brought the number down to around 1400 as most were no longer valid (though, 400+ were not in the list I used before). I then scrubbed those down manually to something that made sense as a lot of the facets were so esoteric that a search would make more sense (does anyone really need a "Action & Adventure starring Anthony Wong Chau-Sang" facet?). Anyway, hope you're happy.
+- Netflix facet refresh: This was considerable effort... I searched around and then consolidated 20+ lists of IDs into around 7000 and then wrote some python to iterate through the IDs to see if a valid page returned with a genre title... this brought the number down to around 1400 as most were no longer valid (though, 400+ were not in the list I used before). I then scrubbed those down manually to something that made sense as a lot of the facets were so esoteric that a search would make more sense (does anyone really need an "Action & Adventure starring Anthony Wong Chau-Sang" facet?). Anyway, hope you're happy.
 - Contextual buttons (left menu) are now more obvious (accent color)
 - Host of bug fixes and refinements
 
@@ -112,7 +112,7 @@ Netflix Issues:
 - If you open a Netlfix child window, playing a video will likely give you an error. This is beacuse you have 2 windows open in the same 'browser'. If you close the Netflix session in the main window, the child will play
 - If you get this screen it most likely means you have not properly VMP signed the package:
   <img src="/public/res/screenshots/e100.png" width="600"/>
-- If you see this with a release, you probably need to update your user agent in the settings
+- If you see this with a release, you probably need to update your user agent in the settings (if you ever updated it before, you can delete it to restore the default)
 
 ## App Control
 
