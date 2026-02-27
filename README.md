@@ -1,60 +1,53 @@
 # Release Update
 
-New release (2.2.0)
+New release (2.3.0)
 
-- Bumps all packages to latest versions (except FA)
-- Fixes Peacock and should now allow a broader set of streaming services I haven't ever used (including Spotify)
-- I switched to using electron-builder's notarization. There is now a .env file you need to generate (there is an example.env file for guidance.) Build scripts have been updated accordingly.
-- Added a local player: you can now turn this on in settings, add directories, and then access these videos in the home screen. If you have entered a TMDB API key, it will also go get some basic data about the movie or TV show including poster art. As of right now, if it finds the wrong metadata for a title, there is really no option to fix that. I am working on a scheme to select the correct metadata. In the meantime, make sure the file names are the correct title. Example: Airplane 2 is actually Airplane II (great film). The former will get you Airplane 2025 (really?) from TMDB. In some cases, there is nothing you can do. More info on this at the bottom.
-- I tweaked the search results detail modal a bit
+- Bumps all packages to latest stable versions (except FA)
+- A mea culpa for the Windows users... it appears shortly after the last release the user agent aged out on Windows... I don't know why things still worked on macOS but I didn't notice (as I don't use Windows all that often)
+- Local media
+  - Another mea culpa to the Windows users, somewhere along the line I backed out a change that then broke local media functionality for windows (fixed)
+  - You can now select correct title from API if the initial result is incorrect
+  - You can also lock metadata and hide library items
+  - More detail on this in the Local File Support section
+- Reworked the Search/Library detail
+  - I switched to using the backdrop when available in the detail as it is more meaningful for episodes
+  - The title image in the detail now appears, as available, in this order: Backdrop > Poster > Not found glyph
+  - There are now carousel buttons in the detail modal so you can navigate through titles from there (top right)
+  - If a search result matches a title in your library, there will be a play button in the detail modal (bottom left)
+- The stream loading indicator is back (not sure what happened there)
+- Netflix facet refresh: This was considerable effort... I searched around and then consolidated 20+ lists of IDs into around 7000 and then wrote some python to iterate through the IDs to see if a valid page returned with a genre title... this brought the number down to around 1400 as most were no longer valid (though, 400+ were not in the list I used before). I then scrubbed those down manually to something that made sense as a lot of the facets were so esoteric that a search would make more sense (does anyone really need a "Action & Adventure starring Anthony Wong Chau-Sang" facet?). Anyway, hope you're happy.
+- Contextual buttons (left menu) are now more obvious (accent color)
+- Host of bug fixes and refinements
 
 # Dev Update
 
-2.3.0 has been merged. A lot of updates here. Metadata selection and locking is now in place along with a host of other fixes and enhancements. I will post a release here very soon along with more extensive version notes.
+Even after a recent update to the service scripts, I noticed a couple are not working reliably. I will revisit those next.
 
 # StreamDock 2.0.0, The Sequel! (Old News)
 
 It took two years and a lack of focus to get 1.0.0 out the door and upon completion I looked at what I had wrought and wept.
 What a mess. It worked. I would say it worked well but it needed some serious refactoring. So serious that I just started from scratch.
 
-The point of the app is still the same in that it was born out of my desire to fill the damn window instead of going fullscreen. Seriously, I want a window with the video content only... why isn't there a button for that? Theater mode, miniplayer, fullscreen... WORTHLESS!
+The point of the app is still the same in that it was born out of my desire to fill the damn window instead of going fullscreen. Seriously, I want a window with the video content only... why isn't there a button for that? Theater mode, miniplayer, fullscreen... WORTHLESS! Now it has ev
 
-It only took a month to rework and in that time, I also managed to knock out all the to-dos that I felt like were still relevant.
-StreamDock still has all the principal functionality it did before with some caveats...
-
-# Material Changes
-
-- The bar at the top is still there but now it disappears. This was much more straight forward than I thought (clarity being the value of just starting over)
-- Menus are out. Menus were fine in macOS but really made the UI ugly on Windows and Linux. Now, everything is either in the header or an internal control.
-- Other aspect ratios are out. Outside of 16x9 there are so many cinema standards that are very close to each other. 4x3 is rare and typically has the bars to make it 16x9 anyway. However, I did add an aspect ratio lock so that when you get it where you want it you can scale as needed.
-- Dark vs. Light modes. There is so little UI to this thing it hardly seems worth it so I scraped it for now. Dark is king!
-- No more stream IDs! If you never looked at the code this isn't all that relevant but the crux of it was that it pigeon-holed me into some less-than-ideal circumstances. There are 'pre-loaded' stream services but the app no longer cares about them. Delete them all if you want.
-- That said, there is now a stream editor that allows you to add/remove/reorder the streaming services that show up in the header bar.
-- There are still service specific scripts to do things like skip ads, previews or recaps but now those are based on the domain of what you are watching, not the stream definition. This has the side of effect of making those scripts work on links you open which they did not before.
-- Script toggles in the preferences pane now apply to all services. Sorry, but I didn't see much use for turning off recaps or enabling binge-mode on a service-by-service basis. If you turn something on or off, it will apply to all services where there are scripts in place (noted below.)
-- Window and Linux are now first-class citizens. I spent a lot more time getting the 'native' feel for those OS's.
-- Child windows now get the full boat of scripted service features, but I won't be adding others like aspect ratio or always on top.
-- Search is still in place with some subtle UI changes. The initial search returns less info than before. This is to save on API calls. Getting all the details as before would require up to 21 calls per search. Now it is just 1 and the detail modal will get the rest as you click on a title. I may revisit that.
-- Resuming play when restoring the window now only activates if the video being restored was playing when you hid it. Used to be that if you had resume turned on it would resume play after restore whether it was playing or not.
-- There is a button in the advanded tab under settings you can use to wipe all your data from StreamDock. This will reset the app as if it was freshly installed and restart. This will log you out of all services and delete all bookmarks and updated settings. :rotating_light:**This cannot be undone!**:rotating_light:
-- Touchbar is out. Was anyone really using that?
-- Electron: Using the latest stable version.
-- Security: Node integration is now turned off and context isolation is turned on. A preload script only exposes node functionality as needed.
-- No more Bootstrap, lodash or jQuery. The only primary dependencies are Electron and FontAwesome (for glyphs.)
-- The code... in my opinion it is waaayyyy better. Much easier to read and far less convoluted. Separation of concerns and whatnot...
+Anyway, enjoy.
 
 #### Main View
 
-<img src="/public/res/screenshots/main.png" width="600"/>
+<img src="/public/res/screenshots/main-view.png" width="600"/>
 
-#### Homescreen (Bookmarks & Stream Search)
+#### Home Screen (Bookmarks & Stream Search)
 
-<img src="/public/res/screenshots/bookmarks.png" width="600"/>
-<img src="/public/res/screenshots/search.png" width="600"/>
+<img src="/public/res/screenshots/bookmark-view.png" width="600"/>
+<img src="/public/res/screenshots/search-view.png" width="600"/>
 
 #### Stream Search Detail
 
-<img src="/public/res/screenshots/search-details.png" width="600"/>
+<img src="/public/res/screenshots/media-detail.png" width="600"/>
+
+#### Stream Edit View
+
+<img src="/public/res/screenshots/settings-streams.png" width="600"/>
 
 ## Using the code
 
@@ -119,6 +112,7 @@ Netflix Issues:
 - If you open a Netlfix child window, playing a video will likely give you an error. This is beacuse you have 2 windows open in the same 'browser'. If you close the Netflix session in the main window, the child will play
 - If you get this screen it most likely means you have not properly VMP signed the package:
   <img src="/public/res/screenshots/e100.png" width="600"/>
+- If you see this with a release, you probably need to update your user agent in the settings
 
 ## App Control
 
@@ -154,6 +148,7 @@ On AppleTV, Disney+, HBO Max, Hulu, Netflix, Paramount+, Peacock and Prime Video
 
 - There are recap, preview and opening credits auto-skipping options
 - Binge-mode will automatically start the next episode as soon as skipping is allowed
+- Not all services work the same, I added caveats in the settings descriptions
 
 NOTE: On some services there are scenarios where an option to skip something doesn't show up. Usually, it's the opening credits for the first episode of a season.
 
@@ -178,10 +173,16 @@ You can now play local files in StreamDock.
 
 - First turn on 'Show Library' feature in settings
 - If you have a TMDB API key entered, StreamDock will attempt to find the title and add metadata as it adds the files to the home screen if you have 'Fetch Metadata' turned on
+- If the API comes back with the wrong metadata, you can right-click on the title and select 'Update Metadata' to choose the correct option
+- Updating one item in a season will update all items for that show/season
+- If a title was updated, it will show an icon to the right of the menu item
+- Updating also automatically locks the metadata so it does not get updated when refreshing
+- You can unlock or hide the title in the same menu and there is a toggle to show hidden items in the menu on the left
 - You can also toggle poster/backdrop caching so they show up offline
 - Add directories to scan (be sure to pick media type TV/Movie as this drives TMDB lookups)
 - There are also options to rescan a directory on startup to see if anything new has been added
 - On each directory entry there are options to rescan or completely refresh all files and metadata
 - There are status symbols at the front of each directory entry to give you a status of file/metadata/errors for loads
 - Show episodes work if you name them with a '.s01e01' after the name (it's not case sensitive and it doesn't need to be 2 digits)
+- There is a 'Group by Season' toggle to collapse TV shows into seasons
 - Supports mp4, mov, avi, mkv and webm

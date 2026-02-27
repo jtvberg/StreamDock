@@ -414,13 +414,14 @@ const setFacetViewBounds = width => facetView.setBounds({ x: 0, y: 0, width, hei
 
 // open url in streamView and send stream opened message to renderer
 const openUrl = async (url, time = 0) => {
-  if (!validUrl(url)) {
+  const validatedUrl = validUrl(url)
+  if (!validatedUrl) {
     return
   }
   await saveVideoTime(getCurrentUrl())
   showStream(false)
   sendLogData(`Open URL: ${url}`)
-  if (url.host === googleAuthHost) {
+  if (validatedUrl.host === googleAuthHost) {
     streamView.webContents.loadURL(url)
   } else {
     sendLogData(`Loading URL with: ${defaultAgent}`)
