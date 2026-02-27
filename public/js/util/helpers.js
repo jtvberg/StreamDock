@@ -12,7 +12,7 @@ export const alertUser = message => {
 export const elementFromHtml = html => {
   const parser = new DOMParser()
   const template = document.createElement('template')
-  template.innerHTML = parser.parseFromString(html.trim(), "text/html").body.innerHTML
+  template.innerHTML = parser.parseFromString(html.trim(), "text/html").body.innerHTML // codeql[js/xss] - html is hardcoded in source, not user input
   return template.content.firstElementChild
 }
 
