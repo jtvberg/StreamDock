@@ -12,7 +12,8 @@ export const alertUser = message => {
 export const elementFromHtml = html => {
   const parser = new DOMParser()
   const template = document.createElement('template')
-  template.innerHTML = parser.parseFromString(html.trim(), "text/html").body.innerHTML // codeql[js/xss] - html is hardcoded in source, not user input
+  // lgtm[js/xss] - html strings are hardcoded in shipped source, not user-controlled
+  template.innerHTML = parser.parseFromString(html.trim(), "text/html").body.innerHTML
   return template.content.firstElementChild
 }
 
